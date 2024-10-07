@@ -1,0 +1,429 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "description": "Api's used and provided by [https://stellarbeat.io](https://stellarbeat.io).",
+    "title": "Stellarbeat.io API",
+    "contact": {
+      "name": "Stellarbeat",
+      "email": "info@stellarbeat.io"
+    },
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "https://api.stellarbeat.io",
+      "description": "Api for Stellar public network"
+    },
+    {
+      "url": "https://api-testnet.stellarbeat.io",
+      "description": "Api for Stellar testnet"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Network",
+      "description": "Information about the network"
+    },
+    {
+      "name": "Node",
+      "description": "Information about the nodes in the network"
+    },
+    {
+      "name": "Organization",
+      "description": "Information about the organizations in the network"
+    }
+  ],
+  "paths": {
+    "/v1": {
+      "get": {
+        "summary": "Get network information",
+        "description": "Get network information, statistics, nodes and organizations",
+        "tags": [
+          "Network"
+        ],
+        "operationId": "getNetwork",
+        "parameters": [
+          {
+            "name": "at",
+            "in": "query",
+            "description": "Fetch at specific point in time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://stellarbeat.io/schemas/network.json"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/node-snapshots": {
+      "get": {
+        "summary": "Get the latest updated node snapshots in the network",
+        "description": "Get the latest updated node snapshots in the network",
+        "tags": [
+          "Network"
+        ],
+        "operationId": "getNetworkNodeSnapshots",
+        "parameters": [
+          {
+            "name": "at",
+            "in": "query",
+            "description": "Latest snapshots at specific point in time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "https://stellarbeat.io/schemas/node-snapshot.json"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/organization-snapshots": {
+      "get": {
+        "summary": "Get the latest updated organization snapshots in the network",
+        "description": "Get the latest updated organization snapshots in the network",
+        "tags": [
+          "Network"
+        ],
+        "operationId": "getNetworkOrganizationSnapshots",
+        "parameters": [
+          {
+            "name": "at",
+            "in": "query",
+            "description": "Latest snapshots at specific point in time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "https://stellarbeat.io/schemas/organization-snapshot.json"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/node": {
+      "get": {
+        "summary": "Get all nodes",
+        "description": "Returns all the crawled nodes with statistics and geo data",
+        "tags": [
+          "Node"
+        ],
+        "operationId": "getNodes",
+        "parameters": [
+          {
+            "name": "at",
+            "in": "query",
+            "description": "Fetch at specific point in time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "https://stellarbeat.io/schemas/node.json"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/node/{publicKey}": {
+      "get": {
+        "summary": "Get a node by public key",
+        "description": "Returns the requested node with statistics and geo data",
+        "tags": [
+          "Node"
+        ],
+        "operationId": "getNodeByPublicKey",
+        "parameters": [
+          {
+            "name": "publicKey",
+            "in": "path",
+            "description": "Public Key of the node to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "description": "Fetch at specific point in time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://stellarbeat.io/schemas/node.json"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Node not found"
+          }
+        }
+      }
+    },
+    "/v1/node/{publicKey}/snapshots": {
+      "get": {
+        "summary": "Get the latest snapshots of a node",
+        "description": "Get the latest snapshots of a node",
+        "tags": [
+          "Node"
+        ],
+        "operationId": "getNodeSnapshots",
+        "parameters": [
+          {
+            "name": "publicKey",
+            "in": "path",
+            "description": "Public Key of the node to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "description": "Latest snapshots at specific point in time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "https://stellarbeat.io/schemas/node-snapshot.json"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/organization": {
+      "get": {
+        "summary": "Get all organizations",
+        "description": "Returns all the crawled organisations",
+        "tags": [
+          "Organization"
+        ],
+        "operationId": "getOrganizations",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "https://stellarbeat.io/schemas/organization.json"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/organization/{id}": {
+      "get": {
+        "summary": "Get an organization by id",
+        "description": "Returns the requested organization",
+        "tags": [
+          "Organization"
+        ],
+        "operationId": "getOrganizationById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "description": "Fetch at specific point in time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://stellarbeat.io/schemas/organization.json"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization not found"
+          }
+        }
+      }
+    },
+    "/v1/organization/{id}/snapshots": {
+      "get": {
+        "summary": "Get the latest snapshots of an organization",
+        "description": "Get the latest snapshots of an organization",
+        "tags": [
+          "Organization"
+        ],
+        "operationId": "getOrganizationSnapshots",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the organization",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "description": "Latest snapshots at specific point in time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "https://stellarbeat.io/schemas/organization-snapshot.json"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/history-scan/{url}": {
+      "get": {
+        "summary": "Get the latest history scan by url",
+        "description": "Returns the latest history scan by url",
+        "tags": [
+          "HistoryScan"
+        ],
+        "operationId": "getHistoryScanByUrl",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "path",
+            "description": "url of the history archive (url encoded)",
+            "required": true,
+            "schema": {
+              "type": "url"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://stellarbeat.io/schemas/history-archive-scan.json"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No scan found for url"
+          },
+          "500": {"description":  "Server error"}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,2 @@
+# Monorepo for Stellarbeat project
+
