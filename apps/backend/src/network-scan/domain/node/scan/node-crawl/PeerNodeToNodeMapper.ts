@@ -1,5 +1,5 @@
 import Node from '../../Node';
-import { PeerNode } from '@stellarbeat/js-stellar-node-crawler';
+import { PeerNode } from 'crawler';
 import NodeQuorumSet from '../../NodeQuorumSet';
 import PublicKey from '../../PublicKey';
 import NodeMeasurement from '../../NodeMeasurement';

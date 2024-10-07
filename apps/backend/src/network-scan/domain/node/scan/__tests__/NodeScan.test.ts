@@ -1,7 +1,7 @@
 import { createDummyNode } from '../../__fixtures__/createDummyNode';
 import Node from '../../Node';
 import { NodeScan } from '../NodeScan';
-import { PeerNode } from '@stellarbeat/js-stellar-node-crawler';
+import { PeerNode } from 'crawler';
 import { createDummyPublicKeyString } from '../../__fixtures__/createDummyPublicKey';
 import NodeDetails from '../../NodeDetails';
 import NodeMeasurement from '../../NodeMeasurement';

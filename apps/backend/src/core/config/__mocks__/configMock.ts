@@ -1,6 +1,6 @@
 import { Url } from '../../domain/Url';
 import { Config, NetworkConfig } from '../Config';
-import { CrawlerConfiguration } from '@stellarbeat/js-stellar-node-crawler';
+import { CrawlerConfiguration } from 'crawler';
 
 export class ConfigMock implements Config {
 	logLevel = 'debug';

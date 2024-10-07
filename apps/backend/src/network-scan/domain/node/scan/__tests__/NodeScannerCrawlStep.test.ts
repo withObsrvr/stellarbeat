@@ -7,9 +7,9 @@ import { NodeScan } from '../NodeScan';
 import { createDummyNode } from '../../__fixtures__/createDummyNode';
 import { NetworkQuorumSetConfiguration } from '../../../network/NetworkQuorumSetConfiguration';
 import { err, ok } from 'neverthrow';
-import { PeerNode } from '@stellarbeat/js-stellar-node-crawler';
 import { createDummyPublicKey } from '../../__fixtures__/createDummyPublicKey';
 import Node from '../../Node';
+import { PeerNode } from 'crawler';
 
 describe('NodeScannerCrawlStep', () => {
 	const nodeRepository = mock<NodeRepository>();

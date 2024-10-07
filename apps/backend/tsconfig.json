@@ -1,6 +1,9 @@
 {
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "sourceMap": true
-  }
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"sourceMap": true,
+		"paths": {
+			"crawler": ["../../packages/crawler/src"]
+		}
+	}
 }

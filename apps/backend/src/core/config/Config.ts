@@ -5,7 +5,7 @@ import { isArray, isString } from '../utilities/TypeGuards';
 import { err, ok, Result } from 'neverthrow';
 import * as yn from 'yn';
 import { Url } from '../domain/Url';
-import { CrawlerConfiguration } from '@stellarbeat/js-stellar-node-crawler';
+import { CrawlerConfiguration } from 'crawler';
 
 type PublicKey = string;
 type ip = string;

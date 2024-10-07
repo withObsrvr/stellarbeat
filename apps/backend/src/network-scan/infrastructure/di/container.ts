@@ -55,10 +55,7 @@ import { IpStackGeoDataService } from '../services/IpStackGeoDataService';
 import { HttpService } from '../../../core/services/HttpService';
 import { NetworkScanner } from '../../domain/network/scan/NetworkScanner';
 import { CrawlerService } from '../../domain/node/scan/node-crawl/CrawlerService';
-import {
-	createCrawler,
-	createCrawlFactory
-} from '@stellarbeat/js-stellar-node-crawler';
+import { createCrawler, createCrawlFactory } from 'crawler';
 import FbasAnalyzerFacade from '../../domain/network/scan/fbas-analysis/FbasAnalyzerFacade';
 import { HorizonService } from '../../domain/network/scan/HorizonService';
 import OrganizationMeasurement from '../../domain/organization/OrganizationMeasurement';

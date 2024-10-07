@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 import { err, ok, Result } from 'neverthrow';
-import { Crawler, PeerNode } from '@stellarbeat/js-stellar-node-crawler';
-import { CrawlResult as CrawlResultDTO } from '@stellarbeat/js-stellar-node-crawler/lib/crawl-result';
-import { Ledger } from '@stellarbeat/js-stellar-node-crawler/lib/crawler';
-import { injectable } from 'inversify';
+import { Crawler } from 'crawler';
+import { PeerNode } from 'crawler';
+import { CrawlResult as CrawlResultDTO } from 'crawler';
+import { Ledger } from 'crawler';
 import { NetworkQuorumSetConfiguration } from '../../../network/NetworkQuorumSetConfiguration';
 import { CrawlerDTOMapper } from './CrawlerDTOMapper';
 import Node from '../../Node';
@@ -12,7 +12,8 @@ import { NodeAddressDTOComposer } from './NodeAddressDTOComposer';
 import { mapUnknownToError } from '../../../../../core/utilities/mapUnknownToError';
 import { NetworkQuorumSetConfigurationMapper } from '../../../network/NetworkQuorumSetConfigurationMapper';
 import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
-import { CrawlFactory } from '@stellarbeat/js-stellar-node-crawler/lib/crawl-factory';
+import { CrawlFactory } from 'crawler';
+import { injectable } from 'inversify';
 
 export interface CrawlResult {
 	latestClosedLedger: Ledger;

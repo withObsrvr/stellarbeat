@@ -6,8 +6,10 @@
 	"scripts": {
 		"build": "tsc --declaration",
 		"examples:crawl": "pnpm run build; NODE_PATH=node_modules node examples/crawl",
-		"test": "jest"
+		"test:unit": "jest"
 	},
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
 	"author": "pieterjan84@github",
 	"license": "MIT",
 	"dependencies": {

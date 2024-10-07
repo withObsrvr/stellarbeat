@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "stellarbeat project monorepo",
   "scripts": {
-    "build": "pnpm run --parallel build"
+    "build": "pnpm run --parallel build",
+    "test:unit": "pnpm run --parallel test:unit"
   },
   "keywords": [],
   "author": "pieterjan84",

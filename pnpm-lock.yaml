@@ -72,9 +72,6 @@ importers:
       '@stellar/stellar-base':
         specifier: 12.1.1
         version: 12.1.1
-      '@stellarbeat/js-stellar-node-crawler':
-        specifier: ^5.1.0
-        version: 5.1.0
       '@stellarbeat/js-stellarbeat-shared':
         specifier: ^6.6.1
         version: 6.6.1
@@ -105,6 +102,9 @@ importers:
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
+      crawler:
+        specifier: workspace:*
+        version: link:../../packages/crawler
       dotenv:
         specifier: ^10.0.0
         version: 10.0.0
@@ -989,10 +989,6 @@ packages:
   '@stellarbeat/js-stellar-node-connector@7.0.1':
     resolution: {integrity: sha512-pacl2TremGbVEtdB/hnHxnLqo/b+xL576GdxM+N4+Qm9qP4Q5WeszwRueuRbUBJa1WIa7ynWkrFkBBYiWe/Ebg==}
     engines: {node: ^20.0.0}
-
-  '@stellarbeat/js-stellar-node-crawler@5.1.0':
-    resolution: {integrity: sha512-8grurJBNrRtKNWgQwCrNdxOtPeK2UYjL4C/v8/bApJUiNH6fAcqeyI7hJuIPQiL6vY9YwH0isCdOSVgdMf5uBg==}
-    engines: {node: 20.*}
 
   '@stellarbeat/js-stellarbeat-shared@6.6.1':
     resolution: {integrity: sha512-bMVF14TIBObP/PcgwziZgmPe6IQjAYjJudvtSkVneRX37taNuGhV3CGFEH23z86c2/r++x8/O01Zd7MwyHwYIg==}
@@ -4472,16 +4468,6 @@ snapshots:
       sodium-native: 4.2.1
       workerpool: 9.1.3
       yn: 4.0.0
-
-  '@stellarbeat/js-stellar-node-crawler@5.1.0':
-    dependencies:
-      '@stellarbeat/js-stellar-node-connector': 7.0.1
-      '@stellarbeat/js-stellarbeat-shared': 6.6.1
-      async: 3.2.6
-      dotenv: 16.4.5
-      lru-cache: 11.0.1
-      neverthrow: 8.0.0
-      pino: 9.4.0
 
   '@stellarbeat/js-stellarbeat-shared@6.6.1':
     dependencies:

@@ -3,7 +3,7 @@ import { ConfigMock } from '../../../../core/config/__mocks__/configMock';
 import { ScanNetwork } from '../ScanNetwork';
 import { TestUtils } from '../../../../core/utilities/TestUtils';
 import { createDummyPublicKey } from '../../../domain/node/__fixtures__/createDummyPublicKey';
-import { Crawler, PeerNode } from '@stellarbeat/js-stellar-node-crawler';
+import { Crawler, PeerNode } from 'crawler';
 import { mock } from 'jest-mock-extended';
 import { CrawlerService } from '../../../domain/node/scan/node-crawl/CrawlerService';
 import { NETWORK_TYPES } from '../../../infrastructure/di/di-types';
@@ -15,8 +15,7 @@ import { GeoDataService } from '../../../domain/node/scan/GeoDataService';
 import { ok } from 'neverthrow';
 import { NetworkQuorumSetConfiguration } from '../../../domain/network/NetworkQuorumSetConfiguration';
 import { DataSource } from 'typeorm';
-import { CrawlFactory } from '@stellarbeat/js-stellar-node-crawler/lib/crawl-factory';
-import { Crawl } from '@stellarbeat/js-stellar-node-crawler/lib/crawl';
+import { CrawlFactory, Crawl } from 'crawler';
 
 let kernel: Kernel;
 jest.setTimeout(60000); //slow integration tests

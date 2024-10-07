@@ -1,7 +1,7 @@
 import { HasherPool } from './HasherPool';
 
 export class WorkerPoolLoadTracker {
-	private readonly loadTrackTimer: NodeJS.Timer;
+	private readonly loadTrackTimer: NodeJS.Timeout;
 	private poolFullCount = 0;
 	private poolCheckIfFullCount = 0;
 
@@ -28,6 +28,6 @@ export class WorkerPoolLoadTracker {
 	}
 
 	stop() {
-		clearTimeout(this.loadTrackTimer);
+		clearInterval(this.loadTrackTimer);
 	}
 }

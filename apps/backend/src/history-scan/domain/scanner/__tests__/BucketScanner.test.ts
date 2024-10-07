@@ -26,7 +26,7 @@ it('should verify the bucket hash', async function () {
 				url: createDummyHistoryBaseUrl(),
 				meta: {
 					hash: 'fed2affac90580353d1d7845194ecedea42363219c27e0e0788d48b6c739962a'
-				},
+				} as any,
 				method: RequestMethod.GET
 			});
 			return new Promise((resolve) => resolve(result));
@@ -65,7 +65,7 @@ it('should return verification error when zip archive is corrupt', async functio
 				url: createDummyHistoryBaseUrl(),
 				meta: {
 					hash: 'fed2affac90580353d1d7845194ecedea42363219c27e0e0788d48b6c739962a'
-				},
+				} as any,
 				method: RequestMethod.GET
 			});
 			return new Promise((resolve) => resolve(result));

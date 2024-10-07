@@ -131,3 +131,7 @@ export function createCrawler(
 	);
 }
 export { CrawlerConfiguration } from './crawler-configuration';
+export { CrawlFactory } from './crawl-factory';
+export { NodeAddress } from './node-address';
+export { Ledger } from './crawler';
+export { Crawl } from './crawl';

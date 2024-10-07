@@ -1,15 +1,15 @@
 import { CrawlerService } from '../CrawlerService';
-import { Crawler, PeerNode } from '@stellarbeat/js-stellar-node-crawler';
+import { Crawler, PeerNode } from 'crawler';
 import { mock } from 'jest-mock-extended';
 import { NetworkQuorumSetConfiguration } from '../../../../network/NetworkQuorumSetConfiguration';
 import {
 	createDummyPublicKey,
 	createDummyPublicKeyString
 } from '../../../__fixtures__/createDummyPublicKey';
-import { CrawlResult } from '@stellarbeat/js-stellar-node-crawler/lib/crawl-result';
+import { CrawlResult } from 'crawler';
 import { createDummyNode } from '../../../__fixtures__/createDummyNode';
 import { createDummyNodeAddress } from '../../../__fixtures__/createDummyNodeAddress';
-import { CrawlFactory } from '@stellarbeat/js-stellar-node-crawler/lib/crawl-factory';
+import { CrawlFactory } from 'crawler';
 
 describe('CrawlerService', function () {
 	it('should crawl', async function () {
