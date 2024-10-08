@@ -1,0 +1,86 @@
+{
+  "$id": "organization.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "dateDiscovered": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "dba": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "github": {
+      "type": "string"
+    },
+    "has24HourStats": {
+      "default": false,
+      "type": "boolean"
+    },
+    "has30DayStats": {
+      "default": false,
+      "type": "boolean"
+    },
+    "horizonUrl": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "isTierOneOrganization": {
+      "type": "boolean"
+    },
+    "keybase": {
+      "type": "string"
+    },
+    "logo": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "officialEmail": {
+      "type": "string"
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "physicalAddress": {
+      "type": "string"
+    },
+    "subQuorum24HoursAvailability": {
+      "default": 0,
+      "type": "number"
+    },
+    "subQuorum30DaysAvailability": {
+      "default": 0,
+      "type": "number"
+    },
+    "subQuorumAvailable": {
+      "default": false,
+      "type": "boolean"
+    },
+    "twitter": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "validators": {
+      "default": [
+      ],
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "type": "object",
+  "required": [
+    "id"
+  ]
+}
+
+

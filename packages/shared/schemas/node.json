@@ -1,0 +1,200 @@
+{
+	"$id": "node.json",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"properties": {
+		"active": {
+			"default": false,
+			"type": "boolean",
+			"description": "Node accepts connections from other nodes"
+		},
+		"activeInScp": {
+			"default": false,
+			"type": "boolean",
+			"description": "Node is active in SCP"
+		},
+		"alias": {
+			"type": "string"
+		},
+		"dateDiscovered": {
+			"format": "date-time",
+			"type": "string"
+		},
+		"dateUpdated": {
+			"format": "date-time",
+			"type": "string"
+		},
+		"displayName": {
+			"type": "string"
+		},
+		"geoData": {
+			"$ref": "#/definitions/NodeGeoData"
+		},
+		"historyUrl": {
+			"type": "string"
+		},
+		"homeDomain": {
+			"type": "string"
+		},
+		"host": {
+			"type": "string"
+		},
+		"index": {
+			"default": 0,
+			"type": "number",
+			"description": "Used to compare nodes. The more trustworthy, the higher the index."
+		},
+		"lag": {
+			"default": 0,
+			"type": "number",
+			"description": "Node externalize lag in milliseconds"
+		},
+		"ip": {
+			"default": "127.0.0.1",
+			"type": "string"
+		},
+		"isFullValidator": {
+			"default": false,
+			"type": "boolean"
+		},
+		"isValidating": {
+			"default": false,
+			"type": "boolean",
+			"description": "Participating in SCP and externalizing new values"
+		},
+		"isValidator": {
+			"type": "boolean"
+		},
+		"isp": {
+			"type": "string"
+		},
+		"key": {
+			"type": "string",
+			"description": "ip:port pair",
+			"default": "127.0.0.1:11625"
+		},
+		"ledgerVersion": {
+			"type": "number"
+		},
+		"name": {
+			"type": "string"
+		},
+		"networkId": {
+			"type": "string"
+		},
+		"organizationId": {
+			"type": "string"
+		},
+		"overLoaded": {
+			"default": false,
+			"type": "boolean",
+			"description": "When node disconnects with err_load"
+		},
+		"overlayMinVersion": {
+			"type": "number"
+		},
+		"overlayVersion": {
+			"type": "number"
+		},
+		"port": {
+			"type": "number"
+		},
+		"publicKey": {
+			"type": "string"
+		},
+		"quorumSet": {
+			"$ref": "#/definitions/QuorumSet"
+		},
+		"quorumSetHashKey": {
+			"type": "string"
+		},
+		"statistics": {
+			"$ref": "#/definitions/NodeStatistics"
+		},
+		"versionStr": {
+			"type": "string"
+		},
+		"historyArchiveHasError": {
+			"type": "boolean"
+		}
+	},
+	"type": "object",
+	"required": ["publicKey"],
+	"definitions": {
+		"NodeGeoData": {
+			"properties": {
+				"countryCode": {
+					"type": "string"
+				},
+				"countryName": {
+					"type": "string"
+				},
+				"latitude": {
+					"type": "number"
+				},
+				"longitude": {
+					"type": "number"
+				}
+			},
+			"type": "object"
+		},
+		"NodeStatistics": {
+			"properties": {
+				"active24HoursPercentage": {
+					"default": 0,
+					"type": "number"
+				},
+				"active30DaysPercentage": {
+					"default": 0,
+					"type": "number"
+				},
+				"has24HourStats": {
+					"default": false,
+					"type": "boolean"
+				},
+				"has30DayStats": {
+					"default": false,
+					"type": "boolean"
+				},
+				"overLoaded24HoursPercentage": {
+					"default": 0,
+					"type": "number"
+				},
+				"overLoaded30DaysPercentage": {
+					"default": 0,
+					"type": "number"
+				},
+				"validating24HoursPercentage": {
+					"default": 0,
+					"type": "number"
+				},
+				"validating30DaysPercentage": {
+					"default": 0,
+					"type": "number"
+				}
+			},
+			"type": "object"
+		},
+		"QuorumSet": {
+			"properties": {
+				"innerQuorumSets": {
+					"items": {
+						"$ref": "#/definitions/QuorumSet"
+					},
+					"type": "array"
+				},
+				"threshold": {
+					"type": "number"
+				},
+				"validators": {
+					"items": {
+						"type": "string"
+					},
+					"type": "array"
+				}
+			},
+			"type": "object",
+			"required": []
+		}
+	}
+}
+

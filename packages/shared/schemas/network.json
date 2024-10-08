@@ -1,0 +1,148 @@
+{
+  "$id": "network.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "time": {
+      "format": "date-time",
+      "type": "string",
+      "description": "Network state at time x"
+    },
+    "latestLedger": {
+      "type": "string",
+      "description": "The latest ledger that was closed in the network at time x"
+    },
+    "statistics": {
+      "$ref": "#/definitions/NetworkStatistics"
+    },
+    "id": {
+      "type": "string",
+      "description": "Network ID",
+      "default": "Public Global Stellar Network ; September 2015"
+    },
+    "name": {
+      "type": "string",
+      "description": "Network name",
+      "default": "Public network"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "node.json"
+      },
+      "type": "array"
+    },
+    "organizations": {
+      "items": {
+        "$ref": "organization.json"
+      },
+      "type": "array"
+    },
+    "transitiveQuorumSet": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "description": "array of nodes in the transitive quorumset of the trust graph"
+    },
+    "scc": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "type": "array",
+      "description": "Strongly connected components in the trust graph"
+    }
+  },
+  "type": "object",
+  "required": [
+    "nodes"
+  ],
+  "definitions": {
+    "NetworkStatistics": {
+      "properties": {
+        "hasQuorumIntersection": {
+          "type": "boolean",
+          "description": "Does the network have quorum intersection"
+        },
+        "hasTransitiveQuorumSet": {
+          "default": false,
+          "type": "boolean",
+          "description": "Does the network have a transitive quorum set"
+        },
+        "minBlockingSetFilteredSize": {
+          "default": 0,
+          "type": "number",
+          "description": "The size of the smallest network blocking set with failing nodes filtered out"
+        },
+        "minBlockingSetOrgsFilteredSize": {
+          "type": "number",
+          "description": "The size of the smallest network blocking set grouped by organizations, with failing organizations filtered out"
+        },
+        "minBlockingSetOrgsSize": {
+          "type": "number",
+          "description": "The size of the smallest network blocking set grouped by organizations"
+        },
+        "minBlockingSetSize": {
+          "type": "number",
+          "description": "The size of the smallest network blocking set"
+        },
+        "minSplittingSetOrgsSize": {
+          "type": "number",
+          "description": "The size of the smallest network splitting set, grouped by organizations"
+        },
+        "minSplittingSetCountrySize": {
+          "type": "number",
+          "description": "The size of the smallest network splitting set, grouped by countries"
+        },
+        "minSplittingSetISPSize": {
+          "type": "number",
+          "description": "The size of the smallest network splitting set, grouped by ISP's"
+        },
+        "minSplittingSetSize": {
+          "type": "number",
+          "description": "The size of the smallest network splitting set"
+        },
+        "nrOfActiveFullValidators": {
+          "default": 0,
+          "type": "number",
+          "description": "Number of active full validators"
+        },
+        "nrOfActiveOrganizations": {
+          "default": 0,
+          "type": "number",
+          "description": "Number of active organizations"
+        },
+        "nrOfActiveValidators": {
+          "default": 0,
+          "type": "number",
+          "description": "Number of active validators"
+        },
+        "nrOfActiveWatchers": {
+          "default": 0,
+          "type": "number",
+          "description": "Number of active watcher nodes"
+        },
+        "time": {
+          "format": "date-time",
+          "type": "string",
+          "description": "Time of the statistics"
+        },
+        "topTierOrgsSize": {
+          "type": "number",
+          "description": "Number of organizations in the top tier"
+        },
+        "topTierSize": {
+          "type": "number",
+          "description": "Number of nodes in the top tier"
+        },
+        "transitiveQuorumSetSize": {
+          "default": 0,
+          "type": "number",
+          "description": "Number of nodes in the transitive quorum set"
+        }
+      },
+      "type": "object"
+    }
+  }
+}

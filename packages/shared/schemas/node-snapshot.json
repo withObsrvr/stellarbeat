@@ -1,0 +1,21 @@
+{
+  "$id": "node-snapshot.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "startDate": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "endDate": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "node": {
+      "$ref": "node.json"
+    }
+  },
+  "type": "object",
+  "required": [
+  ]
+}
+
