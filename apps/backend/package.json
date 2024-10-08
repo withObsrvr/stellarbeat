@@ -1,7 +1,6 @@
 {
 	"name": "backend",
 	"private": true,
-	"version": "0.1.0",
 	"description": "Backend & api",
 	"scripts": {
 		"build": "tsc --build tsconfig.prod.json && cp -R src/notifications/infrastructure/templates lib/notifications/infrastructure/templates",
@@ -19,14 +18,10 @@
 	},
 	"author": "pieterjan84@github",
 	"license": "MIT",
-	"engines": {
-		"node": "20.x"
-	},
 	"dependencies": {
 		"crawler": "workspace:*",
 		"@aws-sdk/client-s3": "^3.665.0",
 		"@sentry/node": "^7.119.1",
-		"@stellar/stellar-base": "12.1.1",
 		"@stellarbeat/js-stellarbeat-shared": "^6.6.1",
 		"@stellarbeat/stellar-history-archive-hasher": "0.6.0",
 		"@stellarbeat/stellar_analysis_nodejs": "^0.6.2",

@@ -1,5 +1,5 @@
 import { hash, Keypair, Networks, xdr } from '@stellar/stellar-base';
-import { createSCPEnvelopeSignature } from '@stellarbeat/js-stellar-node-connector';
+import { createSCPEnvelopeSignature } from 'node-connector';
 
 export function createDummyValue() {
 	return Buffer.from(

@@ -4,17 +4,17 @@ import {
 	createSCPEnvelopeSignature,
 	createNode,
 	getConfigFromEnv
-} from '@stellarbeat/js-stellar-node-connector';
+} from 'node-connector';
 import { xdr, Keypair, hash, Networks } from '@stellar/stellar-base';
 import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
-import { NodeConfig } from '@stellarbeat/js-stellar-node-connector/lib/node-config';
+import { NodeConfig } from 'node-connector';
 import { ok, Result, err } from 'neverthrow';
 import {
 	CrawlerConfiguration,
 	createCrawler,
 	createCrawlFactory
 } from '../index';
-import { StellarMessageWork } from '@stellarbeat/js-stellar-node-connector/lib/connection/connection';
+import { StellarMessageWork } from 'node-connector';
 import { NodeAddress } from '../node-address';
 
 jest.setTimeout(60000);

@@ -1,10 +1,7 @@
 // connectionManager.test.ts
 
 import { mock, mockDeep, MockProxy } from 'jest-mock-extended';
-import {
-	Node as NetworkNode,
-	Connection
-} from '@stellarbeat/js-stellar-node-connector';
+import { Node as NetworkNode, Connection } from 'node-connector';
 import { ConnectionManager } from '../connection-manager';
 import { P } from 'pino';
 import { EventEmitter } from 'events';

@@ -1,6 +1,6 @@
 import { xdr } from '@stellar/stellar-base';
 import { err, ok, Result } from 'neverthrow';
-import { getPublicKeyStringFromBuffer } from '@stellarbeat/js-stellar-node-connector';
+import { getPublicKeyStringFromBuffer } from 'node-connector';
 import { extractCloseTimeFromValue } from './extract-close-time-from-value';
 
 export interface ExternalizeData {

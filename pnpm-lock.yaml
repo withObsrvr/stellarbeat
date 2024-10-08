@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@stellar/stellar-base':
+        specifier: 12.1.1
+        version: 12.1.1
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -69,9 +72,6 @@ importers:
       '@sentry/node':
         specifier: ^7.119.1
         version: 7.119.1
-      '@stellar/stellar-base':
-        specifier: 12.1.1
-        version: 12.1.1
       '@stellarbeat/js-stellarbeat-shared':
         specifier: ^6.6.1
         version: 6.6.1
@@ -214,15 +214,15 @@ importers:
 
   packages/crawler:
     dependencies:
-      '@stellarbeat/js-stellar-node-connector':
-        specifier: ^7.0.1
-        version: 7.0.1
       '@stellarbeat/js-stellarbeat-shared':
         specifier: ^6.6.1
         version: 6.6.1
       async:
         specifier: ^3.2.6
         version: 3.2.6
+      node-connector:
+        specifier: workspace:*
+        version: link:../node-connector
     devDependencies:
       '@stellar/stellar-base':
         specifier: 12.1.1
@@ -230,6 +230,34 @@ importers:
       '@types/async':
         specifier: ^3.2.7
         version: 3.2.24
+
+  packages/node-connector:
+    dependencies:
+      async:
+        specifier: ^3.2.6
+        version: 3.2.6
+      sodium-native:
+        specifier: ^4.1.1
+        version: 4.2.1
+      workerpool:
+        specifier: ^9.1.3
+        version: 9.1.3
+      yn:
+        specifier: ^4.0.0
+        version: 4.0.0
+    devDependencies:
+      '@types/async':
+        specifier: ^3.2.24
+        version: 3.2.24
+      '@types/sodium-native':
+        specifier: ^2.3.9
+        version: 2.3.9
+      '@types/workerpool':
+        specifier: ^6.4.7
+        version: 6.4.7
+      bignumber.js:
+        specifier: 9.1.2
+        version: 9.1.2
 
 packages:
 
@@ -986,10 +1014,6 @@ packages:
   '@stellar/stellar-base@12.1.1':
     resolution: {integrity: sha512-gOBSOFDepihslcInlqnxKZdIW9dMUO1tpOm3AtJR33K2OvpXG6SaVHCzAmCFArcCqI9zXTEiSoh70T48TmiHJA==}
 
-  '@stellarbeat/js-stellar-node-connector@7.0.1':
-    resolution: {integrity: sha512-pacl2TremGbVEtdB/hnHxnLqo/b+xL576GdxM+N4+Qm9qP4Q5WeszwRueuRbUBJa1WIa7ynWkrFkBBYiWe/Ebg==}
-    engines: {node: ^20.0.0}
-
   '@stellarbeat/js-stellarbeat-shared@6.6.1':
     resolution: {integrity: sha512-bMVF14TIBObP/PcgwziZgmPe6IQjAYjJudvtSkVneRX37taNuGhV3CGFEH23z86c2/r++x8/O01Zd7MwyHwYIg==}
     engines: {node: '>=16.0.0'}
@@ -1086,6 +1110,9 @@ packages:
 
   '@types/serve-static@1.15.7':
     resolution: {integrity: sha512-W8Ym+h8nhuRwaKPaDw34QUkwsGi6Rc4yYqvKFo5rm2FUEhCFbzVWrxXUxuKK8TASjWsysJY0nsmNCGhCOIsrOw==}
+
+  '@types/sodium-native@2.3.9':
+    resolution: {integrity: sha512-jZIg5ltGH1okmnH3FrLQsgwjcjOVozMSHwSiEm1/LpMekhOMHbQqp21P4H24mizh1BjwI6Q8qmphmD/HJuAqWg==}
 
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
@@ -4457,18 +4484,6 @@ snapshots:
     optionalDependencies:
       sodium-native: 4.2.1
 
-  '@stellarbeat/js-stellar-node-connector@7.0.1':
-    dependencies:
-      '@stellar/stellar-base': 12.1.1
-      async: 3.2.6
-      dotenv: 16.4.5
-      lru-cache: 11.0.1
-      neverthrow: 8.0.0
-      pino: 9.4.0
-      sodium-native: 4.2.1
-      workerpool: 9.1.3
-      yn: 4.0.0
-
   '@stellarbeat/js-stellarbeat-shared@6.6.1':
     dependencies:
       ajv: 8.17.1
@@ -4581,6 +4596,10 @@ snapshots:
       '@types/http-errors': 2.0.4
       '@types/node': 20.16.10
       '@types/send': 0.17.4
+
+  '@types/sodium-native@2.3.9':
+    dependencies:
+      '@types/node': 20.16.10
 
   '@types/stack-utils@2.0.3': {}
 

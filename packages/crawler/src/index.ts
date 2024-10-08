@@ -1,6 +1,6 @@
 import { Crawler } from './crawler';
 import { pino } from 'pino';
-import { createNode } from '@stellarbeat/js-stellar-node-connector';
+import { createNode } from 'node-connector';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { ConnectionManager } from './network-observer/connection-manager';
 import { CrawlQueueManager } from './crawl-queue-manager';

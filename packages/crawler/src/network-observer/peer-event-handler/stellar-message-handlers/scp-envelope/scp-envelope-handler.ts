@@ -1,5 +1,5 @@
 import { hash, xdr } from '@stellar/stellar-base';
-import { verifySCPEnvelopeSignature } from '@stellarbeat/js-stellar-node-connector';
+import { verifySCPEnvelopeSignature } from 'node-connector';
 import { err, ok, Result } from 'neverthrow';
 import { isLedgerSequenceValid } from './ledger-validator';
 import { ScpStatementHandler } from './scp-statement/scp-statement-handler';

@@ -1,12 +1,9 @@
 import { EventEmitter } from 'events';
-import {
-	Connection,
-	Node as NetworkNode
-} from '@stellarbeat/js-stellar-node-connector';
+import { Connection, Node as NetworkNode } from 'node-connector';
 import { P } from 'pino';
 import { truncate } from '../utilities/truncate';
-import { StellarMessageWork } from '@stellarbeat/js-stellar-node-connector/lib/connection/connection';
-import { NodeInfo } from '@stellarbeat/js-stellar-node-connector/lib/node';
+import { StellarMessageWork } from 'node-connector';
+import { NodeInfo } from 'node-connector';
 
 type PublicKey = string;
 type Address = string;

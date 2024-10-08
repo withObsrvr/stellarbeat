@@ -1,7 +1,4 @@
-import {
-	getIpFromPeerAddress,
-	getQuorumSetFromMessage
-} from '@stellarbeat/js-stellar-node-connector';
+import { getIpFromPeerAddress, getQuorumSetFromMessage } from 'node-connector';
 import { hash, xdr } from '@stellar/stellar-base';
 import { P } from 'pino';
 import { ScpEnvelopeHandler } from './scp-envelope/scp-envelope-handler';

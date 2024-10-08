@@ -14,6 +14,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@stellar/stellar-base": "12.1.1",
     "dotenv": "^16.4.5",
     "lru-cache": "^11.0.1",
     "neverthrow": "^8.0.0",

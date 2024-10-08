@@ -1,5 +1,5 @@
 import { CrawlerConfiguration } from '../crawler-configuration';
-import { NodeConfig } from '@stellarbeat/js-stellar-node-connector/lib/node-config';
+import { NodeConfig } from 'node-connector';
 
 export function createDummyCrawlerConfiguration(): CrawlerConfiguration {
 	const nodeConfig: NodeConfig = {

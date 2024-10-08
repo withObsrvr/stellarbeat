@@ -1,7 +1,7 @@
 //write tests
 import { PeerNodeCollection } from '../peer-node-collection';
 import { PeerNode } from '../index';
-import { NodeInfo } from '@stellarbeat/js-stellar-node-connector/lib/node';
+import { NodeInfo } from 'node-connector';
 
 describe('PeerNodeCollection', () => {
 	let peerNodeCollection: PeerNodeCollection;

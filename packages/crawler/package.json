@@ -1,7 +1,6 @@
 {
 	"name": "crawler",
 	"private": true,
-	"version": "0.1.0",
 	"description": "Crawl the stellar network",
 	"scripts": {
 		"build": "tsc --declaration",
@@ -13,7 +12,7 @@
 	"author": "pieterjan84@github",
 	"license": "MIT",
 	"dependencies": {
-		"@stellarbeat/js-stellar-node-connector": "^7.0.1",
+		"node-connector": "workspace:*",
 		"@stellarbeat/js-stellarbeat-shared": "^6.6.1",
 		"async": "^3.2.6"
 	},

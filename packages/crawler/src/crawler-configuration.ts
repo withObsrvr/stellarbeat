@@ -1,4 +1,4 @@
-import { NodeConfig } from '@stellarbeat/js-stellar-node-connector/lib/node-config';
+import { NodeConfig } from 'node-connector';
 
 type PublicKey = string;
 

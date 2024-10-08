@@ -10,7 +10,7 @@
 		"experimentalDecorators": true,
 		"strict": true
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["apps/**/*.ts", "packages/**/*.ts"],
 	"exclude": [
 		"node_modules/**/*",
 		"src/**/__tests__/*",
