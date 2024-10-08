@@ -54,9 +54,7 @@ export default class Kernel {
 		await this.loadDatabase(config, isTest);
 		loadCore(this.container, config);
 		loadNetworkScan(this.container, config);
-		if (config.enableNotifications) {
-			loadNetworkEventNotifications(this.container, config);
-		}
+		loadNetworkEventNotifications(this.container, config);
 		loadHistory(this.container, config);
 	}
 

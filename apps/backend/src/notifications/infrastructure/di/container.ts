@@ -53,12 +53,15 @@ export function load(container: Container, config: Config) {
 		});
 	container.bind(EventSourceIdFactory).toSelf();
 	container.bind<IUserService>('UserService').toDynamicValue(() => {
-		if (
-			!config.userServiceUsername ||
-			!config.userServiceBaseUrl ||
-			!config.userServicePassword
-		)
-			throw new Error('invalid notification config');
+		if (!config.userServiceBaseUrl) {
+			throw new Error('USER_SERVICE_BASE_URL not defined');
+		}
+		if (!config.userServiceUsername) {
+			throw new Error('USER_SERVICE_USERNAME not defined');
+		}
+		if (!config.userServicePassword) {
+			throw new Error('USER_SERVICE_PASSWORD not defined');
+		}
 		return new UserService(
 			config.userServiceBaseUrl,
 			config.userServiceUsername,

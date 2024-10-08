@@ -278,6 +278,12 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		config.userServicePassword = userServicePassword;
 		config.userServiceUsername = userServiceUsername;
 		config.frontendBaseUrl = frontendBaseUrl;
+	} else {
+		config.enableNotifications = false;
+		config.userServiceBaseUrl = '127.0.0.1';
+		config.userServiceUsername = 'user';
+		config.userServicePassword = 'password';
+		config.frontendBaseUrl = 'http://localhost:3000';
 	}
 
 	const historyMaxFileMs = Number(process.env.HISTORY_MAX_FILE_MS);

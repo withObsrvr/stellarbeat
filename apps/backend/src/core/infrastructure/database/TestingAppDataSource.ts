@@ -1,5 +1,4 @@
 import { DataSource } from 'typeorm';
-import { BaseDataSourceOptions } from 'typeorm/data-source/BaseDataSourceOptions';
 
 const TestingAppDataSource: DataSource = new DataSource({
 	type: 'postgres',

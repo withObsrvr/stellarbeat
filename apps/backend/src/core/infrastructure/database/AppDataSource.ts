@@ -11,12 +11,15 @@ const AppDataSource = new DataSource({
 	entities: ['lib/**/entities/*.js', 'lib/**/domain/**/!(*.test)*.js'],
 	migrations: ['lib/**/migrations/*.js'],
 	migrationsRun: true,
-	ssl: true,
-	extra: {
-		ssl: {
-			rejectUnauthorized: false
-		}
-	},
+	ssl: process.env.NODE_ENV !== 'development',
+	extra:
+		process.env.NODE_ENV !== 'development'
+			? {
+					ssl: {
+						rejectUnauthorized: false
+					}
+			  }
+			: undefined,
 	poolSize: process.env.DATABASE_POOL_SIZE
 		? parseInt(process.env.DATABASE_POOL_SIZE)
 		: 10
