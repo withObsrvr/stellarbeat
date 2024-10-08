@@ -1,10 +1,12 @@
 {
   "name": "stellarbeat",
+  "private": true,
   "version": "0.1.0",
   "description": "stellarbeat project monorepo",
   "scripts": {
     "build": "pnpm run --parallel build",
-    "test:unit": "pnpm run --parallel test:unit"
+    "test:unit": "pnpm run --parallel test:unit",
+    "test:integration": "pnpm run --parallel test:integration"
   },
   "keywords": [],
   "author": "pieterjan84",
@@ -18,7 +20,8 @@
     "dotenv": "^16.4.5",
     "lru-cache": "^11.0.1",
     "neverthrow": "^8.0.0",
-    "pino": "^9.4.0"
+    "pino": "^9.4.0",
+		"reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
     "@types/jest": "29.5.6",

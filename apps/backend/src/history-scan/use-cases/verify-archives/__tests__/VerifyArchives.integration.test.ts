@@ -12,7 +12,7 @@ let verifyArchives: VerifyArchives;
 jest.setTimeout(60000); //slow integration tests
 beforeAll(async () => {
 	kernel = await Kernel.getInstance(new ConfigMock());
-	await mockHistoryArchive.listen(80);
+	await mockHistoryArchive.listen(3333); //make sure this is a unique port not requiring superuser rights (linux > 1024)
 	verifyArchives = kernel.container.get(VerifyArchives);
 });
 
@@ -31,7 +31,7 @@ it('should scan all known archives', async function () {
 		TYPES.HistoryArchiveScanRepository
 	);
 	const scan = (await historyArchiveScanRepository.findLatestByUrl(
-		'http://127.0.0.1'
+		'http://127.0.0.1:3333'
 	)) as Scan;
 
 	expect(scan).toBeInstanceOf(Scan);

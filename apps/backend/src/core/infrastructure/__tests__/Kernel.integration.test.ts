@@ -1,4 +1,4 @@
-import { Connection, DataSource } from 'typeorm';
+import { DataSource } from 'typeorm';
 import Kernel from '../Kernel';
 import { ConfigMock } from '../../config/__mocks__/configMock';
 import { NodeMeasurementRepository } from '../../../network-scan/domain/node/NodeMeasurementRepository';

@@ -49,7 +49,7 @@ describe('scan HAS files', () => {
 					},
 					{
 						url: createDummyHistoryBaseUrl(),
-						meta: {},
+						meta: {} as any,
 						method: RequestMethod.GET
 					}
 				);
@@ -157,7 +157,7 @@ it('should find latest ledger', async function () {
 			const content = fs.readFileSync(file, { encoding: 'utf8' });
 			const result = await resultHandler(JSON.parse(content), {
 				url: createDummyHistoryBaseUrl(),
-				meta: {},
+				meta: {} as any,
 				method: RequestMethod.GET
 			});
 
@@ -218,7 +218,7 @@ function getMockedCategoryScanner(testEmptyFile: boolean) {
 					url: createDummyHistoryBaseUrl(),
 					meta: {
 						category: request.meta.category
-					},
+					} as any,
 					method: RequestMethod.GET
 				});
 			}
