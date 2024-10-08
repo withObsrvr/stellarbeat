@@ -7,7 +7,7 @@ import NodeDetails from '../../NodeDetails';
 import NodeMeasurement from '../../NodeMeasurement';
 import NodeGeoDataLocation from '../../NodeGeoDataLocation';
 import { NodeTomlInfo } from '../NodeTomlInfo';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import NodeQuorumSet from '../../NodeQuorumSet';
 import { StellarCoreVersion } from '../../../network/StellarCoreVersion';
 

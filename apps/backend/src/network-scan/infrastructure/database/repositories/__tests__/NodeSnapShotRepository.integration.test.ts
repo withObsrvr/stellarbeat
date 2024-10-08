@@ -8,7 +8,7 @@ import { createDummyPublicKey } from '../../../../domain/node/__fixtures__/creat
 import Node from '../../../../domain/node/Node';
 import { NodeRepository } from '../../../../domain/node/NodeRepository';
 import NodeSnapShot from '../../../../domain/node/NodeSnapShot';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import NodeQuorumSet from '../../../../domain/node/NodeQuorumSet';
 import { DataSource } from 'typeorm';
 

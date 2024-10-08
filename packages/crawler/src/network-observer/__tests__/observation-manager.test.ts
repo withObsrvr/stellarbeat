@@ -7,7 +7,7 @@ import { P } from 'pino';
 import { Observation } from '../observation';
 import { PeerNodeCollection } from '../../peer-node-collection';
 import { ObservationState } from '../observation-state';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { Ledger } from '../../crawler';
 import { Slots } from '../peer-event-handler/stellar-message-handlers/scp-envelope/scp-statement/externalize/slots';
 import { NodeAddress } from '../../node-address';

@@ -4,7 +4,7 @@ import { ConfigMock } from '../../../../core/config/__mocks__/configMock';
 import { Notify } from '../Notify';
 import { NotifyDTO } from '../NotifyDTO';
 import { NoNetworkError, NoPreviousNetworkError } from '../NotifyError';
-import { NetworkV1, NodeV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { NetworkV1, NodeV1 } from 'shared';
 import { SubscriberRepository } from '../../../domain/subscription/SubscriberRepository';
 import { NetworkId } from '../../../domain/event/EventSourceId';
 import { EventNotificationState } from '../../../domain/subscription/EventNotificationState';

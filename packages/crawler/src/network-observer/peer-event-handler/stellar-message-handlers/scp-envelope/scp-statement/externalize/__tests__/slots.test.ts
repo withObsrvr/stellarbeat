@@ -1,4 +1,4 @@
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { mock } from 'jest-mock-extended';
 import { P } from 'pino';
 import { Slots } from '../slots';

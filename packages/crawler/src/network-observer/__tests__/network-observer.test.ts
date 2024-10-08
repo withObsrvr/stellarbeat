@@ -16,7 +16,7 @@ import { ObservationState } from '../observation-state';
 import { EventEmitter } from 'events';
 import { Ledger } from '../../crawler';
 import { nextTick } from 'async';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { PeerNodeCollection } from '../../peer-node-collection';
 import { Slots } from '../peer-event-handler/stellar-message-handlers/scp-envelope/scp-statement/externalize/slots';
 

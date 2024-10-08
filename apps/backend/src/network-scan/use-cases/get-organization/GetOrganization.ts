@@ -3,7 +3,7 @@ import { err, ok, Result } from 'neverthrow';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';
 import 'reflect-metadata';
 import { GetNetwork } from '../get-network/GetNetwork';
-import { OrganizationV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { OrganizationV1 } from 'shared';
 import { GetOrganizationDTO } from './GetOrganizationDTO';
 
 @injectable()

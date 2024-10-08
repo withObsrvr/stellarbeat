@@ -3,9 +3,9 @@ import { NodeMeasurementDayRepository } from '../../NodeMeasurementDayRepository
 import { InactiveNodesArchiver } from '../InactiveNodesArchiver';
 import { createDummyNode } from '../../__fixtures__/createDummyNode';
 import { NodeScan } from '../../scan/NodeScan';
-import { Edge, TrustGraph, Vertex } from '@stellarbeat/js-stellarbeat-shared';
-import { StronglyConnectedComponentsFinder } from '@stellarbeat/js-stellarbeat-shared/lib/trust-graph/strongly-connected-components-finder';
-import { NetworkTransitiveQuorumSetFinder } from '@stellarbeat/js-stellarbeat-shared/lib/trust-graph/network-transitive-quorum-set-finder';
+import { Edge, TrustGraph, Vertex } from 'shared';
+import { StronglyConnectedComponentsFinder } from 'shared';
+import { NetworkTransitiveQuorumSetFinder } from 'shared';
 import { Snapshot } from '../../../../../core/domain/Snapshot';
 import { Logger } from '../../../../../core/services/PinoLogger';
 import NodeMeasurement from '../../NodeMeasurement';

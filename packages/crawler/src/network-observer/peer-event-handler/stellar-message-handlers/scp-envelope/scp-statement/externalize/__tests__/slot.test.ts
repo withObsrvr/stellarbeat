@@ -1,6 +1,6 @@
 import { Slot } from '../slot';
 import { mock } from 'jest-mock-extended';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { P } from 'pino';
 import { createDummyValue } from '../../../../../../../__fixtures__/createDummyExternalizeMessage';
 

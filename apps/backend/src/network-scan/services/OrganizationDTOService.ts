@@ -5,7 +5,7 @@ import { OrganizationMeasurementRepository } from '../domain/organization/Organi
 import { OrganizationMeasurementDayRepository } from '../domain/organization/OrganizationMeasurementDayRepository';
 import { inject, injectable } from 'inversify';
 import { NETWORK_TYPES } from '../infrastructure/di/di-types';
-import { OrganizationV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { OrganizationV1 } from 'shared';
 import { OrganizationV1DTOMapper } from '../mappers/OrganizationV1DTOMapper';
 
 @injectable()

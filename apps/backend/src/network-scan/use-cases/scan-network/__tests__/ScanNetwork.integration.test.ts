@@ -10,7 +10,7 @@ import { NETWORK_TYPES } from '../../../infrastructure/di/di-types';
 import { NetworkRepository } from '../../../domain/network/NetworkRepository';
 import { NetworkId } from '../../../domain/network/NetworkId';
 import { ScanRepository } from '../../../domain/ScanRepository';
-import { QuorumSet as BaseQuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet as BaseQuorumSet } from 'shared';
 import { GeoDataService } from '../../../domain/node/scan/GeoDataService';
 import { ok } from 'neverthrow';
 import { NetworkQuorumSetConfiguration } from '../../../domain/network/NetworkQuorumSetConfiguration';

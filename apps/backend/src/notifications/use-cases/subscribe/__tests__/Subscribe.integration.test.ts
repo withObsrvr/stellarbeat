@@ -1,7 +1,7 @@
 import { decorate, injectable } from 'inversify';
 import Kernel from '../../../../core/infrastructure/Kernel';
 import { ConfigMock } from '../../../../core/config/__mocks__/configMock';
-import { NodeV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { NodeV1 } from 'shared';
 import { SubscriberRepository } from '../../../domain/subscription/SubscriberRepository';
 import { EventSourceIdDTO, SubscribeDTO } from '../SubscribeDTO';
 import { Subscribe } from '../Subscribe';

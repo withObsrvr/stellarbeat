@@ -1,4 +1,4 @@
-import { NodeV1, NodeSnapshotV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { NodeV1, NodeSnapshotV1 } from 'shared';
 import { NodeMeasurementAverage } from '../domain/node/NodeMeasurementAverage';
 import Node from '../domain/node/Node';
 import { injectable } from 'inversify';

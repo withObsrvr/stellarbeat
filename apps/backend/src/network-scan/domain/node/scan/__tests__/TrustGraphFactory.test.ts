@@ -1,5 +1,5 @@
 import NodeQuorumSet from '../../NodeQuorumSet';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { TrustGraphFactory } from '../TrustGraphFactory';
 import { createDummyNode } from '../../__fixtures__/createDummyNode';
 

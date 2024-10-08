@@ -1,5 +1,5 @@
 import { NetworkQuorumSetConfiguration } from './NetworkQuorumSetConfiguration';
-import { QuorumSet as BasicQuorumSet } from '@stellarbeat/js-stellarbeat-shared/lib/quorum-set';
+import { QuorumSet as BasicQuorumSet } from 'shared';
 
 export class NetworkQuorumSetConfigurationMapper {
 	static toBaseQuorumSet(

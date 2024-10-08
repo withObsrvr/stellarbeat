@@ -2,10 +2,10 @@ import NetworkScan from '../NetworkScan';
 import { NodeScan } from '../../../node/scan/NodeScan';
 import { mock } from 'jest-mock-extended';
 import { OrganizationScan } from '../../../organization/scan/OrganizationScan';
-import { TrustGraph } from '@stellarbeat/js-stellarbeat-shared';
+import { TrustGraph } from 'shared';
 import NetworkMeasurement from '../../NetworkMeasurement';
-import { NetworkTransitiveQuorumSetFinder } from '@stellarbeat/js-stellarbeat-shared/lib/trust-graph/network-transitive-quorum-set-finder';
-import { StronglyConnectedComponentsFinder } from '@stellarbeat/js-stellarbeat-shared/lib/trust-graph/strongly-connected-components-finder';
+import { NetworkTransitiveQuorumSetFinder } from 'shared';
+import { StronglyConnectedComponentsFinder } from 'shared';
 import { AnalysisResult } from '../fbas-analysis/AnalysisResult';
 
 describe('NetworkScan', () => {

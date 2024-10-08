@@ -6,7 +6,7 @@ import { StragglerTimer } from '../../straggler-timer';
 import { OnPeerConnected } from '../on-peer-connected';
 import { Observation } from '../../observation';
 import { ObservationState } from '../../observation-state';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { Ledger } from '../../../crawler';
 import { Slots } from '../stellar-message-handlers/scp-envelope/scp-statement/externalize/slots';
 

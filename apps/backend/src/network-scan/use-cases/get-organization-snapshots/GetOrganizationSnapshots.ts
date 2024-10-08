@@ -3,7 +3,7 @@ import { mapUnknownToError } from '../../../core/utilities/mapUnknownToError';
 import { inject, injectable } from 'inversify';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';
 import { GetOrganizationSnapshotsDTO } from './GetOrganizationSnapshotsDTO';
-import { OrganizationSnapShot } from '@stellarbeat/js-stellarbeat-shared';
+import { OrganizationSnapShot } from 'shared';
 import { OrganizationId } from '../../domain/organization/OrganizationId';
 import { OrganizationSnapshotMapper } from '../../mappers/OrganizationSnapshotMapper';
 import { NETWORK_TYPES } from '../../infrastructure/di/di-types';

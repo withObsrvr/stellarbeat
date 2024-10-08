@@ -5,7 +5,7 @@ import { ScanResult } from '../domain/Scanner';
 import { OrganizationDTOService } from './OrganizationDTOService';
 import { NodeDTOService } from './NodeDTOService';
 import { NETWORK_TYPES } from '../infrastructure/di/di-types';
-import { NetworkV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { NetworkV1 } from 'shared';
 import { NetworkV1DTOMapper } from '../mappers/NetworkV1DTOMapper';
 import { TrustGraphFactory } from '../domain/node/scan/TrustGraphFactory';
 import { NetworkRepository } from '../domain/network/NetworkRepository';

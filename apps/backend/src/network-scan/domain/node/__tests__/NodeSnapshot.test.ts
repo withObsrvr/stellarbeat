@@ -1,7 +1,7 @@
 import NodeSnapShot from '../NodeSnapShot';
 import NodeDetails from '../NodeDetails';
 import NodeQuorumSet from '../NodeQuorumSet';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import NodeGeoDataLocation from '../NodeGeoDataLocation';
 
 describe('NodeSnapshot', () => {

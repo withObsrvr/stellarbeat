@@ -22,7 +22,7 @@
 		"crawler": "workspace:*",
 		"@aws-sdk/client-s3": "^3.665.0",
 		"@sentry/node": "^7.119.1",
-		"@stellarbeat/js-stellarbeat-shared": "^6.6.1",
+		"shared": "workspace:*",
 		"@stellarbeat/stellar-history-archive-hasher": "0.6.0",
 		"@stellarbeat/stellar_analysis_nodejs": "^0.6.2",
 		"ajv": "^8.17.1",

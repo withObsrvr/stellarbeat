@@ -2,7 +2,7 @@ import { Observation } from './observation';
 import { NodeAddress } from '../node-address';
 import { PeerNodeCollection } from '../peer-node-collection';
 import { Slots } from './peer-event-handler/stellar-message-handlers/scp-envelope/scp-statement/externalize/slots';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { Ledger } from '../crawler';
 
 export class ObservationFactory {

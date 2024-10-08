@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"sourceMap": true,
 		"paths": {
-			"crawler": ["../../packages/crawler/src"]
+			"crawler": ["../../packages/crawler/src"],
+			"shared": ["../../packages/shared/src"]
 		}
 	}
 }

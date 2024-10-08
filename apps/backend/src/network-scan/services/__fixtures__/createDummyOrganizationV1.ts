@@ -1,4 +1,4 @@
-import { OrganizationV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { OrganizationV1 } from 'shared';
 
 export function createDummyOrganizationV1(): OrganizationV1 {
 	return {

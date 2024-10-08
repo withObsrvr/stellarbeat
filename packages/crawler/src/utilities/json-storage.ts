@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { Node } from '@stellarbeat/js-stellarbeat-shared';
+import { Node } from 'shared';
 
 export default {
 	readFilePromise: function (path: string): Promise<unknown> {

@@ -2,11 +2,11 @@ import {
 	Node as NodeDTO,
 	NodeGeoData,
 	NodeSnapShot as NodeSnapshotDTO
-} from '@stellarbeat/js-stellarbeat-shared';
+} from 'shared';
 import NodeMeasurement from '../domain/node/NodeMeasurement';
 import { NodeMeasurementAverage } from '../domain/node/NodeMeasurementAverage';
 import NodeSnapShot from '../domain/node/NodeSnapShot';
-import { NodeSnapShot as NodeSnapShotDTO } from '@stellarbeat/js-stellarbeat-shared/lib/node-snap-shot';
+import { NodeSnapShot as NodeSnapShotDTO } from 'shared';
 
 export class NodeSnapshotMapper {
 	static toNodeDTO(

@@ -3,7 +3,7 @@ import { mapUnknownToError } from '../../../core/utilities/mapUnknownToError';
 import { inject, injectable } from 'inversify';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';
 import { GetNodeSnapshotsDTO } from './GetNodeSnapshotsDTO';
-import { NodeSnapShot } from '@stellarbeat/js-stellarbeat-shared';
+import { NodeSnapShot } from 'shared';
 import PublicKey from '../../domain/node/PublicKey';
 import { NodeSnapshotMapper } from '../../mappers/NodeSnapshotMapper';
 import { NodeSnapShotRepository } from '../../domain/node/NodeSnapShotRepository';

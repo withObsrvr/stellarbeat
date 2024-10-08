@@ -1,5 +1,5 @@
 import { Node } from '../node';
-import containsSlice from './containsSlice';
+import { containsSlice } from './containsSlice';
 
 /**
  * detects if the nodes array contains a quorum and returns the first detected.

@@ -1,4 +1,4 @@
-import { TrustGraph } from '@stellarbeat/js-stellarbeat-shared';
+import { TrustGraph } from 'shared';
 import Node from '../Node';
 
 export function hasNoActiveTrustingNodes(

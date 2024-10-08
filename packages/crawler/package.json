@@ -13,7 +13,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"node-connector": "workspace:*",
-		"@stellarbeat/js-stellarbeat-shared": "^6.6.1",
+		"shared": "workspace:*",
 		"async": "^3.2.6"
 	},
 	"devDependencies": {

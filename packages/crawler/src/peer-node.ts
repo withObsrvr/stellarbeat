@@ -1,4 +1,4 @@
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { NodeInfo } from 'node-connector';
 import { Ledger } from './crawler';
 

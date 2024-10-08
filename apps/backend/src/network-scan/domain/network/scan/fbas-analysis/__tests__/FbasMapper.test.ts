@@ -1,6 +1,6 @@
 import { createDummyNode } from '../../../../node/__fixtures__/createDummyNode';
 import NodeQuorumSet from '../../../../node/NodeQuorumSet';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import NodeDetails from '../../../../node/NodeDetails';
 import NodeGeoDataLocation from '../../../../node/NodeGeoDataLocation';
 import { FbasMapper } from '../FbasMapper';

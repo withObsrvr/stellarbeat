@@ -1,6 +1,6 @@
-import { Edge, TrustGraph, Vertex } from '@stellarbeat/js-stellarbeat-shared';
-import { StronglyConnectedComponentsFinder } from '@stellarbeat/js-stellarbeat-shared/lib/trust-graph/strongly-connected-components-finder';
-import { NetworkTransitiveQuorumSetFinder } from '@stellarbeat/js-stellarbeat-shared/lib/trust-graph/network-transitive-quorum-set-finder';
+import { Edge, TrustGraph, Vertex } from 'shared';
+import { StronglyConnectedComponentsFinder } from 'shared';
+import { NetworkTransitiveQuorumSetFinder } from 'shared';
 import { TrustIndex } from '../../../index/trust-index';
 
 const trustGraph = new TrustGraph(

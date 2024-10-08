@@ -75,9 +75,6 @@ importers:
       '@sentry/node':
         specifier: ^7.119.1
         version: 7.119.1
-      '@stellarbeat/js-stellarbeat-shared':
-        specifier: ^6.6.1
-        version: 6.6.1
       '@stellarbeat/stellar-history-archive-hasher':
         specifier: 0.6.0
         version: 0.6.0
@@ -156,6 +153,9 @@ importers:
       shallow-equal-object:
         specifier: ^1.1.1
         version: 1.1.1
+      shared:
+        specifier: workspace:*
+        version: link:../../packages/shared
       swagger-ui-express:
         specifier: ^4.6.3
         version: 4.6.3(express@4.21.0)
@@ -214,15 +214,15 @@ importers:
 
   packages/crawler:
     dependencies:
-      '@stellarbeat/js-stellarbeat-shared':
-        specifier: ^6.6.1
-        version: 6.6.1
       async:
         specifier: ^3.2.6
         version: 3.2.6
       node-connector:
         specifier: workspace:*
         version: link:../node-connector
+      shared:
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@stellar/stellar-base':
         specifier: 12.1.1
@@ -1038,10 +1038,6 @@ packages:
 
   '@stellar/stellar-base@12.1.1':
     resolution: {integrity: sha512-gOBSOFDepihslcInlqnxKZdIW9dMUO1tpOm3AtJR33K2OvpXG6SaVHCzAmCFArcCqI9zXTEiSoh70T48TmiHJA==}
-
-  '@stellarbeat/js-stellarbeat-shared@6.6.1':
-    resolution: {integrity: sha512-bMVF14TIBObP/PcgwziZgmPe6IQjAYjJudvtSkVneRX37taNuGhV3CGFEH23z86c2/r++x8/O01Zd7MwyHwYIg==}
-    engines: {node: '>=16.0.0'}
 
   '@stellarbeat/stellar-history-archive-hasher@0.6.0':
     resolution: {integrity: sha512-M0tUwzdTJVoai+e0Y+t1JJScua0srg8LjH15EHUAe4m5DAKR6yiRlDW0uXa38isROvTh1cQBtz0xKpbl4yH8mg==}
@@ -4562,11 +4558,6 @@ snapshots:
       tweetnacl: 1.0.3
     optionalDependencies:
       sodium-native: 4.2.1
-
-  '@stellarbeat/js-stellarbeat-shared@6.6.1':
-    dependencies:
-      ajv: 8.17.1
-      neverthrow: 6.2.2
 
   '@stellarbeat/stellar-history-archive-hasher@0.6.0': {}
 

@@ -8,7 +8,7 @@ import NodeMeasurement from '../NodeMeasurement';
 import NodeDetails from '../NodeDetails';
 import NodeGeoDataLocation from '../NodeGeoDataLocation';
 import { NodeTomlInfo } from './NodeTomlInfo';
-import { SemanticVersionComparer } from '@stellarbeat/js-stellarbeat-shared';
+import { SemanticVersionComparer } from 'shared';
 import { StellarCoreVersion } from '../../network/StellarCoreVersion';
 
 export class NodeScan {

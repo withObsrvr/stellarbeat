@@ -7,7 +7,7 @@ import { NodeMeasurementDayRepository } from '../domain/node/NodeMeasurementDayR
 import { NETWORK_TYPES } from '../infrastructure/di/di-types';
 import { inject, injectable } from 'inversify';
 import { NodeV1DTOMapper } from '../mappers/NodeV1DTOMapper';
-import { NodeV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { NodeV1 } from 'shared';
 
 @injectable()
 export class NodeDTOService {

@@ -11,7 +11,7 @@ import { NodeAddress } from '../../NodeAddress';
 import { NodeAddressDTOComposer } from './NodeAddressDTOComposer';
 import { mapUnknownToError } from '../../../../../core/utilities/mapUnknownToError';
 import { NetworkQuorumSetConfigurationMapper } from '../../../network/NetworkQuorumSetConfigurationMapper';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { CrawlFactory } from 'crawler';
 import { injectable } from 'inversify';
 

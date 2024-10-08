@@ -4,7 +4,7 @@ import { ActiveIndex } from './index/active-index';
 import { VersionIndex } from './index/version-index';
 import { AgeIndex } from './index/age-index';
 import { TrustIndex } from './index/trust-index';
-import { TrustGraph } from '@stellarbeat/js-stellarbeat-shared';
+import { TrustGraph } from 'shared';
 
 export interface IndexNode {
 	publicKey: string;

@@ -1,5 +1,5 @@
 import { mock } from 'jest-mock-extended';
-import { NodeV1, OrganizationV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { NodeV1, OrganizationV1 } from 'shared';
 import NetworkMeasurement from '../../domain/network/NetworkMeasurement';
 import { NetworkV1DTOMapper } from '../NetworkV1DTOMapper';
 import { Network } from '../../domain/network/Network';

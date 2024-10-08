@@ -1,6 +1,6 @@
-import { Organization as OrganizationDTO } from '@stellarbeat/js-stellarbeat-shared';
+import { Organization as OrganizationDTO } from 'shared';
 import { OrganizationMeasurementAverage } from '../domain/organization/OrganizationMeasurementAverage';
-import { OrganizationSnapShot as DomainOrganizationSnapShot } from '@stellarbeat/js-stellarbeat-shared/lib/organization-snap-shot';
+import { OrganizationSnapShot as DomainOrganizationSnapShot } from 'shared';
 import Organization from '../domain/organization/Organization';
 import { injectable } from 'inversify';
 import 'reflect-metadata';

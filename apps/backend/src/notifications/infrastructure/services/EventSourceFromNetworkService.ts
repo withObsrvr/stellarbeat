@@ -8,7 +8,7 @@ import { EventSourceService } from '../../domain/event/EventSourceService';
 import { injectable } from 'inversify';
 import { EventSource } from '../../domain/event/EventSource';
 import { NetworkDTOService } from '../../../network-scan/services/NetworkDTOService';
-import { NodeV1, OrganizationV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { NodeV1, OrganizationV1 } from 'shared';
 
 @injectable()
 export class EventSourceFromNetworkService implements EventSourceService {

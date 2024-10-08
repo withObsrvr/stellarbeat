@@ -2,7 +2,7 @@ import {
 	createDummyPublicKey,
 	createDummyPublicKeyString
 } from '../../../__fixtures__/createDummyPublicKey';
-import { QuorumSet as QuorumSetDTO } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet as QuorumSetDTO } from 'shared';
 import { PeerNode } from 'crawler';
 import { PeerNodeToNodeMapper } from '../PeerNodeToNodeMapper';
 import NodeMeasurement from '../../../NodeMeasurement';

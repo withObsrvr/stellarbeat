@@ -6,7 +6,7 @@ import {
 	getConfigFromEnv
 } from 'node-connector';
 import { xdr, Keypair, hash, Networks } from '@stellar/stellar-base';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { NodeConfig } from 'node-connector';
 import { ok, Result, err } from 'neverthrow';
 import {

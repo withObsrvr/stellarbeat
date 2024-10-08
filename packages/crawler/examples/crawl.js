@@ -1,5 +1,5 @@
 const jsonStorage = require('../lib').jsonStorage;
-const { QuorumSet } = require('@stellarbeat/js-stellarbeat-shared');
+const { QuorumSet } = require('shared');
 const { createCrawler, createCrawlFactory } = require('../lib');
 const { getConfigFromEnv } = require('node-connector');
 const { CrawlerConfiguration } = require('../lib/crawler-configuration');

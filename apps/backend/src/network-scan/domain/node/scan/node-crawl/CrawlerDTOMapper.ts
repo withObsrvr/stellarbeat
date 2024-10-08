@@ -1,4 +1,4 @@
-import { QuorumSet as QuorumSetDTO } from '@stellarbeat/js-stellarbeat-shared/lib/quorum-set';
+import { QuorumSet as QuorumSetDTO } from 'shared';
 import { NodeAddress as NodeAddressDTO } from 'crawler';
 import Node from '../../Node';
 import { NodeAddress } from '../../NodeAddress';

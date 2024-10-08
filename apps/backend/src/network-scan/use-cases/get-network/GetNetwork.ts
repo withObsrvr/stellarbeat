@@ -1,4 +1,4 @@
-import { Network, NetworkV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { Network, NetworkV1 } from 'shared';
 import { inject, injectable } from 'inversify';
 import { Result } from 'neverthrow';
 import { GetNetworkDTO } from './GetNetworkDTO';

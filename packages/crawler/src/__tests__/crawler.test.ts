@@ -4,7 +4,7 @@ import { CrawlQueueManager } from '../crawl-queue-manager';
 import { MaxCrawlTimeManager } from '../max-crawl-time-manager';
 import { P } from 'pino';
 import { mock, MockProxy } from 'jest-mock-extended';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { CrawlLogger } from '../crawl-logger';
 import { CrawlProcessState } from '../crawl';
 import { EventEmitter } from 'events';

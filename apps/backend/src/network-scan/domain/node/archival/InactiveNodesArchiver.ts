@@ -1,4 +1,4 @@
-import { TrustGraph } from '@stellarbeat/js-stellarbeat-shared';
+import { TrustGraph } from 'shared';
 import { inject, injectable } from 'inversify';
 import { NETWORK_TYPES } from '../../../infrastructure/di/di-types';
 import { NodeMeasurementDayRepository } from '../NodeMeasurementDayRepository';

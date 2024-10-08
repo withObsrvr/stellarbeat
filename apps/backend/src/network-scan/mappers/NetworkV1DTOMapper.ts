@@ -2,7 +2,7 @@ import {
 	NetworkV1,
 	NodeV1,
 	OrganizationV1
-} from '@stellarbeat/js-stellarbeat-shared';
+} from 'shared';
 import NetworkMeasurement from '../domain/network/NetworkMeasurement';
 import { Network } from '../domain/network/Network';
 import { BaseQuorumSetDTOMapper } from './BaseQuorumSetDTOMapper';

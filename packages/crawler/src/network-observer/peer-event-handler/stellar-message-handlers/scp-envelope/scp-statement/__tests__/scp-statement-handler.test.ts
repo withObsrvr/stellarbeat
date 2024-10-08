@@ -10,7 +10,7 @@ import {
 import { Keypair } from '@stellar/stellar-base';
 import { PeerNodeCollection } from '../../../../../../peer-node-collection';
 import { Slots } from '../externalize/slots';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { Ledger } from '../../../../../../crawler';
 import { Observation } from '../../../../../observation';
 

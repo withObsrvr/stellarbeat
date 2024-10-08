@@ -1,4 +1,4 @@
-import { PublicKey, QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { PublicKey, QuorumSet } from 'shared';
 import * as P from 'pino';
 import { xdr } from '@stellar/stellar-base';
 import { PeerNode } from '../peer-node';

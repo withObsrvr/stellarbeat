@@ -1,5 +1,5 @@
 import { Event, EventData } from './Event';
-import { Network, NetworkV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { Network, NetworkV1 } from 'shared';
 import { inject, injectable } from 'inversify';
 import { NetworkEventDetector } from './NetworkEventDetector';
 import { Result, ok, err } from 'neverthrow';

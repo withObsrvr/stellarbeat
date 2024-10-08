@@ -1,7 +1,7 @@
 import { hasNoActiveTrustingNodes } from '../hasNoActiveTrustingNodes';
-import { Edge, TrustGraph, Vertex } from '@stellarbeat/js-stellarbeat-shared';
-import { StronglyConnectedComponentsFinder } from '@stellarbeat/js-stellarbeat-shared/lib/trust-graph/strongly-connected-components-finder';
-import { NetworkTransitiveQuorumSetFinder } from '@stellarbeat/js-stellarbeat-shared/lib/trust-graph/network-transitive-quorum-set-finder';
+import { Edge, TrustGraph, Vertex } from 'shared';
+import { StronglyConnectedComponentsFinder } from 'shared';
+import { NetworkTransitiveQuorumSetFinder } from 'shared';
 import { createDummyNode } from '../../__fixtures__/createDummyNode';
 
 describe('hasNoActiveTrustingNodes', () => {

@@ -1,4 +1,4 @@
-import { PublicKey } from '@stellarbeat/js-stellarbeat-shared';
+import { PublicKey } from 'shared';
 
 export type QuorumSetHash = string;
 

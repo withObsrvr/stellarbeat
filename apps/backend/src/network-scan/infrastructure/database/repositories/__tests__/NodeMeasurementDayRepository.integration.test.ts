@@ -7,7 +7,7 @@ import NodeMeasurementDay from '../../../../domain/node/NodeMeasurementDay';
 import { createDummyNode } from '../../../../domain/node/__fixtures__/createDummyNode';
 import { NodeRepository } from '../../../../domain/node/NodeRepository';
 import NodeQuorumSet from '../../../../domain/node/NodeQuorumSet';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 
 describe('test queries', () => {
 	let container: Container;

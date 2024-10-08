@@ -1,5 +1,5 @@
 import { CrawlerDTOMapper } from '../CrawlerDTOMapper';
-import { QuorumSet as QuorumSetDTO } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet as QuorumSetDTO } from 'shared';
 import { createDummyNode } from '../../../__fixtures__/createDummyNode';
 import { createDummyNodeAddress } from '../../../__fixtures__/createDummyNodeAddress';
 import NodeQuorumSet from '../../../NodeQuorumSet';

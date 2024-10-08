@@ -1,7 +1,7 @@
 import { QuorumSet } from '../quorum-set';
 import { PublicKey } from '../network';
 
-export default function containsSlice(
+export function containsSlice(
 	quorumSet: QuorumSet,
 	nodes: Set<PublicKey>
 ) {

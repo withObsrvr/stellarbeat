@@ -10,7 +10,7 @@ import { Ledger } from '../../../crawler';
 import { NodeAddress } from '../../../node-address';
 import { Observation } from '../../observation';
 import { ObservationState } from '../../observation-state';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { Slots } from '../stellar-message-handlers/scp-envelope/scp-statement/externalize/slots';
 
 describe('OnDataHandler', () => {

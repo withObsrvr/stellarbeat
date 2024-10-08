@@ -15,7 +15,7 @@ import { NodeAddress } from '../NodeAddress';
 import { InactiveNodesArchiver } from '../archival/InactiveNodesArchiver';
 import { TrustGraphFactory } from './TrustGraphFactory';
 import { NodeScannerArchivalStep } from './NodeScannerArchivalStep';
-import { SemanticVersionComparer } from '@stellarbeat/js-stellarbeat-shared';
+import { SemanticVersionComparer } from 'shared';
 
 @injectable()
 export class NodeScanner {

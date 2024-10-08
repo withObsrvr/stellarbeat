@@ -2,7 +2,7 @@ import Node from '../../domain/node/Node';
 import { createDummyPublicKey } from '../../domain/node/__fixtures__/createDummyPublicKey';
 import NodeGeoDataLocation from '../../domain/node/NodeGeoDataLocation';
 import NodeQuorumSet from '../../domain/node/NodeQuorumSet';
-import { NodeV1, QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { NodeV1, QuorumSet } from 'shared';
 import NodeDetails from '../../domain/node/NodeDetails';
 import { createDummyOrganizationId } from '../../domain/organization/__fixtures__/createDummyOrganizationId';
 import NodeMeasurement from '../../domain/node/NodeMeasurement';

@@ -1,5 +1,5 @@
 import { Entity, Column, Index, ValueTransformer } from 'typeorm';
-import { QuorumSet as QuorumSetDTO } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet as QuorumSetDTO } from 'shared';
 import { IdentifiedValueObject } from '../../../core/domain/IdentifiedValueObject';
 
 export const quorumSetTransformer: ValueTransformer = {

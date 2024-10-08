@@ -1,7 +1,7 @@
 import {
 	OrganizationSnapshotV1,
 	OrganizationV1
-} from '@stellarbeat/js-stellarbeat-shared';
+} from 'shared';
 import { OrganizationMeasurementAverage } from '../domain/organization/OrganizationMeasurementAverage';
 import Organization from '../domain/organization/Organization';
 import { injectable } from 'inversify';

@@ -7,7 +7,7 @@ import { TrustIndex } from '../../index/trust-index';
 import { VersionIndex } from '../../index/version-index';
 import { NodeIndex, IndexNode } from '../../node-index';
 import { mock } from 'jest-mock-extended';
-import { TrustGraph } from '@stellarbeat/js-stellarbeat-shared';
+import { TrustGraph } from 'shared';
 
 jest.mock('./../../index/active-index');
 jest.mock('./../../index/validating-index');

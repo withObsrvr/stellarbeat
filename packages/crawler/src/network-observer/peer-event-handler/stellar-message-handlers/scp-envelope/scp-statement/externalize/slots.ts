@@ -1,4 +1,4 @@
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import * as P from 'pino';
 import { Slot, SlotIndex } from './slot';
 

@@ -2,8 +2,8 @@ import {
 	NetworkV1,
 	NodeV1,
 	OrganizationV1
-} from '@stellarbeat/js-stellarbeat-shared';
-import { NetworkStatisticsV1 } from '@stellarbeat/js-stellarbeat-shared/lib/dto/network-v1';
+} from 'shared';
+import { NetworkStatisticsV1 } from 'shared';
 
 export function createDummyNetworkV1(
 	nodes: NodeV1[] = [],

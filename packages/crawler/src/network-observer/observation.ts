@@ -4,7 +4,7 @@ import * as assert from 'assert';
 import { Ledger } from '../crawler';
 import { ObservationState } from './observation-state';
 import { Slots } from './peer-event-handler/stellar-message-handlers/scp-envelope/scp-statement/externalize/slots';
-import { QuorumSet } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet } from 'shared';
 import { QuorumSetState } from './quorum-set-state';
 import { LRUCache } from 'lru-cache';
 

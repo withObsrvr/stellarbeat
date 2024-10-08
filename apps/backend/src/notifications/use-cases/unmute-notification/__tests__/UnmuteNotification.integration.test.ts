@@ -1,7 +1,7 @@
 import { Container, decorate, injectable } from 'inversify';
 import Kernel from '../../../../core/infrastructure/Kernel';
 import { SubscriberRepository } from '../../../domain/subscription/SubscriberRepository';
-import { NodeV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { NodeV1 } from 'shared';
 import { ConfigMock } from '../../../../core/config/__mocks__/configMock';
 import { UnmuteNotificationDTO } from '../UnmuteNotificationDTO';
 import { PublicKey } from '../../../domain/event/EventSourceId';

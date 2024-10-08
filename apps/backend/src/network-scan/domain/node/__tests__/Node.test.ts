@@ -4,7 +4,7 @@ import Node, { NodeProps } from '../Node';
 import { createDummyPublicKey } from '../__fixtures__/createDummyPublicKey';
 import NodeGeoDataLocation from '../NodeGeoDataLocation';
 import NodeQuorumSet from '../NodeQuorumSet';
-import { QuorumSet as QuorumSetDTO } from '@stellarbeat/js-stellarbeat-shared';
+import { QuorumSet as QuorumSetDTO } from 'shared';
 import NodeMeasurement from '../NodeMeasurement';
 
 describe('Node', () => {

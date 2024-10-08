@@ -1,4 +1,4 @@
-import { NodeV1 } from '@stellarbeat/js-stellarbeat-shared';
+import { NodeV1 } from 'shared';
 import { createDummyPublicKeyString } from '../../domain/node/__fixtures__/createDummyPublicKey';
 
 export function createDummyNodeV1(
