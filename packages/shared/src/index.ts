@@ -17,7 +17,11 @@ export { TransitiveQuorumSetFinder } from './quorum-set/transitive-quorum-set-fi
 export { containsSlice } from './quorum/containsSlice';
 export * from './quorum/isQuorum';
 export * from './quorum/detectQuorum';
-export { NetworkV1, NetworkV1Schema } from './dto/network-v1';
+export {
+	NetworkV1,
+	NetworkV1Schema,
+	NetworkStatisticsV1
+} from './dto/network-v1';
 export { NodeV1, NodeV1Schema } from './dto/node-v1';
 export { OrganizationV1, OrganizationV1Schema } from './dto/organization-v1';
 export {
