@@ -1,7 +1,7 @@
 import { QuorumSet } from './index';
 
 export class QuorumSlicesGenerator {
-	getSlices(quorumSet: QuorumSet): Array<Array<string>> {
+	getSlices(quorumSet: QuorumSet): string[][] {
 		if (
 			quorumSet.threshold >
 			quorumSet.validators.length + quorumSet.innerQuorumSets.length
@@ -15,15 +15,15 @@ export class QuorumSlicesGenerator {
 
 		return this.getCombinationsOfSizeK(
 			quorumSet.threshold,
-			([] as Array<string|QuorumSet>).concat(quorumSet.validators).concat(quorumSet.innerQuorumSets)
+			([] as (string|QuorumSet)[]).concat(quorumSet.validators).concat(quorumSet.innerQuorumSets)
 		);
 	}
 
 	getCombinationsOfSizeK(
 		k: number,
-		nodesOrQSets: Array<string|QuorumSet>
+		nodesOrQSets: (string|QuorumSet)[]
 	) {
-		const combinations: Array<Array<string>> = [];
+		const combinations: string[][] = [];
 		for (let i = 0; i < nodesOrQSets.length; i++) {
 			let prefixes: string[][] = [];
 

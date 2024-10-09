@@ -10,7 +10,7 @@ import {QuorumSlicesGenerator} from "./quorum-slices-generator";*/
  * https://arxiv.org/abs/1902.06493
  * https://arxiv.org/abs/2002.08101
  */
-//@ts-ignore
+
 export default {
 	/*hasQuorumIntersection(network: Network) {
         console.time("Quorum intersection");

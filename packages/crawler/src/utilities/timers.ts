@@ -2,7 +2,7 @@ import { Timer } from './timer';
 import { TimerFactory } from './timer-factory';
 
 export class Timers {
-	private timers: Set<Timer> = new Set();
+	private timers = new Set<Timer>();
 
 	constructor(private timerFactory: TimerFactory) {}
 

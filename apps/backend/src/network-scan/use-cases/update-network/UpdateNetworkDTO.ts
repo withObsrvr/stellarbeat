@@ -3,7 +3,7 @@ export interface UpdateNetworkDTO {
 	name: string;
 	networkId: string;
 	passphrase: string;
-	networkQuorumSet: Array<string | string[]>;
+	networkQuorumSet: (string | string[])[];
 	overlayVersion: number;
 	overlayMinVersion: number;
 	ledgerVersion: number;

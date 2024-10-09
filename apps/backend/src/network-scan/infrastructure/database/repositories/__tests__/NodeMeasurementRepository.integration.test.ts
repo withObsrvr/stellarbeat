@@ -96,7 +96,7 @@ describe('test queries', () => {
 		isValidating: boolean,
 		isFullValidator: boolean,
 		connectivityError: boolean,
-		stellarCoreVersionBehind: boolean = false
+		stellarCoreVersionBehind = false
 	): NodeMeasurement {
 		const measurement = new NodeMeasurement(time, node);
 		measurement.isActive = isActive;

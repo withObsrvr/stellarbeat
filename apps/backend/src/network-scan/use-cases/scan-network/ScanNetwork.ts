@@ -24,9 +24,9 @@ import { NodeAddressMapper } from './NodeAddressMapper';
 import { CORE_TYPES } from '../../../core/infrastructure/di/di-types';
 import { JobMonitor } from '../../../core/services/JobMonitor';
 
-type ShutDownRequest = {
+interface ShutDownRequest {
 	callback: () => void;
-};
+}
 @injectable()
 export class ScanNetwork {
 	protected shutdownRequest?: ShutDownRequest;

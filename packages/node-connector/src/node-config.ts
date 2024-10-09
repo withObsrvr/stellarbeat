@@ -1,10 +1,10 @@
 import { Networks } from '@stellar/stellar-base';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+ 
 require('dotenv').config();
 import * as yn from 'yn';
 import { NodeInfo } from './node';
 
-export type NodeConfig = {
+export interface NodeConfig {
 	network: string;
 	nodeInfo: NodeInfo;
 	listeningPort: number;
@@ -15,7 +15,7 @@ export type NodeConfig = {
 	flowControlSendMoreBatchSize: number;
 	peerFloodReadingCapacityBytes: number;
 	flowControlSendMoreBatchSizeBytes: number;
-};
+}
 
 export function getConfigFromEnv(): NodeConfig {
 	const ledgerVersion = getNumberFromEnv('LEDGER_VERSION', 17);

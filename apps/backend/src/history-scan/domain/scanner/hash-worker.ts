@@ -18,7 +18,7 @@ async function unzipAndHash(zip: ArrayBuffer): Promise<string> {
 	});
 }
 
-export type LedgerHeaderHistoryEntryResult = {
+export interface LedgerHeaderHistoryEntryResult {
 	ledger: number;
 	transactionsHash: string;
 	transactionResultsHash: string;
@@ -26,7 +26,7 @@ export type LedgerHeaderHistoryEntryResult = {
 	ledgerHeaderHash: string;
 	bucketListHash: string;
 	protocolVersion: number;
-};
+}
 
 export function processLedgerHeaderHistoryEntryXDR(
 	ledgerHeaderHistoryEntryXDR: Buffer | Uint8Array

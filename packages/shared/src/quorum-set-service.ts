@@ -39,8 +39,8 @@ export class QuorumSetService {
 		nodesTrustGraph: TrustGraph
 	) {
 		const nodesToCheck = network.nodes.filter((node) => node.isValidator);
-		const blockedNodes: Set<PublicKey> = new Set();
-		const inNodesToCheckQueue: Map<PublicKey, boolean> = new Map();
+		const blockedNodes = new Set<PublicKey>();
+		const inNodesToCheckQueue = new Map<PublicKey, boolean>();
 
 		nodesToCheck.forEach((node) =>
 			inNodesToCheckQueue.set(node.publicKey, true)

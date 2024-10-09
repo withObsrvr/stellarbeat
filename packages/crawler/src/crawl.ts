@@ -14,9 +14,9 @@ export enum CrawlProcessState {
 export class Crawl {
 	state: CrawlProcessState = CrawlProcessState.IDLE;
 	maxCrawlTimeHit = false;
-	crawlQueueTaskDoneCallbacks: Map<string, AsyncResultCallback<void>> =
-		new Map();
-	crawledNodeAddresses: Set<PeerKey> = new Set();
+	crawlQueueTaskDoneCallbacks =
+		new Map<string, AsyncResultCallback<void>>();
+	crawledNodeAddresses = new Set<PeerKey>();
 
 	failedConnections: string[] = [];
 	peerAddressesReceivedDuringSync: NodeAddress[] = [];

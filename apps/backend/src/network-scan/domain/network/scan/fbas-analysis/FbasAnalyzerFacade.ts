@@ -24,19 +24,19 @@ interface SymmetricTopTierAnalysis {
 }
 
 interface BlockingSetsAnalysis {
-	result: Array<Array<string>>;
+	result: string[][];
 	min: number;
 	size: number;
 }
 
 interface SplittingSetsAnalysis {
-	result: Array<Array<string>>;
+	result: string[][];
 	min: number;
 	size: number;
 }
 
 interface MinimalQuorumsAnalysis {
-	result: Array<Array<string>>;
+	result: string[][];
 	size: number;
 	min: number;
 	quorum_intersection: boolean;

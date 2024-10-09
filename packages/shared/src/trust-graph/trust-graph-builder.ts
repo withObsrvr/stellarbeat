@@ -14,7 +14,7 @@ export class TrustGraphBuilder {
 		this.network = network;
 	}
 
-	buildGraphFromOrganizations(nodesTrustGraph: TrustGraph) {
+	buildGraphFromOrganizations() {
 		const graph = new TrustGraph(
 			new StronglyConnectedComponentsFinder(),
 			new NetworkTransitiveQuorumSetFinder()

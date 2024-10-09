@@ -124,7 +124,7 @@ export class AxiosHttpService implements HttpService {
 		}
 	}
 
-	protected mapAxiosResponseToHttpResponse(axiosResponse: AxiosResponse) {
+	protected mapAxiosResponseToHttpResponse(axiosResponse: AxiosResponse): HttpResponse {
 		return {
 			data: axiosResponse.data,
 			status: axiosResponse.status,

@@ -87,7 +87,9 @@ describe('OrganizationScanner', function () {
 		const archivedOrganization = Organization.create(
 			createDummyOrganizationId(),
 			'other-domain.com',
-			new Date()
+			new Date(
+				'2021-01-01'
+			)
 		);
 		setup.organizationRepository.findByHomeDomains.mockResolvedValue([
 			archivedOrganization
@@ -103,14 +105,14 @@ describe('OrganizationScanner', function () {
 
 		const node = createNode('domain');
 		const archivedNode = createNode('other-domain.com');
-		const nodeScan = new NodeScan(new Date(), [node, archivedNode]);
+		const nodeScan = new NodeScan(new Date('2021-01-02'), [node, archivedNode]);
 
 		const organization = Organization.create(
 			createDummyOrganizationId(),
 			'domain',
-			new Date()
+			new Date('2021-01-02')
 		);
-		const organizationScan = new OrganizationScan(new Date(), [organization]);
+		const organizationScan = new OrganizationScan(new Date('2021-01-02'), [organization]);
 		const result = await setup.organizationScanner.execute(
 			organizationScan,
 			nodeScan

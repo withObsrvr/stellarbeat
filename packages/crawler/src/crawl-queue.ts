@@ -11,9 +11,7 @@ export interface CrawlQueue {
 	): void;
 }
 
-export interface AsyncResultCallback<T, E = Error> {
-	(err?: E | null, result?: T): void;
-}
+export type AsyncResultCallback<T, E = Error> = (err?: E | null, result?: T) => void;
 
 export class AsyncCrawlQueue implements CrawlQueue {
 	private _crawlQueue?: QueueObject<CrawlTask>;

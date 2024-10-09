@@ -34,7 +34,7 @@ enum HandshakeState {
 	COMPLETED
 }
 
-export type ConnectionOptions = {
+export interface ConnectionOptions {
 	ip: string;
 	port: number;
 	keyPair: Keypair;
@@ -43,12 +43,12 @@ export type ConnectionOptions = {
 	remoteCalledUs: boolean;
 	receiveTransactionMessages: boolean;
 	receiveSCPMessages: boolean;
-};
+}
 
-export type StellarMessageWork = {
+export interface StellarMessageWork {
 	stellarMessage: StellarMessage;
 	done: () => void; //flow control: call when done processing
-};
+}
 
 /**
  * Duplex stream that wraps a tcp socket and handles the handshake to a stellar core node and all authentication verification of overlay messages. It encapsulates incoming and outgoing connections to and from stellar nodes.

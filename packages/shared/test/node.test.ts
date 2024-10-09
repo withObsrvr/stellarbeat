@@ -1,4 +1,4 @@
-import { Node, Organization } from '../src';
+import { Node } from '../src';
 import Ajv from 'ajv';
 import * as addFormats from 'ajv-formats';
 import { NodeV1Schema } from '../src/dto/node-v1';
@@ -15,7 +15,7 @@ node.geoData.countryCode = 'US';
 node.geoData.latitude = 39.0853;
 node.geoData.longitude = -77.6452;
 node.versionStr = 'v10.0.0';
-node.dateDiscovered = new Date('2018-04-28T12:39:01.000Z'); 
+node.dateDiscovered = new Date('2018-04-28T12:39:01.000Z');
 node.dateUpdated = new Date('2018-10-12T09:17:39.000Z');
 node.quorumSetHashKey = 'dbROBZB26KK3PELCVOi5CDds2zSvTK5GOPTqVXBMw8=';
 node.quorumSet.threshold = 2;

@@ -7,8 +7,8 @@ type Ledger = string;
 type Value = string;
 
 export class ScpReader {
-	private nominateVotes: Map<Ledger, Map<PublicKey, Value[]>> = new Map();
-	private nominateAccepted: Map<Ledger, Map<PublicKey, Value[]>> = new Map();
+	private nominateVotes = new Map<Ledger, Map<PublicKey, Value[]>>();
+	private nominateAccepted = new Map<Ledger, Map<PublicKey, Value[]>>();
 
 	constructor(private logger: Logger) {}
 

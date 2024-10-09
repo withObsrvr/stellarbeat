@@ -156,8 +156,7 @@ export default class NetworkStatisticsAggregation {
 
 		const newNetworkStatsAggregation = new NetworkStatisticsAggregation();
 		for (const [key, value] of Object.entries(networkStatsObject)) {
-			//@ts-ignore
-			newNetworkStatsAggregation[key] = value;
+			(newNetworkStatsAggregation as any)[key] = value;
 		}
 
 		return newNetworkStatsAggregation;

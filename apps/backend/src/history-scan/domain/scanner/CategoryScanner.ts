@@ -37,12 +37,12 @@ import { HasherPool } from './HasherPool';
 type Ledger = number;
 type Hash = string;
 
-export type ExpectedHashes = {
+export interface ExpectedHashes {
 	txSetHash: Hash;
 	txSetResultHash: Hash;
 	previousLedgerHeaderHash: Hash;
 	bucketListHash: Hash;
-};
+}
 export type ExpectedHashesPerLedger = Map<Ledger, ExpectedHashes>;
 export type CalculatedTxSetHashes = Map<Ledger, Hash>;
 export type CalculatedTxSetResultHashes = Map<Ledger, Hash>;

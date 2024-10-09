@@ -61,6 +61,7 @@ describe('ObservationManager', () => {
 		const observation = createObservation();
 		observation.moveToSyncingState();
 		observation.moveToSyncedState();
+		 
 		observationManager.stopObservation(observation, () => {});
 
 		expect(observation.state).toBe(ObservationState.Stopped);

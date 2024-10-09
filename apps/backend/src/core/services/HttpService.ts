@@ -8,12 +8,12 @@ export function isHttpError(payload: unknown): payload is HttpError {
 	return payload instanceof HttpError;
 }
 
-export type HttpResponse<T = unknown> = {
+export interface HttpResponse<T = unknown> {
 	data: T;
 	status: number;
 	statusText: string;
 	headers: unknown;
-};
+}
 
 export class HttpError<T = unknown> extends CustomError {
 	code?: string;

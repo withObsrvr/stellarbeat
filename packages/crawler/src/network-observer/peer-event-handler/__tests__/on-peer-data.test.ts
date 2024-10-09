@@ -52,7 +52,7 @@ describe('OnDataHandler', () => {
 	function createSuccessfulResult() {
 		const result: {
 			closedLedger: Ledger | null;
-			peers: Array<NodeAddress>;
+			peers: NodeAddress[];
 		} = {
 			closedLedger: {
 				sequence: BigInt(1),

@@ -2,9 +2,9 @@ export default class PropertyMapper {
 	static mapProperties(
 		dto: any,
 		domainObject: any,
-		propertiesToSkip: Array<string>
+		propertiesToSkip: string[]
 	) {
-		for (const [key, value] of Object.entries(dto)) {
+		for (const [key] of Object.entries(dto)) {
 			if (!propertiesToSkip.includes(key)) {
 				PropertyMapper.mapProperty(key, dto, domainObject);
 			}

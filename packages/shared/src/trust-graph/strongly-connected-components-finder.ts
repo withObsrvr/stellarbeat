@@ -14,9 +14,9 @@ export class StronglyConnectedComponentsFinder {
 		graph: TrustGraph,
 		visitedVertices: Map<Vertex, Time>,
 		low: Map<Vertex, Time>,
-		stack: Array<Vertex>,
+		stack: Vertex[],
 		onStack: Map<Vertex, boolean>,
-		stronglyConnectedComponents: Array<StronglyConnectedComponent>
+		stronglyConnectedComponents: StronglyConnectedComponent[]
 	) {
 		visitedVertices.set(atVertex, this._time);
 		low.set(atVertex, this._time);
@@ -58,13 +58,13 @@ export class StronglyConnectedComponentsFinder {
 		}
 	}
 
-	findTarjan(graph: TrustGraph): Array<StronglyConnectedComponent> {
+	findTarjan(graph: TrustGraph): StronglyConnectedComponent[] {
 		this._time = 0;
 		const visitedVertices = new Map<Vertex, Time>();
 		const low = new Map<Vertex, Time>();
-		const stack: Array<Vertex> = [];
+		const stack: Vertex[] = [];
 		const onStack = new Map<Vertex, boolean>();
-		const stronglyConnectedComponents: Array<StronglyConnectedComponent> = [];
+		const stronglyConnectedComponents: StronglyConnectedComponent[] = [];
 
 		Array.from(graph.vertices.values()).forEach((vertex) => {
 			if (visitedVertices.get(vertex) === undefined) {

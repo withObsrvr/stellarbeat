@@ -19,7 +19,7 @@ export class TrustGraphFactory {
 			return trustGraph;
 		}
 
-		const vertices: Map<string, Vertex> = new Map(
+		const vertices = new Map<string, Vertex>(
 			nodes.map((node) => {
 				return [
 					node.publicKey.value,

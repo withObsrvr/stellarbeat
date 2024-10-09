@@ -4,8 +4,7 @@
 	"scripts": {
 		"build": "tsc --declaration",
 		"examples:connect": "pnpm run build; node examples/connect",
-		"examples:scp": "pnpm run build; node examples/scp",
-		"test:unit": "jest"
+		"examples:scp": "pnpm run build; node examples/scp"
 	},
 	"types": "lib/index.d.ts",
 	"main": "lib/index.js",

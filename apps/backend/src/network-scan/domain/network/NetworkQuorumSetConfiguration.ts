@@ -6,14 +6,14 @@ import { Type } from 'class-transformer';
 export class NetworkQuorumSetConfiguration extends ValueObject {
 	public readonly threshold: number;
 	@Type(() => PublicKey)
-	public readonly validators: Array<PublicKey>;
+	public readonly validators: PublicKey[];
 	@Type(() => NetworkQuorumSetConfiguration)
-	public readonly innerQuorumSets: Array<NetworkQuorumSetConfiguration>;
+	public readonly innerQuorumSets: NetworkQuorumSetConfiguration[];
 
 	public constructor(
 		threshold: number,
-		validators: Array<PublicKey> = [],
-		innerQuorumSets: Array<NetworkQuorumSetConfiguration> = []
+		validators: PublicKey[] = [],
+		innerQuorumSets: NetworkQuorumSetConfiguration[] = []
 	) {
 		super();
 		this.threshold = threshold;

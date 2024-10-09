@@ -18,8 +18,8 @@ interface AuthCert {
 export class ConnectionAuthentication {
 	secretKeyECDH: Curve25519SecretBuffer;
 	publicKeyECDH: Curve25519PublicBuffer;
-	weCalledRemoteSharedKeys: Map<string, Buffer> = new Map();
-	remoteCalledUsSharedKeys: Map<string, Buffer> = new Map();
+	weCalledRemoteSharedKeys = new Map<string, Buffer>();
+	remoteCalledUsSharedKeys = new Map<string, Buffer>();
 	networkId: Buffer;
 	keyPair: Keypair;
 
@@ -113,7 +113,7 @@ export class ConnectionAuthentication {
 
 		const rawSigData = Buffer.concat([
 			this.networkId,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			 
 			//@ts-ignore
 			EnvelopeType.envelopeTypeAuth().toXDR(),
 			authCert.expiration().toXDR(),

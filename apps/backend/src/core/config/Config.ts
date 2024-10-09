@@ -1,11 +1,14 @@
 import { config } from 'dotenv';
-config();
-
 import { isArray, isString } from '../utilities/TypeGuards';
 import { err, ok, Result } from 'neverthrow';
 import * as yn from 'yn';
 import { Url } from '../domain/Url';
 import { CrawlerConfiguration } from 'crawler';
+import * as path from 'path';
+
+config({
+	path: path.resolve(__dirname + '../../../../.env')
+});
 
 type PublicKey = string;
 type ip = string;
@@ -14,7 +17,7 @@ export interface NetworkConfig {
 	networkId: string;
 	networkName: string;
 	networkPassphrase: string;
-	quorumSet: Array<PublicKey[] | PublicKey>;
+	quorumSet: (PublicKey[] | PublicKey)[];
 	ledgerVersion: number;
 	overlayVersion: number;
 	overlayMinVersion: number;

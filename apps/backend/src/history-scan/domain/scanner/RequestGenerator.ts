@@ -3,13 +3,15 @@ import { Request, RequestMethod } from '../../../core/services/HttpQueue';
 import { UrlBuilder } from '../history-archive/UrlBuilder';
 import { Category } from '../history-archive/Category';
 
-export type CategoryRequestMeta = {
+export interface CategoryRequestMeta {
 	category: Category;
-};
+	[key: string]: unknown;
+}
 
-export type BucketRequestMeta = {
+export interface BucketRequestMeta {
 	hash: string;
-};
+	[key: string]: unknown;
+}
 
 export class RequestGenerator {
 	static *generateBucketRequests(

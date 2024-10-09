@@ -9,9 +9,9 @@ import {
 import { isObject } from '../../../../core/utilities/TypeGuards';
 import { CustomError } from '../../../../core/errors/CustomError';
 
-export type Account = {
+export interface Account {
 	home_domain: string | undefined;
-};
+}
 export class HorizonFetchAccountError extends CustomError {
 	constructor(publicKey: string, cause?: Error) {
 		super(
@@ -46,7 +46,7 @@ export class HorizonService {
 
 		// eslint-disable-next-line no-prototype-builtins
 		if (typeof account === 'object' && account.hasOwnProperty('home_domain'))
-			return ok(account as Account);
+			return ok(account as unknown as Account);
 
 		return ok(undefined);
 	}

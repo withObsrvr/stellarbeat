@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const { xdr, StrKey } = require('@stellar/stellar-base');
 const { createNode } = require('../lib');
 const getConfigFromEnv = require('../lib').getConfigFromEnv;
@@ -22,7 +23,6 @@ function connect() {
 		port = parseInt(portArg);
 	}
 
-	let connectedPublicKey;
 	let connection = node.connectTo(ip, port);
 	connection
 		.on('connect', (publicKey, nodeInfo) => {
@@ -36,7 +36,7 @@ function connect() {
 			//console.log(stellarMessage.toXDR('base64'))
 			switch (stellarMessage.switch()) {
 				case xdr.MessageType.scpMessage():
-					let publicKey = StrKey.encodeEd25519PublicKey(
+					{ let publicKey = StrKey.encodeEd25519PublicKey(
 						stellarMessage.envelope().statement().nodeId().value()
 					).toString();
 					console.log(
@@ -61,9 +61,9 @@ function connect() {
 							.closeTime()
 							.toXDR()
 							.readBigUInt64BE();
-						//console.log(new Date(1000 * Number(closeTime)));
+						console.log(new Date(1000 * Number(closeTime)));
 					}
-					break;
+					break; }
 				default:
 					console.log(
 						'rcv StellarMessage of type ' + stellarMessage.switch().name +

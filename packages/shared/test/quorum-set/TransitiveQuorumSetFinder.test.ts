@@ -1,5 +1,4 @@
-import {QuorumSet} from "../../src";
-import {TransitiveQuorumSetFinder} from "../../src";
+import {QuorumSet,TransitiveQuorumSetFinder} from "../../src";
 
 describe('TransitiveQuorumSetFinder', () => {
 	it('should find the transitive quorum set by traversing the validators array', () => {

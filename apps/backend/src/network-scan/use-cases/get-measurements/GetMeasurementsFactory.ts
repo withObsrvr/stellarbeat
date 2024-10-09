@@ -23,9 +23,7 @@ export class GetMeasurementsFactory {
 		@inject('ExceptionLogger') private exceptionLogger: ExceptionLogger
 	) {}
 
-	createFor(measurement: {
-		new (...params: never): Measurement;
-	}): GetMeasurements {
+	createFor(measurement: new (...params: never) => Measurement): GetMeasurements {
 		//todo: type safety with record
 		switch (measurement) {
 			case NodeMeasurement:

@@ -1,9 +1,7 @@
 import { pino } from 'pino';
 import { injectable } from 'inversify';
 
-export interface logFn {
-	(message: string, obj?: Record<string, unknown>, ...args: unknown[]): void;
-}
+export type logFn = (message: string, obj?: Record<string, unknown>, ...args: unknown[]) => void;
 
 export interface Logger {
 	trace: logFn;

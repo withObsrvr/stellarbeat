@@ -30,7 +30,7 @@ export class PeerEventHandler {
 		observation: Observation
 	): {
 		closedLedger: Ledger | null;
-		peers: Array<NodeAddress>;
+		peers: NodeAddress[];
 	} {
 		return this.onPeerDataHandler.handle(data, observation);
 	}

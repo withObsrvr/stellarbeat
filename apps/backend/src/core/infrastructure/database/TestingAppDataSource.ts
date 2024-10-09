@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import * as path from 'path';
 
 const TestingAppDataSource: DataSource = new DataSource({
 	type: 'postgres',
@@ -6,7 +7,10 @@ const TestingAppDataSource: DataSource = new DataSource({
 	synchronize: true,
 	logging: false,
 	url: process.env.DATABASE_TEST_URL,
-	entities: ['src/**/entities/*.ts', 'src/**/domain/**/!(*.test)*.ts'],
+	entities: [
+		path.resolve(__dirname, '../../../**/entities/*.ts'),
+		path.resolve(__dirname, '../../../**/domain/**/!(*.test)*.ts')
+	],
 	migrationsRun: false,
 	ssl: false
 });

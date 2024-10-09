@@ -36,7 +36,7 @@ export interface NetworkV1 {
     id: string;
     name: string;
     passPhrase: string;
-    nodes: Array<NodeV1>;
+    nodes: NodeV1[];
     organizations: OrganizationV1[];
     transitiveQuorumSet: string[];
     scc: string[][];

@@ -3,10 +3,10 @@ import { StronglyConnectedComponent } from './strongly-connected-components-find
 
 export class NetworkTransitiveQuorumSetFinder {
 	public getTransitiveQuorumSet(
-		stronglyConnectedComponents: Array<StronglyConnectedComponent>,
+		stronglyConnectedComponents: StronglyConnectedComponent[],
 		graph: TrustGraph
 	): StronglyConnectedComponent {
-		const scpNoOutgoingEdges: Array<StronglyConnectedComponent> = [];
+		const scpNoOutgoingEdges: StronglyConnectedComponent[] = [];
 		stronglyConnectedComponents.forEach((scp) => {
 			if (
 				scp.size > 1 &&

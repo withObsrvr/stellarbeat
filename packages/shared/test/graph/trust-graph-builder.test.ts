@@ -1,5 +1,4 @@
-import { Network, Node, Organization, QuorumSet } from '../../src';
-import { TrustGraphBuilder } from '../../src';
+import { Network, Node, Organization, QuorumSet , TrustGraphBuilder } from '../../src';
 
 const organizationA = new Organization('A', 'A');
 const organizationB = new Organization('B', 'B');
@@ -42,7 +41,7 @@ const trustGraphBuilder = new TrustGraphBuilder(network);
 test('buildGraphs', () => {
 	const nodesGraph = trustGraphBuilder.buildGraphFromNodes();
 	const organizationsGraph =
-		trustGraphBuilder.buildGraphFromOrganizations(nodesGraph);
+		trustGraphBuilder.buildGraphFromOrganizations();
 
 	expect(nodesGraph.vertices.size).toEqual(4);
 	expect(nodesGraph.edges.size).toEqual(4);

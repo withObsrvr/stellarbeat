@@ -11,8 +11,8 @@ type SlotValue = string;
 export class Slot {
 	public index: SlotIndex;
 	private confirmedClosedLedger?: Ledger;
-	protected valuesMap: Map<SlotValue, Set<NodeId>> = new Map();
-	protected localCloseTimeMap: Map<SlotValue, Date> = new Map(); //we store the first time we observed a close time for a value
+	protected valuesMap = new Map<SlotValue, Set<NodeId>>();
+	protected localCloseTimeMap = new Map<SlotValue, Date>(); //we store the first time we observed a close time for a value
 	//we can't wait until we validated the value, because slow nodes could influence this time.
 	protected trustedQuorumSet: QuorumSet;
 	protected closeTime?: Date;

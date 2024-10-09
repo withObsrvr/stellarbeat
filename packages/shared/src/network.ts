@@ -34,14 +34,14 @@ export class Network {
 
 	// a blocked node is a node that is participating in SCP but cannot validate because its quorumSet cannot
 	// reach its threshold.
-	public blockedNodes: Set<PublicKey> = new Set();
+	public blockedNodes = new Set<PublicKey>();
 
 	protected nodesMap: Map<PublicKey, Node>;
-	protected organizationsMap: Map<OrganizationId, Organization> = new Map();
+	protected organizationsMap = new Map<OrganizationId, Organization>();
 
 	constructor(
-		public nodes: Array<Node> = [],
-		public organizations: Array<Organization> = [],
+		public nodes: Node[] = [],
+		public organizations: Organization[] = [],
 		public time: Date = new Date(),
 		public latestLedger: string | null = null,
 		networkStatistics?: NetworkStatistics

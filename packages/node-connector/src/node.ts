@@ -10,13 +10,13 @@ import { Server, Socket } from 'net';
 import { pino } from 'pino';
 import { FlowController } from './connection/flow-controller';
 
-export type NodeInfo = {
+export interface NodeInfo {
 	ledgerVersion: number;
 	overlayVersion: number;
 	overlayMinVersion: number;
 	versionString: string;
 	networkId?: string;
-};
+}
 
 /**
  * Supports two operations: connect to a node, and accept connections from other nodes.

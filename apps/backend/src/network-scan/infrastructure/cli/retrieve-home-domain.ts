@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+ 
 import { HomeDomainFetcher } from '../../domain/node/scan/HomeDomainFetcher';
 import { HorizonService } from '../../domain/network/scan/HorizonService';
 // noinspection JSIgnoredPromiseFromCall

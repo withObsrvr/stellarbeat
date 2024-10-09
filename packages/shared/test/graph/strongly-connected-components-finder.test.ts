@@ -1,6 +1,5 @@
-import { Node, Network } from '../../src';
+import { Node, Network, TrustGraphBuilder } from '../../src';
 import { StronglyConnectedComponentsFinder } from '../../src/trust-graph/strongly-connected-components-finder';
-import { TrustGraphBuilder } from '../../src';
 import * as _ from 'lodash';
 
 //https://www.youtube.com/watch?v=TyWtx7q2D7Y

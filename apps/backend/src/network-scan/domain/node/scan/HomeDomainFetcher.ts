@@ -40,7 +40,7 @@ export class HomeDomainFetcher {
 	) {}
 
 	async fetchHomeDomains(publicKeys: PublicKey[]) {
-		const homeDomains: Map<PublicKey, HomeDomain> = new Map();
+		const homeDomains = new Map<PublicKey, HomeDomain>();
 		if (publicKeys.length === 0) return homeDomains;
 
 		const q = queue(async (publicKey: PublicKey, callback) => {

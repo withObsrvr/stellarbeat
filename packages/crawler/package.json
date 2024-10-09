@@ -4,8 +4,7 @@
 	"description": "Crawl the stellar network",
 	"scripts": {
 		"build": "tsc --declaration",
-		"examples:crawl": "pnpm run build; NODE_PATH=node_modules node examples/crawl",
-		"test:unit": "jest"
+		"examples:crawl": "pnpm run build; NODE_PATH=node_modules node examples/crawl"
 	},
 	"main": "lib/index.js",
 	"types": "lib/index.d.ts",

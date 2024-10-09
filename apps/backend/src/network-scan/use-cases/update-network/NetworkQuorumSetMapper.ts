@@ -4,7 +4,7 @@ import PublicKey from '../../domain/node/PublicKey';
 
 export class NetworkQuorumSetMapper {
 	static fromArray(
-		quorumSetConfig: Array<string | string[]>
+		quorumSetConfig: (string | string[])[]
 	): Result<NetworkQuorumSetConfiguration, Error> {
 		if (quorumSetConfig.length === 0) {
 			return err(new Error('Quorum set must not be empty'));
@@ -17,7 +17,7 @@ export class NetworkQuorumSetMapper {
 
 		const innerQuorumSetsRaw = quorumSetConfig.filter((item) =>
 			Array.isArray(item)
-		) as Array<string[]>;
+		) as string[][];
 
 		const validatorsOrErrors = Result.combine(
 			validatorsRaw.map((validator) => {

@@ -16,14 +16,14 @@ export class PeerNode {
 	public latestActiveSlotIndex?: string;
 	public participatingInSCP = false;
 	public successfullyConnected = false;
-	private externalizedValues: Map<
+	private externalizedValues = new Map<
 		bigint,
 		{
 			localTime: Date;
 			value: string;
 		}
-	> = new Map();
-	private lagMSMeasurement: Map<bigint, number> = new Map();
+	>();
+	private lagMSMeasurement = new Map<bigint, number>();
 
 	constructor(publicKey: string) {
 		this.publicKey = publicKey;

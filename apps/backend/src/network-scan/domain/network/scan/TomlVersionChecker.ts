@@ -5,7 +5,7 @@ import semver = require('semver/preload');
 export class TomlVersionChecker {
 	static isSupportedVersion(
 		tomlObject: Record<string, unknown>,
-		lowestSupportedVersion: string = '2.0.0'
+		lowestSupportedVersion = '2.0.0'
 	): boolean {
 		if (!valueValidator.isSemVer(lowestSupportedVersion)) return false;
 		if (!isString(tomlObject.VERSION)) return false;

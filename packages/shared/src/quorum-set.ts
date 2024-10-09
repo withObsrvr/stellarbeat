@@ -1,18 +1,18 @@
 export interface BaseQuorumSet {
 	threshold: number;
-	validators: Array<string>;
-	innerQuorumSets: Array<BaseQuorumSet>;
+	validators: string[];
+	innerQuorumSets: BaseQuorumSet[];
 }
 
 export class QuorumSet implements BaseQuorumSet {
 	public threshold: number;
-	public validators: Array<string>;
-	public innerQuorumSets: Array<QuorumSet>;
+	public validators: string[];
+	public innerQuorumSets: QuorumSet[];
 
 	constructor(
 		threshold: number = Number.MAX_SAFE_INTEGER,
-		validators: Array<string> = [],
-		innerQuorumSets: Array<QuorumSet> = []
+		validators: string[] = [],
+		innerQuorumSets: QuorumSet[] = []
 	) {
 		this.threshold = threshold;
 		this.validators = validators;
@@ -23,7 +23,7 @@ export class QuorumSet implements BaseQuorumSet {
 		return this.validators.length > 0 || this.innerQuorumSets.length > 0;
 	}
 
-	static getAllValidators(qs: QuorumSet): Array<string> {
+	static getAllValidators(qs: QuorumSet): string[] {
 		return qs.innerQuorumSets.reduce(
 			(allValidators, innerQS) =>
 				allValidators.concat(QuorumSet.getAllValidators(innerQS)),

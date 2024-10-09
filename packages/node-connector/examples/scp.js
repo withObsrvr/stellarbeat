@@ -1,4 +1,4 @@
-const { xdr, StrKey } = require('@stellar/stellar-base');
+/* eslint-disable no-undef */
 const { createNode } = require('../lib');
 const getConfigFromEnv = require('../lib').getConfigFromEnv;
 const http = require('http');
@@ -61,13 +61,4 @@ function fetchData(url) {
 	});
 }
 
-function trimString(str, lengthToShow = 5) {
-	if (str.length <= lengthToShow * 2) {
-		return str;
-	}
 
-	const start = str.substring(0, lengthToShow);
-	const end = str.substring(str.length - lengthToShow);
-
-	return `${start}...${end}`;
-}

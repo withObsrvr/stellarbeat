@@ -8,10 +8,10 @@ import { ScanResult } from './ScanResult';
 export class ScanJob {
 	private constructor(
 		public readonly url: Url,
-		public readonly latestScannedLedger: number = 0,
+		public readonly latestScannedLedger = 0,
 		public readonly latestScannedLedgerHeaderHash: string | null = null,
 		public readonly chainInitDate: Date | null = null,
-		public readonly fromLedger: number = 0,
+		public readonly fromLedger = 0,
 		public readonly toLedger: number | null = null,
 		public readonly concurrency = 0
 	) {}

@@ -38,7 +38,7 @@ export class RangeScanner {
 		fromLedger: number,
 		latestScannedLedger: number,
 		latestScannedLedgerHeaderHash: string | null = null,
-		alreadyScannedBucketHashes: Set<string> = new Set()
+		alreadyScannedBucketHashes = new Set<string>()
 	): Promise<Result<RangeScanResult, ScanError>> {
 		this.logger.info('Starting range scan', {
 			history: baseUrl.value,

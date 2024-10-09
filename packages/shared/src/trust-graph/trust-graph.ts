@@ -48,7 +48,7 @@ export class TrustGraph {
 	protected _vertices = new Map<PublicKey, Vertex>();
 	protected _edges = new Set<Edge>();
 
-	protected _stronglyConnectedComponents: Array<StronglyConnectedComponent> =
+	protected _stronglyConnectedComponents: StronglyConnectedComponent[] =
 		[];
 	protected _stronglyConnectedVertices: Map<PublicKey, number> = new Map<
 		PublicKey,

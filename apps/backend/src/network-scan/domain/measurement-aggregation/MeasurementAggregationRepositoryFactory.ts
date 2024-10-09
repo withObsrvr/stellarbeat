@@ -24,9 +24,7 @@ export class MeasurementAggregationRepositoryFactory {
 		private networkMeasurementMonthRepository: NetworkMeasurementMonthRepository
 	) {}
 
-	createFor(aggregation: {
-		new (...params: never): MeasurementAggregation;
-	}): MeasurementAggregationRepository<MeasurementAggregation> {
+	createFor(aggregation: new (...params: never) => MeasurementAggregation): MeasurementAggregationRepository<MeasurementAggregation> {
 		switch (aggregation) {
 			case NodeMeasurementDay:
 				return this.nodeMeasurementDayRepository;

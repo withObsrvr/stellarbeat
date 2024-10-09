@@ -10,10 +10,10 @@ import { ScanSettings } from '../scan/ScanSettings';
 import { ScanResult } from '../scan/ScanResult';
 import { Url } from '../../../core/domain/Url';
 
-export type LedgerHeader = {
+export interface LedgerHeader {
 	ledger: number;
 	hash?: string;
-};
+}
 
 @injectable()
 export class Scanner {

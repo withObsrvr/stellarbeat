@@ -1,5 +1,5 @@
 import { logFn, Logger } from '../PinoLogger';
-/* eslint-disable */
+ 
 export class LoggerMock implements Logger {
 	debug: logFn = (message, context) => {
 		console.log(message, context);

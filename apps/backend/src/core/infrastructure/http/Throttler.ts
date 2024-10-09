@@ -1,9 +1,9 @@
 import * as LRUCache from 'lru-cache';
 
-export type Throttle = {
+export interface Throttle {
 	startTime: number;
 	count: number;
-};
+}
 
 export class Throttler {
 	protected cache: LRUCache<string, Throttle>;

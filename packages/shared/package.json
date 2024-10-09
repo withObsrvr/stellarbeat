@@ -3,9 +3,8 @@
 	"description": "Shared code between Stellarbeat frontend and backend",
 	"scripts": {
 		"preversion": "pnpm run build",
-		"build": "../../node_modules/typescript/bin/tsc  --declaration; pnpm compile-schemas",
-		"compile-schemas": "ajv compile -s \"schemas/*(network).json\" -r \"schemas/*(node|organization).json\" -o lib/network-schema.js -c ajv-formats --code-optimize=true --code-lines; node generate-dto-validate-functions.js",
-		"test:unit": "jest"
+		"build": "../../node_modules/typescript/bin/tsc  --declaration",
+		"compile-schemas": "ajv compile -s \"schemas/*(network).json\" -r \"schemas/*(node|organization).json\" -o lib/network-schema.js -c ajv-formats --code-optimize=true --code-lines; node generate-dto-validate-functions.js"
 	},
 	"author": "pieterjan84@github",
 	"license": "MIT",

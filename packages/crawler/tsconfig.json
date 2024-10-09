@@ -10,7 +10,10 @@
   "include": [
     "src/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+"exclude": [
+		"node_modules/**/*",
+		"src/**/__tests__/*",
+		"src/**/__mocks__/*",
+		"src/**/__fixtures__/*"
+	]
 }

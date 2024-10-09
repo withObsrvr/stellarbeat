@@ -28,7 +28,7 @@ export class StellarMessageHandler {
 	): Result<
 		{
 			closedLedger: Ledger | null;
-			peers: Array<NodeAddress>;
+			peers: NodeAddress[];
 		},
 		Error
 	> {
@@ -135,11 +135,11 @@ export class StellarMessageHandler {
 		peerNodeCollection: PeerNodeCollection
 	): Result<
 		{
-			peers: Array<NodeAddress>;
+			peers: NodeAddress[];
 		},
 		Error
 	> {
-		const peerAddresses: Array<NodeAddress> = [];
+		const peerAddresses: NodeAddress[] = [];
 		peers.forEach((peer) => {
 			const ipResult = getIpFromPeerAddress(peer);
 			if (ipResult.isOk()) peerAddresses.push([ipResult.value, peer.port()]);

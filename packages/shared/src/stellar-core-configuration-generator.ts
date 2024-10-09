@@ -7,24 +7,24 @@ enum Quality {
 	MEDIUM_OR_LOW = 'MEDIUM_OR_LOW'
 }
 
-type HomeDomain = {
+interface HomeDomain {
 	HOME_DOMAIN: string;
 	QUALITY: Quality;
-};
+}
 
-type Validator = {
+interface Validator {
 	NAME: string; //A unique alias for the node
 	QUALITY?: string; //Rating for node (required unless specified in [[HOME_DOMAINS]]): HIGH, MEDIUM, or LOW.
 	HOME_DOMAIN?: string; //URL of home domain linked to validator
 	PUBLIC_KEY: string; //Stellar public key associated with validator
 	ADDRESS?: string; //	Peer:port associated with validator (optional)
 	HISTORY?: string; //	archive GET command associated with validator (optional)
-};
+}
 
-type TomlConfig = {
+interface TomlConfig {
 	HOME_DOMAINS: HomeDomain[];
 	VALIDATORS: Validator[];
-};
+}
 
 export default class StellarCoreConfigurationGenerator {
 	protected network: Network;

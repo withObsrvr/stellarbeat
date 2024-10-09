@@ -8,7 +8,7 @@ import { ObservationState } from '../observation-state';
 
 export interface OnPeerDataResult {
 	closedLedger: Ledger | null;
-	peers: Array<NodeAddress>;
+	peers: NodeAddress[];
 }
 
 export class OnPeerData {
@@ -32,7 +32,7 @@ export class OnPeerData {
 
 	private createOnPeerDataResult(result: {
 		closedLedger: Ledger | null;
-		peers: Array<NodeAddress>;
+		peers: NodeAddress[];
 	}): OnPeerDataResult {
 		return {
 			closedLedger: result.closedLedger,

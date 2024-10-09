@@ -1,5 +1,4 @@
-import { Node } from '../src';
-import { getPublicKeysToNodesMap } from '../src';
+import { Node , getPublicKeysToNodesMap } from '../src';
 
 test('mapper', () => {
 	const node1 = new Node('a');
