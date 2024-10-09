@@ -1,20 +1,16 @@
 {
-	"compilerOptions": {
-		"rootDirs": ["src"],
-		"target": "ES2016",
-		"module": "commonjs",
-		"outDir": "lib",
-		"types": ["node", "jest", "reflect-metadata"],
-		"noUnusedParameters": false,
-		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
-		"strict": true
-	},
-	"include": ["apps/**/*.ts", "packages/**/*.ts"],
+	"include": ["src/**/*.ts"],
 	"exclude": [
 		"node_modules/**/*",
 		"src/**/__tests__/*",
 		"src/**/__mocks__/*",
-		"src/**/__fixtures__/*"
+		"src/**/__fixtures__/*",
+		"*.test.ts"
+	],
+	"references": [
+		{ "path": "./packages/shared" },
+		{ "path": "./packages/node-connector" },
+		{ "path": "./packages/crawler" },
+		{ "path": "./apps/backend" }
 	]
 }
