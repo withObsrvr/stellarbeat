@@ -1,16 +1,10 @@
 {
-  "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
-    "outDir": "lib",
-    "sourceMap": true,
-    "types": ["node", "jest"],
-    "strict": true
-      },
-  "include": [
-    "src/**/*.ts"
-  ],
-"exclude": [
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"outDir": "lib"
+	},
+	"include": ["src/**/*.ts"],
+	"exclude": [
 		"node_modules/**/*",
 		"src/**/__tests__/*",
 		"src/**/__mocks__/*",

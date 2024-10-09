@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 module.exports = {
 	arrowParens: 'always',
 	bracketSpacing: true,
