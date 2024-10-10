@@ -4,13 +4,18 @@
 	"version": "0.1.0",
 	"description": "stellarbeat project monorepo",
 	"scripts": {
-		"build": "tsc --build --verbose && pnpm --parallel post-build",
+		"build:ts": "tsc --build --verbose",
+		"build": "tsc --build --verbose && pnpm --filter frontend run build && pnpm --parallel post-build",
+		"serve": "pnpm build:ts && concurrently -n backend,frontend -c yellow,blue \"pnpm --filter backend run start-api\" \"pnpm --filter frontend run dev\"",
 		"test:unit": "jest --testPathIgnorePatterns '\\.integration\\.test'",
 		"tu": "pnpm test:unit",
 		"test:integration": "jest --testMatch '**/*.integration.test.[jt]s?(x)' --runInBand",
 		"ti": "pnpm test:integration",
 		"lint": "pnpm eslint .",
-		"test:all": "pnpm run test:unit && pnpm run test:integration"
+		"test:all": "pnpm run test:unit && pnpm run test:integration",
+		"start:frontend": "pnpm --filter frontend run start",
+		"start:api": "pnpm --filter backend run start-api",
+		"start:network-scan": "pnpm --filter backend run scan-network"
 	},
 	"keywords": [],
 	"author": "pieterjan84",
@@ -32,6 +37,7 @@
 		"@types/node": "^20.0.0",
 		"@typescript-eslint/eslint-plugin": "8.8.1",
 		"@typescript-eslint/parser": "8.8.1",
+		"concurrently": "^9.0.1",
 		"eslint": "9.12.0",
 		"eslint-plugin-import": "^2.31.0",
 		"globals": "^15.10.0",

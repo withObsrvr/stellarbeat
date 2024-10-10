@@ -11,7 +11,7 @@
 		"build-and-start-api": "pnpm run build; node lib/core/infrastructure/http/api.js",
 		"build-and-verify-archives": "pnpm run build; node lib/history-scan/infrastructure/cli/verify-archives.js",
 		"verify-archives": "node lib/history-scan/infrastructure/cli/verify-archives.js",
-		"start-a-c jest.integration.config.cjs pi": "node lib/core/infrastructure/http/api.js",
+		"start-api": "node lib/core/infrastructure/http/api.js",
 		"retrieve-home-domain": "node lib/network-scan/infrastructure/cli/retrieve-home-domain.js",
 		"prepare": "husky install"
 	},
