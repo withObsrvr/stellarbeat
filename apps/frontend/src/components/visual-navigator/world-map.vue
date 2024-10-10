@@ -256,11 +256,7 @@ onBeforeUnmount(() => {
   text-align: center;
   border-radius: 15px;
   border-width: 10px;
-  font:
-    12px "Helvetica Neue",
-    Arial,
-    Helvetica,
-    sans-serif;
+  font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
   background-color: #1997c6;
 }
 
