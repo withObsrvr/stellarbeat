@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+ 
 const { xdr, StrKey } = require('@stellar/stellar-base');
 const { createNode } = require('../lib');
 const getConfigFromEnv = require('../lib').getConfigFromEnv;

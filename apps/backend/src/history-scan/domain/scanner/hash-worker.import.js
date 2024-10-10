@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 require('ts-node').register();
 const path = require('path');
 

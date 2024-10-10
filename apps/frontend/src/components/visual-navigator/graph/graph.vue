@@ -268,7 +268,6 @@ const truncate = useTruncate();
 let d3svg: Selection<Element, null, null, undefined>;
 let d3Grid: Selection<Element, null, null, undefined>;
 
-/* eslint-disable  @typescript-eslint/no-explicit-any */
 let graphZoom: any;
 
 watch(

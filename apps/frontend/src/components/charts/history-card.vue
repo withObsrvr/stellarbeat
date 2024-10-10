@@ -292,7 +292,6 @@ const thirtyDaysBarChartData: ComputedRef<ScatterDataPoint[]> = computed(() => {
 
 const twentyFourHourBarChartData = computed((): { x: number; y: number }[] => {
   const twentyFourHourMap = new Map<string, number[]>();
-  /* eslint-disable  @typescript-eslint/no-explicit-any */
   twentyFourHourMeasurements.value.forEach((measurement: any) => {
     const date = new Date(measurement.time);
     date.setMinutes(0, 0, 0); // set minutes, seconds, and milliseconds to 0 to start of the hour

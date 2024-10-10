@@ -119,7 +119,6 @@ const filteredList: ComputedRef<Match[]> = computed(() => {
 
 function navigate(match: Match) {
   searchString.value = "";
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   router.push(match.route).catch(() => {});
 }
 
