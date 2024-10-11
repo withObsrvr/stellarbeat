@@ -145,11 +145,7 @@
 </template>
 <script setup lang="ts">
 import Vue, { type Ref, ref, toRefs, watch } from "vue";
-import {
-  Node,
-  type PublicKey,
-  QuorumSet,
-} from "@stellarbeat/js-stellarbeat-shared";
+import { Node, type PublicKey, QuorumSet } from "shared";
 import * as jsondiffpatch from "jsondiffpatch";
 import * as htmlFormatter from "jsondiffpatch/formatters/html";
 
@@ -167,7 +163,7 @@ import {
   BModal,
   VBModal,
 } from "bootstrap-vue";
-import { isArray } from "@stellarbeat/js-stellarbeat-shared/lib/typeguards";
+import { isArray } from "shared";
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router/composables";
 import useNodeSnapshotRepository from "@/repositories/useNodeSnapshotRepository";

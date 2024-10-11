@@ -6,9 +6,9 @@ import {
   QuorumSet,
   TrustGraph,
   Vertex,
-} from "@stellarbeat/js-stellarbeat-shared";
-import { NetworkTransitiveQuorumSetFinder } from "@stellarbeat/js-stellarbeat-shared/lib/trust-graph/network-transitive-quorum-set-finder";
-import { StronglyConnectedComponentsFinder } from "@stellarbeat/js-stellarbeat-shared/lib/trust-graph/strongly-connected-components-finder";
+} from "shared";
+import { NetworkTransitiveQuorumSetFinder } from "shared";
+import { StronglyConnectedComponentsFinder } from "shared";
 
 export class OrganizationTrustGraphBuilder {
   static build(

@@ -1,4 +1,4 @@
-import { Network, Node } from "@stellarbeat/js-stellarbeat-shared";
+import { Network, Node } from "shared";
 
 export class NodeWarningDetector {
   static nodeHasWarning(node: Node, network: Network) {

@@ -5,7 +5,7 @@
 </template>
 <script setup lang="ts">
 import { computed, type ComputedRef } from "vue";
-import { Organization } from "@stellarbeat/js-stellarbeat-shared";
+import { Organization } from "shared";
 import NodesTable, { type TableNode } from "@/components/node/nodes-table.vue";
 import useStore from "@/store/useStore";
 

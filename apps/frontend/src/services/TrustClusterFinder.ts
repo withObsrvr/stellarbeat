@@ -1,4 +1,4 @@
-import { Node, QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { Node, QuorumSet } from "shared";
 
 export class TrustClusterFinder {
   static find(

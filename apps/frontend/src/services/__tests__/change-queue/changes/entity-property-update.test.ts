@@ -1,4 +1,4 @@
-import { Node, QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { Node, QuorumSet } from "shared";
 import { EntityPropertyUpdate } from "../../../change-queue/changes/entity-property-update";
 
 describe("entity property update", () => {

@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 
-import { Node } from "@stellarbeat/js-stellarbeat-shared";
+import { Node } from "shared";
 import { BFormInput, BIconShield, BPagination, BTable } from "bootstrap-vue";
 import { useTruncate } from "@/composables/useTruncate";
 

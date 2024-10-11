@@ -1,4 +1,4 @@
-import { Node, Network } from "@stellarbeat/js-stellarbeat-shared";
+import { Node, Network } from "shared";
 import { NetworkAddNode } from "@/services/change-queue/changes/network-add-node";
 
 describe("network add node", () => {

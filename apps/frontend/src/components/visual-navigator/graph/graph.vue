@@ -183,7 +183,7 @@ import GraphStronglyConnectedComponent from "@/components/visual-navigator/graph
 import ViewVertex from "@/components/visual-navigator/graph/view-vertex";
 import ViewGraph from "@/components/visual-navigator/graph/view-graph";
 import ViewEdge from "@/components/visual-navigator/graph/view-edge";
-import { isObject } from "@stellarbeat/js-stellarbeat-shared/lib/typeguards";
+import { isObject } from "shared";
 import {
   computed,
   onBeforeUnmount,

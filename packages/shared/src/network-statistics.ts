@@ -1,5 +1,5 @@
-import {NetworkStatisticsV1} from "./dto/network-v1";
-import PropertyMapper from "./PropertyMapper";
+import { NetworkStatisticsV1 } from './dto/network-v1';
+import PropertyMapper from './PropertyMapper';
 
 export default class NetworkStatistics {
 	time: Date = new Date();
@@ -26,9 +26,7 @@ export default class NetworkStatistics {
 	topTierOrgsSize?: number;
 	hasSymmetricTopTier = false;
 
-	static fromJSON(
-		networkStatsObject: NetworkStatisticsV1
-	): NetworkStatistics {
+	static fromJSON(networkStatsObject: NetworkStatisticsV1): NetworkStatistics {
 		const networkStatistics = new NetworkStatistics();
 		PropertyMapper.mapProperties(networkStatsObject, networkStatistics, [
 			'time'

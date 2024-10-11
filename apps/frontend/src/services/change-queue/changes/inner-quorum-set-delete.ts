@@ -1,4 +1,4 @@
-import { QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { QuorumSet } from "shared";
 import { type NetworkChange } from "@/services/change-queue/network-change-queue";
 
 export class InnerQuorumSetDelete implements NetworkChange {

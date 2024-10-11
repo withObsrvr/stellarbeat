@@ -50,7 +50,7 @@ import {
   Node,
   QuorumSet,
   QuorumSlicesGenerator,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 import Vue, { computed, nextTick, onMounted, ref } from "vue";
 import useStore from "@/store/useStore";
 

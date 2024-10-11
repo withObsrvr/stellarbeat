@@ -84,7 +84,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Node } from "@stellarbeat/js-stellarbeat-shared";
+import { Node } from "shared";
 import useStore from "@/store/useStore";
 
 defineProps<{

@@ -1,4 +1,4 @@
-import { Organization, QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { Organization, QuorumSet } from "shared";
 import { type NetworkChange } from "@/services/change-queue/network-change-queue";
 
 export class QuorumSetOrganizationsAdd implements NetworkChange {

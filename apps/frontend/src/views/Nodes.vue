@@ -82,7 +82,7 @@ Age = Time since discovery
 </template>
 
 <script setup lang="ts">
-import { Node } from "@stellarbeat/js-stellarbeat-shared";
+import { Node } from "shared";
 import CrawlTime from "@/components/crawl-time.vue";
 import SimulationBadge from "@/components/simulation-badge.vue";
 import NodesTable, { type TableNode } from "@/components/node/nodes-table.vue";

@@ -1,7 +1,7 @@
 import { type FbasAnalysisWorkerResult } from "@/workers/fbas-analysis-v3.worker";
-import { Network, Node } from "@stellarbeat/js-stellarbeat-shared";
+import { Network, Node } from "shared";
 import { MergeBy } from "@stellarbeat/stellar_analysis_web";
-import { isNumber } from "@stellarbeat/js-stellarbeat-shared/lib/typeguards";
+import { isNumber } from "shared";
 
 export enum AutomaticNetworkAnalysis {
   Init,

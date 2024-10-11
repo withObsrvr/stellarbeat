@@ -232,9 +232,6 @@ importers:
       '@sentry/vue':
         specifier: ^7.119.0
         version: 7.119.1(vue@2.7.16)
-      '@stellarbeat/js-stellarbeat-shared':
-        specifier: ^6.6.1
-        version: 6.6.1
       '@stellarbeat/stellar-halting-analysis':
         specifier: 1.2.0
         version: 1.2.0
@@ -310,6 +307,9 @@ importers:
       prerender-node:
         specifier: ^3.8.0
         version: 3.8.0
+      shared:
+        specifier: workspace:*
+        version: link:../../packages/shared
       vue:
         specifier: ^2.7.16
         version: 2.7.16
@@ -1481,10 +1481,6 @@ packages:
 
   '@stellar/stellar-base@12.1.1':
     resolution: {integrity: sha512-gOBSOFDepihslcInlqnxKZdIW9dMUO1tpOm3AtJR33K2OvpXG6SaVHCzAmCFArcCqI9zXTEiSoh70T48TmiHJA==}
-
-  '@stellarbeat/js-stellarbeat-shared@6.6.1':
-    resolution: {integrity: sha512-bMVF14TIBObP/PcgwziZgmPe6IQjAYjJudvtSkVneRX37taNuGhV3CGFEH23z86c2/r++x8/O01Zd7MwyHwYIg==}
-    engines: {node: '>=16.0.0'}
 
   '@stellarbeat/stellar-halting-analysis@1.2.0':
     resolution: {integrity: sha512-W/OfQOgIcogIxpwyQ93RTr8Ke55z4/mvqG9UNUdB4AgJLwfgelYFn+RMdmWw4I77koQ3zdw19kuTm6pbg4yUkw==}
@@ -6116,11 +6112,6 @@ snapshots:
       tweetnacl: 1.0.3
     optionalDependencies:
       sodium-native: 4.2.1
-
-  '@stellarbeat/js-stellarbeat-shared@6.6.1':
-    dependencies:
-      ajv: 8.17.1
-      neverthrow: 6.2.2
 
   '@stellarbeat/stellar-halting-analysis@1.2.0': {}
 

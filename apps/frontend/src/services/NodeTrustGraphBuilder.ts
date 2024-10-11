@@ -1,12 +1,6 @@
-import {
-  Edge,
-  Node,
-  QuorumSet,
-  TrustGraph,
-  Vertex,
-} from "@stellarbeat/js-stellarbeat-shared";
-import { NetworkTransitiveQuorumSetFinder } from "@stellarbeat/js-stellarbeat-shared/lib/trust-graph/network-transitive-quorum-set-finder";
-import { StronglyConnectedComponentsFinder } from "@stellarbeat/js-stellarbeat-shared/lib/trust-graph/strongly-connected-components-finder";
+import { Edge, Node, QuorumSet, TrustGraph, Vertex } from "shared";
+import { NetworkTransitiveQuorumSetFinder } from "shared";
+import { StronglyConnectedComponentsFinder } from "shared";
 
 export class NodeTrustGraphBuilder {
   // Make sure to provide ALL the nodes, including the ones trusted through quorumsets.

@@ -4,7 +4,7 @@ import {
   Organization,
   QuorumSet,
   QuorumSetService,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 import {
   type NetworkChange,
   NetworkChangeQueue,
@@ -20,7 +20,7 @@ import { QuorumSetOrganizationsAdd } from "@/services/change-queue/changes/quoru
 import { AggregateChange } from "@/services/change-queue/changes/aggregate-change";
 import NetworkAnalyzer from "@/services/NetworkAnalyzer";
 import { MergeBy } from "@stellarbeat/stellar_analysis_web";
-import { isString } from "@stellarbeat/js-stellarbeat-shared/lib/typeguards";
+import { isString } from "shared";
 import Config, { type NetworkContext, type NetworkId } from "@/config/Config";
 
 interface Data {

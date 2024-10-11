@@ -2,7 +2,7 @@ import {
   Network,
   Node,
   Organization,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 import { OrganizationWarningDetector } from "@/services/OrganizationWarningDetector";
 
 describe("OrganizationWarningDetector", () => {

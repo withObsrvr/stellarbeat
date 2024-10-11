@@ -173,14 +173,13 @@ import {
 } from "chart.js";
 import { BIconExclamationTriangle, BIconInfoCircle } from "bootstrap-vue";
 import DateNavigator from "@/components/date-navigator.vue";
-import NetworkStatisticsAggregation from "@stellarbeat/js-stellarbeat-shared/lib/network-statistics-aggregation";
 import AggregationLineChart from "@/components/network/cards/network-risk-analysis-charts/aggregation-line-chart.vue";
 import StatisticsDateTimeNavigator from "@/components/network/cards/network-risk-analysis-charts/StatisticsDateTimeNavigator";
-import NetworkStatistics from "@stellarbeat/js-stellarbeat-shared/lib/network-statistics";
 import { computed, nextTick, onMounted, type Ref, ref, toRefs } from "vue";
 import { useIsLoading } from "@/composables/useIsLoading";
 import useStore from "@/store/useStore";
 import useNetworkMeasurementsStore from "@/store/useNetworkMeasurementsStore";
+import { NetworkStatistics, NetworkStatisticsAggregation } from "shared";
 
 const { dimmerClass, isLoading } = useIsLoading();
 

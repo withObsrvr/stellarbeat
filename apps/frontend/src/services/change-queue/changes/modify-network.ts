@@ -2,7 +2,7 @@ import {
   Network,
   Node,
   Organization,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 import { type NetworkChange } from "@/services/change-queue/network-change-queue";
 
 export class ModifyNetwork implements NetworkChange {

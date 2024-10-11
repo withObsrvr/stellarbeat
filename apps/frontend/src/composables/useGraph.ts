@@ -1,4 +1,4 @@
-import { isObject } from "@stellarbeat/js-stellarbeat-shared/lib/typeguards";
+import { isObject } from "shared";
 import { type SimulationLinkDatum, type SimulationNodeDatum } from "d3-force";
 import { useTruncate } from "@/composables/useTruncate";
 import { type NodeDatum } from "@/components/federated-voting/GraphManager";

@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { Organization } from "@stellarbeat/js-stellarbeat-shared";
+import { Organization } from "shared";
 import NavLink from "@/components/side-bar/nav-link.vue";
 import OrganizationActions from "@/components/organization/sidebar/organization-actions.vue";
 import useStore from "@/store/useStore";

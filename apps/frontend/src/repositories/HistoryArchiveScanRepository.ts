@@ -1,4 +1,4 @@
-import { HistoryArchiveScan } from "@stellarbeat/js-stellarbeat-shared";
+import { HistoryArchiveScan } from "shared";
 
 export interface HistoryArchiveScanRepository {
   get apiBaseUrl(): string;

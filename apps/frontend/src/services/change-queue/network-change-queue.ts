@@ -1,4 +1,4 @@
-import { Network } from "@stellarbeat/js-stellarbeat-shared";
+import { Network } from "shared";
 import NetworkAnalyzer from "@/services/NetworkAnalyzer";
 
 export interface NetworkChange {

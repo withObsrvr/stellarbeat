@@ -10,7 +10,6 @@ import {
 } from "d3-force";
 import ViewVertex from "@/components/visual-navigator/graph/view-vertex";
 import ViewEdge from "@/components/visual-navigator/graph/view-edge";
-import { isObject } from "@stellarbeat/js-stellarbeat-shared/lib/typeguards";
 
 //@ts-ignore
 const ctx: Worker = self;
@@ -87,5 +86,9 @@ ctx.addEventListener("message", (event) => {
   }
   ctx.postMessage({ type: "end", vertices: vertices, edges: edges });
 });
+
+function isObject(obj: unknown): obj is Record<string, unknown> {
+  return typeof obj === "object";
+}
 
 export default ctx;

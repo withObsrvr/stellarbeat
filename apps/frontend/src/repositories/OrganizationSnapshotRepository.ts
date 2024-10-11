@@ -1,5 +1,5 @@
 import { err, ok, Result } from "neverthrow";
-import { OrganizationSnapShot } from "@stellarbeat/js-stellarbeat-shared";
+import { OrganizationSnapShot } from "shared";
 
 export class OrganizationSnapshotRepository {
   constructor(public readonly apiBaseUrl: string) {}

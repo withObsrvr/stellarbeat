@@ -256,7 +256,7 @@ import {
 import GraphLegend from "@/components/visual-navigator/graph/graph-legend.vue";
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router/composables";
-import { isString } from "@stellarbeat/js-stellarbeat-shared/lib/typeguards";
+import { isString } from "shared";
 
 const WorldMap = defineAsyncComponent(
   () => import("@/components/visual-navigator/world-map.vue"),

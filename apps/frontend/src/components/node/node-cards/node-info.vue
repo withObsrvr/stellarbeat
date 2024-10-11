@@ -92,7 +92,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Node } from "@stellarbeat/js-stellarbeat-shared";
+import { Node } from "shared";
 import { BBadge, BIconClipboard } from "bootstrap-vue";
 import FullValidatorTitle from "@/components/node/full-validator-title.vue";
 import useStore from "@/store/useStore";

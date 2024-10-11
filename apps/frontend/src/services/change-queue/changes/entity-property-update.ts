@@ -3,7 +3,7 @@ import {
   Node,
   Organization,
   QuorumSet,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 
 type Entity = Node | Organization | QuorumSet;
 

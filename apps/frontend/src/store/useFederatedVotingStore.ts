@@ -1,5 +1,5 @@
 import { reactive, ref, type Ref } from "vue";
-import { Network } from "@stellarbeat/js-stellarbeat-shared";
+import { Network } from "shared";
 import { FBASQIRepository } from "@/repositories/implementation/FBASQIRepository";
 
 class FederatedVotingStore {

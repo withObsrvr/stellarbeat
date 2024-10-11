@@ -1,4 +1,4 @@
-import { Network } from "@stellarbeat/js-stellarbeat-shared";
+import { Network } from "shared";
 import { err, ok, Result } from "neverthrow";
 import { type NetworkRepository } from "@/repositories/NetworkRepository";
 

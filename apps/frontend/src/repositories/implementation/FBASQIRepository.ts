@@ -4,7 +4,7 @@ import {
   Node,
   Organization,
   QuorumSet,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 import { ok, Result } from "neverthrow";
 
 export class FBASQIRepository implements NetworkRepository {

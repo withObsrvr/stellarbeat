@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { BIconShield } from "bootstrap-vue";
 import { useTruncate } from "@/composables/useTruncate";
-import { Node } from "@stellarbeat/js-stellarbeat-shared";
+import { Node } from "shared";
 
 const truncate = useTruncate();
 

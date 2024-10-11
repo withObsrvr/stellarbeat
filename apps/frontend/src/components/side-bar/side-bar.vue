@@ -174,7 +174,7 @@ import NavLink from "@/components/side-bar/nav-link.vue";
 import {
   type BaseQuorumSet,
   Network,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 
 Vue.component("BIconBullseye", BIconBullseye);
 Vue.component("BIconBuilding", BIconBuilding);

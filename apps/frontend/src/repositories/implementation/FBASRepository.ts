@@ -5,7 +5,7 @@ import {
   Node,
   Organization,
   QuorumSet,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 
 export class FBASRepository implements NetworkRepository {
   find(): Promise<Result<Network, Error>> {

@@ -326,7 +326,7 @@ import {
   Node,
   TransitiveQuorumSetFinder,
   type PublicKey,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 import Analysis from "@/components/network/tools/network-analysis/analysis.vue";
 import QuorumIntersectionInfo from "@/components/network/tools/network-analysis/info/quorum-intersection-info.vue";
 import SafetyInfo from "@/components/network/tools/network-analysis/info/safety-info.vue";

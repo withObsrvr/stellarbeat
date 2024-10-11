@@ -82,7 +82,7 @@
 import $ from "jquery";
 import { ref, toRefs } from "vue";
 
-import { QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { QuorumSet } from "shared";
 import {
   BDropdown,
   BDropdownDivider,

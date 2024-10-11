@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { Node, Organization } from "@stellarbeat/js-stellarbeat-shared";
+import { Node, Organization } from "shared";
 import NavLink from "@/components/side-bar/nav-link.vue";
 import NodeActions from "@/components/node/sidebar/node-actions.vue";
 import { useDropdown } from "@/composables/useDropdown";

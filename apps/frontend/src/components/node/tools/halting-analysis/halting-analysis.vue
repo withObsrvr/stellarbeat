@@ -114,7 +114,7 @@ import {
   type PublicKey,
   QuorumSet,
   Vertex,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 import {
   BAlert,
   BCard,

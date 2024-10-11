@@ -76,7 +76,7 @@ import {
   Node,
   QuorumSet,
   QuorumSetService,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 import NavLink from "@/components/side-bar/nav-link.vue";
 import NodeActions from "@/components/node/sidebar/node-actions.vue";
 import QuorumSetActions from "@/components/node/sidebar/quorum-set-actions.vue";

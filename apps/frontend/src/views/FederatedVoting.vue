@@ -48,7 +48,7 @@ import SimulationControl from "@/components/federated-voting/simulation-control.
 import Graph from "@/components/visual-navigator/graph/graph.vue";
 import { onMounted, ref } from "vue";
 import ViewGraph from "@/components/visual-navigator/graph/view-graph";
-import { Network, TrustGraph } from "@stellarbeat/js-stellarbeat-shared";
+import { Network, TrustGraph } from "shared";
 import ViewVertex from "@/components/visual-navigator/graph/view-vertex";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph-base.vue";

@@ -1,5 +1,5 @@
 import { type NetworkRepository } from "@/repositories/NetworkRepository";
-import { Network, Node, QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { Network, Node, QuorumSet } from "shared";
 import { ok, Result } from "neverthrow";
 
 export class MeridianRepository implements NetworkRepository {

@@ -46,7 +46,7 @@ import { computed, type ComputedRef, ref } from "vue";
 import useStore from "@/store/useStore";
 import { OrganizationWarningDetector } from "@/services/OrganizationWarningDetector";
 import useMetaTags from "@/composables/useMetaTags";
-import { Node, Organization } from "@stellarbeat/js-stellarbeat-shared";
+import { Node, Organization } from "shared";
 
 defineProps({
   isLoading: {

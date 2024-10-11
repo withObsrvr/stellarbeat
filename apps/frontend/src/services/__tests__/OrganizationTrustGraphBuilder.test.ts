@@ -1,5 +1,5 @@
 import { OrganizationTrustGraphBuilder } from "../OrganizationTrustGraphBuilder";
-import { Organization, Node } from "@stellarbeat/js-stellarbeat-shared";
+import { Organization, Node } from "shared";
 
 describe("OrganizationTrustGraphBuilder", () => {
   let organizations: Organization[];

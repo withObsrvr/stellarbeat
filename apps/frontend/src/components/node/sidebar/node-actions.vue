@@ -59,7 +59,7 @@ import {
   BIconXCircle,
 } from "bootstrap-vue";
 
-import { Node, QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { Node, QuorumSet } from "shared";
 import useStore from "@/store/useStore";
 import { toRefs } from "vue";
 

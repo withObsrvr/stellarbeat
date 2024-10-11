@@ -31,7 +31,7 @@
   </portal>
 </template>
 <script setup lang="ts">
-import StellarCoreConfigurationGenerator from "@stellarbeat/js-stellarbeat-shared/lib/stellar-core-configuration-generator";
+import { StellarCoreConfigurationGenerator } from "shared";
 import useStore from "@/store/useStore";
 import $ from "jquery";
 import {
@@ -42,7 +42,7 @@ import {
   ref,
   toRefs,
 } from "vue";
-import { QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { QuorumSet } from "shared";
 
 const props = defineProps({
   id: {

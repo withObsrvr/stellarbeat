@@ -1,4 +1,4 @@
-import { Network, Organization } from "@stellarbeat/js-stellarbeat-shared";
+import { Network, Organization } from "shared";
 import { NodeWarningDetector } from "./NodeWarningDetector";
 
 export class OrganizationWarningDetector {

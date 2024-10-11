@@ -32,7 +32,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { isString } from "@stellarbeat/js-stellarbeat-shared/lib/typeguards";
+import { isString } from "shared";
 import { isNumber } from "chart.js/helpers";
 import { ref, toRefs, watch } from "vue";
 

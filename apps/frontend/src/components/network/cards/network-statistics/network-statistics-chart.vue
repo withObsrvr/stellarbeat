@@ -19,7 +19,7 @@ import {
   type TooltipItem,
 } from "chart.js";
 import "chartjs-adapter-date-fns";
-import NetworkStatisticsAggregation from "@stellarbeat/js-stellarbeat-shared/lib/network-statistics-aggregation";
+import { NetworkStatisticsAggregation } from "shared";
 import {
   type ComponentPublicInstance,
   onBeforeUnmount,

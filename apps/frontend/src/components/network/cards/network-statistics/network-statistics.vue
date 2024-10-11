@@ -295,7 +295,7 @@
 </template>
 
 <script setup lang="ts">
-import NetworkStatisticsAggregation from "@stellarbeat/js-stellarbeat-shared/lib/network-statistics-aggregation";
+import { NetworkStatisticsAggregation } from "shared";
 import NetworkStatisticsCard from "@/components/network/cards/network-statistics/network-statistics-card.vue";
 import useStore from "@/store/useStore";
 import { useIsLoading } from "@/composables/useIsLoading";

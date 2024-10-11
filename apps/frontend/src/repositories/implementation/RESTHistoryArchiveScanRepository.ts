@@ -1,5 +1,5 @@
 import { type HistoryArchiveScanRepository } from "@/repositories/HistoryArchiveScanRepository";
-import { HistoryArchiveScan } from "@stellarbeat/js-stellarbeat-shared";
+import { HistoryArchiveScan } from "shared";
 
 export class RESTHistoryArchiveScanRepository
   implements HistoryArchiveScanRepository

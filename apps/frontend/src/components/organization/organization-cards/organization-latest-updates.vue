@@ -115,7 +115,7 @@ import {
   Organization,
   OrganizationSnapShot,
   type PublicKey,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 import * as jsondiffpatch from "jsondiffpatch";
 import * as htmlFormatter from "jsondiffpatch/formatters/html";
 

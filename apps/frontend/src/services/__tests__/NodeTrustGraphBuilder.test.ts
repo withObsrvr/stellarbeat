@@ -1,5 +1,5 @@
 import { NodeTrustGraphBuilder } from "../NodeTrustGraphBuilder";
-import { Node, QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { Node, QuorumSet } from "shared";
 
 describe("NodeTrustGraphBuilder", () => {
   it("should build a TrustGraph with the correct vertices and edges", () => {

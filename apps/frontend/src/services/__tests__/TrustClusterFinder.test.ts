@@ -1,5 +1,5 @@
 import { TrustClusterFinder } from "../TrustClusterFinder";
-import { Node, QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { Node, QuorumSet } from "shared";
 
 describe("TrustClusterFinder", () => {
   it("should add public keys to the trust cluster", () => {

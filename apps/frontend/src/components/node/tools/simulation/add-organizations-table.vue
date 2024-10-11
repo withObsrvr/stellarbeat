@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 
-import { Node, Organization } from "@stellarbeat/js-stellarbeat-shared";
+import { Node, Organization } from "shared";
 import { BFormInput, BIconShield, BPagination, BTable } from "bootstrap-vue";
 
 const props = defineProps<{

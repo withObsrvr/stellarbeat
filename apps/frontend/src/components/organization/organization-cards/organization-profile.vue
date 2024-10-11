@@ -142,7 +142,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Organization } from "@stellarbeat/js-stellarbeat-shared";
+import { Organization } from "shared";
 import Github from "@/components/organization/logo/github.vue";
 import Twitter from "@/components/organization/logo/twitter.vue";
 import {

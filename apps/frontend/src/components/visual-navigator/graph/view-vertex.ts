@@ -2,7 +2,7 @@ import {
   Network,
   TrustGraph,
   Vertex,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 
 export default class ViewVertex {
   key: string;

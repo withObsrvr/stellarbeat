@@ -1,10 +1,7 @@
 // noinspection ES6MissingAwait
 
 import Store from "@/store/Store";
-import {
-  isArray,
-  isObject,
-} from "@stellarbeat/js-stellarbeat-shared/lib/typeguards";
+import { isArray, isObject } from "shared";
 
 export interface StatisticsAggregation extends Statistics {
   crawlCount: number;

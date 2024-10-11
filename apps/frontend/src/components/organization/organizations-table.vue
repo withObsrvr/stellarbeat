@@ -198,7 +198,7 @@ import {
 import OrganizationActions from "@/components/organization/sidebar/organization-actions.vue";
 import useStore from "@/store/useStore";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
-import { Node } from "@stellarbeat/js-stellarbeat-shared";
+import { Node } from "shared";
 
 export interface Props {
   filter?: string;

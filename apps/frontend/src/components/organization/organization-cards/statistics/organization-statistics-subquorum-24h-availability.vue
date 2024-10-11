@@ -28,7 +28,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Organization } from "@stellarbeat/js-stellarbeat-shared";
+import { Organization } from "shared";
 import Gauge from "@/components/charts/gauge.vue";
 import { BIconInfoCircle } from "bootstrap-vue";
 

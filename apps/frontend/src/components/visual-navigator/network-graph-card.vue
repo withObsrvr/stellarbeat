@@ -35,7 +35,7 @@ import { useRoute, useRouter } from "vue-router/composables";
 import { NodeTrustGraphBuilder } from "@/services/NodeTrustGraphBuilder";
 import { OrganizationTrustGraphBuilder } from "@/services/OrganizationTrustGraphBuilder";
 import { TrustClusterFinder } from "@/services/TrustClusterFinder";
-import { Node, Organization } from "@stellarbeat/js-stellarbeat-shared";
+import { Node, Organization } from "shared";
 
 const router = useRouter();
 const route = useRoute();

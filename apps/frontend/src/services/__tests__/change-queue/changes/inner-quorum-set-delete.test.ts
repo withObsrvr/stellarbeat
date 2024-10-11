@@ -1,4 +1,4 @@
-import { QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { QuorumSet } from "shared";
 import { InnerQuorumSetDelete } from "@/services/change-queue/changes/inner-quorum-set-delete";
 
 describe("quorum set delete inner quorum set", () => {

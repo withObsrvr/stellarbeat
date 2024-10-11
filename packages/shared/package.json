@@ -5,7 +5,8 @@
 		"preversion": "pnpm run build",
 		"build": "../../node_modules/typescript/bin/tsc  --declaration",
 		"post-build": "pnpm run compile-schemas",
-		"compile-schemas": "ajv compile -s \"schemas/*(network).json\" -r \"schemas/*(node|organization).json\" -o lib/network-schema.js -c ajv-formats --code-optimize=true --code-lines; node generate-dto-validate-functions.js"
+		"compile-schemas": "ajv compile -s \"schemas/*(network).json\" -r \"schemas/*(node|organization).json\" -o lib/network-schema.js -c ajv-formats --code-optimize=true --code-lines; node generate-dto-validate-functions.js",
+		"test:unit": "jest"
 	},
 	"author": "pieterjan84@github",
 	"license": "MIT",

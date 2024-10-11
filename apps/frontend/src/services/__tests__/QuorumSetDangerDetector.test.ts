@@ -1,4 +1,4 @@
-import { Network, Node, QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { Network, Node, QuorumSet } from "shared";
 import { QuorumSetDangerDetector } from "@/services/QuorumSetDangerDetector";
 
 describe("QuorumSetDangerDetector", () => {

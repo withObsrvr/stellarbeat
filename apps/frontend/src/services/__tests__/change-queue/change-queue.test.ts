@@ -1,6 +1,6 @@
 import { NetworkChangeQueue } from "../../change-queue/network-change-queue";
 import { EntityPropertyUpdate } from "../../change-queue/changes/entity-property-update";
-import { Network } from "@stellarbeat/js-stellarbeat-shared";
+import { Network } from "shared";
 import NetworkAnalyzer from "@/services/NetworkAnalyzer";
 import { mock } from "jest-mock-extended";
 

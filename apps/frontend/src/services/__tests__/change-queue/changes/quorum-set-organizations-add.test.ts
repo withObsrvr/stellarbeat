@@ -1,4 +1,4 @@
-import { Organization, QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { Organization, QuorumSet } from "shared";
 import { QuorumSetOrganizationsAdd } from "@/services/change-queue/changes/quorum-set-organizations-add";
 
 describe("quorum set add organization", () => {

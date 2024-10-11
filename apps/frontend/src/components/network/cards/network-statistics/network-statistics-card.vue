@@ -79,7 +79,7 @@
 <script setup lang="ts">
 import { BBadge, BIconInfoCircle, BModal } from "bootstrap-vue";
 import NetworkStatisticsChart from "@/components/network/cards/network-statistics/network-statistics-chart.vue";
-import NetworkStatisticsAggregation from "@stellarbeat/js-stellarbeat-shared/lib/network-statistics-aggregation";
+import { NetworkStatisticsAggregation } from "shared";
 import { computed, type Ref, ref, toRefs, withDefaults } from "vue";
 import useStore from "@/store/useStore";
 

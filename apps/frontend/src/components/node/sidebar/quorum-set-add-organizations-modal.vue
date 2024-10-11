@@ -64,7 +64,7 @@ import {
   toRefs,
 } from "vue";
 import useStore from "@/store/useStore";
-import { Organization, QuorumSet } from "@stellarbeat/js-stellarbeat-shared";
+import { Organization, QuorumSet } from "shared";
 import AddOrganizationsTable from "@/components/node/tools/simulation/add-organizations-table.vue";
 import $ from "jquery";
 

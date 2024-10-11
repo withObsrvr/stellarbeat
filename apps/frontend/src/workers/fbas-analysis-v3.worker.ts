@@ -11,7 +11,7 @@ import {
   Node,
   Organization,
   type PublicKey,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 //@ts-ignore
 import wasmUrl from "@stellarbeat/stellar_analysis_web/stellar_analysis_bg.wasm?url";
 //@ts-ignore

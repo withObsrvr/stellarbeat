@@ -1,4 +1,4 @@
-import { Network, Node } from "@stellarbeat/js-stellarbeat-shared";
+import { Network, Node } from "shared";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
 
 describe("NodeWarningDetector", () => {

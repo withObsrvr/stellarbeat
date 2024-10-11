@@ -1,6 +1,6 @@
 import { type NetworkRepository } from "@/repositories/NetworkRepository";
 import { StellarBeatNetworkV1Repository } from "@/repositories/implementation/StellarBeatNetworkV1Repository";
-import { isString } from "@stellarbeat/js-stellarbeat-shared/lib/typeguards";
+import { isString } from "shared";
 import { FBASRepository } from "@/repositories/implementation/FBASRepository";
 import { FBASQIRepository } from "@/repositories/implementation/FBASQIRepository";
 import { MeridianRepository } from "@/repositories/implementation/MeridianRepository";

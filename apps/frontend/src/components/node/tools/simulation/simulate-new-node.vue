@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { Node } from "@stellarbeat/js-stellarbeat-shared";
+import { Node } from "shared";
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router/composables";
 

@@ -2,7 +2,7 @@ import {
   Network,
   QuorumSet,
   QuorumSetService,
-} from "@stellarbeat/js-stellarbeat-shared";
+} from "shared";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
 
 export class QuorumSetWarningDetector {

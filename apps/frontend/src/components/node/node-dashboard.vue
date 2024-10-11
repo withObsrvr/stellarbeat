@@ -180,7 +180,7 @@ import NodeStatistics24HActive from "@/components/node/node-cards/statistics/nod
 import NodeTrustedBy from "@/components/node/node-cards/node-trusted-by.vue";
 import NodeLatestUpdates from "@/components/node/node-cards/node-latest-updates.vue";
 import { BAlert } from "bootstrap-vue";
-import { HistoryArchiveScan } from "@stellarbeat/js-stellarbeat-shared";
+import { HistoryArchiveScan } from "shared";
 import useStore from "@/store/useStore";
 import NodeStatistics30DOverloaded from "@/components/node/node-cards/statistics/node-statistics-30D-overloaded.vue";
 import NodeStatistics30DActive from "@/components/node/node-cards/statistics/node-statistics-30D-active.vue";
