@@ -7,7 +7,7 @@
 		"build:ts": "tsc --build --verbose",
 		"build": "tsc --build --verbose && pnpm --filter frontend run build && pnpm --parallel post-build",
 		"serve": "pnpm build:ts && concurrently -n backend,frontend -c yellow,blue \"pnpm --filter backend run start-api\" \"pnpm --filter frontend run dev\"",
-		"test:unit": "jest --testPathIgnorePatterns '\\.integration\\.test'",
+		"test:unit": "jest --testPathIgnorePatterns '\\.integration\\.test' --maxWorkers=50% ",
 		"tu": "pnpm test:unit",
 		"test:integration": "jest --testMatch '**/*.integration.test.[jt]s?(x)' --runInBand",
 		"ti": "pnpm test:integration",

@@ -1,14 +1,13 @@
 module.exports = {
 	preset: 'ts-jest',
 	testEnvironment: 'node',
-	cache: true,
 	transform: {
-		'^.+\\.tsx?$': [
-			'ts-jest',
-			{
-				tsconfig: 'tsconfig.json'
-			}
-		]
+		'^.+\\.tsx?$': 'ts-jest'
+	},
+	globals: {
+		'ts-jest': {
+			tsconfig: 'tsconfig.json'
+		}
 	},
 	projects: [
 		{
@@ -38,6 +37,7 @@ module.exports = {
 		},
 		{
 			moduleFileExtensions: ['js', 'jsx', 'json', 'vue', 'ts', 'tsx'],
+			preset: 'ts-jest',
 			displayName: 'frontend',
 			rootDir: 'apps/frontend',
 			moduleNameMapper: {
