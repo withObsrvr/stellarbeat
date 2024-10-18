@@ -1,5 +1,5 @@
-import { writeFileSync } from 'fs';
-import path, { join } from 'path';
+import { writeFileSync, mkdirSync } from 'fs';
+import { dirname } from 'path';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
@@ -9,8 +9,8 @@ import {
 	OrganizationV1Schema,
 	OrganizationSnapshotV1Schema,
 	NetworkV1Schema
-} from './lib/network';
-import standaloneCode from 'ajv/dist/standalone';
+} from './lib/index.js';
+import standaloneCode from 'ajv/dist/standalone/index.js';
 
 // For CJS, it generates an exports array, will generate
 // `exports["#/definitions/Foo"] = ...;exports["#/definitions/Bar"] = ... ;`
@@ -27,8 +27,9 @@ const ajv = new Ajv({
 addFormats(ajv);
 const moduleCode = standaloneCode(ajv);
 
+// Ensure the directory structure exists
+const outputFilePath = 'lib/dto/generated/validators.js';
+mkdirSync(dirname(outputFilePath), { recursive: true });
+
 // Now you can write the module code to file
-writeFileSync(
-	join(path._dirname, './lib/dto/generated/validators.js'),
-	moduleCode
-);
+writeFileSync(outputFilePath, moduleCode);
