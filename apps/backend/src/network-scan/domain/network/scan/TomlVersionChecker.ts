@@ -1,6 +1,6 @@
 import valueValidator from 'validator';
 import { isString } from '../../../../core/utilities/TypeGuards';
-import semver = require('semver/preload');
+import * as semver from 'semver/preload';
 
 export class TomlVersionChecker {
 	static isSupportedVersion(

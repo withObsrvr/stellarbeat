@@ -9,7 +9,7 @@ import { EventEmitter } from 'events';
 import { ObservationManager } from './observation-manager';
 import { PeerEventHandler } from './peer-event-handler/peer-event-handler';
 import { Observation } from './observation';
-import * as assert from 'assert';
+import assert from 'assert';
 import { ObservationState } from './observation-state';
 import { ObservationFactory } from './observation-factory';
 

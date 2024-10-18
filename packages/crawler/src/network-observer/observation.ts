@@ -1,6 +1,6 @@
 import { NodeAddress } from '../node-address';
 import { PeerNodeCollection } from '../peer-node-collection';
-import * as assert from 'assert';
+import assert from 'assert';
 import { Ledger } from '../crawler';
 import { ObservationState } from './observation-state';
 import { Slots } from './peer-event-handler/stellar-message-handlers/scp-envelope/scp-statement/externalize/slots';

@@ -1,9 +1,9 @@
-import { HttpQueue, RequestMethod } from '../HttpQueue';
+import { HttpQueue, RequestMethod, QueueError } from '../HttpQueue';
 import { mock } from 'jest-mock-extended';
 import { LoggerMock } from '../__mocks__/LoggerMock';
-import { HttpService } from '../HttpService';
+import { HttpService, HttpError } from '../HttpService';
 import { createDummyHistoryBaseUrl } from '../../../history-scan/domain/history-archive/__fixtures__/HistoryBaseUrl';
-import { ok } from 'neverthrow';
+import { err, ok } from 'neverthrow';
 
 it('should bust cache', async function () {
 	const httpService = mock<HttpService>();
@@ -34,4 +34,36 @@ it('should bust cache', async function () {
 	expect(
 		httpService.get.mock.calls[0][0].value.indexOf('bust') > 0
 	).toBeTruthy();
+});
+
+it('should handle sending requests with an error', async function () {
+	const httpService = mock<HttpService>();
+	httpService.get.mockResolvedValue(
+		err(new HttpError('Network error', 'ECONNABORTED'))
+	);
+	const httpQueue = new HttpQueue(httpService, new LoggerMock());
+
+	const result = await httpQueue.sendRequests(
+		[
+			{
+				url: createDummyHistoryBaseUrl(),
+				meta: {},
+				method: RequestMethod.GET
+			}
+		][Symbol.iterator](),
+		{
+			cacheBusting: false,
+			concurrency: 1,
+			rampUpConnections: false,
+			nrOfRetries: 0,
+			stallTimeMs: 100,
+			httpOptions: {}
+		}
+	);
+
+	expect(result.isErr()).toBeTruthy();
+	if (result.isErr()) {
+		expect(result.error).toBeInstanceOf(QueueError);
+		expect(result.error.message).toContain('Network error');
+	}
 });

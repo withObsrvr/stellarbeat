@@ -2,11 +2,13 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"outDir": "lib",
+		"module": "Node16",
+		"moduleResolution": "Node16",
 		"rootDir": "src",
 		"baseUrl": ".",
 		"composite": true
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "generate-dto-validate-functions.mjs"],
 	"exclude": [
 		"node_modules/**/*",
 		"src/**/__tests__/*",

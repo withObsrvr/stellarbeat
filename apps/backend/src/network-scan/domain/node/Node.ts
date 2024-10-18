@@ -25,7 +25,7 @@ export default class Node extends VersionedEntity<NodeSnapShot> {
 		cascade: false,
 		nullable: false
 	})
-	protected _snapshots?: NodeSnapShot[];
+	protected declare _snapshots?: NodeSnapShot[];
 
 	@OneToMany(() => NodeMeasurement, (measurement) => measurement.node, {
 		cascade: false

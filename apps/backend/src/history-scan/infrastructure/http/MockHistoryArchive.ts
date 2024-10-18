@@ -1,7 +1,7 @@
 import { Server } from 'net';
-import * as express from 'express';
-import * as path from 'path';
-import * as fs from 'fs';
+import express from 'express';
+import path from 'path';
+import fs from 'fs';
 
 export class MockHistoryArchive {
 	private server?: Server;

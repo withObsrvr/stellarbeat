@@ -1,7 +1,7 @@
 import { Networks } from '@stellar/stellar-base';
- 
+
 require('dotenv').config();
-import * as yn from 'yn';
+import yn from 'yn';
 import { NodeInfo } from './node';
 
 export interface NodeConfig {

@@ -39,7 +39,7 @@ export class Network extends VersionedEntity<NetworkSnapshot> {
 		cascade: false,
 		nullable: false
 	})
-	protected _snapshots?: NetworkSnapshot[];
+	protected declare _snapshots?: NetworkSnapshot[];
 
 	public get changes(): NetworkChange[] {
 		if (!this._changes) {

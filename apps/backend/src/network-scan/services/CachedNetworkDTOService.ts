@@ -1,7 +1,7 @@
 import { NetworkDTOService } from './NetworkDTOService';
 import { inject, injectable } from 'inversify';
 import { err, ok, Result } from 'neverthrow';
-import * as LRUCache from 'lru-cache';
+import LRUCache from 'lru-cache';
 import { NetworkV1 } from 'shared';
 import { mapUnknownToError } from '../../core/utilities/mapUnknownToError';
 import { NETWORK_TYPES } from '../infrastructure/di/di-types';

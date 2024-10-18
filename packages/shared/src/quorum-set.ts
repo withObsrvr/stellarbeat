@@ -43,8 +43,8 @@ export class QuorumSet implements BaseQuorumSet {
 		return new QuorumSet(
 			quorumSetObject.threshold,
 			quorumSetObject.validators,
-			quorumSetObject.innerQuorumSets.map(
-				(innerQuorumSet) => this.fromBaseQuorumSet(innerQuorumSet)
+			quorumSetObject.innerQuorumSets.map((innerQuorumSet) =>
+				this.fromBaseQuorumSet(innerQuorumSet)
 			)
 		);
 	}

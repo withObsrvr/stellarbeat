@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { Url } from '../domain/Url';
-import { eachLimit, ErrorCallback } from 'async';
+import { AsyncWorker, eachLimit, ErrorCallback } from 'async';
 import { inject, injectable } from 'inversify';
 import { Logger } from './PinoLogger';
 import { err, ok, Result } from 'neverthrow';
@@ -93,10 +93,7 @@ export class HttpQueue {
 	): Promise<Result<void, QueueError>> {
 		let counter = 0;
 		let activeRequestCount = 0;
-		const getWorker = async (
-			request: Request<Meta>,
-			callback: ErrorCallback<QueueError>
-		) => {
+		const getWorker = async (request: Request<Meta>) => {
 			counter++;
 			activeRequestCount++;
 			if (
@@ -111,7 +108,6 @@ export class HttpQueue {
 					httpQueueOptions.httpOptions.abortSignal.aborted
 				) {
 					activeRequestCount--;
-					callback();
 					return;
 				}
 			}
@@ -123,8 +119,7 @@ export class HttpQueue {
 			);
 			activeRequestCount--;
 
-			if (result.isErr()) callback(result.error);
-			else callback();
+			if (result.isErr()) throw result.error;
 		};
 
 		const abortController = new AbortController();
@@ -142,8 +137,11 @@ export class HttpQueue {
 				);
 				await asyncSleep(1000);
 			}
-			if (error instanceof QueueError) return err(error);
-			throw error; //should not happen as worker returns QueueErrors, but cannot seem to typehint this correctly
+			if (!(error instanceof QueueError)) {
+				throw new Error('Unexpected error in http queue');
+			}
+
+			return err(error);
 		}
 	}
 

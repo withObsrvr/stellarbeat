@@ -110,11 +110,7 @@ import {
   type NetworkGraphNode,
   type QuorumSet as NetworkQuorumSet,
 } from "@stellarbeat/stellar-halting-analysis";
-import {
-  type PublicKey,
-  QuorumSet,
-  Vertex,
-} from "shared";
+import { type PublicKey, QuorumSet, Vertex } from "shared";
 import {
   BAlert,
   BCard,

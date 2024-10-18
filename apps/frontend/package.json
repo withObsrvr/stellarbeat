@@ -8,8 +8,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "@sentry/vue": "^7.119.0",
-    "shared": "workspace:*",
+    "@sentry/vue": "^8.34.0",
     "@stellarbeat/stellar-halting-analysis": "1.2.0",
     "@stellarbeat/stellar_analysis_web": "^0.7.0",
     "bootstrap": "4.6.1",
@@ -35,6 +34,7 @@
     "popper.js": "1.16.1",
     "portal-vue": "^2.1.7",
     "prerender-node": "^3.8.0",
+    "shared": "workspace:*",
     "vue": "^2.7.16",
     "vue-multiselect": "^2.1.9",
     "vue-router": "^3.6.5"
@@ -60,6 +60,7 @@
     "vite-bundle-visualizer": "^1.2.1",
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-top-level-await": "^1.4.4",
+    "vite-tsconfig-paths": "^5.0.1",
     "vue-tsc": "2.0.29"
   }
 }

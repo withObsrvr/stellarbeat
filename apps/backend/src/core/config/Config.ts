@@ -1,10 +1,10 @@
 import { config } from 'dotenv';
 import { isArray, isString } from '../utilities/TypeGuards';
 import { err, ok, Result } from 'neverthrow';
-import * as yn from 'yn';
+import yn from 'yn';
 import { Url } from '../domain/Url';
 import { CrawlerConfiguration } from 'crawler';
-import * as path from 'path';
+import path from 'path';
 
 config({
 	path: path.resolve(__dirname + '../../../../.env')

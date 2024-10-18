@@ -1,4 +1,4 @@
-import { QuorumSet } from "shared";
+import { Network, QuorumSet } from "shared";
 import { type NetworkChange } from "@/services/change-queue/network-change-queue";
 
 export class InnerQuorumSetAdd implements NetworkChange {

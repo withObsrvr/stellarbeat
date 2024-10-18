@@ -2,9 +2,11 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue2";
 import topLevelAwait from "vite-plugin-top-level-await";
 import eslint from "vite-plugin-eslint";
+import tsConfigPaths from "vite-tsconfig-paths";
+import path from "path";
 
 export default defineConfig({
-  plugins: [vue(), eslint(), topLevelAwait()],
+  plugins: [tsConfigPaths(), vue(), eslint(), topLevelAwait()],
   envPrefix: "VUE_",
   worker: {
     plugins: () => [topLevelAwait()],
@@ -12,7 +14,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": "/src",
-      shared: "../../packages/shared/src/index.ts",
+      shared: path.resolve(__dirname, "../../packages/shared/src"),
     },
     extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"],
   },
@@ -36,9 +38,13 @@ export default defineConfig({
           jquery: ["jquery"],
           vue: ["vue", "vue-router", "vue-multiselect", "portal-vue"],
           sentry: ["@sentry/vue"],
+          shared: ["shared"],
         },
       },
     },
+  },
+  optimizeDeps: {
+    include: ["shared"], // Include the shared package so it is optimized for faster builds
   },
   css: {
     devSourcemap: true,

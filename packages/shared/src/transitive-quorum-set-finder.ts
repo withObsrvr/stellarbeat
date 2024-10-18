@@ -1,4 +1,4 @@
-import {BaseQuorumSet} from "../quorum-set";
+import { BaseQuorumSet } from './quorum-set';
 
 // finds the transitive quorum set for a given quorum set,
 // meaning all the nodes reachable starting from the given quorum set

@@ -13,7 +13,7 @@ export { TrustGraphBuilder } from './trust-graph/trust-graph-builder';
 export { OrganizationSnapShot } from './organization-snap-shot';
 export { NodeSnapShot } from './node-snap-shot';
 export { HistoryArchiveScan } from './history-archive-scan';
-export { TransitiveQuorumSetFinder } from './quorum-set/transitive-quorum-set-finder';
+export { TransitiveQuorumSetFinder } from './transitive-quorum-set-finder';
 export { containsSlice } from './quorum/containsSlice';
 export * from './quorum/isQuorum';
 export * from './quorum/detectQuorum';

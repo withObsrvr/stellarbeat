@@ -10,7 +10,7 @@ import { TomlState } from './scan/TomlState';
 
 @Entity('organization')
 export default class Organization extends VersionedEntity<OrganizationSnapShot> {
-	id?: number;
+	declare id?: number;
 
 	@Column('timestamptz')
 	dateDiscovered: Date;
@@ -22,7 +22,7 @@ export default class Organization extends VersionedEntity<OrganizationSnapShot> 
 		cascade: false,
 		nullable: false
 	})
-	protected _snapshots?: OrganizationSnapShot[];
+	protected declare _snapshots?: OrganizationSnapShot[];
 
 	@OneToMany(
 		() => OrganizationMeasurement,

@@ -1,4 +1,4 @@
-import * as LRUCache from 'lru-cache';
+import LRUCache from 'lru-cache';
 
 export interface Throttle {
 	startTime: number;
@@ -8,7 +8,10 @@ export interface Throttle {
 export class Throttler {
 	protected cache: LRUCache<string, Throttle>;
 
-	constructor(protected maxRequestCount: number, protected timeWindow: number) {
+	constructor(
+		protected maxRequestCount: number,
+		protected timeWindow: number
+	) {
 		this.cache = new LRUCache<string, Throttle>({
 			max: 10000,
 			ttl: timeWindow * maxRequestCount
