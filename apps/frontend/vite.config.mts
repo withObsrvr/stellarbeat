@@ -3,8 +3,8 @@ import vue from "@vitejs/plugin-vue2";
 import topLevelAwait from "vite-plugin-top-level-await";
 import eslint from "vite-plugin-eslint";
 import tsConfigPaths from "vite-tsconfig-paths";
-import path from "path";
 
+/** @type {import('vite').UserConfig} */
 export default defineConfig({
   plugins: [tsConfigPaths(), vue(), eslint(), topLevelAwait()],
   envPrefix: "VUE_",
@@ -14,7 +14,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": "/src",
-      shared: path.resolve(__dirname, "../../packages/shared/src"),
     },
     extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"],
   },
@@ -22,6 +21,9 @@ export default defineConfig({
     "process.env": process.env,
   },
   build: {
+    commonjsOptions: {
+      include: [/shared/, /node_modules/, /shared\/lib\/network-schema/],
+    },
     sourcemap: true,
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
@@ -44,7 +46,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["shared"], // Include the shared package so it is optimized for faster builds
+    include: ["shared", "shared/lib/network-schema"],
   },
   css: {
     devSourcemap: true,

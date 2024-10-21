@@ -5,7 +5,7 @@
 		"preversion": "pnpm run build",
 		"build": "../../node_modules/typescript/bin/tsc  --declaration",
 		"post-build": "pnpm run compile-schemas",
-		"compile-schemas": "ajv compile -s \"schemas/*(network).json\" -r \"schemas/*(node|organization).json\" -o lib/network-schema.js -c ajv-formats --code-optimize=true --code-lines; node generate-dto-validate-functions.mjs",
+		"compile-schemas": "ajv compile -s \"schemas/*(network).json\" -r \"schemas/*(node|organization).json\" -o lib/network-schema.js -c ajv-formats --code-optimize=true --code-lines=false --strict=true; node generate-dto-validate-functions.mjs",
 		"test:unit": "jest"
 	},
 	"author": "pieterjan84@github",
@@ -13,12 +13,12 @@
 	"main": "lib/index.js",
 	"types": "lib/index.d.ts",
 	"dependencies": {
-		"ajv": "^8.12.0"
+		"ajv": "^8.17.1"
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.14.191",
 		"ajv-cli": "^5.0.0",
-		"ajv-formats": "^2.1.1",
+		"ajv-formats": "^3.0.1",
 		"await-fs": "^1.0.0",
 		"lodash": "^4.17.21",
 		"typescript-json-schema": "^0.65.1"

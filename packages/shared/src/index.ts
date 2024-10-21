@@ -1,8 +1,8 @@
-export { Network, PublicKey, OrganizationId } from './network';
+export { Network, type PublicKey, type OrganizationId } from './network';
 export { Node } from './node';
 export { default as QuorumService } from './quorum-service-old';
 export { QuorumSlicesGenerator } from './quorum-slices-generator';
-export { QuorumSet, BaseQuorumSet } from './quorum-set';
+export { QuorumSet, type BaseQuorumSet } from './quorum-set';
 export { QuorumSetService } from './quorum-set-service';
 export { NodeStatistics } from './node-statistics';
 export { NodeGeoData } from './node-geo-data';
@@ -18,20 +18,26 @@ export { containsSlice } from './quorum/containsSlice';
 export * from './quorum/isQuorum';
 export * from './quorum/detectQuorum';
 export {
-	NetworkV1,
+	type NetworkV1,
 	NetworkV1Schema,
-	NetworkStatisticsV1
+	type NetworkStatisticsV1
 } from './dto/network-v1';
-export { NodeV1, NodeV1Schema } from './dto/node-v1';
-export { OrganizationV1, OrganizationV1Schema } from './dto/organization-v1';
+export { type NodeV1, NodeV1Schema } from './dto/node-v1';
 export {
-	HistoryArchiveScanV1,
+	type OrganizationV1,
+	OrganizationV1Schema
+} from './dto/organization-v1';
+export {
+	type HistoryArchiveScanV1,
 	HistoryArchiveScanV1Schema
 } from './dto/history-archive-scan-v1';
-export { NodeSnapshotV1Schema, NodeSnapshotV1 } from './dto/node-snapshot-v1';
+export {
+	NodeSnapshotV1Schema,
+	type NodeSnapshotV1
+} from './dto/node-snapshot-v1';
 export {
 	OrganizationSnapshotV1Schema,
-	OrganizationSnapshotV1
+	type OrganizationSnapshotV1
 } from './dto/organization-snapshot-v1';
 export { SemanticVersionComparer } from './semantic-version-comparer';
 export { StronglyConnectedComponentsFinder } from './trust-graph/strongly-connected-components-finder';

@@ -22,7 +22,9 @@ const ajv = new Ajv({
 		OrganizationSnapshotV1Schema,
 		NetworkV1Schema
 	],
-	code: { source: true }
+	code: { source: true, esm: false }
+	//ajv-formats does not yet support ESM (=browser supported) output
+	//Thus we let vite (or other bundler) transform commonjs to esm
 });
 addFormats(ajv);
 const moduleCode = standaloneCode(ajv);
@@ -31,5 +33,5 @@ const moduleCode = standaloneCode(ajv);
 const outputFilePath = 'lib/dto/generated/validators.js';
 mkdirSync(dirname(outputFilePath), { recursive: true });
 
-// Now you can write the module code to file
+// write the module code to file
 writeFileSync(outputFilePath, moduleCode);

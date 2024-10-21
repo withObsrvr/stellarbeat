@@ -105,9 +105,7 @@ import { Node, Organization, QuorumSet } from "shared";
 import { ModifyNetwork as ModifyNetworkChange } from "@/services/change-queue/changes/modify-network";
 import useStore from "@/store/useStore";
 import { type Ref, ref } from "vue";
-//import { error } from "console";
-
-//import validateSchema from "shared/lib/network-schema";
+import validateNetworkSchema from "shared/lib/network-schema"; //we use network-schema because it is less strict then the dto/generated validation scripts
 
 type BasicQuorumSet = {
   validators: string[];
@@ -137,7 +135,7 @@ type BasicNode = {
 
 type ValidationError = {
   dataPath?: string;
-  message: string;
+  message?: string;
   params: unknown;
 };
 
@@ -171,13 +169,12 @@ const showModal = () => {
 };
 
 const validate = () => {
-  return true; //todo: FIX
-  /*isValid.value = false;
+  isValid.value = false;
   modified.value = false;
   try {
     modifiedNetwork = JSON.parse(modifiedNetworkString.value);
-    isValid.value = validateSchema(modifiedNetwork);
-    validationErrors.value = validateSchema.errors;
+    isValid.value = validateNetworkSchema(modifiedNetwork);
+    validationErrors.value = validateNetworkSchema.errors;
   } catch (error) {
     if (error instanceof Error)
       validationErrors.value = [
@@ -187,7 +184,7 @@ const validate = () => {
           params: undefined,
         },
       ];
-  }*/
+  }
 };
 
 const load = () => {

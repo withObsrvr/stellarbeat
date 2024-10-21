@@ -69,7 +69,7 @@
           class="row"
         >
           <div class="col-12">
-            <network-analysis></network-analysis>
+            <network-analysis />
           </div>
         </div>
         <div class="row">

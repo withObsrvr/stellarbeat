@@ -118,7 +118,7 @@
 		}
 	},
 	"type": "object",
-	"required": ["publicKey"],
+	"required": ["publicKey", "quorumSet"],
 	"definitions": {
 		"NodeGeoData": {
 			"properties": {
@@ -193,8 +193,7 @@
 				}
 			},
 			"type": "object",
-			"required": []
+			"required": ["innerQuorumSets", "threshold", "validators"]
 		}
 	}
 }
-

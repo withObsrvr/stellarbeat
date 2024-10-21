@@ -27,8 +27,7 @@
     "skipLibCheck": true,
     "types": ["jest", "jquery", "bootstrap"],
     "paths": {
-      "@/*": ["src/*"],
-      "shared": ["./../../packages/shared"]
+      "@/*": ["src/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
