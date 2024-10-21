@@ -24,7 +24,7 @@ const customTypescriptConfig = {
 };
 
 export default [
-	{ ignores: ['**/lib/*', '**/dist/*'] }, // global ignores
+	{ ignores: ['**/lib/*', '**/dist/*', 'node_modules'] }, // global ignores
 	eslintJs.configs.recommended,
 	...eslintTs.configs.recommended,
 	...pluginVue.configs['flat/vue2-recommended'],

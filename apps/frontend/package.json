@@ -61,6 +61,6 @@
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-top-level-await": "^1.4.4",
     "vite-tsconfig-paths": "^5.0.1",
-    "vue-tsc": "2.0.29"
+    "vue-tsc": "2.1.6"
   }
 }

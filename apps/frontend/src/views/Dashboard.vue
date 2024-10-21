@@ -69,7 +69,7 @@
           class="row"
         >
           <div class="col-12">
-            <network-analysis />
+            <network-analysis :dummy="'compiler_gives_error_if_no_props??'" />
           </div>
         </div>
         <div class="row">
