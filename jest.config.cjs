@@ -32,6 +32,12 @@ module.exports = {
 		{
 			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],
 			preset: 'ts-jest',
+			displayName: 'scp-simulation',
+			rootDir: 'packages/scp-simulation'
+		},
+		{
+			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],
+			preset: 'ts-jest',
 			displayName: 'node-connector',
 			rootDir: 'packages/node-connector'
 		},
