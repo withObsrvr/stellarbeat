@@ -1,2 +1,2 @@
-api: pnpm start-api
-scan-network: pnpm scan-network 1
+api: pnpm start:api
+scan-network: pnpm start:scan-network 1
