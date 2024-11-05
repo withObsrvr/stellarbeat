@@ -22,7 +22,7 @@
 	"author": "pieterjan84",
 	"license": "MIT",
 	"engines": {
-		"node": ">=20.0.0"
+		"node": "20.x"
 	},
 	"type": "module",
 	"dependencies": {
