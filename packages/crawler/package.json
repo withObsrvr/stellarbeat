@@ -16,7 +16,6 @@
 		"async": "^3.2.6"
 	},
 	"devDependencies": {
-		"@stellar/stellar-base": "12.1.1",
 		"@types/async": "^3.2.7"
 	}
 }

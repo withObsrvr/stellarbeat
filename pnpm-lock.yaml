@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@stellar/stellar-base':
-        specifier: 12.1.1
-        version: 12.1.1
+        specifier: 13.0.0-beta.1
+        version: 13.0.0-beta.1
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -399,9 +399,6 @@ importers:
         specifier: workspace:*
         version: link:../shared
     devDependencies:
-      '@stellar/stellar-base':
-        specifier: 12.1.1
-        version: 12.1.1
       '@types/async':
         specifier: ^3.2.7
         version: 3.2.24
@@ -433,6 +430,8 @@ importers:
       bignumber.js:
         specifier: 9.1.2
         version: 9.1.2
+
+  packages/scp-simulation: {}
 
   packages/shared:
     dependencies:
@@ -1498,8 +1497,8 @@ packages:
   '@stellar/js-xdr@3.1.2':
     resolution: {integrity: sha512-VVolPL5goVEIsvuGqDc5uiKxV03lzfWdvYg1KikvwheDmTBO68CKDji3bAZ/kppZrx5iTA8z3Ld5yuytcvhvOQ==}
 
-  '@stellar/stellar-base@12.1.1':
-    resolution: {integrity: sha512-gOBSOFDepihslcInlqnxKZdIW9dMUO1tpOm3AtJR33K2OvpXG6SaVHCzAmCFArcCqI9zXTEiSoh70T48TmiHJA==}
+  '@stellar/stellar-base@13.0.0-beta.1':
+    resolution: {integrity: sha512-S5c2FyKwUOc28/3sDoOfPIcdzcbUyfiYRmcUlscZrEX/VVzV12216XRkdWy2MYa8KQNK60MpR7wrGp2MamvVGg==}
 
   '@stellarbeat/stellar-halting-analysis@1.2.0':
     resolution: {integrity: sha512-W/OfQOgIcogIxpwyQ93RTr8Ke55z4/mvqG9UNUdB4AgJLwfgelYFn+RMdmWw4I77koQ3zdw19kuTm6pbg4yUkw==}
@@ -6166,7 +6165,7 @@ snapshots:
 
   '@stellar/js-xdr@3.1.2': {}
 
-  '@stellar/stellar-base@12.1.1':
+  '@stellar/stellar-base@13.0.0-beta.1':
     dependencies:
       '@stellar/js-xdr': 3.1.2
       base32.js: 0.1.0

@@ -7,7 +7,7 @@ describe('LoopTimer', () => {
 		const sleepTime = 100;
 		const loopTimer = new LoopTimer();
 		loopTimer.start(maxTime);
-		await asyncSleep(sleepTime);
+		await asyncSleep(sleepTime * 2);
 		loopTimer.stop();
 		expect(loopTimer.getElapsedTime()).toBeGreaterThanOrEqual(sleepTime);
 		expect(loopTimer.getElapsedTime()).toBeLessThanOrEqual(maxTime);

@@ -1,10 +1,10 @@
 import { FederatedVote } from '../../src/federated-voting/FederatedVote';
-import assert from 'node:assert';
 import { Vote } from '../../src/federated-voting/Vote';
 import { BaseQuorumSet } from '../../src/node/BaseQuorumSet';
 import { Voted } from '../../src/federated-voting/event/Voted';
 import { AgreementAttemptCreated } from '../../src/federated-voting/event/AgreementAttemptCreated';
 import { AddedVoteToAgreementAttempt } from '../../src/federated-voting';
+import exp from 'constants';
 
 describe('FederatedVote', () => {
 	describe('voteForStatement', () => {
@@ -19,7 +19,7 @@ describe('FederatedVote', () => {
 			federatedVote.voteForStatement(statement);
 			federatedVote.drainEvents();
 			federatedVote.voteForStatement(statement);
-			assert.ok(federatedVote.drainEvents().length === 0);
+			expect(federatedVote.drainEvents().length).toBe(0);
 		});
 
 		it('should vote and start a new agreement attempt', () => {
@@ -34,34 +34,47 @@ describe('FederatedVote', () => {
 
 			federatedVote.voteForStatement(statement);
 			const events = federatedVote.drainEvents();
-			assert.strictEqual(events.length, 3);
+			expect(events.length).toBe(3);
 
 			const votedEvent = events[0];
-			assert.ok(votedEvent instanceof Voted);
+			expect(votedEvent).toBeInstanceOf(Voted);
+			if (!(votedEvent instanceof Voted)) {
+				throw new Error('Expected Voted event');
+			}
 			const vote = votedEvent.vote;
-			assert.strictEqual(vote?.statement, statement);
-			assert.strictEqual(vote?.accept, false);
-			assert.strictEqual(vote.publicKey, 'V');
-			assert.deepStrictEqual(vote.quorumSet, quorumSet);
-			assert.strictEqual(federatedVote.nodeHasVotedForAStatement(), true);
+			expect(vote).not.toBeNull();
+			expect(vote.statement).toBe(statement);
+			expect(vote.accept).toBe(false);
+			expect(vote.publicKey).toBe('V');
+			expect(vote.quorumSet).toStrictEqual(quorumSet);
+			expect(federatedVote.nodeHasVotedForAStatement()).toBe(true);
 
 			const agreementAttemptCreatedEvent = events[1];
-			assert.ok(
-				agreementAttemptCreatedEvent instanceof AgreementAttemptCreated
+			expect(agreementAttemptCreatedEvent).toBeInstanceOf(
+				AgreementAttemptCreated
 			);
 
 			const voteAddedToAgreementAttemptEvent = events[2];
-			assert.ok(
-				voteAddedToAgreementAttemptEvent instanceof AddedVoteToAgreementAttempt
+			expect(voteAddedToAgreementAttemptEvent).toBeInstanceOf(
+				AddedVoteToAgreementAttempt
 			);
-			assert.strictEqual(voteAddedToAgreementAttemptEvent.statement, statement);
+			if (
+				!(
+					voteAddedToAgreementAttemptEvent instanceof
+					AddedVoteToAgreementAttempt
+				)
+			) {
+				throw new Error('Expected AddedVoteToAgreementAttempt event');
+			}
+			expect(voteAddedToAgreementAttemptEvent.statement).toBe(statement);
 
 			const agreementAttempts = federatedVote.getAgreementAttempts();
-			assert.strictEqual(agreementAttempts.length, 1);
+			expect(agreementAttempts.length).toBe(1);
+
 			const agreementAttempt = agreementAttempts[0];
-			assert.strictEqual(agreementAttempt.statement, statement);
-			assert.strictEqual(agreementAttempt.phase, 'unknown');
-			assert.strictEqual(agreementAttempt.node.publicKey, 'V');
+			expect(agreementAttempt.statement).toBe(statement);
+			expect(agreementAttempt.phase).toBe('unknown');
+			expect(agreementAttempt.node.publicKey).toBe('V');
 		});
 
 		describe('processVote', () => {
@@ -79,10 +92,10 @@ describe('FederatedVote', () => {
 				federatedVote.processVote(vote);
 
 				const agreementAttempts = federatedVote.getAgreementAttempts();
-				assert.strictEqual(agreementAttempts.length, 1);
+				expect(agreementAttempts.length).toBe(1);
 				const agreementAttempt = agreementAttempts[0];
-				assert.strictEqual(agreementAttempt.statement, 'statement');
-				assert.strictEqual(agreementAttempt.node.publicKey, 'V');
+				expect(agreementAttempt.statement).toBe('statement');
+				expect(agreementAttempt.node.publicKey).toBe('V');
 			});
 
 			it('should resume work on existing agreement attempt', () => {
@@ -95,10 +108,11 @@ describe('FederatedVote', () => {
 				federatedVote.processVote(otherVote);
 
 				const agreementAttempts = federatedVote.getAgreementAttempts();
-				assert.strictEqual(agreementAttempts.length, 1);
+				expect(agreementAttempts.length).toBe(1);
+
 				const agreementAttempt = agreementAttempts[0];
-				assert.strictEqual(agreementAttempt.statement, 'statement');
-				assert.strictEqual(agreementAttempt.node.publicKey, 'V');
+				expect(agreementAttempt.statement).toBe('statement');
+				expect(agreementAttempt.node.publicKey).toBe('V');
 			});
 
 			it('should move to accept phase', () => {
@@ -120,20 +134,24 @@ describe('FederatedVote', () => {
 
 				federatedVote.processVote(voteThatTriggersAccept);
 				const events = federatedVote.drainEvents();
-				assert.strictEqual(events.length, 7);
+				expect(events.length).toBe(7);
 
 				const votedEvent = events.find((event) => event instanceof Voted);
-				assert.ok(votedEvent instanceof Voted);
+				expect(votedEvent).toBeInstanceOf(Voted);
+				if (!(votedEvent instanceof Voted)) {
+					throw new Error('Expected Voted event');
+				}
+
 				const voteForAccept = votedEvent.vote;
 
-				assert.notStrictEqual(voteForAccept, null);
-				assert.strictEqual(voteForAccept?.accept, true);
+				expect(voteForAccept).not.toBeNull();
+				expect(voteForAccept?.accept).toBe(true);
 
 				const agreementAttempts = federatedVote.getAgreementAttempts();
-				assert.strictEqual(agreementAttempts.length, 1);
+				expect(agreementAttempts.length).toBe(1);
 				const agreementAttempt = agreementAttempts[0];
-				assert.strictEqual(agreementAttempt.phase, 'accepted');
-				assert.deepEqual(Array.from(agreementAttempt.getAcceptVotes().keys()), [
+				expect(agreementAttempt.phase).toBe('accepted');
+				expect(Array.from(agreementAttempt.getAcceptVotes().keys())).toEqual([
 					'V'
 				]);
 			});
@@ -161,12 +179,12 @@ describe('FederatedVote', () => {
 				federatedVote.processVote(voteThatTriggersConfirm);
 
 				const agreementAttempts = federatedVote.getAgreementAttempts();
-				assert.strictEqual(agreementAttempts.length, 1);
+				expect(agreementAttempts.length).toBe(1);
 				const agreementAttempt = agreementAttempts[0];
-				assert.strictEqual(agreementAttempt.phase, 'confirmed');
+				expect(agreementAttempt.phase).toBe('confirmed');
 
-				assert.strictEqual(federatedVote.hasConsensus(), true);
-				assert.strictEqual(federatedVote.getConsensus(), 'statement');
+				expect(federatedVote.hasConsensus()).toBe(true);
+				expect(federatedVote.getConsensus()).toBe('statement');
 			});
 		});
 	});

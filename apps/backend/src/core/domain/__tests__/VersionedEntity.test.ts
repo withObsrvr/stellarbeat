@@ -2,7 +2,10 @@ import { VersionedEntity } from '../VersionedEntity';
 import { Snapshot } from '../Snapshot';
 
 class MySnapshot extends Snapshot {
-	constructor(startDate: Date, public myProperty: string) {
+	constructor(
+		startDate: Date,
+		public myProperty: string
+	) {
 		super(startDate);
 	}
 
@@ -12,7 +15,10 @@ class MySnapshot extends Snapshot {
 }
 
 class MyVersionedEntity extends VersionedEntity<MySnapshot> {
-	constructor(time: Date, private myProperty: string) {
+	constructor(
+		time: Date,
+		private myProperty: string
+	) {
 		super([new MySnapshot(time, myProperty)]);
 	}
 
@@ -31,15 +37,15 @@ class MyVersionedEntity extends VersionedEntity<MySnapshot> {
 }
 
 it('should get snapshot values from the current snapshot', function () {
-	const entity = new MyVersionedEntity(new Date(), 'foo');
+	const entity = new MyVersionedEntity(new Date('01-01-2020'), 'foo');
 	expect(entity.getMyProperty()).toEqual('foo');
-	entity.setMyProperty('bar', new Date());
+	entity.setMyProperty('bar', new Date('01-01-2020'));
 	expect(entity.getMyProperty()).toEqual('bar');
 });
 
 it('it should not create a new snapshot if a snapshot already exists for the given time', function () {
-	const entity = new MyVersionedEntity(new Date(), 'foo');
-	const time = new Date();
+	const entity = new MyVersionedEntity(new Date('01-01-2020'), 'foo');
+	const time = new Date('01-01-2020');
 	entity.setMyProperty('bar', time);
 	expect(entity.snapshots.length).toEqual(1);
 	entity.setMyProperty('baz', time);
