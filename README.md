@@ -40,29 +40,51 @@ pnpm build
 
 Make sure to build first.
 
-Start the backend API
+### Start the backend API
+
+Start REST API that exposes all data. Used by frontend.
+
+Source: apps/backend/core/infrastructure/http
 
 ```
 pnpm start:api
 ```
 
-Start the frontend server and serve the website
+### Start the frontend server and serve the website
+
+Host the web dashboard.
+
+source: apps/frontend
 
 ```
 pnpm start:frontend
 ```
 
-Run a stellar network scan (recommended: use dedicated worker or machine)
+### Run a stellar network scan (recommended: use dedicated worker or machine)
+
+Scans the a stellar network, detects nodes and validators, fetches geo data,
+performs network analysis,...
+
+Source: apps/backend/network-scan
 
 ```
-pnpm start:scan-network
+pnpm start:scan-network 1 0
 ```
 
-Run a history scan (recommended: use a dedicated machine)
+First argument controls if it should loop the scans (.env file in backend can
+supply a loop time interval), second argument controls if it's a dry run.
+
+### Run a history scan (recommended: use a dedicated machine)
+
+Fetches all known history archives from db and scans and verifies their content.
+Source: apps/backend/history-scan
 
 ```
-pnpm start:scan-history
+pnpm start:scan-history 1 1
 ```
+
+First argument controls persisting the results, the second argument if you want
+to loop the scanning forever.
 
 ## typescript monorepo configuration
 
