@@ -1,11 +1,15 @@
 # Monorepo for Stellarbeat project
 
-Work in progress
-
 ## install
 
 ```
 pnpm install
+```
+
+## list available commands
+
+```
+pnpm run
 ```
 
 ## development
@@ -19,7 +23,7 @@ pnpm build:ts
 ### frontend and API
 
 ```
-pnpm serve
+pnpm dev
 ```
 
 This will start the api on port 3000 and the frontend hot reload environment.
@@ -54,6 +58,12 @@ Run a stellar network scan (recommended: use dedicated worker or machine)
 pnpm start:scan-network
 ```
 
+Run a history scan (recommended: use a dedicated machine)
+
+```
+pnpm start:scan-history
+```
+
 ## typescript monorepo configuration
 
 The pure typescript packages and apps (backend, crawler, shared,...) have their
@@ -68,7 +78,6 @@ apps/packages and does this in the correct order.
 To compile:
 
 ```
-
 pnpm build:ts
 
 ```
@@ -90,11 +99,29 @@ project needs to be defined here to enable linting.
 run linting:
 
 ```
-
 pnpm lint
-
 ```
 
+## testing
+
+Using Jest
+
+### unit
+
+```
+pnpm test:unit
 ```
 
+### integration
+
+Using jest, needs postgres instance
+
+```
+pnpm test:integration
+```
+
+### run all tests (ci)
+
+```
+pnpm test:all
 ```
