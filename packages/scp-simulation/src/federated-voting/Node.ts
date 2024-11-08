@@ -14,7 +14,10 @@ import { PublicKey } from '..';
  * Thus every member of a quorum can be convinced of a statement by the members of that quorum.
  */
 export class Node {
-	constructor(public publicKey: PublicKey, public quorumSet: QuorumSet) {}
+	constructor(
+		public publicKey: PublicKey,
+		public quorumSet: QuorumSet
+	) {}
 
 	updateQuorumSet(quorumSet: QuorumSet): void {
 		this.quorumSet = quorumSet;
@@ -41,6 +44,14 @@ export class Node {
 			if (this.isThisNodePartOfQuorum(quorumCandidate)) {
 				return quorumCandidate;
 			}
+			return null;
+		}
+
+		// is this node a member of the quorum candidate? if not, it can never be a quorum for this node
+		// because the node should be part of every one of it's quorum slices.
+		// but because this is implicit in the quorum set definition, we have the extra check here.
+		// The actual quorumset should is: [t:2, self, QUORUM_SET]
+		if (!quorumCandidate.has(this.publicKey)) {
 			return null;
 		}
 

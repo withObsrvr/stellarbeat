@@ -11,9 +11,10 @@ describe('Node', () => {
 	});
 
 	describe('part of quorumCandidate is a quorum', () => {
-		const quorumCandidate = new Map<string, QuorumSet>();
+		let quorumCandidate: Map<string, QuorumSet>;
 
 		beforeEach(() => {
+			quorumCandidate = new Map<string, QuorumSet>();
 			quorumCandidate.set('A', new QuorumSet(1, ['B'], []));
 			quorumCandidate.set('B', new QuorumSet(1, ['A'], []));
 			quorumCandidate.set('C', new QuorumSet(2, ['F', 'G'], []));
@@ -21,13 +22,22 @@ describe('Node', () => {
 
 		it('should be a quorum with V as member', () => {
 			const node = new Node('V', new QuorumSet(1, ['B'], []));
+			quorumCandidate.set('V', node.quorumSet);
 			const quorumOrNull = node.isQuorum(quorumCandidate);
 
-			assert.notStrictEqual(quorumOrNull, null);
+			expect(quorumOrNull).not.toBe(null);
 			if (quorumOrNull === null) {
 				return;
 			}
-			assert.deepEqual(Array.from(quorumOrNull.keys()), ['A', 'B']);
+			expect(Array.from(quorumOrNull.keys()).sort()).toEqual(
+				['V', 'A', 'B'].sort()
+			);
+		});
+
+		it('should only be a quorum if it contains itself', () => {
+			const node = new Node('V', new QuorumSet(1, ['B'], []));
+			const quorumOrNull = node.isQuorum(quorumCandidate);
+			assert.strictEqual(quorumOrNull, null);
 		});
 
 		it('should not be a quorum with V as member', () => {

@@ -1,12 +1,12 @@
 {
 	"name": "scp-simulation",
 	"private": true,
-	"description": "Simulate the SCP protocol for educational purposes",
+	"description": "Simulate the SCP protocol for educational purposes. Currently focussing on federated voting",
 	"scripts": {
 		"build": "tsc --declaration",
 		"test:unit": "jest",
-		"build-and-start": "pnpm build && node ./lib/src/start-console.js",
-		"start": "node ./lib/src/start-console.js"
+		"build-and-start": "pnpm build && node ./lib/start-console.js",
+		"start": "node ./lib/start-console.js"
 	},
 	"main": "lib/index.js",
 	"types": "lib/index.d.ts",
