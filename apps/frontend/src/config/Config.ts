@@ -3,7 +3,7 @@ import { StellarBeatNetworkV1Repository } from "@/repositories/implementation/St
 import { isString } from "shared";
 import { FBASRepository } from "@/repositories/implementation/FBASRepository";
 import { FBASQIRepository } from "@/repositories/implementation/FBASQIRepository";
-import { MeridianRepository } from "@/repositories/implementation/MeridianRepository";
+import { TrustClusterDemoRepository } from "@/repositories/implementation/TrustClusterDemoRepository";
 
 export interface NetworkContext {
   networkId: NetworkId;
@@ -140,11 +140,10 @@ export default class Config {
         enableConfigExport: false,
         apiBaseUrl: "localhost",
       });
-
-      this.networkContexts.set("meridian", {
-        networkId: "meridian",
-        name: "Meridian demo",
-        repository: new MeridianRepository(),
+      this.networkContexts.set("trust-cluster", {
+        networkId: "trust-cluster",
+        name: "Trust Cluster demo",
+        repository: new TrustClusterDemoRepository(),
         enableNotify: false,
         enableHistory: false,
         enableIndex: false,

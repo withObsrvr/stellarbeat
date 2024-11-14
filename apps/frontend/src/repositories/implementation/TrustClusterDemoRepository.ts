@@ -2,7 +2,7 @@ import { type NetworkRepository } from "@/repositories/NetworkRepository";
 import { Network, Node, QuorumSet } from "shared";
 import { ok, Result } from "neverthrow";
 
-export class MeridianRepository implements NetworkRepository {
+export class TrustClusterDemoRepository implements NetworkRepository {
   find(): Promise<Result<Network, Error>> {
     const organizations = [];
     const nodes = [
