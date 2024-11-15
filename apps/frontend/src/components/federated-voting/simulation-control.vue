@@ -1,51 +1,104 @@
 <template>
-  <nav class="card navbar">
-    <div class="button-group">
-      <button class="btn btn-primary navbar-item" @click="backward">
-        <BIconArrowCounterclockwise class="icon-color" />
-      </button>
-      <button
-        v-if="!isPlaying"
-        class="btn btn-primary navbar-item"
-        @click="play"
+  <div>
+    <!-- Console View -->
+    <div class="card mt-2">
+      <div class="card-header d-flex justify-content-between pl-2">
+        <nav class="navbar p-0">
+          <div class="btn-group" role="group">
+            <button v-if="isPaused" class="btn btn-primary" @click="play">
+              <BIconPlayFill class="icon-color" />
+            </button>
+            <button v-else class="btn btn-success" @click="pause">
+              <BIconPauseFill class="icon-color" />
+            </button>
+            <button class="btn btn-secondary" @click="forward">
+              <BIconArrowClockwise class="icon-color" />
+            </button>
+          </div>
+        </nav>
+        <input
+          v-model="consoleFilterQuery"
+          type="text"
+          class="form-control form-control-sm"
+          placeholder="Filter logs"
+          style="width: 150px"
+        />
+      </div>
+      <div
+        class="card-body p-2"
+        style="
+          max-height: 200px;
+          overflow-y: auto;
+          font-family: monospace;
+          font-size: 12px;
+        "
       >
-        <BIconPlayFill class="icon-color" />
-      </button>
-      <button v-else class="btn btn-primary navbar-item" @click="pause">
-        <BIconPauseFill class="icon-color" />
-      </button>
-      <button class="btn btn-primary navbar-item" @click="forward">
-        <BIconArrowClockwise class="icon-color" />
-      </button>
+        <div v-for="(log, index) in filteredConsoleLogs" :key="index">
+          {{ log }}
+        </div>
+      </div>
     </div>
-
-    <scenario-selector />
-  </nav>
+  </div>
 </template>
 
 <script setup lang="ts">
 import {
   BIconArrowClockwise,
-  BIconArrowCounterclockwise,
   BIconPauseFill,
   BIconPlayFill,
 } from "bootstrap-vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import ScenarioSelector from "@/components/federated-voting/scenario-selector.vue";
 
-const isPlaying = ref(false);
+const isPaused = ref(true);
 
-const backward = () => {};
+function play() {
+  isPaused.value = false;
+  // Implement play logic
+}
 
-const forward = () => {};
+function pause() {
+  isPaused.value = true;
+  // Implement pause logic
+}
 
-const play = () => {
-  isPlaying.value = true;
-};
+function forward() {
+  // Implement forward logic
+}
 
-const pause = () => {
-  isPlaying.value = false;
-};
+const events = ref([
+  "Node 1 sends message: Vote(pizza)",
+  "Node 2 sends message: Vote(pasta)",
+  "Node 3 sends message: Vote(sushi)",
+  "Node 4 sends message: Vote(burger)",
+  "Node 5 sends message: Vote(salad)",
+]);
+
+const consoleFilterQuery = ref("");
+
+const filteredConsoleLogs = computed(() => {
+  if (!consoleFilterQuery.value) {
+    return consoleLogs.value;
+  }
+  return consoleLogs.value.filter((log) =>
+    log.toLowerCase().includes(consoleFilterQuery.value.toLowerCase()),
+  );
+});
+
+// Mockup console logs
+const consoleLogs = ref([
+  "Protocol started...",
+  "Node 1 sends message: Vote(pizza)",
+  "Node 2 sends message: Vote(pasta)",
+  "Node 3 sends message: Vote(sushi)",
+  "Node 4 sends message: Vote(burger)",
+  "Node 5 sends message: Vote(salad)",
+  "Node 1 received message: Vote(pizza)",
+  "Node 2 received message: Vote(pasta)",
+  "Node 3 received message: Vote(sushi)",
+  "Node 4 received message: Vote(burger)",
+  "Node 5 received message: Vote(salad)",
+]);
 </script>
 
 <style scoped>
@@ -55,10 +108,6 @@ const pause = () => {
   justify-content: space-between;
   flex-direction: row;
   background-color: white;
-}
-
-.icon-color {
-  color: gray;
 }
 
 .button-group {
