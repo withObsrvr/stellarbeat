@@ -34,13 +34,11 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 const consoleSearchQuery = ref("");
-const consoleLogs = ref<string[]>([]);
-consoleLogs.value.push("Federated Voting simulation initialized.");
-
 const filteredConsoleLogs = computed(() => {
-  const logsWithLineNumbers = consoleLogs.value.map((log, index) => ({
+  const logsWithLineNumbers = federatedVotingStore.log.map((log, index) => ({
     log,
     lineNumber: index + 1,
   }));

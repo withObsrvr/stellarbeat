@@ -31,7 +31,7 @@ export class SimulationPlayer {
 		this.addNode('Chad', quorumSet);
 		this.addConnection('Alice', 'Bob');
 		this.addConnection('Bob', 'Chad');
-		this.executeCurrentStep();
+		this.executeCurrentStep(); //todo: should we execute at start?
 		//@todo: validation of the network connections => only known nodes or ignore?
 	}
 
