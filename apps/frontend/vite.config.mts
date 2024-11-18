@@ -22,7 +22,12 @@ export default defineConfig({
   },
   build: {
     commonjsOptions: {
-      include: [/shared/, /node_modules/, /shared\/lib\/network-schema/],
+      include: [
+        /shared/,
+        /node_modules/,
+        /shared\/lib\/network-schema/,
+        /scp-simulation/,
+      ],
     },
     sourcemap: true,
     chunkSizeWarningLimit: 1000,
@@ -46,7 +51,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["shared", "shared/lib/network-schema"],
+    include: ["shared", "shared/lib/network-schema", "scp-simulation"],
   },
   css: {
     devSourcemap: true,

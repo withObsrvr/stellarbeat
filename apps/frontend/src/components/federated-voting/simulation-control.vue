@@ -30,38 +30,7 @@
       </div>
       <!-- Content area: Console Output and Events Panel -->
       <div class="card-body p-2 d-flex" style="max-height: 250px">
-        <!-- Console Output -->
-        <div
-          class="console-output"
-          style="
-            flex: 1;
-            margin-right: 10px;
-            overflow-y: auto;
-            font-family: monospace;
-            font-size: 12px;
-            background-color: white;
-            border: 1px solid lightgray;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-          "
-        >
-          <!-- Console Search Box -->
-          <div class="mb-2">
-            <input
-              v-model="consoleSearchQuery"
-              type="text"
-              class="form-control form-control-sm"
-              placeholder="Search console logs"
-            />
-          </div>
-          <!-- Console Logs -->
-          <div style="overflow-y: auto; flex: 1">
-            <div v-for="(log, index) in filteredConsoleLogs" :key="index">
-              {{ log }}
-            </div>
-          </div>
-        </div>
+        <console-log />
         <!-- Events Panel -->
         <div
           class="events-panel"
@@ -118,8 +87,9 @@
 
 <script setup lang="ts">
 import ScenarioSelector from "@/components/federated-voting/scenario-selector.vue";
+import ConsoleLog from "@/components/federated-voting/console-log.vue";
+
 import {
-  BIconPlayFill,
   BIconSkipBackwardFill,
   BIconSkipForwardFill,
   BIconStopFill,
@@ -146,13 +116,9 @@ function handleEventAction(index: number) {
   if (event.type === "Action") {
     // Handle cancel action
     const canceledEvent = events.value.splice(originalIndex, 1)[0];
-    consoleLogs.value.push(`Action event canceled: ${canceledEvent.message}`);
   } else if (event.type === "Protocol") {
     // Handle disrupt action
     const disruptedEvent = events.value.splice(originalIndex, 1)[0];
-    consoleLogs.value.push(
-      `Protocol event disrupted: ${disruptedEvent.message}`,
-    );
   }
 }
 
@@ -178,27 +144,6 @@ const filteredEvents = computed(() => {
     );
   }
   return filtered;
-});
-
-const consoleFilterQuery = ref("");
-const consoleSearchQuery = ref("");
-const consoleLogs = ref(
-  Array.from({ length: 50 }, (_, i) => `Log entry ${i + 1}: Sample log data.`),
-);
-
-const filteredConsoleLogs = computed(() => {
-  let logs = consoleLogs.value;
-  if (consoleFilterQuery.value) {
-    logs = logs.filter((log) =>
-      log.toLowerCase().includes(consoleFilterQuery.value.toLowerCase()),
-    );
-  }
-  if (consoleSearchQuery.value) {
-    logs = logs.filter((log) =>
-      log.toLowerCase().includes(consoleSearchQuery.value.toLowerCase()),
-    );
-  }
-  return logs;
 });
 </script>
 
@@ -240,14 +185,6 @@ const filteredConsoleLogs = computed(() => {
 
 .event-item {
   padding: 5px 0;
-}
-
-.console-output {
-  /* Additional styles can be added here */
-}
-
-.events-panel {
-  /* Additional styles can be added here */
 }
 
 .btn-sm {

@@ -35,6 +35,7 @@
     "portal-vue": "^2.1.7",
     "prerender-node": "^3.8.0",
     "shared": "workspace:*",
+    "scp-simulation": "workspace:*",
     "vue": "^2.7.16",
     "vue-multiselect": "^2.1.9",
     "vue-router": "^3.6.5"
