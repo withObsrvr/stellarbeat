@@ -14,12 +14,15 @@ export class SimulationPlayer {
 	private executedSteps: SimulationStep[] = [];
 	private simulation: Simulation = new Simulation();
 	private currentSimulationStep: SimulationStep = new SimulationStep(0);
+	private log: string[] = [];
 
 	start(): void {
+		this.log.push('Starting simulation');
 		//todo: take a json or something for a scenario
 		this.simulation = new Simulation();
 		this.currentSimulationStep = new SimulationStep(0);
 		this.executedSteps = [];
+		this.log.push('Initialize default scenario');
 		const quorumSet: BaseQuorumSet = {
 			threshold: 2,
 			validators: ['Alice', 'Bob', 'Chad'],
@@ -73,7 +76,7 @@ export class SimulationPlayer {
 			!this.currentSimulationStep.hasCommands() &&
 			!this.simulation.hasMessages()
 		) {
-			console.log('Nothing to do');
+			this.log.push('Nothing to do');
 			return;
 		}
 
@@ -90,11 +93,11 @@ export class SimulationPlayer {
 	logEvents(events: Event[]): void {
 		events.forEach((event) => {
 			if (event instanceof ProtocolEvent) {
-				console.log(`[fed-vot]${event.toString()}`);
+				this.log.push(`[fed-vot]${event.toString()}`);
 			}
 
 			if (event instanceof MessageSent) {
-				console.log(`[overlay]${event.toString()}`);
+				this.log.push(`[overlay]${event.toString()}`);
 			}
 		});
 	}
@@ -108,12 +111,10 @@ export class SimulationPlayer {
 
 	public undoLastStep(): void {
 		if (this.executedSteps.length === 0) {
-			console.log('Nothing to undo');
 			return;
 		}
 		const removedStep = this.executedSteps.pop();
 		if (!removedStep) {
-			console.log('Nothing to undo');
 			return;
 		}
 		this.simulation = new Simulation();
@@ -141,5 +142,9 @@ export class SimulationPlayer {
 		connections: PublicKey[];
 	}[] {
 		return this.simulation.nodesWithConnections;
+	}
+
+	get simulationLog(): string[] {
+		return this.log.slice(); //return a copy to avoid mutation
 	}
 }

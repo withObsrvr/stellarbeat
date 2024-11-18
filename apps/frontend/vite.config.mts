@@ -46,6 +46,7 @@ export default defineConfig({
           vue: ["vue", "vue-router", "vue-multiselect", "portal-vue"],
           sentry: ["@sentry/vue"],
           shared: ["shared"],
+          "scp-simulation": ["scp-simulation"],
         },
       },
     },

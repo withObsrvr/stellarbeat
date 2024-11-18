@@ -24,7 +24,7 @@
       />
     </div>
     <!-- Console Logs -->
-    <div style="overflow-y: auto; flex: 1">
+    <div ref="logContainer" style="overflow-y: auto; flex: 1">
       <div v-for="item in filteredConsoleLogs" :key="item.lineNumber">
         {{ item.lineNumber }}. {{ item.log }}
       </div>
@@ -33,15 +33,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, nextTick } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import { watch } from "vue";
+import { vueIntegration } from "@sentry/vue";
 
+const logContainer = ref<HTMLElement | null>(null);
 const consoleSearchQuery = ref("");
 const filteredConsoleLogs = computed(() => {
-  const logsWithLineNumbers = federatedVotingStore.log.map((log, index) => ({
-    log,
-    lineNumber: index + 1,
-  }));
+  const logsWithLineNumbers =
+    federatedVotingStore.simulationPlayer.simulationLog.map((log, index) => ({
+      log,
+      lineNumber: index + 1,
+    }));
 
   if (consoleSearchQuery.value) {
     return logsWithLineNumbers.filter((item) =>
@@ -49,6 +53,14 @@ const filteredConsoleLogs = computed(() => {
     );
   }
   return logsWithLineNumbers;
+});
+
+watch(filteredConsoleLogs, () => {
+  nextTick(() => {
+    if (logContainer.value) {
+      logContainer.value.scrollTop = logContainer.value.scrollHeight;
+    }
+  });
 });
 </script>
 

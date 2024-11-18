@@ -95,11 +95,13 @@ import {
   BIconStopFill,
 } from "bootstrap-vue";
 import { ref, computed } from "vue";
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 const started = ref(false);
 
 function play() {
   started.value = true;
+  federatedVotingStore.simulationPlayer.next();
 }
 
 function stop() {
