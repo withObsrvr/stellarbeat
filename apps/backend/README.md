@@ -31,22 +31,45 @@ Copy env.dist to .env and configure the environment variables.
 
 Every package has a README.md file with more detailed information.
 
+### Run dev environment
+
+1. Provide the necessary environment variables. (todo: automate)
+2. Start a network scan to get some data into the system
+
+```
+pnpm start:scan-network
+```
+
+3. start api and frontend dev environment
+
+```
+pnpm dev
+```
+
+Dev environment hosted on http://localhost:5173/
+
 ### Run the api
 
 ```
+
 pnpm start-api
+
 ```
 
 ### Run the history-scan
 
 ```
+
 pnpm verify-archives
+
 ```
 
 ### Run the network-scan
 
 ```
+
 pnpm scan-network
+
 ```
 
 ### Run tests
@@ -56,19 +79,26 @@ required for the integration tests that you can configure with the
 DATABASE_TEST_URL env variable.
 
 ```
-pnpm test
-pnpm test:unit
-pnpm test:integration
+
+pnpm test pnpm test:unit pnpm test:integration
+
 ```
 
 ### Create migration
 
 ```
-pnpm build
-pnpm typeorm migration:generate src/core/infrastructure/database/migrations/{{MIGRATION_DESCRIPTION}} -d lib/core/infrastructure/database/AppDataSource.js
+
+pnpm build pnpm typeorm migration:generate
+src/core/infrastructure/database/migrations/{{MIGRATION_DESCRIPTION}} -d
+lib/core/infrastructure/database/AppDataSource.js
+
 ```
 
 ## history
 
 Code from https://github.com/stellarbeat/js-stellarbeat-backend was moved to
 this monorepo. For history consult this archive.
+
+```
+
+```

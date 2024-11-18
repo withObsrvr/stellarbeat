@@ -6,17 +6,21 @@
         <nav class="navbar p-0">
           <div class="btn-group" role="group">
             <button
-              v-if="isPaused"
-              class="btn btn-primary btn-sm"
-              @click="play"
+              class="btn btn-secondary btn-sm"
+              :disabled="!started"
+              @click="goBackOneStep"
             >
-              <BIconPlayFill class="icon-color" />
+              <BIconSkipBackwardFill class="icon-color" />
             </button>
-            <button v-else class="btn btn-success btn-sm" @click="pause">
-              <BIconPauseFill class="icon-color" />
+            <button class="btn btn-primary btn-sm" @click="play">
+              <BIconSkipForwardFill class="icon-color" />
             </button>
-            <button class="btn btn-secondary btn-sm" @click="forward">
-              <BIconArrowCounterclockwise class="icon-color" />
+            <button
+              class="btn btn-secondary btn-sm"
+              :disabled="!started"
+              @click="stop"
+            >
+              <BIconStopFill class="icon-color" />
             </button>
           </div>
         </nav>
@@ -115,27 +119,25 @@
 <script setup lang="ts">
 import ScenarioSelector from "@/components/federated-voting/scenario-selector.vue";
 import {
-  BIconArrowClockwise,
-  BIconArrowCounterclockwise,
-  BIconPauseFill,
   BIconPlayFill,
+  BIconSkipBackwardFill,
+  BIconSkipForwardFill,
+  BIconStopFill,
 } from "bootstrap-vue";
 import { ref, computed } from "vue";
 
-const isPaused = ref(true);
+const started = ref(false);
 
 function play() {
-  isPaused.value = false;
-  // Implement play logic
+  started.value = true;
 }
 
-function pause() {
-  isPaused.value = true;
-  // Implement pause logic
+function stop() {
+  started.value = false;
 }
 
-function forward() {
-  // Implement forward logic
+function goBackOneStep() {
+  //nothing yet
 }
 
 function handleEventAction(index: number) {
