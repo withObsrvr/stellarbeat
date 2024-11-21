@@ -1,35 +1,39 @@
 import { PublicKey, Statement } from '..';
 import { EventCollector } from '../core/EventCollector';
-import { FederatedVote } from '../federated-voting/FederatedVote';
+import { FederatedVotingProtocol } from '../federated-voting/FederatedVotingProtocol';
+import { FederatedVotingState } from '../federated-voting/FederatedVotingState';
 import { Vote } from '../federated-voting/Vote';
 import { Voted } from '../federated-voting/event/Voted';
-import { BaseQuorumSet } from './BaseQuorumSet';
+import { PhaseTransitioner } from '../federated-voting/phase-transitioner/PhaseTransitioner';
+import { QuorumSet } from './QuorumSet';
 import { Message } from './Message';
 import { MessageSent } from './event/MessageSent';
 
 export class NodeOrchestrator extends EventCollector {
 	private connections: Set<PublicKey> = new Set();
-	private federatedVote: FederatedVote;
+	private federatedVotingProtocol = new FederatedVotingProtocol(
+		new PhaseTransitioner()
+	);
+	private federatedVotingState: FederatedVotingState;
 	private processedVotes: Set<Vote> = new Set();
-	private quorumSet: BaseQuorumSet;
+	private quorumSet: QuorumSet;
 
 	constructor(
 		public readonly publicKey: PublicKey,
-		quorumSet: BaseQuorumSet,
+		quorumSet: QuorumSet,
 		connections: PublicKey[] = []
 	) {
 		super();
 		this.quorumSet = quorumSet;
-		this.federatedVote = new FederatedVote(publicKey, quorumSet); //todo: inject?
+		this.federatedVotingState = new FederatedVotingState(publicKey, quorumSet);
 		connections.forEach((connection) => this.addConnection(connection));
 	}
 
-	updateQuorumSet(quorumSet: BaseQuorumSet): void {
+	updateQuorumSet(quorumSet: QuorumSet): void {
 		this.quorumSet = quorumSet;
-		this.federatedVote.updateQuorumSet(this.quorumSet);
 	}
 
-	getQuorumSet(): BaseQuorumSet {
+	getQuorumSet(): QuorumSet {
 		return this.quorumSet;
 	}
 
@@ -47,8 +51,11 @@ export class NodeOrchestrator extends EventCollector {
 	}
 
 	receiveMessage(message: Message): void {
-		this.federatedVote.processVote(message.vote);
-		const federatedVoteEvents = this.federatedVote.drainEvents();
+		this.federatedVotingProtocol.processVote(
+			message.vote,
+			this.federatedVotingState
+		);
+		const federatedVoteEvents = this.federatedVotingProtocol.drainEvents();
 		this.registerEvents(federatedVoteEvents);
 
 		federatedVoteEvents
@@ -61,8 +68,8 @@ export class NodeOrchestrator extends EventCollector {
 	}
 
 	vote(statement: Statement): void {
-		this.federatedVote.voteForStatement(statement);
-		const federatedVoteEvents = this.federatedVote.drainEvents();
+		this.federatedVotingProtocol.vote(statement, this.federatedVotingState);
+		const federatedVoteEvents = this.federatedVotingProtocol.drainEvents();
 		this.registerEvents(federatedVoteEvents);
 
 		federatedVoteEvents
@@ -82,7 +89,7 @@ export class NodeOrchestrator extends EventCollector {
 		this.processedVotes.add(vote);
 	}
 
-	getFederatedVote(): FederatedVote {
-		return this.federatedVote;
+	getFederatedVotingState(): FederatedVotingState {
+		return this.federatedVotingState;
 	}
 }

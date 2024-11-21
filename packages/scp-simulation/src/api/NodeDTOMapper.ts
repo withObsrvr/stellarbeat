@@ -8,8 +8,8 @@ export class NodeDTOMapper {
 			publicKey: node.publicKey.toString(),
 			quorumSet: includeQSet ? node.getQuorumSet() : undefined,
 			connections: node.getConnections(),
-			federatedVote: FederatedVoteDTOMapper.toDTO(
-				node.getFederatedVote(),
+			federatedVotingState: FederatedVoteDTOMapper.toDTO(
+				node.getFederatedVotingState(),
 				includeQSet
 			)
 		};

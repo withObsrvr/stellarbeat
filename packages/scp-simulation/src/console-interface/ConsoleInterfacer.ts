@@ -1,7 +1,7 @@
 import * as readline from 'readline';
 import { SimulationPlayer } from '../simulation/SimulationPlayer';
 import { ConsoleAdjacencyMatrixVisualization } from './ConsoleAdjacencyMatrixVisualizer';
-import { BaseQuorumSet } from '../node/BaseQuorumSet';
+import { QuorumSet } from '../node/QuorumSet';
 
 export class ConsoleInterfacer {
 	private rl: readline.Interface;
@@ -44,8 +44,8 @@ export class ConsoleInterfacer {
 
 	private showNodeTrustConnections(): void {
 		const nodesWithQuorumSets = this.simulationPlayer.publicKeysWithQuorumSets;
-		const getQuorumSetMembers: (quorumSet: BaseQuorumSet) => string[] = (
-			quorumSet: BaseQuorumSet
+		const getQuorumSetMembers: (quorumSet: QuorumSet) => string[] = (
+			quorumSet: QuorumSet
 		) => {
 			return quorumSet.validators.concat(
 				quorumSet.innerQuorumSets.map(getQuorumSetMembers).flat()

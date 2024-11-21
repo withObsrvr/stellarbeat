@@ -1,10 +1,10 @@
 import { PublicKey } from '..';
-import { BaseQuorumSet } from '../node/BaseQuorumSet';
+import { QuorumSet } from '../node/QuorumSet';
 import { FederatedVoteDTO } from './FederatedVoteDTO';
 
 export interface NodeDTO {
 	publicKey: string;
-	quorumSet?: BaseQuorumSet;
+	quorumSet?: QuorumSet;
 	connections: PublicKey[];
-	federatedVote: FederatedVoteDTO;
+	federatedVotingState: FederatedVoteDTO;
 }

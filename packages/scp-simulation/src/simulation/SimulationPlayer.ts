@@ -1,4 +1,4 @@
-import { BaseQuorumSet } from '../node/BaseQuorumSet';
+import { QuorumSet } from '../node/QuorumSet';
 import { PublicKey, Statement } from '..';
 import { NodeDTO } from '../api/NodeDTO';
 import { Simulation } from './Simulation';
@@ -23,7 +23,7 @@ export class SimulationPlayer {
 		this.currentSimulationStep = new SimulationStep(0);
 		this.executedSteps = [];
 		this.log.push('Initialize default scenario');
-		const quorumSet: BaseQuorumSet = {
+		const quorumSet: QuorumSet = {
 			threshold: 2,
 			validators: ['Alice', 'Bob', 'Chad'],
 			innerQuorumSets: []
@@ -38,7 +38,7 @@ export class SimulationPlayer {
 		//@todo: validation of the network connections => only known nodes or ignore?
 	}
 
-	addNode(publicKey: PublicKey, quorumSet: BaseQuorumSet): void {
+	addNode(publicKey: PublicKey, quorumSet: QuorumSet): void {
 		const addNodeCommand = new AddNodeCommand(publicKey, quorumSet);
 		this.currentSimulationStep.addCommand(addNodeCommand);
 	}
@@ -118,6 +118,10 @@ export class SimulationPlayer {
 			return;
 		}
 		this.simulation = new Simulation();
+		//This could be optimized by cloning and storing the state in every previous step.
+		//Undo would then be just restoring the state from the previous step.
+		//When? If replaying steps would take a significant amount of time.
+		//Tradeoff? more memory usage
 		this.executedSteps.forEach((step) => step.execute(this.simulation));
 		this.currentSimulationStep = new SimulationStep(removedStep.id);
 	}
@@ -132,7 +136,7 @@ export class SimulationPlayer {
 
 	get publicKeysWithQuorumSets(): {
 		publicKey: PublicKey;
-		quorumSet: BaseQuorumSet;
+		quorumSet: QuorumSet;
 	}[] {
 		return this.simulation.publicKeysWithQuorumSets;
 	}

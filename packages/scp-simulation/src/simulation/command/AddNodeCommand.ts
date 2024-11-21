@@ -1,12 +1,15 @@
 import { PublicKey } from '../..';
-import { BaseQuorumSet } from '../../node/BaseQuorumSet';
+import { QuorumSet } from '../../node/QuorumSet';
 import { Command } from '../Command';
 import { Simulation } from '../Simulation';
 
 export class AddNodeCommand implements Command {
 	command = 'add-node';
 
-	constructor(private publicKey: PublicKey, private quorumSet: BaseQuorumSet) {}
+	constructor(
+		private publicKey: PublicKey,
+		private quorumSet: QuorumSet
+	) {}
 
 	execute(simulation: Simulation): void {
 		simulation.addNode(this.publicKey, this.quorumSet);

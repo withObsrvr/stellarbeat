@@ -4,6 +4,8 @@ import { Command } from './Command';
 import { Simulation } from './Simulation';
 
 export class SimulationStep extends EventCollector {
+	public pendingProtocolEvents: any;
+	public pendingUserEvents: any;
 	private commands: Command[] = [];
 
 	constructor(public readonly id: number) {

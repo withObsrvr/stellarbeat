@@ -1,9 +1,9 @@
 import { PublicKey, Statement } from '../../..';
+import { QuorumSet } from '../../../node/QuorumSet';
 import { ProtocolEvent } from '../../ProtocolEvent';
-import { QuorumSet } from '../../QuorumSet';
 
-export class AcceptVoteRatified extends ProtocolEvent {
-	readonly subType = 'AcceptVoteRatified';
+export class VoteRatified extends ProtocolEvent {
+	readonly subType = 'VoteRatified';
 	constructor(
 		public readonly publicKey: PublicKey,
 		public readonly statement: Statement,
@@ -15,8 +15,8 @@ export class AcceptVoteRatified extends ProtocolEvent {
 	toString(): string {
 		return `[${this.publicKey}][${
 			this.subType
-		}] vote(accept(${this.statement.toString()})) ratified by quorum (${Array.from(
+		}] vote(${this.statement.toString()}) ratified by quorum (${Array.from(
 			this.quorum.keys()
-		)}) in agreement attempt on statement ${this.statement.toString()}`;
+		)}) for statement ${this.statement.toString()}`;
 	}
 }

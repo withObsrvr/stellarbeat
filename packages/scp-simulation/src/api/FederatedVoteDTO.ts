@@ -1,11 +1,13 @@
 import { PublicKey } from '..';
-import { BaseQuorumSet } from '../node/BaseQuorumSet';
-import { AgreementAttemptDTO } from './AgreementAttemptDTO';
+import { FederatedVotingPhase } from '../federated-voting/FederatedVotingState';
+import { QuorumSet } from '../node/QuorumSet';
 import { StatementDTO } from './StatementDTO';
 
 export interface FederatedVoteDTO {
 	publicKey: PublicKey;
-	quorumSet?: BaseQuorumSet;
-	agreementAttempts: AgreementAttemptDTO[];
-	consensus: StatementDTO | null;
+	quorumSet?: QuorumSet;
+	confirmed: StatementDTO | null;
+	voted: StatementDTO | null;
+	accepted: StatementDTO | null;
+	phase: FederatedVotingPhase;
 }

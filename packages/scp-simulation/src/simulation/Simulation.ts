@@ -2,20 +2,19 @@ import assert from 'assert';
 import { PublicKey, Statement } from '..';
 import { NodeDTO } from '../api/NodeDTO';
 import { NodeDTOMapper } from '../api/NodeDTOMapper';
-import { BaseQuorumSet } from '../node/BaseQuorumSet';
+import { QuorumSet } from '../node/QuorumSet';
 import { NodeOrchestrator } from '../node/NodeOrchestrator';
 import { MessageSent } from '../node/event/MessageSent';
 import { Message } from '../node/Message';
 import { Overlay } from '../overlay/Overlay';
 import { EventCollector } from '../core/EventCollector';
 
-//todo: is this the correct name?
 export class Simulation extends EventCollector {
 	private overlay: Overlay = new Overlay();
 	private messageQueue: Set<Message> = new Set();
 	private outbox: Set<Message> = new Set();
 
-	addNode(publicKey: PublicKey, quorumSet: BaseQuorumSet): void {
+	addNode(publicKey: PublicKey, quorumSet: QuorumSet): void {
 		this.overlay.addNode(publicKey, quorumSet);
 		this.registerEvents(this.overlay.drainEvents());
 	}
@@ -83,7 +82,7 @@ export class Simulation extends EventCollector {
 
 	get publicKeysWithQuorumSets(): {
 		publicKey: PublicKey;
-		quorumSet: BaseQuorumSet;
+		quorumSet: QuorumSet;
 	}[] {
 		return this.overlay.getNodes().map((node) => ({
 			publicKey: node.publicKey,

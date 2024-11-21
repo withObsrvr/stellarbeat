@@ -1,6 +1,6 @@
 import { PublicKey } from '..';
 import { EventCollector } from '../core/EventCollector';
-import { BaseQuorumSet } from '../node/BaseQuorumSet';
+import { QuorumSet } from '../node/QuorumSet';
 
 import { NodeOrchestrator } from '../node/NodeOrchestrator';
 import { ConnectionAdded } from './event/ConnectionAdded';
@@ -12,7 +12,7 @@ import { NodeAdded } from './event/NodeAdded';
 export class Overlay extends EventCollector {
 	private nodeMap: Map<PublicKey, NodeOrchestrator> = new Map();
 
-	addNode(publicKey: PublicKey, quorumSet: BaseQuorumSet): void {
+	addNode(publicKey: PublicKey, quorumSet: QuorumSet): void {
 		if (this.nodeMap.has(publicKey)) {
 			console.log('Node already exists');
 			return;
