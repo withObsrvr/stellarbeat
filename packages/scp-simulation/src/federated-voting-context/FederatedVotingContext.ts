@@ -1,6 +1,6 @@
 import { Node, PublicKey, QuorumSet, Statement } from '..';
 import { Context } from '../core/Context';
-import { EventCollector, InMemoryEventCollector } from '../core/EventCollector';
+import { InMemoryEventCollector } from '../core/EventCollector';
 import { Voted } from '../federated-voting-protocol';
 import { FederatedVotingProtocol } from '../federated-voting-protocol/FederatedVotingProtocol';
 import { FederatedVotingState } from '../federated-voting-protocol/FederatedVotingState';

@@ -2,11 +2,11 @@ import { Statement } from './Statement';
 import { Vote } from './Vote';
 import { Voted } from './event/Voted';
 import { ConsensusReached } from './event/ConsensusReached';
-import { EventCollector } from '../core/EventCollector';
+import { EventCollector, InMemoryEventCollector } from '../core/EventCollector';
 import { FederatedVotingState } from './FederatedVotingState';
 import { PhaseTransitioner } from './phase-transitioner/PhaseTransitioner';
 
-export class FederatedVotingProtocol extends EventCollector {
+export class FederatedVotingProtocol extends InMemoryEventCollector{
 	constructor(private phaseTransitioner: PhaseTransitioner) {
 		super();
 	}

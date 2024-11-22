@@ -1,16 +1,16 @@
 import * as readline from 'readline';
-import { SimulationPlayer } from '../simulation/SimulationPlayer';
+import { SimulationFactory } from '../simulation/SimulationFactory';
 import { ConsoleAdjacencyMatrixVisualization } from './ConsoleAdjacencyMatrixVisualizer';
 import { QuorumSet } from '../core/QuorumSet';
 
 export class ConsoleInterfacer {
 	private rl: readline.Interface;
-	private simulationPlayer: SimulationPlayer;
+	private simulationPlayer: SimulationFactory;
 
 	constructor(
 		private consoleAdjacencyMatrixVisualizer: ConsoleAdjacencyMatrixVisualization
 	) {
-		this.simulationPlayer = new SimulationPlayer();
+		this.simulationPlayer = new SimulationFactory();
 
 		this.rl = readline.createInterface({
 			input: process.stdin,

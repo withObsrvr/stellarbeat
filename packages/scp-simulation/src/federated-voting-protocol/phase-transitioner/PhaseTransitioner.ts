@@ -1,5 +1,5 @@
 import { Statement } from '../Statement';
-import { EventCollector } from '../../core/EventCollector';
+import { InMemoryEventCollector } from '../../core/EventCollector';
 import { TransitionedToAcceptPhase } from './event/TransitionedToAcceptPhase';
 import { VoteRatified } from './event/VoteRatified';
 import { AcceptVoteRatified } from './event/AcceptVoteRatified';
@@ -14,7 +14,7 @@ import { QuorumSetService } from '../QuorumSetService';
 import { QuorumSet } from '../../core/QuorumSet';
 import { QuorumService } from '../QuorumService';
 
-export class PhaseTransitioner extends EventCollector {
+export class PhaseTransitioner extends InMemoryEventCollector {
 	tryMoveToAcceptPhase(
 		statement: Statement,
 		state: FederatedVotingState
