@@ -1,7 +1,7 @@
 import * as readline from 'readline';
 import { SimulationPlayer } from '../simulation/SimulationPlayer';
 import { ConsoleAdjacencyMatrixVisualization } from './ConsoleAdjacencyMatrixVisualizer';
-import { QuorumSet } from '../node/QuorumSet';
+import { QuorumSet } from '../core/QuorumSet';
 
 export class ConsoleInterfacer {
 	private rl: readline.Interface;

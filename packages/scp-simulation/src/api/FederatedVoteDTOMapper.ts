@@ -1,4 +1,4 @@
-import { FederatedVotingState } from '../federated-voting/FederatedVotingState';
+import { FederatedVotingState } from '../federated-voting-protocol/FederatedVotingState';
 import { FederatedVoteDTO } from './FederatedVoteDTO';
 import { StatementDTOMapper } from './StatementDTOMapper';
 

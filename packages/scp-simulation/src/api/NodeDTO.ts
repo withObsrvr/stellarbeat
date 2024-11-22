@@ -1,5 +1,5 @@
 import { PublicKey } from '..';
-import { QuorumSet } from '../node/QuorumSet';
+import { QuorumSet } from '../core/QuorumSet';
 import { FederatedVoteDTO } from './FederatedVoteDTO';
 
 export interface NodeDTO {

@@ -1,6 +1,6 @@
 import { PublicKey } from '..';
-import { FederatedVotingPhase } from '../federated-voting/FederatedVotingState';
-import { QuorumSet } from '../node/QuorumSet';
+import { FederatedVotingPhase } from '../federated-voting-protocol/FederatedVotingState';
+import { QuorumSet } from '../core/QuorumSet';
 import { StatementDTO } from './StatementDTO';
 
 export interface FederatedVoteDTO {

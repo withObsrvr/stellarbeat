@@ -14,9 +14,14 @@ export class FederatedVotingProtocol extends EventCollector {
 	vote(statement: Statement, state: FederatedVotingState): void {
 		if (state.voted !== null) return;
 
-		const vote = new Vote(statement, false, state.publicKey, state.quorumSet);
+		const vote = new Vote(
+			statement,
+			false,
+			state.node.publicKey,
+			state.node.quorumSet
+		);
 		state.voted = vote;
-		this.registerEvent(new Voted(state.publicKey, vote));
+		this.registerEvent(new Voted(state.node.publicKey, vote));
 		this.processVote(vote, state);
 	}
 
@@ -26,8 +31,13 @@ export class FederatedVotingProtocol extends EventCollector {
 		statement: Statement,
 		state: FederatedVotingState
 	) {
-		const vote = new Vote(statement, true, state.publicKey, state.quorumSet);
-		this.registerEvent(new Voted(state.publicKey, vote));
+		const vote = new Vote(
+			statement,
+			true,
+			state.node.publicKey,
+			state.node.quorumSet
+		);
+		this.registerEvent(new Voted(state.node.publicKey, vote));
 		this.processVote(vote, state);
 	}
 
@@ -44,7 +54,7 @@ export class FederatedVotingProtocol extends EventCollector {
 			this.registerEvents(this.phaseTransitioner.drainEvents());
 			state.confirmed = vote.statement;
 			this.registerEvent(
-				new ConsensusReached(state.publicKey, state.confirmed)
+				new ConsensusReached(state.node.publicKey, state.confirmed)
 			);
 		}
 	}

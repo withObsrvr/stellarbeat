@@ -1,4 +1,5 @@
-import { QuorumSet } from '../node/QuorumSet';
+import { Node } from '../core/Node';
+import { QuorumSet } from '../core/QuorumSet';
 import { Statement } from './Statement';
 import { Vote } from './Vote';
 
@@ -15,8 +16,5 @@ export class FederatedVotingState {
 	public confirmed: Statement | null = null;
 	public phase: FederatedVotingPhase = FederatedVotingPhase.unknown;
 
-	constructor(
-		public readonly publicKey: string,
-		public quorumSet: QuorumSet
-	) {}
+	constructor(public readonly node: Node) {}
 }

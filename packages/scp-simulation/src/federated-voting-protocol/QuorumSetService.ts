@@ -1,5 +1,5 @@
 import { PublicKey } from '..';
-import { QuorumSet } from '../node/QuorumSet';
+import { QuorumSet } from '../core/QuorumSet';
 
 export class QuorumSetService {
 	static isSetVBlocking(nodeSet: PublicKey[], quorumSet: QuorumSet): boolean {

@@ -1,4 +1,4 @@
-import { QuorumSet } from '../node/QuorumSet';
+import { QuorumSet } from '../core/QuorumSet';
 import { PublicKey, Statement } from '..';
 import { NodeDTO } from '../api/NodeDTO';
 import { Simulation } from './Simulation';
@@ -7,7 +7,7 @@ import { SimulationStep } from './SimulationStep';
 import { AddNodeCommand } from './command/AddNodeCommand';
 import { AddConnectionCommand } from './command/AddConnectionCommand';
 import { Event } from '../core/Event';
-import { ProtocolEvent } from '../federated-voting/ProtocolEvent';
+import { ProtocolEvent } from '../federated-voting-protocol/ProtocolEvent';
 import { MessageSent } from '../node/event/MessageSent';
 
 export class SimulationPlayer {
@@ -23,11 +23,7 @@ export class SimulationPlayer {
 		this.currentSimulationStep = new SimulationStep(0);
 		this.executedSteps = [];
 		this.log.push('Initialize default scenario');
-		const quorumSet: QuorumSet = {
-			threshold: 2,
-			validators: ['Alice', 'Bob', 'Chad'],
-			innerQuorumSets: []
-		};
+		const quorumSet = new QuorumSet(2, ['Alice', 'Bob', 'Chad'], []);
 
 		this.addNode('Alice', quorumSet);
 		this.addNode('Bob', quorumSet);

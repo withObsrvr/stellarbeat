@@ -1,4 +1,3 @@
-export { QuorumService as Node } from './QuorumService';
 export { Statement } from './Statement';
 export { FederatedVotingProtocol as FederatedVote } from './FederatedVotingProtocol';
 export { ProtocolEvent } from './ProtocolEvent';

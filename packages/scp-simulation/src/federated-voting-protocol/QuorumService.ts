@@ -1,5 +1,6 @@
 import { PublicKey } from '..';
-import { QuorumSet } from '../node/QuorumSet';
+import { Node } from '../core/Node';
+import { QuorumSet } from '../core/QuorumSet';
 
 export class QuorumService {
 	/**
@@ -7,9 +8,8 @@ export class QuorumService {
 	 *
 	 * A quorum is a set of nodes where every member has a slice in the quorum.
 	 */
-	public static isQuorum(
-		publicKey: PublicKey,
-		quorumSet: QuorumSet,
+	public static isQuorumContainingNode(
+		node: Node,
 		quorumCandidate: Map<PublicKey, QuorumSet> //we assume we know all the QuorumSets
 	): Map<PublicKey, QuorumSet> | null {
 		const originalQuorumCandidateSize = quorumCandidate.size;
@@ -23,8 +23,8 @@ export class QuorumService {
 		if (originalQuorumCandidateSize === quorumCandidate.size) {
 			// the original quorumCandidate has not been shrunk down and is a quorum
 			if (
-				this.hasSliceInSet(quorumSet, quorumCandidate) &&
-				quorumCandidate.has(publicKey)
+				this.hasSliceInSet(node.quorumSet, quorumCandidate) &&
+				quorumCandidate.has(node.publicKey)
 			) {
 				//is the node with publicKey and quorumSet part of the quorumCandidate?
 				return quorumCandidate;
@@ -33,7 +33,7 @@ export class QuorumService {
 		}
 
 		// Check if the shrunk down quorumCandidate is a quorum
-		return this.isQuorum(publicKey, quorumSet, quorumCandidate);
+		return this.isQuorumContainingNode(node, quorumCandidate);
 	}
 
 	private static removeMembersWithoutSlice(

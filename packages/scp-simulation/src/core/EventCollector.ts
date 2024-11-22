@@ -7,7 +7,7 @@ import { Event } from './Event';
  * This works because no real time constraints are placed on the events. This is just a simulation and events need only to be processed when the
  * domain logic is complete.
  */
-export class EventCollector {
+export class InMemoryEventCollector implements EventCollector {
 	private events: Event[];
 	constructor() {
 		this.events = [];
@@ -30,4 +30,8 @@ export class EventCollector {
 	public getEvents(): Event[] {
 		return this.events;
 	}
+}
+
+export interface EventCollector {
+	drainEvents(): Event[];
 }

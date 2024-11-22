@@ -1,0 +1,11 @@
+# Actions
+
+There are two kind of actions. The ones the user initiates and the ones the
+protocol initiates.
+
+Actions can be canceled, tampered with,... They give the user an entry point to
+modify the protocol or the circumstances (quorumsets, node connections,...)
+
+This entry point is provided between every communication over the network.
+
+In contrast to events which report what happened in the past.

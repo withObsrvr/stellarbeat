@@ -11,7 +11,7 @@ import {
 } from '../FederatedVotingState';
 import { Vote } from '../Vote';
 import { QuorumSetService } from '../QuorumSetService';
-import { QuorumSet } from '../../node/QuorumSet';
+import { QuorumSet } from '../../core/QuorumSet';
 import { QuorumService } from '../QuorumService';
 
 export class PhaseTransitioner extends EventCollector {
@@ -27,13 +27,13 @@ export class PhaseTransitioner extends EventCollector {
 
 		if (
 			this.areAcceptingNodesVBlocking(
-				state.quorumSet,
+				state.node.quorumSet,
 				votesToAcceptStatement.map((vote) => vote.publicKey)
 			)
 		) {
 			this.registerEvent(
 				new AcceptVoteVBlocked(
-					state.publicKey,
+					state.node.publicKey,
 					statement,
 					new Set(votesToAcceptStatement.map((vote) => vote.publicKey))
 				)
@@ -43,7 +43,7 @@ export class PhaseTransitioner extends EventCollector {
 
 			this.registerEvent(
 				new TransitionedToAcceptPhase(
-					state.publicKey,
+					state.node.publicKey,
 					state.phase,
 					state.accepted
 				)
@@ -63,12 +63,12 @@ export class PhaseTransitioner extends EventCollector {
 			state.accepted = statement;
 
 			this.registerEvent(
-				new VoteRatified(state.publicKey, statement, quorumOrNull)
+				new VoteRatified(state.node.publicKey, statement, quorumOrNull)
 			);
 
 			this.registerEvent(
 				new TransitionedToAcceptPhase(
-					state.publicKey,
+					state.node.publicKey,
 					state.phase,
 					state.accepted
 				)
@@ -97,10 +97,14 @@ export class PhaseTransitioner extends EventCollector {
 		if (quorumOrNull !== null) {
 			state.phase = FederatedVotingPhase.confirmed;
 			this.registerEvent(
-				new AcceptVoteRatified(state.publicKey, statement, quorumOrNull)
+				new AcceptVoteRatified(state.node.publicKey, statement, quorumOrNull)
 			);
 			this.registerEvent(
-				new TransitionedToConfirmPhase(state.publicKey, state.phase, statement)
+				new TransitionedToConfirmPhase(
+					state.node.publicKey,
+					state.phase,
+					statement
+				)
 			);
 			return true;
 		}
@@ -124,9 +128,8 @@ export class PhaseTransitioner extends EventCollector {
 		votes.forEach((vote) => {
 			quorumCandidate.set(vote.publicKey, vote.quorumSet);
 		});
-		const quorumOrNull = QuorumService.isQuorum(
-			state.publicKey,
-			state.quorumSet,
+		const quorumOrNull = QuorumService.isQuorumContainingNode(
+			state.node,
 			quorumCandidate
 		);
 

@@ -1,102 +1,32 @@
-import assert from 'assert';
-import { PublicKey, Statement } from '..';
-import { NodeDTO } from '../api/NodeDTO';
-import { NodeDTOMapper } from '../api/NodeDTOMapper';
-import { QuorumSet } from '../node/QuorumSet';
-import { NodeOrchestrator } from '../node/NodeOrchestrator';
-import { MessageSent } from '../node/event/MessageSent';
-import { Message } from '../node/Message';
-import { Overlay } from '../overlay/Overlay';
-import { EventCollector } from '../core/EventCollector';
+import { Context } from '../core/Context';
+import { ProtocolAction } from '../core/ProtocolAction';
+import { UserAction } from '../core/UserAction';
 
-export class Simulation extends EventCollector {
-	private overlay: Overlay = new Overlay();
-	private messageQueue: Set<Message> = new Set();
-	private outbox: Set<Message> = new Set();
+export class Simulation {
+	private protocolActionQueue: Set<ProtocolAction> = new Set();
+	private userActionQueue: Set<UserAction> = new Set();
 
-	addNode(publicKey: PublicKey, quorumSet: QuorumSet): void {
-		this.overlay.addNode(publicKey, quorumSet);
-		this.registerEvents(this.overlay.drainEvents());
+	constructor(private context: Context) {}
+
+	public addUserAction(action: UserAction): void {
+		this.userActionQueue.add(action);
 	}
 
-	addConnection(nodeA: PublicKey, nodeB: PublicKey): void {
-		this.overlay.addConnection(nodeA, nodeB);
-		this.registerEvents(this.overlay.drainEvents());
-	}
-
-	vote(publicKey: PublicKey, statement: Statement): void {
-		const node = this.overlay.getNode(publicKey);
-		if (!node) {
-			console.log('Node not found');
-			return;
-		}
-		node.vote(statement);
-		const events = node.drainEvents();
-		this.registerEvents(events);
-		events.forEach((event) => {
-			if (event instanceof MessageSent) {
-				this.messageQueue.add(event.message);
-			}
+	//Executes the pending actions. ProtocolActions are always first, then UserActions
+	flush(): void {
+		const newProtocolActions: ProtocolAction[] = [];
+		this.protocolActionQueue.forEach((action) => {
+			newProtocolActions.push(...this.context.executeProtocolAction(action));
 		});
-	}
+		this.protocolActionQueue.clear();
 
-	hasMessages(): boolean {
-		return this.messageQueue.size > 0;
-	}
-
-	moveMessagesToOutbox(): void {
-		this.outbox = new Set(this.messageQueue);
-		this.messageQueue.clear();
-	}
-
-	deliverMessagesInOutbox(): void {
-		const messages = Array.from(this.outbox);
-		this.outbox.clear();
-		messages.forEach((message) => {
-			const node = this.overlay.getNode(message.receiver);
-			assert(node instanceof NodeOrchestrator);
-
-			console.log(`[overlay] Delivering message: ${message.toString()}`);
-			node.receiveMessage(message);
-			const events = node.drainEvents();
-			this.registerEvents(events);
-			events.forEach((event) => {
-				if (event instanceof MessageSent) {
-					this.messageQueue.add(event.message);
-				}
-			});
+		this.userActionQueue.forEach((action) => {
+			newProtocolActions.push(...this.context.executeUserAction(action));
 		});
-	}
+		this.userActionQueue.clear();
 
-	get nodes(): PublicKey[] {
-		return Array.from(this.overlay.getNodes().map((node) => node.publicKey));
-	}
-
-	getNodeInfo(publicKey: PublicKey, includeQSet = false): NodeDTO | null {
-		const node = this.overlay.getNode(publicKey);
-		if (!node) {
-			return null;
-		}
-		return NodeDTOMapper.toDTO(node, includeQSet);
-	}
-
-	get publicKeysWithQuorumSets(): {
-		publicKey: PublicKey;
-		quorumSet: QuorumSet;
-	}[] {
-		return this.overlay.getNodes().map((node) => ({
-			publicKey: node.publicKey,
-			quorumSet: node.getQuorumSet()
-		}));
-	}
-
-	get nodesWithConnections(): {
-		publicKey: PublicKey;
-		connections: PublicKey[];
-	}[] {
-		return this.overlay.getNodes().map((node) => ({
-			publicKey: node.publicKey,
-			connections: node.getConnections()
-		}));
+		newProtocolActions.forEach((action) => {
+			this.protocolActionQueue.add(action);
+		});
 	}
 }
