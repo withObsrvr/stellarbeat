@@ -4,7 +4,7 @@ import { FederatedVotingContext } from '../federated-voting-context/FederatedVot
 import { FederatedVotingProtocol } from '../federated-voting-protocol/FederatedVotingProtocol';
 import { PhaseTransitioner } from '../federated-voting-protocol/phase-transitioner/PhaseTransitioner';
 import { AddNode } from '../federated-voting-context/action/user/AddNode';
-import { Vote } from '../federated-voting-context/action/user/Vote';
+import { VoteOnStatement } from '../federated-voting-context/action/user/VoteOnStatement';
 
 export class SimulationFactory {
 	create(): Simulation {
@@ -22,9 +22,9 @@ export class SimulationFactory {
 			new AddNode('Chad', quorumSet)
 		]);
 
-		simulation.addUserAction(new Vote('Alice', 'pizza'));
-		simulation.addUserAction(new Vote('Bob', 'pizza'));
-		simulation.addUserAction(new Vote('Chad', 'burger'));
+		simulation.addUserAction(new VoteOnStatement('Alice', 'pizza'));
+		simulation.addUserAction(new VoteOnStatement('Bob', 'pizza'));
+		simulation.addUserAction(new VoteOnStatement('Chad', 'burger'));
 
 		return simulation;
 	}
