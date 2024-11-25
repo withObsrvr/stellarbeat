@@ -3,8 +3,8 @@ import { BasicFederatedVotingScenario } from '../simulation/BasicFederatedVoting
 import { ConsoleAdjacencyMatrixVisualization } from './ConsoleAdjacencyMatrixVisualizer';
 import { QuorumSet } from '../core/QuorumSet';
 import { Simulation } from '../simulation/Simulation';
-import { FederatedVotingContext } from '../federated-voting-context/FederatedVotingContext';
-import { FederatedVotingContextFactory } from '../federated-voting-context/FederatedVotingContextFactory';
+import { FederatedVotingContext } from '../federated-voting/FederatedVotingContext';
+import { FederatedVotingContextFactory } from '../federated-voting/FederatedVotingContextFactory';
 
 export class ConsoleInterfacer {
 	private rl: readline.Interface;
