@@ -1,15 +1,16 @@
 import { Node, PublicKey, QuorumSet, Statement } from '..';
 import { Context } from '../core/Context';
+import { Event } from '../core/Event';
 import { InMemoryEventCollector } from '../core/EventCollector';
 import { Message } from '../simulation/Message';
 import { ProtocolAction } from '../core/ProtocolAction';
-import { UserAction } from '../core/UserAction';
-import { VoteOnStatement } from './action/user/VoteOnStatement';
-import { AddNode } from './action/user/AddNode';
 import { SendMessageProtocolAction } from './action/protocol/SendMessageAction';
 import { FederatedVotingState } from './protocol/FederatedVotingState';
 import { FederatedVotingProtocol } from './protocol/FederatedVotingProtocol';
-import { Voted } from './protocol';
+import { Vote } from './protocol';
+import { MessageSent } from './event/MessageSent';
+import { MessageReceived } from './event/MessageReceived';
+import { BroadcastVoteRequested } from './protocol/event/BroadcastVoteRequested';
 
 export class FederatedVotingContext
 	extends InMemoryEventCollector //todo: composition
@@ -25,22 +26,6 @@ export class FederatedVotingContext
 	reset(): void {
 		this.federatedVotingStates.clear();
 		this.drainEvents(); // Clear the collected events
-	}
-
-	executeUserAction(action: UserAction): ProtocolAction[] {
-		//use instanceof to execute the right method
-		if (action instanceof VoteOnStatement) {
-			return this.vote(action.publicKey, action.statement);
-		}
-
-		if (action instanceof AddNode) {
-			this.addNode(
-				new FederatedVotingState(new Node(action.publicKey, action.quorumSet))
-			);
-			return [];
-		}
-
-		return [];
 	}
 
 	addNode(state: FederatedVotingState): void {
@@ -59,11 +44,16 @@ export class FederatedVotingContext
 
 		this.registerEvents(events);
 
+		return this.processBroadcastRequests(events);
+	}
+
+	private processBroadcastRequests(events: Event[]): ProtocolAction[] {
 		const protocolActions: ProtocolAction[] = [];
 		events
-			.filter((event) => event instanceof Voted)
+			.filter((event) => event instanceof BroadcastVoteRequested)
 			.forEach((event) => {
-				protocolActions.push(...this.broadcast(event as Voted));
+				const broadcastVoteRequested = event as BroadcastVoteRequested;
+				protocolActions.push(...this.broadcast(broadcastVoteRequested.vote));
 			});
 
 		return protocolActions;
@@ -80,29 +70,43 @@ export class FederatedVotingContext
 	}
 
 	sendMessage(message: Message): ProtocolAction[] {
-		//todo: implement
-		//register event that message is sent
-		//register event that message is received
-		//process message, register events and determine new ProtocolActions
+		const messageSent = new MessageSent(message);
+		this.registerEvent(messageSent);
+		return this.deliverMessage(message); //in the future this will be handled by overlay, and allows for delaying the message etc
+	}
 
-		return [];
+	private deliverMessage(message: Message): ProtocolAction[] {
+		const nodeFederatedVotingState = this.federatedVotingStates.get(
+			message.receiver
+		);
+		if (!nodeFederatedVotingState) {
+			console.log('Node not found'); //todo: throw error?
+			return [];
+		}
+
+		const messageReceived = new MessageReceived(message);
+		this.registerEvent(messageReceived);
+
+		this.federatedVotingProtocol.processVote(
+			message.vote,
+			nodeFederatedVotingState
+		);
+		const events = this.federatedVotingProtocol.drainEvents();
+
+		this.registerEvents(events);
+
+		return this.processBroadcastRequests(events);
 	}
 
 	//in the future we handle this with an overlay class. For now we assume all nodes are connected.
 	//As in the scp whitepaper we assume an asynchronous network that eventually delivers all messages.
 	//For every message, a send action is queued. This allows the user to 'tamper' with these actions before
 	//they are actually executed
-	private broadcast(voted: Voted): ProtocolAction[] {
+	private broadcast(vote: Vote): ProtocolAction[] {
 		const protocolActions: ProtocolAction[] = [];
 		this.nodes.forEach((node) => {
-			if (node.publicKey === voted.vote.publicKey) return;
-			const message = new Message(
-				voted.vote.publicKey,
-				node.publicKey,
-				voted.vote
-			);
-			//const event = new QueuedMessage(message); //for the log
-			//this.registerEvent(event); //todo: maybe register 'BroadcastRequested' event in Protocol instead
+			if (node.publicKey === vote.publicKey) return;
+			const message = new Message(vote.publicKey, node.publicKey, vote);
 			protocolActions.push(new SendMessageProtocolAction(message));
 		});
 

@@ -15,6 +15,7 @@ import {
 import { TransitionedToAcceptPhase } from '../phase-transitioner/event/TransitionedToAcceptPhase';
 import { Node } from '../../../core/Node';
 import { QuorumSet } from '../../../core/QuorumSet';
+import { BroadcastVoteRequested } from '../event/BroadcastVoteRequested';
 
 describe('FederatedVotingProtocol', () => {
 	describe('voteForStatement', () => {
@@ -43,7 +44,7 @@ describe('FederatedVotingProtocol', () => {
 
 			federatedVotingProtocol.vote(statement, federatedVotingState);
 			const events = federatedVotingProtocol.drainEvents();
-			expect(events.length).toBe(1);
+			expect(events.length).toBe(2);
 
 			const votedEvent = events[0];
 			expect(votedEvent).toBeInstanceOf(Voted);
@@ -56,6 +57,15 @@ describe('FederatedVotingProtocol', () => {
 			expect(vote.isVoteToAccept).toBe(false);
 			expect(vote.publicKey).toBe('V');
 			expect(vote.quorumSet).toStrictEqual(quorumSet);
+
+			const broadcastVoteRequested = events[1];
+			expect(broadcastVoteRequested).not.toBeNull();
+			expect(broadcastVoteRequested).toBeInstanceOf(BroadcastVoteRequested);
+			if (!(broadcastVoteRequested instanceof BroadcastVoteRequested)) {
+				throw new Error('Expected BroadcastVoteRequested event');
+			}
+			expect(broadcastVoteRequested.vote).toStrictEqual(vote);
+
 			expect(federatedVotingState.voted).not.toBeNull();
 			expect(federatedVotingState.voted).toStrictEqual(vote);
 			expect(federatedVotingState.accepted).toBeNull();
@@ -97,18 +107,27 @@ describe('FederatedVotingProtocol', () => {
 				);
 				expect(federatedVotingState.phase).toBe(FederatedVotingPhase.accepted);
 				const events = federatedVotingProtocol.drainEvents();
-				expect(events.length).toBe(3);
+				expect(events.length).toBe(4);
 
 				const votedEvent = events.find((event) => event instanceof Voted);
 				expect(votedEvent).toBeInstanceOf(Voted);
 				if (!(votedEvent instanceof Voted)) {
 					throw new Error('Expected Voted event');
 				}
-
 				const voteForAccept = votedEvent.vote;
-
 				expect(voteForAccept).not.toBeNull();
 				expect(voteForAccept?.isVoteToAccept).toBe(true);
+
+				const broadcastVoteRequested = events.find(
+					(event) => event instanceof BroadcastVoteRequested
+				);
+				expect(broadcastVoteRequested).not.toBeNull();
+				expect(broadcastVoteRequested).toBeInstanceOf(BroadcastVoteRequested);
+				if (!(broadcastVoteRequested instanceof BroadcastVoteRequested)) {
+					throw new Error('Expected BroadcastVoteRequested event');
+				}
+				expect(broadcastVoteRequested.vote).toStrictEqual(voteForAccept);
+
 				expect(federatedVotingState.accepted).toEqual('statement');
 				expect(federatedVotingState.phase).toBe(FederatedVotingPhase.accepted);
 

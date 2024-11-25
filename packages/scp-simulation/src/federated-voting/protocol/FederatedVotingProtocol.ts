@@ -1,5 +1,6 @@
 import { Statement } from './Statement';
 import { Vote } from './Vote';
+import { BroadcastVoteRequested } from './event/BroadcastVoteRequested';
 import { Voted } from './event/Voted';
 import { ConsensusReached } from './event/ConsensusReached';
 import { FederatedVotingState } from './FederatedVotingState';
@@ -22,6 +23,7 @@ export class FederatedVotingProtocol extends InMemoryEventCollector {
 		);
 		state.voted = vote;
 		this.registerEvent(new Voted(state.node.publicKey, vote));
+		this.registerEvent(new BroadcastVoteRequested(state.node.publicKey, vote));
 		this.processVote(vote, state);
 	}
 
@@ -38,6 +40,8 @@ export class FederatedVotingProtocol extends InMemoryEventCollector {
 			state.node.quorumSet
 		);
 		this.registerEvent(new Voted(state.node.publicKey, vote));
+		this.registerEvent(new BroadcastVoteRequested(state.node.publicKey, vote));
+
 		this.processVote(vote, state);
 	}
 
