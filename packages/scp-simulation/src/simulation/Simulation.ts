@@ -1,122 +1,125 @@
 import { Context } from '../core/Context';
+import { Event } from '../core/Event';
 import { ProtocolAction } from '../core/ProtocolAction';
 import { UserAction } from '../core/UserAction';
 
+//A step in the simulation. Contains all user and protocol actions to be executed next
+//and stores the state and events that got us here.
+//Linked list
 interface SimulationStep {
-	step: number;
 	userActions: UserAction[];
-	//we do not need to store ProtocolActions here because they are deterministically determined by the protocol
+	protocolActions: ProtocolAction[];
+	previousEvents: Event[]; //the events executed in the previous step. Todo: or store executed events? Improve naming?
+	nextStep: SimulationStep | null;
+	previousStep: SimulationStep | null;
 }
 
+//The simulation. Works on a context and manages the user and protocol actions. Provides an eventlog, and allows to replay the simulation.
 export class Simulation {
-	private initializationActions: UserAction[] = []; //todo: part of step 0? Does user want this in log?
-	private protocolActionQueue: ProtocolAction[] = [];
-	private simulationSteps: Map<number, SimulationStep> = new Map();
-	private log: string[] = [];
-	private _step = 0;
+	private initialStep: SimulationStep; //handy to replay the state
+	private currentStep: SimulationStep;
 
-	constructor(private context: Context) {}
-
-	//some user actions that setup the simulation
-	initialize(actions: UserAction[]): void {
-		this.log.push('Initializing simulation');
-		this.initializationActions = actions;
-		actions.forEach((action) => {
-			this.protocolActionQueue.push(...action.execute(this.context));
-		});
-	}
-
-	private getCurrentSimulationStep(): SimulationStep {
-		return this.getSimulationStep(this._step);
-	}
-
-	private getSimulationStep(stepNumber: number): SimulationStep {
-		const step = this.simulationSteps.get(stepNumber);
-		if (step) {
-			return step;
-		}
-
-		const newStep: SimulationStep = {
-			step: this._step,
-			userActions: []
+	constructor(private context: Context) {
+		this.currentStep = {
+			userActions: [],
+			protocolActions: [],
+			previousEvents: [],
+			nextStep: null,
+			previousStep: null
 		};
-
-		this.simulationSteps.set(this._step, newStep);
-
-		return newStep;
+		this.initialStep = this.currentStep;
 	}
 
-	private reInitialize(): void {
-		this.log.push('Reinitializing simulation');
-		this.initializationActions.forEach((action) => {
-			this.protocolActionQueue.push(...action.execute(this.context));
-		});
+	//todo: look into performance
+	getFullEventLog(): Event[] {
+		const events: Event[] = [];
+		let stepIterator: SimulationStep | null = this.initialStep;
+		while (stepIterator !== null) {
+			events.push(...stepIterator.previousEvents);
+			stepIterator = stepIterator.nextStep;
+		}
+		return events;
 	}
 
 	public addUserAction(action: UserAction): void {
-		this.getCurrentSimulationStep().userActions.push(action);
+		this.currentStep.userActions.push(action);
+	}
+
+	public pendingUserActions(): UserAction[] {
+		return this.currentStep.userActions;
+	}
+
+	public pendingProtocolActions(): ProtocolAction[] {
+		return this.currentStep.protocolActions;
 	}
 
 	//Executes the pending actions. ProtocolActions are always first, then UserActions
-	next(): void {
-		this.log.push('Executing next step');
-		const step = this.getCurrentSimulationStep();
-		this.executeStep(step);
+	public executeStep() {
+		const nextStep: SimulationStep = {
+			userActions: [],
+			protocolActions: [],
+			previousEvents: [],
+			nextStep: null,
+			previousStep: this.currentStep
+		};
 
-		const events = this.context.drainEvents();
-
-		events.forEach((event) => {
-			this.log.push(event.toString()); //todo: rename log
+		const newProtocolActions: ProtocolAction[] = [];
+		this.currentStep.protocolActions.forEach((action) => {
+			newProtocolActions.push(...action.execute(this.context));
 		});
 
-		this._step++;
+		this.currentStep.userActions.forEach((action) => {
+			newProtocolActions.push(...action.execute(this.context));
+		});
+
+		nextStep.protocolActions = newProtocolActions;
+
+		this.currentStep.nextStep = nextStep;
+		this.currentStep = nextStep;
+		this.currentStep.previousEvents = this.context.drainEvents();
 	}
 
-	private executeStep(step: SimulationStep) {
-		const newProtocolActions: ProtocolAction[] = [];
-		this.protocolActionQueue.forEach((action) => {
-			newProtocolActions.push(...action.execute(this.context));
-		});
-		this.protocolActionQueue = [];
+	public hasNextStep() {
+		return (
+			this.currentStep.nextStep !== null ||
+			this.currentStep.userActions.length > 0 ||
+			this.currentStep.protocolActions.length > 0
+		);
+	}
 
-		step.userActions.forEach((action) => {
-			newProtocolActions.push(...action.execute(this.context));
-		});
-
-		newProtocolActions.forEach((action) => {
-			this.protocolActionQueue.push(action);
-		});
+	hasPreviousStep() {
+		return this.currentStep.previousStep !== null;
 	}
 
 	previous(): void {
-		this.log.push('Undoing last step');
-		this.rollback();
-		this._step--;
-		for (let i = 0; i < this._step; i++) {
-			const step = this.getSimulationStep(i);
-			this.executeStep(step);
+		if (this.currentStep.previousStep !== null) {
+			this.currentStep = this.currentStep.previousStep;
+			this.replayState();
 		}
 	}
 
-	reset(): void {
-		this.log.push('Reset to initial state');
-		this.rollback();
-	}
-
-	private rollback() {
+	//event sourcing the state
+	private replayState() {
 		this.context.reset();
-		this.reInitialize();
+		let stepIterator = this.initialStep;
+		while (stepIterator !== this.currentStep) {
+			stepIterator.protocolActions.forEach((action) => {
+				action.execute(this.context);
+			});
+			stepIterator.userActions.forEach((action) => {
+				action.execute(this.context);
+			});
+
+			if (stepIterator.nextStep === null) {
+				break;
+			}
+
+			stepIterator = stepIterator.nextStep;
+		}
 	}
 
-	get step() {
-		return this._step;
-	}
-
-	getPendingUserActions(): UserAction[] {
-		return this.getCurrentSimulationStep().userActions;
-	}
-
-	getPendingProtocolActions(): ProtocolAction[] {
-		return this.protocolActionQueue;
+	goToFirstStep(): void {
+		this.currentStep = this.initialStep;
+		this.context.reset();
 	}
 }

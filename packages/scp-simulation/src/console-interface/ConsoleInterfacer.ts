@@ -1,16 +1,22 @@
 import * as readline from 'readline';
-import { SimulationFactory } from '../simulation/SimulationFactory';
+import { BasicFederatedVotingScenario } from '../simulation/BasicFederatedVotingScenario';
 import { ConsoleAdjacencyMatrixVisualization } from './ConsoleAdjacencyMatrixVisualizer';
 import { QuorumSet } from '../core/QuorumSet';
+import { Simulation } from '../simulation/Simulation';
+import { FederatedVotingContext } from '../federated-voting-context/FederatedVotingContext';
+import { FederatedVotingContextFactory } from '../federated-voting-context/FederatedVotingContextFactory';
 
 export class ConsoleInterfacer {
 	private rl: readline.Interface;
-	private simulationPlayer: SimulationFactory;
+	private simulation: Simulation;
+	private federatedVotingContext: FederatedVotingContext; //todo: could me made more generic, but not a priority right now
 
 	constructor(
-		private consoleAdjacencyMatrixVisualizer: ConsoleAdjacencyMatrixVisualization
+		private consoleAdjacencyMatrixVisualizer: ConsoleAdjacencyMatrixVisualization,
+		private basicScenario: BasicFederatedVotingScenario
 	) {
-		this.simulationPlayer = new SimulationFactory();
+		this.federatedVotingContext = FederatedVotingContextFactory.create();
+		this.simulation = new Simulation(this.federatedVotingContext);
 
 		this.rl = readline.createInterface({
 			input: process.stdin,
@@ -38,12 +44,13 @@ export class ConsoleInterfacer {
 
 	private showNodeConnections(): void {
 		this.consoleAdjacencyMatrixVisualizer.visualize(
-			this.simulationPlayer.nodesWithConnections
+			this.federatedVotingContext.connections
 		);
 	}
 
 	private showNodeTrustConnections(): void {
-		const nodesWithQuorumSets = this.simulationPlayer.publicKeysWithQuorumSets;
+		const nodesWithQuorumSets =
+			this.federatedVotingContext.publicKeysWithQuorumSets;
 		const getQuorumSetMembers: (quorumSet: QuorumSet) => string[] = (
 			quorumSet: QuorumSet
 		) => {
@@ -120,31 +127,26 @@ export class ConsoleInterfacer {
 	}
 
 	private startSimulation(): void {
-		console.log('\n-- Starting default scenario --\n');
-		this.simulationPlayer.start();
-		console.log('The nodes in the network are:');
-		this.listNodes(false);
-		console.log('The node connections are:');
-		this.showNodeConnections();
-		console.log('The node trust connections are:');
-		this.showNodeTrustConnections();
+		console.log('\n-- Loading default scenario --\n');
+		this.basicScenario.load(this.simulation);
+		console.log('Pending user actions');
 
 		console.log("\n-- Enter 'next' to start federated consensus -- \n");
 	}
 
 	private nextStep(): void {
-		this.simulationPlayer.next();
+		this.simulation.executeStep();
 	}
 
 	private listNodes(showQSets: boolean): void {
 		if (showQSets) {
 			this.listNodesWithQuorumSets();
 		}
-		console.log(this.simulationPlayer.nodes);
+		console.log(this.federatedVotingContext.nodes);
 	}
 
 	private listNodesWithQuorumSets(): void {
-		console.log(this.simulationPlayer.publicKeysWithQuorumSets);
+		console.log(this.federatedVotingContext.publicKeysWithQuorumSets);
 	}
 
 	private handleCommand(command: string): void {
@@ -184,16 +186,16 @@ export class ConsoleInterfacer {
 				this.inspectNode(args[1], args.includes('--qset'));
 				break;
 			case 'simulation:undo':
-				this.simulationPlayer.undoLastStep();
+				this.simulation.previous();
 				break;
 			case 'su':
-				this.simulationPlayer.undoLastStep();
+				this.simulation.previous();
 				break;
-			case 'simulation:commands':
-				console.log(this.simulationPlayer.getNextCommandsInfo());
+			case 'simulation:pending-user-actions':
+				console.log(this.simulation.pendingUserActions());
 				break;
-			case 'sc':
-				console.log(this.simulationPlayer.getNextCommandsInfo());
+			case 'simulation:pending-protocol-actions':
+				console.log(this.simulation.pendingProtocolActions());
 				break;
 			case 'q':
 				console.log('Exiting simulation...');
@@ -207,7 +209,9 @@ export class ConsoleInterfacer {
 	}
 
 	private inspectNode(publicKey: string, includeQSet: boolean): void {
-		const nodeInfo = this.simulationPlayer.getNodeInfo(publicKey, includeQSet);
+		const nodeInfo = this.federatedVotingContext.nodes.find(
+			(node) => node.publicKey === publicKey
+		);
 		if (nodeInfo) {
 			console.log(JSON.stringify(nodeInfo, null, 2));
 		} else {

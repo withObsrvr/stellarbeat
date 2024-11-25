@@ -8,8 +8,8 @@ export class FederatedVoteDTOMapper {
 		includeQSet = false
 	): FederatedVoteDTO {
 		return {
-			publicKey: federatedVotingState.publicKey,
-			quorumSet: includeQSet ? federatedVotingState.quorumSet : undefined,
+			publicKey: federatedVotingState.node.publicKey,
+			quorumSet: includeQSet ? federatedVotingState.node.quorumSet : undefined,
 			confirmed: federatedVotingState.confirmed
 				? StatementDTOMapper.toStatementDTO(federatedVotingState.confirmed)
 				: null,

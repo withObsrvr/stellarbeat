@@ -6,26 +6,15 @@ import { PhaseTransitioner } from '../federated-voting-protocol/phase-transition
 import { AddNode } from '../federated-voting-context/action/user/AddNode';
 import { VoteOnStatement } from '../federated-voting-context/action/user/VoteOnStatement';
 
-export class SimulationFactory {
-	create(): Simulation {
-		const simulation = new Simulation(
-			new FederatedVotingContext(
-				new FederatedVotingProtocol(new PhaseTransitioner())
-			)
-		);
-
-		//todo: move this to scenario
+//this will be removed
+export class BasicFederatedVotingScenario {
+	load(simulation: Simulation): void {
 		const quorumSet = new QuorumSet(2, ['Alice', 'Bob', 'Chad'], []);
-		simulation.initialize([
-			new AddNode('Alice', quorumSet),
-			new AddNode('Bob', quorumSet),
-			new AddNode('Chad', quorumSet)
-		]);
-
+		simulation.addUserAction(new AddNode('Alice', quorumSet));
+		simulation.addUserAction(new AddNode('Bob', quorumSet));
+		simulation.addUserAction(new AddNode('Chad', quorumSet));
 		simulation.addUserAction(new VoteOnStatement('Alice', 'pizza'));
 		simulation.addUserAction(new VoteOnStatement('Bob', 'pizza'));
 		simulation.addUserAction(new VoteOnStatement('Chad', 'burger'));
-
-		return simulation;
 	}
 }

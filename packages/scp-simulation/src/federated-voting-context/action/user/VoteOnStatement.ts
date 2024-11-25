@@ -1,4 +1,3 @@
-import { Context } from '../../../core/Context';
 import { ProtocolAction } from '../../../core/ProtocolAction';
 import { UserAction } from '../../../core/UserAction';
 import { Statement } from '../../../federated-voting-protocol';

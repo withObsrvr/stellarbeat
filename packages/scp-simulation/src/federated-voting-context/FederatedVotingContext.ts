@@ -24,6 +24,7 @@ export class FederatedVotingContext
 
 	reset(): void {
 		this.federatedVotingStates.clear();
+		this.drainEvents(); // Clear the collected events
 	}
 
 	executeUserAction(action: UserAction): ProtocolAction[] {
@@ -121,6 +122,13 @@ export class FederatedVotingContext
 		return this.nodes.map((node) => ({
 			publicKey: node.publicKey,
 			quorumSet: node.quorumSet
+		}));
+	}
+
+	get connections(): { publicKey: PublicKey; connections: PublicKey[] }[] {
+		return this.nodes.map((node) => ({
+			publicKey: node.publicKey,
+			connections: this.nodes.map((otherNode) => otherNode.publicKey)
 		}));
 	}
 }
