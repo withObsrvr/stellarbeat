@@ -1,6 +1,7 @@
-import { PublicKey, Statement } from '../../../..';
+import { PublicKey } from '../../../../core';
 import { FederatedVotingPhase } from '../../FederatedVotingState';
 import { ProtocolEvent } from '../../ProtocolEvent';
+import { Statement } from '../../Statement';
 
 export class TransitionedToAcceptPhase extends ProtocolEvent {
 	readonly subType = 'TransitionedToAcceptPhase';

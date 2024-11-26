@@ -3,11 +3,11 @@ import { mock, MockProxy } from 'jest-mock-extended';
 import { FederatedVotingProtocol } from './../protocol/FederatedVotingProtocol';
 import { FederatedVotingState } from './../protocol/FederatedVotingState';
 import { Statement, Node, QuorumSet } from '../../';
-import { ProtocolAction } from '../../core/ProtocolAction';
-import { Message } from '../../simulation/Message';
+import { ProtocolAction } from '../../core';
+import { Message } from '../Message';
 import { BroadcastVoteRequested } from './../protocol/event/BroadcastVoteRequested';
 import { Vote, Voted } from '../protocol';
-import { SendMessageProtocolAction } from '../action/protocol/SendMessageAction';
+import { SendMessage } from '../action/protocol/SendMessage';
 
 describe('FederatedVotingContext', () => {
 	let mockFederatedVotingProtocol: MockProxy<FederatedVotingProtocol>;
@@ -166,7 +166,7 @@ describe('FederatedVotingContext', () => {
 			const actions = context.sendMessage(message);
 
 			expect(actions).toHaveLength(1);
-			expect(actions[0]).toBeInstanceOf(SendMessageProtocolAction);
+			expect(actions[0]).toBeInstanceOf(SendMessage);
 
 			expect(mockFederatedVotingProtocol.processVote).toHaveBeenCalledTimes(1);
 		});

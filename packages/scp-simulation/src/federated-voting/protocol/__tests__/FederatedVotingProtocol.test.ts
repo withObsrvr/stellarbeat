@@ -13,8 +13,7 @@ import {
 	VoteRatified
 } from '../';
 import { TransitionedToAcceptPhase } from '../phase-transitioner/event/TransitionedToAcceptPhase';
-import { Node } from '../../../core/Node';
-import { QuorumSet } from '../../../core/QuorumSet';
+import { Node, QuorumSet } from '../../../core';
 import { BroadcastVoteRequested } from '../event/BroadcastVoteRequested';
 
 describe('FederatedVotingProtocol', () => {

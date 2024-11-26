@@ -5,7 +5,7 @@ import { Voted } from './event/Voted';
 import { ConsensusReached } from './event/ConsensusReached';
 import { FederatedVotingState } from './FederatedVotingState';
 import { PhaseTransitioner } from './phase-transitioner/PhaseTransitioner';
-import { InMemoryEventCollector } from '../../core/EventCollector';
+import { InMemoryEventCollector } from '../../core';
 
 export class FederatedVotingProtocol extends InMemoryEventCollector {
 	constructor(private phaseTransitioner: PhaseTransitioner) {

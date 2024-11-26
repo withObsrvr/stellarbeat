@@ -1,9 +1,8 @@
-import { Message } from '../../../simulation/Message';
-import { ProtocolAction } from '../../../core/ProtocolAction';
-import { Context } from 'vm';
+import { Message } from '../../Message';
+import { ProtocolAction } from '../../../core';
 import { FederatedVotingContext } from '../../FederatedVotingContext';
 
-export class SendMessageProtocolAction extends ProtocolAction {
+export class SendMessage extends ProtocolAction {
 	constructor(public readonly message: Message) {
 		super();
 	}
@@ -13,6 +12,6 @@ export class SendMessageProtocolAction extends ProtocolAction {
 	}
 
 	toString(): string {
-		return `[SendMessageAction] ${this.message.toString()}`;
+		return `[SendMessage] ${this.message.toString()}`;
 	}
 }

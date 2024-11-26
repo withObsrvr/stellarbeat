@@ -11,8 +11,7 @@ import {
 import { Vote } from '../Vote';
 import { QuorumSetService } from '../QuorumSetService';
 import { QuorumService } from '../QuorumService';
-import { InMemoryEventCollector } from '../../../core/EventCollector';
-import { QuorumSet } from '../../../core/QuorumSet';
+import { InMemoryEventCollector, QuorumSet } from '../../../core';
 
 export class PhaseTransitioner extends InMemoryEventCollector {
 	tryMoveToAcceptPhase(

@@ -1,4 +1,5 @@
-import { Node, QuorumService, QuorumSet } from '../../..';
+import { Node, QuorumSet } from '../../../core';
+import { QuorumService } from '../QuorumService';
 
 describe('QuorumService', () => {
 	describe('part of quorumCandidate is a quorum', () => {

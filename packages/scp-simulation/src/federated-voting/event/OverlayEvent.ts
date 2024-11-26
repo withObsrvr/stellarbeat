@@ -1,4 +1,4 @@
-import { Event } from '../../core/Event';
+import { Event } from '../../core';
 
 export abstract class OverlayEvent implements Event {
 	type = 'ProtocolEvent';

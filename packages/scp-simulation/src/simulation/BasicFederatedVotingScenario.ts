@@ -1,9 +1,8 @@
-import { QuorumSet } from '../core/QuorumSet';
+import { QuorumSet } from '../core';
+import { AddNode, VoteOnStatement } from '../federated-voting';
 import { Simulation } from './Simulation';
-import { AddNode } from '../federated-voting/action/user/AddNode';
-import { VoteOnStatement } from '../federated-voting/action/user/VoteOnStatement';
 
-//this will be removed
+//this will be removed. Simulation is not allowed to use federated-voting. Thus Scenario should be separate package
 export class BasicFederatedVotingScenario {
 	load(simulation: Simulation): void {
 		const quorumSet = new QuorumSet(2, ['Alice', 'Bob', 'Chad'], []);

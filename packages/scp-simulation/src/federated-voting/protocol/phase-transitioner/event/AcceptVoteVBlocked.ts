@@ -1,5 +1,6 @@
-import { PublicKey, Statement } from '../../../..';
+import { PublicKey } from '../../../../core';
 import { ProtocolEvent } from '../../ProtocolEvent';
+import { Statement } from '../../Statement';
 
 export class AcceptVoteVBlocked extends ProtocolEvent {
 	readonly subType = 'AcceptVoteVBlocked';

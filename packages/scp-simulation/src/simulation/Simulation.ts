@@ -1,7 +1,4 @@
-import { Context } from '../core/Context';
-import { Event } from '../core/Event';
-import { ProtocolAction } from '../core/ProtocolAction';
-import { UserAction } from '../core/UserAction';
+import { Event, Context, UserAction, ProtocolAction } from '../core';
 
 //A step in the simulation. Contains all user and protocol actions to be executed next
 //and stores the state and events that got us here.

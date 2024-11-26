@@ -1,5 +1,5 @@
 export { Statement } from './Statement';
-export { FederatedVotingProtocol as FederatedVote } from './FederatedVotingProtocol';
+export { FederatedVotingProtocol } from './FederatedVotingProtocol';
 export { ProtocolEvent } from './ProtocolEvent';
 export { Vote } from './Vote';
 export { Voted } from './event/Voted';
@@ -9,3 +9,5 @@ export { AcceptVoteRatified } from './phase-transitioner/event/AcceptVoteRatifie
 export { TransitionedToAcceptPhase } from './phase-transitioner/event/TransitionedToAcceptPhase';
 export { TransitionedToConfirmPhase } from './phase-transitioner/event/TransitionedToConfirmPhase';
 export { VoteRatified } from './phase-transitioner/event/VoteRatified';
+export { FederatedVotingState } from './FederatedVotingState';
+export { BroadcastVoteRequested } from './event/BroadcastVoteRequested';

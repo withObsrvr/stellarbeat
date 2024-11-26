@@ -1,10 +1,11 @@
 import * as readline from 'readline';
-import { BasicFederatedVotingScenario } from '../simulation/BasicFederatedVotingScenario';
+import { Simulation, BasicFederatedVotingScenario } from '../simulation';
 import { ConsoleAdjacencyMatrixVisualization } from './ConsoleAdjacencyMatrixVisualizer';
-import { QuorumSet } from '../core/QuorumSet';
-import { Simulation } from '../simulation/Simulation';
-import { FederatedVotingContext } from '../federated-voting/FederatedVotingContext';
-import { FederatedVotingContextFactory } from '../federated-voting/FederatedVotingContextFactory';
+import { QuorumSet } from '../core';
+import {
+	FederatedVotingContext,
+	FederatedVotingContextFactory
+} from '../federated-voting';
 
 export class ConsoleInterfacer {
 	private rl: readline.Interface;

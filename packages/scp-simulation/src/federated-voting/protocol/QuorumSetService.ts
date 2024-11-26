@@ -1,4 +1,4 @@
-import { PublicKey, QuorumSet } from '../..';
+import { PublicKey, QuorumSet } from '../../core';
 
 export class QuorumSetService {
 	static isSetVBlocking(nodeSet: PublicKey[], quorumSet: QuorumSet): boolean {

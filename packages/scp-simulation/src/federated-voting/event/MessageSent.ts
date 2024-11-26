@@ -1,4 +1,4 @@
-import { Message } from '../../simulation/Message';
+import { Message } from '../Message';
 import { OverlayEvent } from './OverlayEvent';
 
 export class MessageSent extends OverlayEvent {

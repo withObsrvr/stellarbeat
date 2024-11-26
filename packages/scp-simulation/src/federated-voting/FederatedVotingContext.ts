@@ -1,13 +1,18 @@
-import { Node, PublicKey, QuorumSet, Statement } from '..';
-import { Context } from '../core/Context';
-import { Event } from '../core/Event';
-import { InMemoryEventCollector } from '../core/EventCollector';
-import { Message } from '../simulation/Message';
+import {
+	Event,
+	Context,
+	InMemoryEventCollector,
+	Node,
+	PublicKey,
+	QuorumSet
+} from '../core';
+
+import { Message } from './Message';
 import { ProtocolAction } from '../core/ProtocolAction';
-import { SendMessageProtocolAction } from './action/protocol/SendMessageAction';
+import { SendMessage } from './action/protocol/SendMessage';
 import { FederatedVotingState } from './protocol/FederatedVotingState';
 import { FederatedVotingProtocol } from './protocol/FederatedVotingProtocol';
-import { Vote } from './protocol';
+import { Statement, Vote } from './protocol';
 import { MessageSent } from './event/MessageSent';
 import { MessageReceived } from './event/MessageReceived';
 import { BroadcastVoteRequested } from './protocol/event/BroadcastVoteRequested';
@@ -113,7 +118,7 @@ export class FederatedVotingContext
 		const protocolActions: ProtocolAction[] = [];
 		this.getCompleteConnections(vote.publicKey).forEach((connection) => {
 			const message = new Message(vote.publicKey, connection, vote);
-			protocolActions.push(new SendMessageProtocolAction(message));
+			protocolActions.push(new SendMessage(message));
 		});
 
 		return protocolActions;

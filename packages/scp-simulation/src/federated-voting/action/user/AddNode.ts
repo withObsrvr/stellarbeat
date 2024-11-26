@@ -1,9 +1,6 @@
-import { Node } from '../../../core/Node';
-import { ProtocolAction } from '../../../core/ProtocolAction';
-import { QuorumSet } from '../../../core/QuorumSet';
-import { UserAction } from '../../../core/UserAction';
+import { Node, ProtocolAction, QuorumSet, UserAction } from '../../../core';
 import { FederatedVotingContext } from '../../FederatedVotingContext';
-import { FederatedVotingState } from '../../protocol/FederatedVotingState';
+import { FederatedVotingState } from '../../protocol';
 
 export class AddNode extends UserAction {
 	constructor(

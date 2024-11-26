@@ -1,6 +1,8 @@
-import { ConsoleAdjacencyMatrixVisualization } from './console-interface/ConsoleAdjacencyMatrixVisualizer';
-import { ConsoleInterfacer } from './console-interface/ConsoleInterfacer';
-import { BasicFederatedVotingScenario } from './simulation/BasicFederatedVotingScenario';
+import {
+	ConsoleInterfacer,
+	ConsoleAdjacencyMatrixVisualization
+} from './console-interface';
+import { BasicFederatedVotingScenario } from './simulation';
 
 new ConsoleInterfacer(
 	new ConsoleAdjacencyMatrixVisualization(),

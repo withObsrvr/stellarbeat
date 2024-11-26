@@ -1,5 +1,4 @@
-import { ProtocolAction } from '../../../core/ProtocolAction';
-import { UserAction } from '../../../core/UserAction';
+import { UserAction, ProtocolAction } from '../../../core';
 import { Statement } from '../../../federated-voting/protocol';
 import { FederatedVotingContext } from '../../FederatedVotingContext';
 

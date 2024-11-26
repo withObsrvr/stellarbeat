@@ -1,6 +1,5 @@
-import { PublicKey } from '../..';
+import { PublicKey, QuorumSet } from '../../core';
 import { Statement } from './Statement';
-import { QuorumSet } from '../../core/QuorumSet';
 
 //contains the statement a node voted from and if it accepted a vote.
 export class Vote {

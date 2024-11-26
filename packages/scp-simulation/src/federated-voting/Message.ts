@@ -1,5 +1,5 @@
 import { PublicKey } from '..';
-import { Vote } from '../federated-voting/protocol/Vote';
+import { Vote } from './protocol/Vote';
 
 export class Message {
 	constructor(

@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { QuorumSet } from '../../../core/QuorumSet';
+import { QuorumSet } from '../../../core';
 import { QuorumSetService } from '../QuorumSetService';
 
 describe('QuorumSetService', () => {

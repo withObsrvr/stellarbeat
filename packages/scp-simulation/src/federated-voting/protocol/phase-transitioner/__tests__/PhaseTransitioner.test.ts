@@ -1,6 +1,4 @@
-import { Event } from '../../../../core/Event';
-import { Node } from '../../../../core/Node';
-import { QuorumSet } from '../../../../core/QuorumSet';
+import { Event, Node, QuorumSet } from '../../../../core';
 import {
 	FederatedVotingPhase,
 	FederatedVotingState

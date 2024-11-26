@@ -1,7 +1,6 @@
 import { reactive, ref, type Ref } from "vue";
 import { Network } from "shared";
 import { FBASQIRepository } from "@/repositories/implementation/FBASQIRepository";
-import { SimulationPlayer } from "scp-simulation";
 
 class FederatedVotingStore {
   scenarios: string[] = ["FBAS QI scenario"];
@@ -10,13 +9,11 @@ class FederatedVotingStore {
   selectedNodeId: string | null = null;
 
   overlayGraphRepellingForce: Ref<number> = ref(1000);
-  simulationPlayer: SimulationPlayer = new SimulationPlayer();
 
   constructor() {
     this.getNetwork().then((network: Network) => {
       this.network = network;
     });
-    this.simulationPlayer.start();
   }
 
   private getNetwork = async () => {

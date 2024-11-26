@@ -1,4 +1,4 @@
-import { PublicKey } from '../../../..';
+import { PublicKey } from '../../../../core';
 import { FederatedVotingPhase } from '../../FederatedVotingState';
 import { ProtocolEvent } from '../../ProtocolEvent';
 import { Statement } from '../../Statement';

@@ -1,4 +1,4 @@
-import { Event } from '../../core/Event';
+import { Event } from '../../core';
 
 export abstract class ProtocolEvent implements Event {
 	type = 'ProtocolEvent';

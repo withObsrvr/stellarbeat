@@ -1,5 +1,4 @@
-import { PublicKey, QuorumSet } from '../..';
-import { Node } from '../../core/Node';
+import { Node, PublicKey, QuorumSet } from '../../core';
 
 export class QuorumService {
 	/**

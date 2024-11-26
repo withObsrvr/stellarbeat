@@ -1,4 +1,4 @@
-import { Node } from '../../core/Node';
+import { Node } from '../../core';
 import { Statement } from './Statement';
 import { Vote } from './Vote';
 
