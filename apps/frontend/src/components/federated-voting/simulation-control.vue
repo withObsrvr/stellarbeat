@@ -101,7 +101,7 @@ const started = ref(false);
 
 function play() {
   started.value = true;
-  federatedVotingStore.simulationPlayer.next();
+  federatedVotingStore.simulation.executeStep();
 }
 
 function stop() {
@@ -109,7 +109,7 @@ function stop() {
 }
 
 function goBackOneStep() {
-  //nothing yet
+  federatedVotingStore.simulation.goBackOneStep();
 }
 
 function handleEventAction(index: number) {

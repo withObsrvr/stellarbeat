@@ -13,8 +13,7 @@ export class ConsoleInterfacer {
 	private federatedVotingContext: FederatedVotingContext; //todo: could me made more generic, but not a priority right now
 
 	constructor(
-		private consoleAdjacencyMatrixVisualizer: ConsoleAdjacencyMatrixVisualization,
-		private basicScenario: BasicFederatedVotingScenario
+		private consoleAdjacencyMatrixVisualizer: ConsoleAdjacencyMatrixVisualization
 	) {
 		this.federatedVotingContext = FederatedVotingContextFactory.create();
 		this.simulation = new Simulation(this.federatedVotingContext);
@@ -129,7 +128,7 @@ export class ConsoleInterfacer {
 
 	private startSimulation(): void {
 		console.log('\n-- Loading default scenario --\n');
-		this.basicScenario.load(this.simulation);
+		BasicFederatedVotingScenario.load(this.simulation);
 		console.log('Pending user actions');
 
 		console.log("\n-- Enter 'next' to start federated consensus -- \n");
@@ -187,10 +186,10 @@ export class ConsoleInterfacer {
 				this.inspectNode(args[1], args.includes('--qset'));
 				break;
 			case 'simulation:undo':
-				this.simulation.previous();
+				this.simulation.goBackOneStep();
 				break;
 			case 'su':
-				this.simulation.previous();
+				this.simulation.goBackOneStep();
 				break;
 			case 'simulation:pending-user-actions':
 				console.log(this.simulation.pendingUserActions());

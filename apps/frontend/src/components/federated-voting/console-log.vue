@@ -41,9 +41,10 @@ import { vueIntegration } from "@sentry/vue";
 const logContainer = ref<HTMLElement | null>(null);
 const consoleSearchQuery = ref("");
 const filteredConsoleLogs = computed(() => {
-  const logsWithLineNumbers =
-    federatedVotingStore.simulationPlayer.simulationLog.map((log, index) => ({
-      log,
+  const logsWithLineNumbers = federatedVotingStore.simulation
+    .getFullEventLog()
+    .map((log, index) => ({
+      log: log.toString(),
       lineNumber: index + 1,
     }));
 

@@ -4,7 +4,7 @@ import { Simulation } from './Simulation';
 
 //this will be removed. Simulation is not allowed to use federated-voting. Thus Scenario should be separate package
 export class BasicFederatedVotingScenario {
-	load(simulation: Simulation): void {
+	static load(simulation: Simulation): void {
 		const quorumSet = new QuorumSet(2, ['Alice', 'Bob', 'Chad'], []);
 		simulation.addUserAction(new AddNode('Alice', quorumSet));
 		simulation.addUserAction(new AddNode('Bob', quorumSet));

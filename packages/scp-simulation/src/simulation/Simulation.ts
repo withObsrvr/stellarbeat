@@ -88,7 +88,7 @@ export class Simulation {
 		return this.currentStep.previousStep !== null;
 	}
 
-	previous(): void {
+	goBackOneStep(): void {
 		if (this.currentStep.previousStep !== null) {
 			this.currentStep = this.currentStep.previousStep;
 			this.replayState();

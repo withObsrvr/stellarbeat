@@ -43,7 +43,7 @@ describe('Simulation Class', () => {
 		]);
 	});
 
-	it('should navigate to previous step', () => {
+	it('should go back one step', () => {
 		const userAction = mock<UserAction>();
 		const generatedProtocolAction = mock<ProtocolAction>();
 		userAction.execute.mockReturnValue([generatedProtocolAction]);
@@ -53,14 +53,14 @@ describe('Simulation Class', () => {
 
 		expect(simulation.hasPreviousStep()).toBe(true);
 
-		simulation.previous();
+		simulation.goBackOneStep();
 
 		// After going back, user actions should be pending again
 		expect(simulation.pendingUserActions()).toEqual([userAction]);
 		expect(simulation.pendingProtocolActions()).toEqual([]);
 	});
 
-	it('should replay state when going to previous step', () => {
+	it('should replay state when going back one step', () => {
 		const resetSpy = jest.spyOn(context, 'reset');
 		const userAction = mock<UserAction>();
 		userAction.execute.mockReturnValue([]);
@@ -72,7 +72,7 @@ describe('Simulation Class', () => {
 		simulation.addUserAction(secondUserAction);
 		simulation.executeStep();
 
-		simulation.previous();
+		simulation.goBackOneStep();
 		expect(resetSpy).toHaveBeenCalled();
 		expect(userAction.execute).toHaveBeenCalledTimes(2); //replayed
 		expect(secondUserAction.execute).toHaveBeenCalledTimes(1); //not replayed
