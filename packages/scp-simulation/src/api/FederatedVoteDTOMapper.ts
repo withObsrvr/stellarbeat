@@ -1,10 +1,10 @@
-import { FederatedVotingState } from '../federated-voting/protocol/FederatedVotingState';
+import { FederatedVotingProtocolState } from '../federated-voting/protocol/FederatedVotingProtocolState';
 import { FederatedVoteDTO } from './FederatedVoteDTO';
 import { StatementDTOMapper } from './StatementDTOMapper';
 
 export class FederatedVoteDTOMapper {
 	static toDTO(
-		federatedVotingState: FederatedVotingState,
+		federatedVotingState: FederatedVotingProtocolState,
 		includeQSet = false
 	): FederatedVoteDTO {
 		return {

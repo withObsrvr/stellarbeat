@@ -1,5 +1,5 @@
 import { PublicKey } from '../../../../core';
-import { FederatedVotingPhase } from '../../FederatedVotingState';
+import { FederatedVotingPhase } from '../../FederatedVotingProtocolState';
 import { ProtocolEvent } from '../../ProtocolEvent';
 import { Statement } from '../../Statement';
 

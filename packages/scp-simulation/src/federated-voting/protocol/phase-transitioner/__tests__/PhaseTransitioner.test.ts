@@ -1,8 +1,8 @@
 import { Event, Node, QuorumSet } from '../../../../core';
 import {
 	FederatedVotingPhase,
-	FederatedVotingState
-} from '../../FederatedVotingState';
+	FederatedVotingProtocolState
+} from '../../FederatedVotingProtocolState';
 import { QuorumService } from '../../QuorumService';
 import { QuorumSetService } from '../../QuorumSetService';
 import { Statement } from '../../Statement';
@@ -18,7 +18,7 @@ describe('PhaseTransitioner', () => {
 	const phaseTransitioner = new PhaseTransitioner();
 
 	const setupState = (publicKey: string) => {
-		return new FederatedVotingState(
+		return new FederatedVotingProtocolState(
 			new Node(publicKey, new QuorumSet(1, ['B'], []))
 		);
 	};

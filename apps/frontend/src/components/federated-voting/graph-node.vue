@@ -58,7 +58,7 @@ const rectLabelClassName = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "src/assets/variables";
+@import "@/assets/variables";
 
 .node {
   fill: #1687b2;

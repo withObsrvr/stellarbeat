@@ -8,7 +8,7 @@ export enum FederatedVotingPhase {
 	confirmed = 'confirmed'
 }
 
-export class FederatedVotingState {
+export class FederatedVotingProtocolState {
 	public knownVotes: Set<Vote> = new Set();
 	public voted: Statement | null = null;
 	public accepted: Statement | null = null;

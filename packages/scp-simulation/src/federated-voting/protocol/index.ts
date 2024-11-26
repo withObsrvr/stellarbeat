@@ -9,5 +9,5 @@ export { AcceptVoteRatified } from './phase-transitioner/event/AcceptVoteRatifie
 export { TransitionedToAcceptPhase } from './phase-transitioner/event/TransitionedToAcceptPhase';
 export { TransitionedToConfirmPhase } from './phase-transitioner/event/TransitionedToConfirmPhase';
 export { VoteRatified } from './phase-transitioner/event/VoteRatified';
-export { FederatedVotingState } from './FederatedVotingState';
+export { FederatedVotingProtocolState } from './FederatedVotingProtocolState';
 export { BroadcastVoteRequested } from './event/BroadcastVoteRequested';

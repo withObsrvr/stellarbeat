@@ -26,7 +26,7 @@ const props = defineProps({
 const link: Ref<LinkDatum> = toRefs(props).link;
 </script>
 <style lang="scss" scoped>
-@import "src/assets/variables";
+@import "@/assets/variables";
 .link {
   fill: none;
   stroke: #1687b2;

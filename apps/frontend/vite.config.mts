@@ -56,5 +56,10 @@ export default defineConfig({
   },
   css: {
     devSourcemap: true,
+    preprocessorOptions: {
+      scss: {
+        includePaths: ["src"],
+      },
+    },
   },
 });

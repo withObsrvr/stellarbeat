@@ -6,8 +6,8 @@ import { AcceptVoteVBlocked } from './event/AcceptVoteVBlocked';
 import { TransitionedToConfirmPhase } from './event/TransitionedToConfirmPhase';
 import {
 	FederatedVotingPhase,
-	FederatedVotingState
-} from '../FederatedVotingState';
+	FederatedVotingProtocolState
+} from '../FederatedVotingProtocolState';
 import { Vote } from '../Vote';
 import { QuorumSetService } from '../QuorumSetService';
 import { QuorumService } from '../QuorumService';
@@ -16,7 +16,7 @@ import { InMemoryEventCollector, QuorumSet } from '../../../core';
 export class PhaseTransitioner extends InMemoryEventCollector {
 	tryMoveToAcceptPhase(
 		statement: Statement,
-		state: FederatedVotingState
+		state: FederatedVotingProtocolState
 	): boolean {
 		if (state.phase !== FederatedVotingPhase.unknown) {
 			return false;
@@ -80,7 +80,7 @@ export class PhaseTransitioner extends InMemoryEventCollector {
 
 	tryMoveToConfirmPhase(
 		statement: Statement,
-		state: FederatedVotingState
+		state: FederatedVotingProtocolState
 	): boolean {
 		if (state.phase === FederatedVotingPhase.confirmed) {
 			return false;
@@ -119,7 +119,7 @@ export class PhaseTransitioner extends InMemoryEventCollector {
 	}
 
 	private isVoteRatified(
-		state: FederatedVotingState,
+		state: FederatedVotingProtocolState,
 		statement: Statement,
 		votes: Vote[]
 	): Map<string, QuorumSet> | null {
@@ -136,7 +136,7 @@ export class PhaseTransitioner extends InMemoryEventCollector {
 	}
 
 	private filterVotesForStatement(
-		state: FederatedVotingState,
+		state: FederatedVotingProtocolState,
 		statement: Statement
 	) {
 		return Array.from(state.knownVotes).filter(
@@ -146,7 +146,7 @@ export class PhaseTransitioner extends InMemoryEventCollector {
 	}
 
 	private filterVotesToAccept(
-		state: FederatedVotingState,
+		state: FederatedVotingProtocolState,
 		statement: Statement
 	) {
 		return Array.from(state.knownVotes).filter(

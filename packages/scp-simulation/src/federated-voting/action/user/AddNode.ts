@@ -1,6 +1,6 @@
 import { Node, ProtocolAction, QuorumSet, UserAction } from '../../../core';
 import { FederatedVotingContext } from '../../FederatedVotingContext';
-import { FederatedVotingState } from '../../protocol';
+import { FederatedVotingProtocolState } from '../../protocol';
 
 export class AddNode extends UserAction {
 	constructor(
@@ -12,7 +12,7 @@ export class AddNode extends UserAction {
 
 	execute(context: FederatedVotingContext): ProtocolAction[] {
 		const node = new Node(this.publicKey, this.quorumSet);
-		context.addNode(new FederatedVotingState(node));
+		context.addNode(node);
 
 		return [];
 	}

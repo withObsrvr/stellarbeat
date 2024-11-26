@@ -3,8 +3,8 @@ import { Voted } from '../event/Voted';
 import { FederatedVotingProtocol } from '../FederatedVotingProtocol';
 import {
 	FederatedVotingPhase,
-	FederatedVotingState
-} from '../FederatedVotingState';
+	FederatedVotingProtocolState
+} from '../FederatedVotingProtocolState';
 import { PhaseTransitioner } from '../phase-transitioner/PhaseTransitioner';
 import {
 	AcceptVoteRatified,
@@ -22,7 +22,7 @@ describe('FederatedVotingProtocol', () => {
 			new PhaseTransitioner()
 		);
 		it('should do nothing if the node has already voted for a statement', () => {
-			const federatedVotingState = new FederatedVotingState(
+			const federatedVotingState = new FederatedVotingProtocolState(
 				new Node('V', new QuorumSet(1, ['Q'], []))
 			);
 
@@ -35,7 +35,7 @@ describe('FederatedVotingProtocol', () => {
 
 		it('should vote', () => {
 			const quorumSet: QuorumSet = new QuorumSet(1, ['OTHER'], []);
-			const federatedVotingState = new FederatedVotingState(
+			const federatedVotingState = new FederatedVotingProtocolState(
 				new Node('V', quorumSet)
 			);
 
@@ -75,7 +75,7 @@ describe('FederatedVotingProtocol', () => {
 			const quorumSet: QuorumSet = new QuorumSet(1, ['Q'], []);
 
 			it('should register vote', () => {
-				const federatedVotingState = new FederatedVotingState(
+				const federatedVotingState = new FederatedVotingProtocolState(
 					new Node('V', quorumSet)
 				);
 				const vote = new Vote('statement', false, 'V', quorumSet);
@@ -84,7 +84,7 @@ describe('FederatedVotingProtocol', () => {
 			});
 
 			it('should move to accept phase', () => {
-				const federatedVotingState = new FederatedVotingState(
+				const federatedVotingState = new FederatedVotingProtocolState(
 					new Node('V', new QuorumSet(1, ['Q'], []))
 				);
 
@@ -139,7 +139,7 @@ describe('FederatedVotingProtocol', () => {
 			});
 
 			it('should move to confirm phase', () => {
-				const federatedVotingState = new FederatedVotingState(
+				const federatedVotingState = new FederatedVotingProtocolState(
 					new Node('V', quorumSet)
 				);
 

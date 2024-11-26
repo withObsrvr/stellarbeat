@@ -3,7 +3,7 @@ import { Vote } from './Vote';
 import { BroadcastVoteRequested } from './event/BroadcastVoteRequested';
 import { Voted } from './event/Voted';
 import { ConsensusReached } from './event/ConsensusReached';
-import { FederatedVotingState } from './FederatedVotingState';
+import { FederatedVotingProtocolState } from './FederatedVotingProtocolState';
 import { PhaseTransitioner } from './phase-transitioner/PhaseTransitioner';
 import { InMemoryEventCollector } from '../../core';
 
@@ -12,7 +12,7 @@ export class FederatedVotingProtocol extends InMemoryEventCollector {
 		super();
 	}
 
-	vote(statement: Statement, state: FederatedVotingState): void {
+	vote(statement: Statement, state: FederatedVotingProtocolState): void {
 		if (state.voted !== null) return;
 
 		const vote = new Vote(
@@ -31,7 +31,7 @@ export class FederatedVotingProtocol extends InMemoryEventCollector {
 	//can only happen due to processing of a vote, thus private
 	private voteToAcceptStatement(
 		statement: Statement,
-		state: FederatedVotingState
+		state: FederatedVotingProtocolState
 	) {
 		const vote = new Vote(
 			statement,
@@ -45,7 +45,7 @@ export class FederatedVotingProtocol extends InMemoryEventCollector {
 		this.processVote(vote, state);
 	}
 
-	processVote(vote: Vote, state: FederatedVotingState): void {
+	processVote(vote: Vote, state: FederatedVotingProtocolState): void {
 		if (state.knownVotes.has(vote)) return; //because we are doing everything in memory, this check suffices and we don't need hashes
 		state.knownVotes.add(vote);
 

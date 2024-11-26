@@ -10,19 +10,24 @@ import {
 import { Message } from './Message';
 import { ProtocolAction } from '../core/ProtocolAction';
 import { SendMessage } from './action/protocol/SendMessage';
-import { FederatedVotingState } from './protocol/FederatedVotingState';
+import { FederatedVotingProtocolState } from './protocol/FederatedVotingProtocolState';
 import { FederatedVotingProtocol } from './protocol/FederatedVotingProtocol';
 import { Statement, Vote } from './protocol';
 import { MessageSent } from './event/MessageSent';
 import { MessageReceived } from './event/MessageReceived';
 import { BroadcastVoteRequested } from './protocol/event/BroadcastVoteRequested';
 
+export interface FederatedVotingContextState {
+	protocolStates: FederatedVotingProtocolState[];
+}
+
 export class FederatedVotingContext
 	extends InMemoryEventCollector //todo: composition
 	implements Context
 {
-	private federatedVotingStates: Map<PublicKey, FederatedVotingState> =
-		new Map();
+	private state: FederatedVotingContextState = {
+		protocolStates: []
+	};
 
 	constructor(private federatedVotingProtocol: FederatedVotingProtocol) {
 		super();
@@ -30,13 +35,25 @@ export class FederatedVotingContext
 
 	reset(): void {
 		//todo: could we make this class purer?
-		this.federatedVotingStates.clear();
+		this.state.protocolStates = [];
 		this.drainEvents(); // Clear the collected events
 	}
 
+	setState(state: FederatedVotingContextState): void {
+		this.state = state;
+	}
+
 	//todo: naming of addNode. Should the action create a new State, or should we just pass a Node
-	addNode(state: FederatedVotingState): void {
-		this.federatedVotingStates.set(state.node.publicKey, state);
+	addNode(node: Node): void {
+		this.state.protocolStates.push(new FederatedVotingProtocolState(node));
+	}
+
+	getProtocolState(publicKey: PublicKey): FederatedVotingProtocolState | null {
+		const state = this.state.protocolStates.find(
+			(state) => state.node.publicKey === publicKey
+		);
+
+		return state ? state : null;
 	}
 
 	vote(publicKey: PublicKey, statement: Statement): ProtocolAction[] {
@@ -45,7 +62,9 @@ export class FederatedVotingContext
 			return [];
 		}
 
-		const nodeFederatedVotingState = this.federatedVotingStates.get(publicKey);
+		const nodeFederatedVotingState = this.state.protocolStates.find(
+			(state) => state.node.publicKey === publicKey
+		);
 		if (!nodeFederatedVotingState) {
 			console.log('Node not found');
 			return [];
@@ -72,7 +91,9 @@ export class FederatedVotingContext
 	}
 
 	canVote(publicKey: PublicKey): boolean {
-		const nodeFederatedVotingState = this.federatedVotingStates.get(publicKey);
+		const nodeFederatedVotingState = this.state.protocolStates.find(
+			(state) => state.node.publicKey === publicKey
+		);
 		if (!nodeFederatedVotingState) {
 			console.log('Node not found');
 			return false;
@@ -88,9 +109,7 @@ export class FederatedVotingContext
 	}
 
 	private deliverMessage(message: Message): ProtocolAction[] {
-		const nodeFederatedVotingState = this.federatedVotingStates.get(
-			message.receiver
-		);
+		const nodeFederatedVotingState = this.getProtocolState(message.receiver);
 		if (!nodeFederatedVotingState) {
 			console.log('Node not found'); //todo: throw error?
 			return [];
@@ -131,7 +150,7 @@ export class FederatedVotingContext
 	}
 
 	get nodes(): Node[] {
-		return Array.from(this.federatedVotingStates.values()).map(
+		return Array.from(this.state.protocolStates.values()).map(
 			(state) => state.node
 		);
 	}
