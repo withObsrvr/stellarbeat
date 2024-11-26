@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import NodesPanel from "@/components/federated-voting/nodes-panel.vue";
-import SimulationControl from "@/components/federated-voting/simulation-control.vue";
+import SimulationControl from "@/components/federated-voting/simulation-control/simulation-control.vue";
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph-base.vue";
 import Graph from "@/components/visual-navigator/graph/graph.vue";
 import ViewGraph from "@/components/visual-navigator/graph/view-graph";

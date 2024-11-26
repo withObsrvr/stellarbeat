@@ -2,7 +2,7 @@ export { Network, type PublicKey, type OrganizationId } from './network';
 export { Node } from './node';
 export { default as QuorumService } from './quorum-service-old';
 export { QuorumSlicesGenerator } from './quorum-slices-generator';
-export { QuorumSet, type BaseQuorumSet } from './quorum-set';
+export { QuorumSet, BaseQuorumSet } from './quorum-set';
 export { QuorumSetService } from './quorum-set-service';
 export { NodeStatistics } from './node-statistics';
 export { NodeGeoData } from './node-geo-data';
