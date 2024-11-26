@@ -24,15 +24,22 @@ export class FederatedVotingContext
 	}
 
 	reset(): void {
+		//todo: could we make this class purer?
 		this.federatedVotingStates.clear();
 		this.drainEvents(); // Clear the collected events
 	}
 
+	//todo: naming of addNode. Should the action create a new State, or should we just pass a Node
 	addNode(state: FederatedVotingState): void {
 		this.federatedVotingStates.set(state.node.publicKey, state);
 	}
 
 	vote(publicKey: PublicKey, statement: Statement): ProtocolAction[] {
+		if (!this.canVote(publicKey)) {
+			console.log('Node cannot vote');
+			return [];
+		}
+
 		const nodeFederatedVotingState = this.federatedVotingStates.get(publicKey);
 		if (!nodeFederatedVotingState) {
 			console.log('Node not found');
@@ -104,13 +111,18 @@ export class FederatedVotingContext
 	//they are actually executed
 	private broadcast(vote: Vote): ProtocolAction[] {
 		const protocolActions: ProtocolAction[] = [];
-		this.nodes.forEach((node) => {
-			if (node.publicKey === vote.publicKey) return;
-			const message = new Message(vote.publicKey, node.publicKey, vote);
+		this.getCompleteConnections(vote.publicKey).forEach((connection) => {
+			const message = new Message(vote.publicKey, connection, vote);
 			protocolActions.push(new SendMessageProtocolAction(message));
 		});
 
 		return protocolActions;
+	}
+
+	private getCompleteConnections(publicKey: PublicKey): PublicKey[] {
+		return this.nodes
+			.filter((node) => node.publicKey !== publicKey)
+			.map((node) => node.publicKey);
 	}
 
 	get nodes(): Node[] {
@@ -132,7 +144,7 @@ export class FederatedVotingContext
 	get connections(): { publicKey: PublicKey; connections: PublicKey[] }[] {
 		return this.nodes.map((node) => ({
 			publicKey: node.publicKey,
-			connections: this.nodes.map((otherNode) => otherNode.publicKey)
+			connections: this.getCompleteConnections(node.publicKey)
 		}));
 	}
 }
