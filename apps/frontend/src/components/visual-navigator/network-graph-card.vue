@@ -204,10 +204,14 @@ function buildNodeViewGraph(allNodes: Node[], merge: boolean) {
   }
   const trustGraph = NodeTrustGraphBuilder.build(nodes);
   viewGraph.value = ViewGraph.fromNodes(
-    store.network,
     trustGraph,
     merge ? viewGraph.value : undefined,
     selectedKeys.value,
+    new Set(
+      store.network.nodes
+        .filter((node) => store.network.isNodeFailing(node))
+        .map((node) => node.publicKey),
+    ),
   );
 }
 
@@ -240,10 +244,14 @@ function buildOrganizationViewGraph(allNodes: Node[], merge: boolean) {
     allNodes,
   );
   viewGraph.value = ViewGraph.fromOrganizations(
-    store.network,
     trustGraph,
     merge ? viewGraph.value : undefined,
     selectedKeys.value,
+    new Set(
+      store.network.organizations
+        .filter((organization) => !organization.subQuorumAvailable)
+        .map((organization) => organization.id),
+    ),
   );
 }
 

@@ -1,4 +1,4 @@
-import { Network, TrustGraph } from "shared";
+import { TrustGraph } from "shared";
 import ViewVertex from "@/components/visual-navigator/graph/view-vertex";
 import ViewEdge from "@/components/visual-navigator/graph/view-edge";
 
@@ -26,21 +26,25 @@ export default class ViewGraph {
   }
 
   static fromNodes(
-    network: Network,
     trustGraph: TrustGraph,
     mergeWithGraph?: ViewGraph,
     selectedKeys: string[] = [],
+    failingNodes: Set<string> = new Set<string>(),
   ) {
     const viewGraph = new ViewGraph();
 
     Array.from(trustGraph.edges).forEach((edge) => {
-      const viewEdge = ViewEdge.fromNodeEdge(edge, trustGraph, network);
+      const viewEdge = ViewEdge.fromNodeEdge(edge, trustGraph, failingNodes);
       viewGraph.viewEdges.set(viewEdge.key, viewEdge);
       viewGraph.classifyEdge(viewEdge, selectedKeys);
     });
 
     trustGraph.vertices.forEach((vertex) => {
-      const viewVertex = ViewVertex.fromVertex(vertex, trustGraph, network);
+      const viewVertex = ViewVertex.fromVertex(
+        vertex,
+        trustGraph,
+        failingNodes,
+      );
       if (mergeWithGraph && mergeWithGraph.viewVertices.has(viewVertex.key)) {
         viewVertex.x = (
           mergeWithGraph.viewVertices.get(viewVertex.key) as ViewVertex
@@ -59,15 +63,19 @@ export default class ViewGraph {
   }
 
   static fromOrganizations(
-    network: Network,
     trustGraph: TrustGraph,
     mergeWithGraph?: ViewGraph,
     selectedKeys: string[] = [],
+    failingOrganizations: Set<string> = new Set(),
   ) {
     const viewGraph = new ViewGraph();
 
     Array.from(trustGraph.edges).forEach((edge) => {
-      const viewEdge = ViewEdge.fromOrganizationEdge(edge, trustGraph, network);
+      const viewEdge = ViewEdge.fromOrganizationEdge(
+        edge,
+        trustGraph,
+        failingOrganizations,
+      );
       viewGraph.viewEdges.set(viewEdge.key, viewEdge);
       viewGraph.classifyEdge(viewEdge, selectedKeys);
     });
@@ -76,7 +84,7 @@ export default class ViewGraph {
       const viewVertex = ViewVertex.fromOrganization(
         vertex,
         trustGraph,
-        network,
+        failingOrganizations,
       );
       if (mergeWithGraph && mergeWithGraph.viewVertices.has(viewVertex.key)) {
         const mergeVertex = mergeWithGraph.viewVertices.get(viewVertex.key);

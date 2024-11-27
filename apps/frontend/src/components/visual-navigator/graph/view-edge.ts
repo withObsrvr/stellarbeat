@@ -1,4 +1,4 @@
-import { Edge, Network, TrustGraph } from "shared";
+import { Edge, TrustGraph } from "shared";
 
 export default class ViewEdge {
   key: string;
@@ -32,11 +32,13 @@ export default class ViewEdge {
     return viewEdge;
   }
 
-  static fromNodeEdge(edge: Edge, trustGraph: TrustGraph, network: Network) {
+  static fromNodeEdge(
+    edge: Edge,
+    trustGraph: TrustGraph,
+    failingNodes: Set<string>,
+  ) {
     const viewEdge = ViewEdge.fromEdge(edge, trustGraph);
-    const source = network.getNodeByPublicKey(edge.parent.key);
-    const target = network.getNodeByPublicKey(edge.child.key);
-    if (network.isNodeFailing(source) || network.isNodeFailing(target))
+    if (failingNodes.has(edge.parent.key) || failingNodes.has(edge.child.key))
       viewEdge.isFailing = true;
 
     return viewEdge;
@@ -45,13 +47,14 @@ export default class ViewEdge {
   static fromOrganizationEdge(
     edge: Edge,
     trustGraph: TrustGraph,
-    network: Network,
+    failingOrganizations: Set<string>,
   ) {
     const viewEdge = ViewEdge.fromEdge(edge, trustGraph);
 
-    const source = network.getOrganizationById(edge.parent.key);
-    const target = network.getOrganizationById(edge.child.key);
-    if (!(source.subQuorumAvailable && target.subQuorumAvailable))
+    if (
+      failingOrganizations.has(edge.parent.key) ||
+      failingOrganizations.has(edge.child.key)
+    )
       viewEdge.isFailing = true;
 
     return viewEdge;

@@ -1,8 +1,4 @@
-import {
-  Network,
-  TrustGraph,
-  Vertex,
-} from "shared";
+import { TrustGraph, Vertex } from "shared";
 
 export default class ViewVertex {
   key: string;
@@ -25,14 +21,17 @@ export default class ViewVertex {
     this.isPartOfTransitiveQuorumSet = isPartOfTransitiveQuorumSet;
   }
 
-  static fromVertex(vertex: Vertex, trustGraph: TrustGraph, network: Network) {
+  static fromVertex(
+    vertex: Vertex,
+    trustGraph: TrustGraph,
+    failingNodes: Set<string>,
+  ) {
     const viewVertex = new ViewVertex(
       vertex.key,
       vertex.label,
       trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(vertex.key),
     );
-    const node = network.getNodeByPublicKey(vertex.key);
-    viewVertex.isFailing = network.isNodeFailing(node);
+    viewVertex.isFailing = failingNodes.has(vertex.key);
 
     return viewVertex;
   }
@@ -40,15 +39,14 @@ export default class ViewVertex {
   static fromOrganization(
     vertex: Vertex,
     trustGraph: TrustGraph,
-    network: Network,
+    failingOrganizations: Set<string>,
   ) {
     const viewVertex = new ViewVertex(
       vertex.key,
       vertex.label,
       trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(vertex.key),
     );
-    const organization = network.getOrganizationById(vertex.key);
-    viewVertex.isFailing = !organization.subQuorumAvailable;
+    viewVertex.isFailing = failingOrganizations.has(vertex.key);
 
     return viewVertex;
   }

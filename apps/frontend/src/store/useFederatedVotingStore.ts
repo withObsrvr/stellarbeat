@@ -12,7 +12,6 @@ import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting
 class FederatedVotingStore {
   scenarios: string[] = ["FBAS QI scenario"];
   selectedScenario: string = this.scenarios[0];
-  network: Network = new Network([]);
   selectedNodeId: string | null = null;
 
   protocolContext: FederatedVotingContext;
@@ -22,10 +21,6 @@ class FederatedVotingStore {
   overlayGraphRepellingForce: Ref<number> = ref(1000);
 
   constructor() {
-    this.getNetwork().then((network: Network) => {
-      this.network = network;
-    });
-
     this.protocolContext = FederatedVotingContextFactory.create();
     this.protocolContextState = reactive(
       this.protocolContext.getState(),
@@ -35,16 +30,6 @@ class FederatedVotingStore {
     ) as Simulation;
     BasicFederatedVotingScenario.load(this.simulation);
   }
-
-  private getNetwork = async () => {
-    const networkRepository = new FBASQIRepository();
-    const networkOrError = await networkRepository.find();
-    if (networkOrError.isErr()) {
-      return new Network([]);
-    }
-
-    return networkOrError.value;
-  };
 }
 
 export const federatedVotingStore = reactive<FederatedVotingStore>(

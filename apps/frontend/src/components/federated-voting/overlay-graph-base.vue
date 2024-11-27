@@ -88,12 +88,14 @@ const handleNodeClick = (node: NodeDatum) => {
   }
 };
 
-const nodes: NodeDatum[] = federatedVotingStore.network.nodes.map((node) => ({
-  id: node.publicKey,
-  name: node.name ? node.name : node.publicKey,
-  x: 0,
-  y: 0,
-}));
+const nodes: NodeDatum[] = federatedVotingStore.protocolContext.nodes.map(
+  (node) => ({
+    id: node.publicKey,
+    name: node.publicKey,
+    x: 0,
+    y: 0,
+  }),
+);
 
 const graphManager = reactive(new GraphManager(nodes, initialTopology));
 
