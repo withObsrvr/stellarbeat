@@ -27,11 +27,12 @@ class FederatedVotingStore {
     });
 
     this.protocolContext = FederatedVotingContextFactory.create();
-    this.protocolContextState = reactive({
-      protocolStates: [],
-    });
-    this.protocolContext.setState(this.protocolContextState); //need to think of a better solution for reactivity
-    this.simulation = new Simulation(this.protocolContext);
+    this.protocolContextState = reactive(
+      this.protocolContext.getState(),
+    ) as FederatedVotingContextState;
+    this.simulation = reactive(
+      new Simulation(this.protocolContext),
+    ) as Simulation;
     BasicFederatedVotingScenario.load(this.simulation);
   }
 

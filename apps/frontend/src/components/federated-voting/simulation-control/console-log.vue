@@ -25,8 +25,15 @@
     </div>
     <!-- Console Logs -->
     <div ref="logContainer" style="overflow-y: auto; flex: 1">
-      <div v-for="item in filteredConsoleLogs" :key="item.lineNumber">
-        {{ item.lineNumber }}. {{ item.log }}
+      <div
+        v-for="item in filteredConsoleLogs"
+        :key="item.lineNumber"
+        :class="[
+          'log-entry',
+          item.stepIndex % 2 === 0 ? 'step-even' : 'step-odd',
+        ]"
+      >
+        {{ item.lineNumber }}| {{ item.log }}
       </div>
     </div>
   </div>
@@ -36,17 +43,23 @@
 import { ref, computed, nextTick } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { watch } from "vue";
-import { vueIntegration } from "@sentry/vue";
 
 const logContainer = ref<HTMLElement | null>(null);
 const consoleSearchQuery = ref("");
+
 const filteredConsoleLogs = computed(() => {
-  const logsWithLineNumbers = federatedVotingStore.simulation
-    .getFullEventLog()
-    .map((log, index) => ({
-      log: log.toString(),
-      lineNumber: index + 1,
-    }));
+  const eventLogs = federatedVotingStore.simulation.getFullEventLog(); // Returns Event[][]
+
+  // Flatten the events while adding step index and event index
+  const logsWithLineNumbers = eventLogs.flatMap((events, stepIndex) => {
+    return events.map((event, eventIndex) => {
+      return {
+        log: event.toString(),
+        lineNumber: `${stepIndex}.${eventIndex + 1}`,
+        stepIndex: stepIndex,
+      };
+    });
+  });
 
   if (consoleSearchQuery.value) {
     return logsWithLineNumbers.filter((item) =>
@@ -65,4 +78,16 @@ watch(filteredConsoleLogs, () => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.log-entry {
+  padding: 2px;
+}
+
+.log-entry.step-odd {
+  background-color: white;
+}
+
+.log-entry.step-even {
+  background-color: #f8f9fa; /* Light gray */
+}
+</style>

@@ -27,12 +27,14 @@ export class Simulation {
 		this.initialStep = this.currentStep;
 	}
 
-	//todo: look into performance
-	getFullEventLog(): Event[] {
-		const events: Event[] = [];
+	getFullEventLog(): Event[][] {
+		const events: Event[][] = [];
 		let stepIterator: SimulationStep | null = this.initialStep;
-		while (stepIterator !== null) {
-			events.push(...stepIterator.previousEvents);
+		while (
+			stepIterator !== this.currentStep.nextStep &&
+			stepIterator !== null
+		) {
+			events.push(stepIterator.previousEvents);
 			stepIterator = stepIterator.nextStep;
 		}
 		return events;

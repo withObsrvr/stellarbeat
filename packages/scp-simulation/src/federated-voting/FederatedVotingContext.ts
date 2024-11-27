@@ -39,8 +39,9 @@ export class FederatedVotingContext
 		this.drainEvents(); // Clear the collected events
 	}
 
-	setState(state: FederatedVotingContextState): void {
-		this.state = state;
+	//for exposing the state in GUI. Should not be altered directly
+	getState(): FederatedVotingContextState {
+		return this.state;
 	}
 
 	addNode(node: Node): void {
