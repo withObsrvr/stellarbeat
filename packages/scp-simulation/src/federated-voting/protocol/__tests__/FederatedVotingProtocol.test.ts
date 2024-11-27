@@ -66,7 +66,7 @@ describe('FederatedVotingProtocol', () => {
 			expect(broadcastVoteRequested.vote).toStrictEqual(vote);
 
 			expect(federatedVotingState.voted).not.toBeNull();
-			expect(federatedVotingState.voted).toStrictEqual(vote);
+			expect(federatedVotingState.voted).toStrictEqual(vote.statement);
 			expect(federatedVotingState.accepted).toBeNull();
 			expect(federatedVotingState.phase).toBe('unknown');
 		});

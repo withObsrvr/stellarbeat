@@ -1,32 +1,146 @@
 <template>
-  <div class="card">
-    <div class="card-title pt-2 pb-2">
-      <ul class="list-group list-group-flush">
-        <li
-          v-for="node in nodes"
-          :key="node.publicKey"
-          class="list-group-item d-flex justify-content-between align-items-center"
-        >
-          {{ node.publicKey }}
-          <button class="btn btn-primary btn-sm" @click="vote(node)">
-            Vote
-          </button>
-        </li>
-      </ul>
-    </div>
+  <div class="side-panel h-100">
+    <ul class="node-list">
+      <li
+        v-for="nodeState in nodes"
+        :key="nodeState.node.publicKey"
+        class="node-item"
+      >
+        <div class="node-info">
+          <div class="node-key d-flex align-items-center">
+            <span class="key-text">{{ nodeState.node.publicKey }}</span>
+          </div>
+          <div class="node-status">
+            <span v-if="nodeState.voted" class="badge badge-voted">
+              <BIconCheckCircle class="me-1" /> Voted:
+              {{ nodeState.voteValue || "N/A" }}
+            </span>
+            <span v-else class="badge badge-phase phase-unknown">
+              <BIconInfoCircleFill class="me-1" /> Not voted
+            </span>
+            <span
+              v-if="nodeState.phase !== 'unknown'"
+              class="badge badge-phase"
+              :class="{
+                'phase-accepted': nodeState.phase === 'accepted',
+                'phase-confirmed': nodeState.phase === 'confirmed',
+              }"
+            >
+              <template v-if="nodeState.phase === 'accepted'">
+                <BIconInfoCircleFill class="me-1" /> Accepted:
+                {{ nodeState.acceptedValue || "N/A" }}
+              </template>
+              <template v-else-if="nodeState.phase === 'confirmed'">
+                <BIconCheckCircleFill class="me-1" /> Confirmed:
+                {{ nodeState.confirmedValue || "N/A" }}
+              </template>
+            </span>
+          </div>
+        </div>
+      </li>
+    </ul>
   </div>
 </template>
+
 <script setup lang="ts">
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { computed } from "vue";
-
-function vote(node) {
-  console.log(node);
-}
+import {
+  BIconCheckCircle,
+  BIconInfoCircleFill,
+  BIconCheckCircleFill,
+} from "bootstrap-vue";
 
 const nodes = computed(() => {
   return federatedVotingStore.protocolContextState.protocolStates.map(
-    (protocolState) => protocolState.node,
+    (protocolState) => ({
+      node: protocolState.node,
+      voted: protocolState.voted,
+      phase: protocolState.phase,
+      voteValue: protocolState.voted,
+      acceptedValue: protocolState.accepted,
+      confirmedValue: protocolState.confirmed,
+    }),
   );
 });
 </script>
+
+<style scoped>
+.side-panel {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.node-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.node-item {
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  background: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.node-item:hover {
+  background: #e9ecef;
+}
+
+.node-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.node-key {
+  font-weight: 500;
+  color: #212529;
+  word-break: break-word;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.badge-voted {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-phase.phase-unknown {
+  background-color: #e2e3e5;
+  color: #6c757d;
+}
+
+.badge-phase.phase-accepted {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.badge-phase.phase-confirmed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.key-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+</style>

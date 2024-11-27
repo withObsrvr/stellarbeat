@@ -21,7 +21,7 @@ export class FederatedVotingProtocol extends InMemoryEventCollector {
 			state.node.publicKey,
 			state.node.quorumSet
 		);
-		state.voted = vote;
+		state.voted = statement;
 		this.registerEvent(new Voted(state.node.publicKey, vote));
 		this.registerEvent(new BroadcastVoteRequested(state.node.publicKey, vote));
 		this.processVote(vote, state);

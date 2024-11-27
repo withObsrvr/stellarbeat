@@ -43,8 +43,10 @@ export class FederatedVotingContext
 		this.state = state;
 	}
 
-	//todo: naming of addNode. Should the action create a new State, or should we just pass a Node
 	addNode(node: Node): void {
+		if (this.getProtocolState(node.publicKey)) {
+			return;
+		}
 		this.state.protocolStates.push(new FederatedVotingProtocolState(node));
 	}
 

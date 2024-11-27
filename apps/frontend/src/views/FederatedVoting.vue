@@ -3,7 +3,7 @@
     <!-- Page Header -->
     <div class="page-header d-flex justify-content-between py-3">
       <div class="d-flex align-items-center">
-        <h2 class="page-title">Federated Voting</h2>
+        <h2 class="page-title">Federated Voting Simulation</h2>
       </div>
     </div>
 
@@ -24,7 +24,7 @@
       </div>
 
       <!-- Graphs -->
-      <div class="col-lg-9 col-md-10 col-sm-12">
+      <div class="col-lg-10 col-md-10 col-sm-12">
         <div class="row h-100">
           <div class="col-md-6 col-sm-12 mb-4 d-flex">
             <div class="w-100">
