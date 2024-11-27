@@ -11,6 +11,10 @@
         v-for="nodeState in nodes"
         :key="nodeState.node.publicKey"
         class="node-item"
+        :class="{
+          'selected-node': nodeState.node.publicKey === selectedNodeId,
+        }"
+        @click="selectNode(nodeState.node.publicKey)"
       >
         <div class="node-info">
           <div class="node-key d-flex align-items-center">
@@ -49,8 +53,8 @@
 </template>
 
 <script setup lang="ts">
-import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { computed } from "vue";
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import {
   BIconCheckCircle,
   BIconInfoCircleFill,
@@ -69,6 +73,12 @@ const nodes = computed(() => {
     }),
   );
 });
+
+const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
+
+function selectNode(publicKey: string) {
+  federatedVotingStore.selectedNodeId = publicKey;
+}
 </script>
 
 <style scoped>
@@ -149,5 +159,9 @@ const nodes = computed(() => {
   color: #333;
   font-size: 24px;
   font-weight: bold;
+}
+
+.selected-node {
+  background-color: #e9ecef;
 }
 </style>
