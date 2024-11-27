@@ -9,14 +9,14 @@ import {
 import {
   type LinkDatum,
   type NodeDatum,
-} from "@/components/federated-voting/GraphManager";
+} from "@/components/federated-voting/overlay-graph/GraphManager";
 
 export class SimulationManager {
   private simulation: Simulation<NodeDatum, LinkDatum> | null = null;
 
   constructor(
-    private nodes: NodeDatum[],
-    private links: LinkDatum[],
+    public nodes: NodeDatum[],
+    public links: LinkDatum[],
     private repellingForce: number,
     private width: number,
     private height: number,

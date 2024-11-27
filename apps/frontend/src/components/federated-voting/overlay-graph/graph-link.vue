@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import useGraph from "@/composables/useGraph";
 import { type PropType, type Ref, toRefs } from "vue";
-import { type LinkDatum } from "@/components/federated-voting/GraphManager";
+import { type LinkDatum } from "@/components/federated-voting/overlay-graph/GraphManager";
 
 const { getLinkPath } = useGraph();
 

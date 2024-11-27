@@ -9,8 +9,12 @@ export class BasicFederatedVotingScenario {
 		simulation.addUserAction(new AddNode('Alice', quorumSet));
 		simulation.addUserAction(new AddNode('Bob', quorumSet));
 		simulation.addUserAction(new AddNode('Chad', quorumSet));
+		simulation.addUserAction(
+			new AddNode('Steve', new QuorumSet(2, ['Bob', 'Chad'], []))
+		);
 		simulation.addUserAction(new VoteOnStatement('Alice', 'pizza'));
 		simulation.addUserAction(new VoteOnStatement('Bob', 'pizza'));
 		simulation.addUserAction(new VoteOnStatement('Chad', 'burger'));
+		simulation.addUserAction(new VoteOnStatement('Steve', 'burger'));
 	}
 }

@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { useTruncate } from "@/composables/useTruncate";
 import useGraph from "@/composables/useGraph";
-import { type NodeDatum } from "@/components/federated-voting/GraphManager";
+import { type NodeDatum } from "@/components/federated-voting/overlay-graph/GraphManager";
 import { type PropType, toRefs, computed } from "vue";
 
 const truncate = useTruncate();
