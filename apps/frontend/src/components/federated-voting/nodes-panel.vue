@@ -1,5 +1,11 @@
 <template>
-  <div class="side-panel h-100">
+  <div class="card side-panel h-100">
+    <div
+      class="title d-flex justify-content-around align-items-baseline border-bottom pb-4 mb-2"
+    >
+      Nodes
+    </div>
+
     <ul class="node-list">
       <li
         v-for="nodeState in nodes"
@@ -67,11 +73,8 @@ const nodes = computed(() => {
 
 <style scoped>
 .side-panel {
-  background-color: #ffffff;
-  border-radius: 8px;
   padding: 1rem;
   font-size: 0.9rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .node-list {
@@ -85,7 +88,6 @@ const nodes = computed(() => {
   margin-bottom: 0.5rem;
   border-radius: 6px;
   background: #f8f9fa;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -142,5 +144,10 @@ const nodes = computed(() => {
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 150px;
+}
+.title {
+  color: #333;
+  font-size: 24px;
+  font-weight: bold;
 }
 </style>

@@ -15,26 +15,26 @@
     </div>
 
     <!-- Main Content -->
-    <div class="row d-flex align-items-stretch">
+    <div class="row mb-4">
       <!-- Nodes Panel -->
-      <div class="col-lg-2 col-md-2 col-sm-12 mb-4">
+      <div class="col-lg-2 col-md-2 col-sm-12">
         <div class="h-100">
           <nodes-panel></nodes-panel>
         </div>
       </div>
 
-      <!-- Graphs -->
       <div class="col-lg-10 col-md-10 col-sm-12">
-        <div class="row h-100">
-          <div class="col-md-6 col-sm-12 mb-4 d-flex">
-            <div class="w-100">
-              <TrustGraph />
-            </div>
+        <div class="row">
+          <div class="col-md-6 col-sm-12">
+            <TrustGraph />
           </div>
-          <div class="col-md-6 col-sm-12 d-flex">
-            <div class="w-100">
-              <overlay-graph-base class="card-spacing" />
-            </div>
+          <div class="col-md-6 col-sm-12">
+            <overlay-graph-base class="card-spacing" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <selected-node-panel />
           </div>
         </div>
       </div>
@@ -47,6 +47,7 @@ import NodesPanel from "@/components/federated-voting/nodes-panel.vue";
 import SimulationControl from "@/components/federated-voting/simulation-control/simulation-control.vue";
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph-base.vue";
 import TrustGraph from "@/components/federated-voting/trust-graph/trust-graph.vue";
+import SelectedNodePanel from "@/components/federated-voting/selected-node-panel.vue";
 </script>
 
 <style scoped>

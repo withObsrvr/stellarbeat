@@ -24,7 +24,7 @@
         @vertex-selected="handleVertexSelected"
       />
     </div>
-    <div class="card-footer pt-0 footer"></div>
+    <div class="card-footer footer"></div>
   </div>
 </template>
 <script setup lang="ts">
