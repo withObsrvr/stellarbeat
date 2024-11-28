@@ -80,7 +80,7 @@ describe('FederatedVotingProtocol', () => {
 				);
 				const vote = new Vote('statement', false, 'V', quorumSet);
 				federatedVotingProtocol.processVote(vote, federatedVotingState);
-				expect(federatedVotingState.knownVotes.has(vote)).toBe(true);
+				expect(federatedVotingState.processedVotes.includes(vote)).toBe(true);
 			});
 
 			it('should move to accept phase', () => {

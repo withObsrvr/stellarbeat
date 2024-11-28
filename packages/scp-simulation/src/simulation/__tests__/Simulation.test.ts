@@ -17,7 +17,7 @@ describe('Simulation Class', () => {
 	it('should initialize with empty actions and events', () => {
 		expect(simulation.pendingUserActions()).toEqual([]);
 		expect(simulation.pendingProtocolActions()).toEqual([]);
-		expect(simulation.getFullEventLog()).toEqual([]);
+		expect(simulation.getFullEventLog()).toEqual([[]]);
 		expect(simulation.hasNextStep()).toBe(false);
 		expect(simulation.hasPreviousStep()).toBe(false);
 	});
@@ -120,6 +120,6 @@ describe('Simulation Class', () => {
 
 		const eventLog = simulation.getFullEventLog();
 
-		expect(eventLog).toEqual([event1, event2]);
+		expect(eventLog).toEqual([[], [event1], [event2]]);
 	});
 });

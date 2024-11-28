@@ -40,7 +40,7 @@
 <script setup lang="ts">
 import ScenarioSelector from "@/components/federated-voting/simulation-control/scenario-selector.vue";
 import ConsoleLog from "@/components/federated-voting/simulation-control/console-log.vue";
-
+import { onMounted, onBeforeUnmount } from "vue";
 import {
   BIconSkipBackwardFill,
   BIconSkipForwardFill,
@@ -65,6 +65,26 @@ function reset() {
 function goBackOneStep() {
   federatedVotingStore.simulation.goBackOneStep();
 }
+
+// Keydown event handler
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === "n") {
+    play();
+    event.preventDefault();
+  }
+  if (event.key === "N") {
+    goBackOneStep();
+    event.preventDefault();
+  }
+};
+
+onMounted(() => {
+  document.addEventListener("keydown", handleKeydown, { capture: true });
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("keydown", handleKeydown, { capture: true });
+});
 </script>
 
 <style scoped>

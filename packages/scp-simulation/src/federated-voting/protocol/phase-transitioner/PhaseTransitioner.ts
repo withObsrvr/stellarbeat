@@ -139,7 +139,7 @@ export class PhaseTransitioner extends InMemoryEventCollector {
 		state: FederatedVotingProtocolState,
 		statement: Statement
 	) {
-		return Array.from(state.knownVotes).filter(
+		return state.processedVotes.filter(
 			(v) =>
 				v.statement.toString() === statement.toString() && !v.isVoteToAccept
 		);
@@ -149,7 +149,7 @@ export class PhaseTransitioner extends InMemoryEventCollector {
 		state: FederatedVotingProtocolState,
 		statement: Statement
 	) {
-		return Array.from(state.knownVotes).filter(
+		return state.processedVotes.filter(
 			(v) => v.statement.toString() === statement.toString() && v.isVoteToAccept
 		);
 	}

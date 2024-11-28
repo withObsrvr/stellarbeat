@@ -46,8 +46,8 @@ export class FederatedVotingProtocol extends InMemoryEventCollector {
 	}
 
 	processVote(vote: Vote, state: FederatedVotingProtocolState): void {
-		if (state.knownVotes.has(vote)) return; //because we are doing everything in memory, this check suffices and we don't need hashes
-		state.knownVotes.add(vote);
+		if (state.processedVotes.includes(vote)) return; //because we are doing everything in memory, this check suffices and we don't need hashes
+		state.processedVotes.push(vote);
 
 		if (this.phaseTransitioner.tryMoveToAcceptPhase(vote.statement, state)) {
 			this.registerEvents(this.phaseTransitioner.drainEvents());

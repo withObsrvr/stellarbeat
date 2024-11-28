@@ -9,7 +9,7 @@ export enum FederatedVotingPhase {
 }
 
 export class FederatedVotingProtocolState {
-	public knownVotes: Set<Vote> = new Set();
+	public processedVotes: Vote[] = [];
 	public voted: Statement | null = null;
 	public accepted: Statement | null = null;
 	public confirmed: Statement | null = null;

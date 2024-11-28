@@ -94,14 +94,14 @@ describe('PhaseTransitioner', () => {
 		it('should accept if a v-blocking set of nodes has accepted the statement', () => {
 			const federatedVotingState = setupState('A');
 			const statement = createStatement();
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, true, 'B', new QuorumSet(1, ['C'], []))
 			);
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, true, 'C', new QuorumSet(1, ['B'], []))
 			);
 
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, false, 'D', new QuorumSet(1, ['B'], []))
 			);
 
@@ -138,13 +138,13 @@ describe('PhaseTransitioner', () => {
 			const federatedVotingState = setupState('A');
 			const statement = createStatement();
 
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, true, 'B', new QuorumSet(1, ['C'], []))
 			);
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, false, 'C', new QuorumSet(1, ['B'], []))
 			);
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, false, 'D', new QuorumSet(1, ['B'], []))
 			);
 
@@ -172,17 +172,17 @@ describe('PhaseTransitioner', () => {
 			const statement = createStatement();
 
 			const quorumSetOfB = new QuorumSet(1, ['C'], []);
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, false, 'B', quorumSetOfB)
 			);
 
 			const quorumSetOfC = new QuorumSet(1, ['B'], []);
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, false, 'C', quorumSetOfC)
 			);
 
 			const quorumSetOfD = new QuorumSet(1, ['B'], []);
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, false, 'D', quorumSetOfD)
 			);
 
@@ -291,11 +291,11 @@ describe('PhaseTransitioner', () => {
 			const statement = createStatement();
 
 			const quorumSetOfB = new QuorumSet(1, ['c'], []);
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, false, 'B', quorumSetOfB)
 			);
 			const quorumSetOfC = new QuorumSet(1, ['B'], []);
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, true, 'C', quorumSetOfC)
 			);
 
@@ -317,11 +317,11 @@ describe('PhaseTransitioner', () => {
 			const federatedVotingState = setupState('A');
 			const statement = createStatement();
 
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, true, 'B', new QuorumSet(1, ['C'], []))
 			);
 
-			federatedVotingState.knownVotes.add(
+			federatedVotingState.processedVotes.push(
 				new Vote(statement, true, 'C', new QuorumSet(1, ['B'], []))
 			);
 
