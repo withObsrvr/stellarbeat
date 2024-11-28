@@ -6,7 +6,7 @@
       Nodes
     </div>
 
-    <ul class="node-list">
+    <ul class="node-list sticky">
       <li
         v-for="nodeState in nodes"
         :key="nodeState.node.publicKey"
@@ -96,6 +96,11 @@ function selectNode(publicKey: string) {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.node-list.sticky {
+  position: sticky;
+  top: 0;
 }
 
 .node-item {
