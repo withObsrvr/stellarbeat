@@ -45,6 +45,10 @@
           <scenario-selector />
         </div>
       </div>
+      <!-- Tick Time Animation -->
+      <div v-show="playing" class="tick-animation">
+        <div ref="progressBar" class="progress-bar"></div>
+      </div>
       <!-- Content area: Console Output and Events Panel -->
       <div class="card-body p-2 d-flex" style="max-height: 250px">
         <console-log />
@@ -57,7 +61,7 @@
 <script setup lang="ts">
 import ScenarioSelector from "@/components/federated-voting/simulation-control/scenario-selector.vue";
 import ConsoleLog from "@/components/federated-voting/simulation-control/event-log.vue";
-import { onMounted, onBeforeUnmount } from "vue";
+import { onMounted, onBeforeUnmount, nextTick } from "vue";
 import {
   BIconPlayFill,
   BIconSkipBackwardFill,
@@ -69,21 +73,37 @@ import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import Actions from "./actions.vue";
 
 const playing = ref(false);
+const tickTime = 2000;
+const progressBar = ref<HTMLElement | null>(null);
 let playInterval: NodeJS.Timeout | null = null;
 
 function play() {
   playing.value = true;
+  resetAnimation();
   if (federatedVotingStore.simulation.hasNextStep()) {
     executeNextStep();
   }
   playInterval = setInterval(() => {
     if (federatedVotingStore.simulation.hasNextStep()) {
+      resetAnimation();
       executeNextStep();
     } else {
       clearPlayingInterval();
       playing.value = false;
     }
-  }, 2000);
+  }, tickTime);
+}
+
+function resetAnimation() {
+  nextTick(() => {
+    if (progressBar.value) {
+      // Restart the animation
+      progressBar.value.style.animation = "none";
+      // Trigger reflow to restart the animation
+      void progressBar.value.offsetWidth;
+      progressBar.value.style.animation = `tickAnimation ${tickTime}ms linear`;
+    }
+  });
 }
 
 const clearPlayingInterval = () => {
@@ -136,6 +156,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener("keydown", handleKeydown, { capture: true });
+  clearPlayingInterval();
 });
 </script>
 
@@ -173,5 +194,32 @@ onBeforeUnmount(() => {
 
 .card-body {
   background-color: white;
+}
+
+.tick-animation {
+  position: relative;
+  height: 4px;
+  background-color: #e9ecef;
+  overflow: hidden;
+}
+
+.tick-animation .progress-bar {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background-color: #28a745;
+  animation: tickAnimation linear infinite;
+}
+</style>
+<style>
+@keyframes tickAnimation {
+  from {
+    left: -101%;
+  }
+  to {
+    left: -1%;
+  }
 }
 </style>
