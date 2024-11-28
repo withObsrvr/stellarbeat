@@ -37,7 +37,8 @@
               :disabled="!federatedVotingStore.simulation.hasPreviousStep()"
               @click="stop"
             >
-              <BIconStopFill class="icon-color" />
+              <BIconStopFill v-if="!playing" class="icon-color" />
+              <BIconPauseFill v-else class="icon-color" />
             </button>
           </div>
         </nav>
@@ -63,6 +64,7 @@ import ScenarioSelector from "@/components/federated-voting/simulation-control/s
 import ConsoleLog from "@/components/federated-voting/simulation-control/event-log.vue";
 import { onMounted, onBeforeUnmount, nextTick } from "vue";
 import {
+  BIconPauseFill,
   BIconPlayFill,
   BIconSkipBackwardFill,
   BIconSkipForwardFill,
