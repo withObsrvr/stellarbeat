@@ -7,17 +7,21 @@
           <div class="btn-group" role="group">
             <button
               class="btn btn-secondary btn-sm"
-              :disabled="!started"
+              :disabled="!federatedVotingStore.simulation.hasPreviousStep()"
               @click="goBackOneStep"
             >
               <BIconSkipBackwardFill class="icon-color" />
             </button>
-            <button class="btn btn-primary btn-sm" @click="play">
+            <button
+              :disabled="!federatedVotingStore.simulation.hasNextStep()"
+              class="btn btn-primary btn-sm"
+              @click="executeNextStep"
+            >
               <BIconSkipForwardFill class="icon-color" />
             </button>
             <button
               class="btn btn-secondary btn-sm"
-              :disabled="!started"
+              :disabled="!federatedVotingStore.simulation.hasPreviousStep()"
               @click="reset"
             >
               <BIconStopFill class="icon-color" />
@@ -52,7 +56,7 @@ import Actions from "./actions.vue";
 
 const started = ref(false);
 
-function play() {
+function executeNextStep() {
   started.value = true;
   federatedVotingStore.simulation.executeStep();
 }
@@ -69,11 +73,15 @@ function goBackOneStep() {
 // Keydown event handler
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === "n") {
-    play();
-    event.preventDefault();
+    if (federatedVotingStore.simulation.hasNextStep()) {
+      executeNextStep();
+      event.preventDefault();
+    }
   }
   if (event.key === "N") {
-    goBackOneStep();
+    if (federatedVotingStore.simulation.hasPreviousStep()) {
+      goBackOneStep();
+    }
     event.preventDefault();
   }
 };
