@@ -7,13 +7,26 @@
           <div class="btn-group" role="group">
             <button
               class="btn btn-secondary btn-sm"
-              :disabled="!federatedVotingStore.simulation.hasPreviousStep()"
+              :disabled="
+                !federatedVotingStore.simulation.hasPreviousStep() || playing
+              "
               @click="goBackOneStep"
             >
               <BIconSkipBackwardFill class="icon-color" />
             </button>
             <button
-              :disabled="!federatedVotingStore.simulation.hasNextStep()"
+              class="btn btn-success btn-sm"
+              :disabled="
+                !federatedVotingStore.simulation.hasNextStep() || playing
+              "
+              @click="play"
+            >
+              <BIconPlayFill class="icon-color" />
+            </button>
+            <button
+              :disabled="
+                !federatedVotingStore.simulation.hasNextStep() || playing
+              "
               class="btn btn-primary btn-sm"
               @click="executeNextStep"
             >
@@ -22,7 +35,7 @@
             <button
               class="btn btn-secondary btn-sm"
               :disabled="!federatedVotingStore.simulation.hasPreviousStep()"
-              @click="reset"
+              @click="stop"
             >
               <BIconStopFill class="icon-color" />
             </button>
@@ -46,6 +59,7 @@ import ScenarioSelector from "@/components/federated-voting/simulation-control/s
 import ConsoleLog from "@/components/federated-voting/simulation-control/event-log.vue";
 import { onMounted, onBeforeUnmount } from "vue";
 import {
+  BIconPlayFill,
   BIconSkipBackwardFill,
   BIconSkipForwardFill,
   BIconStopFill,
@@ -54,15 +68,45 @@ import { ref } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import Actions from "./actions.vue";
 
-const started = ref(false);
+const playing = ref(false);
+let playInterval: NodeJS.Timeout | null = null;
+
+function play() {
+  playing.value = true;
+  if (federatedVotingStore.simulation.hasNextStep()) {
+    executeNextStep();
+  }
+  playInterval = setInterval(() => {
+    if (federatedVotingStore.simulation.hasNextStep()) {
+      executeNextStep();
+    } else {
+      clearPlayingInterval();
+      playing.value = false;
+    }
+  }, 2000);
+}
+
+const clearPlayingInterval = () => {
+  if (playInterval) {
+    clearInterval(playInterval);
+    playInterval = null;
+  }
+};
+
+function stop() {
+  if (playing.value) {
+    clearPlayingInterval();
+    playing.value = false;
+  } else {
+    reset();
+  }
+}
 
 function executeNextStep() {
-  started.value = true;
   federatedVotingStore.simulation.executeStep();
 }
 
 function reset() {
-  started.value = false;
   federatedVotingStore.simulation.goToFirstStep();
 }
 
