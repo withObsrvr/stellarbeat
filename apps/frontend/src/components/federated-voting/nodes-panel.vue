@@ -14,14 +14,19 @@
         :class="{
           'selected-node': nodeState.node.publicKey === selectedNodeId,
         }"
+        role="button"
+        tabindex="0"
+        :aria-pressed="nodeState.node.publicKey === selectedNodeId"
         @click="selectNode(nodeState.node.publicKey)"
+        @keydown.enter.prevent="selectNode(nodeState.node.publicKey)"
+        @keydown.space.prevent="selectNode(nodeState.node.publicKey)"
       >
         <div class="node-info">
           <div class="node-key d-flex align-items-center">
             <span class="key-text">{{ nodeState.node.publicKey }}</span>
           </div>
           <div class="node-status">
-            <span v-if="nodeState.voted" class="badge badge-voted">
+            <span v-if="nodeState.voted" class="badge badge-voted mb-1">
               <BIconCheckCircle class="me-1" /> Voted:
               {{ nodeState.voteValue || "N/A" }}
             </span>

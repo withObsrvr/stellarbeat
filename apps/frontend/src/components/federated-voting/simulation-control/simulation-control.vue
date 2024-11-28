@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import ScenarioSelector from "@/components/federated-voting/simulation-control/scenario-selector.vue";
-import ConsoleLog from "@/components/federated-voting/simulation-control/console-log.vue";
+import ConsoleLog from "@/components/federated-voting/simulation-control/event-log.vue";
 import { onMounted, onBeforeUnmount } from "vue";
 import {
   BIconSkipBackwardFill,

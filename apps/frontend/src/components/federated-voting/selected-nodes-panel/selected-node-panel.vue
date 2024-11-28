@@ -44,9 +44,9 @@
         </div>
       </div>
 
-      <!-- Known Votes Section -->
+      <!-- Processed Votes Section -->
       <div class="known-votes">
-        <h2>Known Votes</h2>
+        <h2>Processed Votes</h2>
         <table>
           <thead>
             <tr>

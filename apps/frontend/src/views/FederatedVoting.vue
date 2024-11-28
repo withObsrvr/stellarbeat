@@ -47,7 +47,7 @@ import NodesPanel from "@/components/federated-voting/nodes-panel.vue";
 import SimulationControl from "@/components/federated-voting/simulation-control/simulation-control.vue";
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
 import TrustGraph from "@/components/federated-voting/trust-graph/trust-graph.vue";
-import SelectedNodePanel from "@/components/federated-voting/selected-node-panel.vue";
+import SelectedNodePanel from "@/components/federated-voting/selected-nodes-panel/selected-node-panel.vue";
 </script>
 
 <style scoped>

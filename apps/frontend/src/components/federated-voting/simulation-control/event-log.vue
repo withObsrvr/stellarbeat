@@ -20,7 +20,7 @@
         v-model="consoleSearchQuery"
         type="text"
         class="form-control form-control-sm"
-        placeholder="Search console logs"
+        placeholder="Search events"
       />
     </div>
     <!-- Console Logs -->
