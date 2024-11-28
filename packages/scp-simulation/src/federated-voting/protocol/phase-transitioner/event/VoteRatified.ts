@@ -1,6 +1,6 @@
 import { PublicKey } from '../../../../core';
 import { QuorumSet } from '../../../../core/QuorumSet';
-import { ProtocolEvent } from '../../ProtocolEvent';
+import { ProtocolEvent } from '../../event/ProtocolEvent';
 import { Statement } from '../../Statement';
 
 export class VoteRatified extends ProtocolEvent {
@@ -10,7 +10,7 @@ export class VoteRatified extends ProtocolEvent {
 		public readonly statement: Statement,
 		public readonly quorum: Map<string, QuorumSet>
 	) {
-		super();
+		super(publicKey);
 	}
 
 	toString(): string {

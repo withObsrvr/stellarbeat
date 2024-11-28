@@ -1,6 +1,6 @@
 export { Statement } from './Statement';
 export { FederatedVotingProtocol } from './FederatedVotingProtocol';
-export { ProtocolEvent } from './ProtocolEvent';
+export { ProtocolEvent } from './event/ProtocolEvent';
 export { Vote } from './Vote';
 export { Voted } from './event/Voted';
 export { ConsensusReached } from './event/ConsensusReached';

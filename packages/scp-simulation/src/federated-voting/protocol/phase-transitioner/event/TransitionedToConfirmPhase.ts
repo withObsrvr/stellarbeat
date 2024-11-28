@@ -1,6 +1,6 @@
 import { PublicKey } from '../../../../core';
 import { FederatedVotingPhase } from '../../FederatedVotingProtocolState';
-import { ProtocolEvent } from '../../ProtocolEvent';
+import { ProtocolEvent } from '../../event/ProtocolEvent';
 import { Statement } from '../../Statement';
 
 export class TransitionedToConfirmPhase extends ProtocolEvent {
@@ -11,7 +11,7 @@ export class TransitionedToConfirmPhase extends ProtocolEvent {
 		public readonly phase: FederatedVotingPhase,
 		public readonly statement: Statement
 	) {
-		super();
+		super(publicKey);
 	}
 
 	toString(): string {

@@ -106,7 +106,7 @@ export class FederatedVotingContext
 	}
 
 	sendMessage(message: Message): ProtocolAction[] {
-		const messageSent = new MessageSent(message);
+		const messageSent = new MessageSent(message.sender, message);
 		this.registerEvent(messageSent);
 		return this.deliverMessage(message); //in the future this will be handled by overlay, and allows for delaying the message etc
 	}
@@ -118,7 +118,7 @@ export class FederatedVotingContext
 			return [];
 		}
 
-		const messageReceived = new MessageReceived(message);
+		const messageReceived = new MessageReceived(message.receiver, message);
 		this.registerEvent(messageReceived);
 
 		this.federatedVotingProtocol.processVote(

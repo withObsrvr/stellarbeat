@@ -1,5 +1,5 @@
 import { PublicKey } from '../../../core';
-import { ProtocolEvent } from '../ProtocolEvent';
+import { ProtocolEvent } from './ProtocolEvent';
 import { Statement } from '../Statement';
 
 export class ConsensusReached extends ProtocolEvent {
@@ -8,7 +8,7 @@ export class ConsensusReached extends ProtocolEvent {
 		public readonly publicKey: PublicKey,
 		public readonly statement: Statement
 	) {
-		super();
+		super(publicKey);
 	}
 
 	toString(): string {

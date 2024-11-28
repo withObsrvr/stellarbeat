@@ -1,5 +1,5 @@
 import { PublicKey } from '../../../core';
-import { ProtocolEvent } from '../ProtocolEvent';
+import { ProtocolEvent } from './ProtocolEvent';
 import { Vote } from '../Vote';
 
 export class BroadcastVoteRequested extends ProtocolEvent {
@@ -8,7 +8,7 @@ export class BroadcastVoteRequested extends ProtocolEvent {
 		public readonly publicKey: PublicKey,
 		public readonly vote: Vote
 	) {
-		super();
+		super(publicKey);
 	}
 
 	toString(): string {

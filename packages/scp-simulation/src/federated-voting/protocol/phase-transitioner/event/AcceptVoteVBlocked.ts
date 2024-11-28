@@ -1,5 +1,5 @@
 import { PublicKey } from '../../../../core';
-import { ProtocolEvent } from '../../ProtocolEvent';
+import { ProtocolEvent } from '../../event/ProtocolEvent';
 import { Statement } from '../../Statement';
 
 export class AcceptVoteVBlocked extends ProtocolEvent {
@@ -9,7 +9,7 @@ export class AcceptVoteVBlocked extends ProtocolEvent {
 		public readonly statement: Statement,
 		public readonly vBlockingSet: Set<PublicKey>
 	) {
-		super();
+		super(publicKey);
 	}
 
 	toString(): string {
