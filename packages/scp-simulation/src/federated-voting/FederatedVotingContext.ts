@@ -16,6 +16,7 @@ import { Statement, Vote } from './protocol';
 import { MessageSent } from './event/MessageSent';
 import { MessageReceived } from './event/MessageReceived';
 import { BroadcastVoteRequested } from './protocol/event/BroadcastVoteRequested';
+import { ReceiveMessage } from './action/protocol/ReceiveMessage';
 
 export interface FederatedVotingContextState {
 	protocolStates: FederatedVotingProtocolState[];
@@ -108,10 +109,11 @@ export class FederatedVotingContext
 	sendMessage(message: Message): ProtocolAction[] {
 		const messageSent = new MessageSent(message.sender, message);
 		this.registerEvent(messageSent);
-		return this.deliverMessage(message); //in the future this will be handled by overlay, and allows for delaying the message etc
+
+		return [new ReceiveMessage(message)];
 	}
 
-	private deliverMessage(message: Message): ProtocolAction[] {
+	receiveMessage(message: Message): ProtocolAction[] {
 		const nodeFederatedVotingState = this.getProtocolState(message.receiver);
 		if (!nodeFederatedVotingState) {
 			console.log('Node not found'); //todo: throw error?

@@ -7,6 +7,7 @@ import { Message } from '../Message';
 import { BroadcastVoteRequested } from './../protocol/event/BroadcastVoteRequested';
 import { Vote, Voted } from '../protocol';
 import { SendMessage } from '../action/protocol/SendMessage';
+import { ReceiveMessage } from '../action/protocol/ReceiveMessage';
 
 describe('FederatedVotingContext', () => {
 	let mockFederatedVotingProtocol: MockProxy<FederatedVotingProtocol>;
@@ -131,14 +132,14 @@ describe('FederatedVotingContext', () => {
 	});
 
 	describe('sendMessage', () => {
-		it('should send a message and deliver it', () => {
+		it('should send a message and queue a Receive action', () => {
 			context.addNode(node);
 			const message = new Message('sender', node.publicKey, mock<Vote>());
 
 			const actions = context.sendMessage(message);
 
-			expect(actions).toEqual([]);
-			expect(mockFederatedVotingProtocol.processVote).toHaveBeenCalled();
+			expect(actions).toHaveLength(1);
+			expect(actions[0]).toBeInstanceOf(ReceiveMessage);
 		});
 
 		it('should process delivered messages and handle new broadcast events', () => {
@@ -149,7 +150,7 @@ describe('FederatedVotingContext', () => {
 				new BroadcastVoteRequested(node.publicKey, message.vote)
 			]);
 
-			const actions = context.sendMessage(message);
+			const actions = context.receiveMessage(message);
 
 			expect(actions).toHaveLength(1);
 			expect(actions[0]).toBeInstanceOf(SendMessage);
@@ -161,7 +162,7 @@ describe('FederatedVotingContext', () => {
 			context.addNode(node);
 			const message = new Message('sender', 'nonexistent', mock<Vote>());
 
-			const actions = context.sendMessage(message);
+			const actions = context.receiveMessage(message);
 
 			expect(actions).toEqual([]);
 			expect(mockFederatedVotingProtocol.processVote).not.toHaveBeenCalled();
