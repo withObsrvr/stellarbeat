@@ -49,7 +49,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, reactive, Ref, ref, watch } from "vue";
+import { onMounted, reactive, Ref, ref, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import {
   GraphManager,
@@ -60,16 +60,14 @@ import OverlayGraphOptions from "@/components/federated-voting/overlay-graph/ove
 import { SimulationManager } from "@/components/federated-voting/overlay-graph/SimulationManager";
 import GraphLink from "@/components/federated-voting/overlay-graph/graph-link.vue";
 import GraphNode from "@/components/federated-voting/overlay-graph/graph-node.vue";
+import { MessageSent } from "scp-simulation";
 
 const initialRepellingForce = 1000;
 const initialTopology = "complete";
 const overlayGraph = ref<SVGElement | null>(null);
 const graphManager = reactive(new GraphManager([], []));
 
-let simulationManager = reactive(
-  new SimulationManager([], [], initialRepellingForce, 0, 0),
-);
-
+let simulationManager: SimulationManager | null = null;
 let addLinkSourceNode: NodeDatum | null = null;
 
 const handleLinkClick = (link: LinkDatum) => {
@@ -90,24 +88,16 @@ const handleNodeClick = (node: NodeDatum) => {
   }
 };
 
-const nodes: Ref<NodeDatum[]> = computed(() => {
-  const nodes = federatedVotingStore.protocolContext.nodes.map((node) => ({
-    id: node.publicKey,
-    name: node.publicKey,
-    x: 0,
-    y: 0,
-  }));
+const nodes: Ref<NodeDatum[]> = ref([]);
+const links: Ref<LinkDatum[]> = ref([]);
 
-  return nodes;
-});
-
-const links: Ref<LinkDatum[]> = computed(() => {
-  const links: LinkDatum[] = [];
+const updateLinks = () => {
+  const newLinks: LinkDatum[] = [];
   nodes.value.forEach((node) => {
     //todo: handle in context. How do we handle bi-directionality?
     nodes.value.forEach((otherNode) => {
       if (node.id !== otherNode.id) {
-        links.push({
+        newLinks.push({
           source: node,
           target: otherNode,
         });
@@ -115,32 +105,67 @@ const links: Ref<LinkDatum[]> = computed(() => {
     });
   });
 
-  return links;
+  links.value = newLinks;
+};
+
+watch(federatedVotingStore.simulation, () => {
+  federatedVotingStore.simulation
+    .getLatestEvents()
+    .filter((event) => event instanceof MessageSent)
+    .forEach((event) => {
+      const messageEvent = event as MessageSent;
+      const sourceNode = nodes.value.find(
+        (n) => n.id === messageEvent.message.sender,
+      );
+      const targetNode = nodes.value.find(
+        (n) => n.id === messageEvent.message.receiver,
+      );
+      if (sourceNode && targetNode) {
+        animateMessage(sourceNode, targetNode);
+      }
+    });
 });
 
-watch(federatedVotingStore.protocolContextState, () => {
-  //todo: graphManager should create user-actions for the simulation. Reactive may not be the way to go here
-  simulationManager = reactive(
-    new SimulationManager(
-      nodes.value,
-      links.value,
-      initialRepellingForce,
-      width(),
-      height(),
-    ),
-  ) as SimulationManager;
-});
+import { select } from "d3-selection";
+import "d3-transition";
+
+const animateMessage = (source: NodeDatum, target: NodeDatum) => {
+  const svg = select(overlayGraph.value);
+  const messageDot = svg
+    .append("circle")
+    .attr("r", 5)
+    .attr("fill", "#f1c40f")
+    .attr("cx", source.x ?? 0)
+    .attr("cy", source.y ?? 0);
+
+  messageDot
+    //@ts-ignore
+    .transition()
+    .duration(2000)
+    .attr("cx", target.x)
+    .attr("cy", target.y)
+    .remove();
+};
 
 onMounted(() => {
-  simulationManager = reactive(
-    new SimulationManager(
-      nodes.value,
-      links.value,
-      initialRepellingForce,
-      width(),
-      height(),
-    ),
-  ) as SimulationManager;
+  nodes.value = federatedVotingStore.protocolContextState.protocolStates.map(
+    (protocolState) => ({
+      id: protocolState.node.publicKey,
+      name: protocolState.node.publicKey,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  updateLinks();
+
+  simulationManager = new SimulationManager(
+    nodes.value,
+    links.value,
+    initialRepellingForce,
+    width(),
+    height(),
+  );
 });
 
 const updateRepellingForce = (force: number) => {

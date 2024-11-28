@@ -1,4 +1,4 @@
-import { Event, Context, UserAction, ProtocolAction } from '../core';
+import { Event, Context, UserAction, ProtocolAction, Node } from '../core';
 
 //A step in the simulation. Contains all user and protocol actions to be executed next
 //and stores the state and events that got us here.
@@ -38,6 +38,14 @@ export class Simulation {
 			stepIterator = stepIterator.nextStep;
 		}
 		return events;
+	}
+
+	getLatestEvents(): Event[] {
+		return this.currentStep.previousEvents;
+	}
+
+	public loadInitialNodes(nodes: Node[]): void {
+		this.context.loadInitialNodes(nodes);
 	}
 
 	public addUserAction(action: UserAction): void {

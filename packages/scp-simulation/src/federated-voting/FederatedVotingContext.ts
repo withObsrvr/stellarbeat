@@ -19,6 +19,7 @@ import { BroadcastVoteRequested } from './protocol/event/BroadcastVoteRequested'
 import { ReceiveMessage } from './action/protocol/ReceiveMessage';
 
 export interface FederatedVotingContextState {
+	initialNodes: Node[];
 	protocolStates: FederatedVotingProtocolState[];
 }
 
@@ -27,6 +28,7 @@ export class FederatedVotingContext
 	implements Context
 {
 	private state: FederatedVotingContextState = {
+		initialNodes: [],
 		protocolStates: []
 	};
 
@@ -34,10 +36,16 @@ export class FederatedVotingContext
 		super();
 	}
 
+	loadInitialNodes(nodes: Node[]): void {
+		this.state.initialNodes = nodes;
+		nodes.forEach((node) => this.addNode(node));
+	}
+
 	reset(): void {
 		//todo: could we make this class purer?
 		this.state.protocolStates = [];
 		this.drainEvents(); // Clear the collected events
+		this.state.initialNodes.forEach((node) => this.addNode(node));
 	}
 
 	//for exposing the state in GUI. Should not be altered directly

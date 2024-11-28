@@ -23,6 +23,7 @@
     "d3-selection": "^3.0.0",
     "d3-shape": "^3.2.0",
     "d3-zoom": "^3.0.0",
+    "d3-transition": "^3.0.1",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",

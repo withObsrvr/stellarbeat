@@ -12,6 +12,6 @@ export class ReceiveMessage extends ProtocolAction {
 	}
 
 	toString(): string {
-		return `[SendMessage] ${this.message.toString()}`;
+		return `[ReceiveMessage] ${this.message.toString()}`;
 	}
 }
