@@ -20,7 +20,7 @@
         :option-transitive-quorum-set-only="false"
         :zoom-enabled="false"
         :initial-zoom="2"
-        :propagation-enabled="true"
+        :propagation-enabled="false"
         @vertex-selected="handleVertexSelected"
       />
     </div>
@@ -32,13 +32,20 @@ import Graph from "@/components/visual-navigator/graph/graph.vue";
 import ViewGraph from "@/components/visual-navigator/graph/view-graph";
 import ViewVertex from "@/components/visual-navigator/graph/view-vertex";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import { TrustGraph } from "shared";
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { TrustGraphBuilder } from "./TrustGraphBuilder";
 import { FederatedVotingProtocolState } from "scp-simulation";
 
 const viewGraph = ref<ViewGraph>(new ViewGraph());
-const selectedVertices = ref<ViewVertex[]>([]);
+const selectedVertices = computed(() => {
+  if (!federatedVotingStore.selectedNodeId) {
+    return [];
+  }
+  const vertex = viewGraph.value.viewVertices.get(
+    federatedVotingStore.selectedNodeId,
+  );
+  return vertex ? [vertex] : [];
+});
 
 const trustGraph = () => {
   return TrustGraphBuilder.buildTrustGraph(
@@ -56,10 +63,10 @@ onMounted(() => {
 });
 
 const handleVertexSelected = (vertex: ViewVertex) => {
-  selectedVertices.value = [vertex];
   federatedVotingStore.selectedNodeId = vertex.key;
 };
 </script>
+
 <style scoped>
 .footer {
   height: 60px;
