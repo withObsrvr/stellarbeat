@@ -44,27 +44,7 @@
         </div>
       </div>
 
-      <!-- Processed Votes Section -->
-      <div class="known-votes">
-        <h2>Processed Votes</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Voter</th>
-              <th>Statement</th>
-              <th>Vote to Accept</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(vote, index) in knownVotes" :key="index">
-              <td>{{ vote.publicKey }}</td>
-              <td>{{ vote.statement }}</td>
-              <td>{{ vote.isVoteToAccept ? "Yes" : "No" }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
+      <ProcessedVotes />
       <!-- Quorum Set Section -->
       <div class="quorum-set">
         <h2>Quorum Set</h2>
@@ -86,22 +66,24 @@ import {
   BIconQuestionCircleFill,
 } from "bootstrap-vue";
 import QuorumSetDisplay from "./quorum-set-display.vue";
+import ProcessedVotes from "./processed-votes.vue";
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
+
 const contextState = computed(() => {
   return federatedVotingStore.protocolContextState;
 });
+
 const protocolState = computed(() => {
   return contextState.value.protocolStates.find(
     (state) => state.node.publicKey === selectedNodeId.value,
   );
 });
+
 const selectedNodePhase = computed(() => {
   return protocolState.value ? protocolState.value.phase : "unknown";
 });
-const knownVotes = computed(() => {
-  return protocolState.value ? protocolState.value.processedVotes : [];
-});
+
 const quorumSet = computed(() => {
   return protocolState.value ? protocolState.value.node.quorumSet : null;
 });
@@ -166,29 +148,7 @@ const quorumSet = computed(() => {
   margin-right: 0.25rem;
 }
 
-.known-votes,
 .quorum-set {
   margin-bottom: 40px;
-}
-
-.vote-item {
-  display: flex;
-  margin-bottom: 10px;
-}
-
-.known-votes table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.known-votes th,
-.known-votes td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-.known-votes th {
-  background-color: #f2f2f2;
-  text-align: left;
 }
 </style>
