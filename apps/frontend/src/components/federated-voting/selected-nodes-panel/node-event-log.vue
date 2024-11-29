@@ -1,25 +1,28 @@
 <template>
-  <div class="console-output">
-    <div class="search-box">
-      <input
-        v-model="filter"
-        type="text"
-        class="form-control form-control-sm"
-        placeholder="Filter events"
-      />
-    </div>
-    <div ref="logContainer" class="log-container">
-      <div v-if="filteredConsoleLogs.length === 0" class="no-events-message">
-        No events yet, start the simulation
+  <div>
+    <h3>Node Event Log</h3>
+    <div class="console-output">
+      <div class="search-box">
+        <input
+          v-model="filter"
+          type="text"
+          class="form-control form-control-sm"
+          placeholder="Filter events"
+        />
       </div>
-      <div
-        v-for="item in filteredConsoleLogs"
-        :key="item.lineNumber"
-        :class="getBackgroundClass(item.stepIndex)"
-      >
-        <span class="line-number">{{ item.lineNumber }}</span>
-        <span class="event-subtype">{{ item.event.subType }}</span>
-        <span class="log-entry">{{ item.log }}</span>
+      <div ref="logContainer" class="log-container">
+        <div v-if="filteredConsoleLogs.length === 0" class="no-events-message">
+          No events yet, start the simulation
+        </div>
+        <div
+          v-for="item in filteredConsoleLogs"
+          :key="item.lineNumber"
+          :class="getBackgroundClass(item.stepIndex)"
+        >
+          <span class="line-number">{{ item.lineNumber }}</span>
+          <span class="event-subtype">{{ item.event.subType }}</span>
+          <span class="log-entry">{{ item.log }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -77,6 +80,8 @@ watch(filteredConsoleLogs, () => {
 .console-output {
   display: flex;
   flex-direction: column;
+
+  border: 1px solid #ddd;
   height: 100%;
   font-family: monospace;
   font-size: 12px;
@@ -91,7 +96,6 @@ watch(filteredConsoleLogs, () => {
 .log-container {
   height: 300px; /* Fixed height for the log container */
   overflow-y: auto;
-  border: 1px solid #ddd;
   padding: 5px;
 }
 

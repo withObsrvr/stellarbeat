@@ -2,16 +2,15 @@
   <div class="card selected-node-panel">
     <div v-if="selectedNodeId">
       <div class="header">
-        <h1>Node Info</h1>
-        <p>{{ selectedNodeId }}</p>
+        <h2>{{ selectedNodeId }} Info</h2>
       </div>
 
-      <NodeInformation :public-key="selectedNodeId" />
+      <NodeInformation :public-key="selectedNodeId" class="mb-5" />
       <ProcessedVotes />
 
       <!-- Quorum Set Section -->
       <div class="quorum-set">
-        <h2>Quorum Set</h2>
+        <h3>Quorum Set</h3>
         <quorum-set-display :quorum-set="quorumSet" :level="1" />
       </div>
 

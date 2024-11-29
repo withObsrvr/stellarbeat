@@ -1,6 +1,6 @@
 <template>
   <div class="processed-votes">
-    <h2>Processed Votes</h2>
+    <h3>Processed Votes</h3>
     <table>
       <thead>
         <tr>
