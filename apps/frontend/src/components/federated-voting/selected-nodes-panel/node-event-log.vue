@@ -48,8 +48,10 @@ const filteredConsoleLogs = computed(() => {
         stepIndex: stepIndex,
         event: event,
       }))
-      .filter((item) =>
-        item.log.toLowerCase().includes(filter.value.toLowerCase()),
+      .filter(
+        (item) =>
+          item.log.toLowerCase().includes(filter.value.toLowerCase()) ||
+          item.event.subType.toLowerCase().includes(filter.value.toLowerCase()),
       );
   });
 });
@@ -71,7 +73,6 @@ watch(filteredConsoleLogs, () => {
   font-family: monospace;
   font-size: 12px;
   background-color: #fff;
-  border: 1px solid #ddd;
   padding: 10px;
 }
 
@@ -80,8 +81,10 @@ watch(filteredConsoleLogs, () => {
 }
 
 .log-container {
-  flex: 1;
+  height: 300px; /* Fixed height for the log container */
   overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 5px;
 }
 
 .log-line {
@@ -93,7 +96,7 @@ watch(filteredConsoleLogs, () => {
 .line-number {
   color: #999;
   margin-right: 10px;
-  min-width: 50px;
+  min-width: 30px;
 }
 
 .event-subtype {
