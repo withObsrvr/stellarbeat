@@ -9,10 +9,13 @@
       />
     </div>
     <div ref="logContainer" class="log-container">
+      <div v-if="filteredConsoleLogs.length === 0" class="no-events-message">
+        No events yet, start the simulation
+      </div>
       <div
         v-for="item in filteredConsoleLogs"
         :key="item.lineNumber"
-        class="log-line"
+        :class="getBackgroundClass(item.stepIndex)"
       >
         <span class="line-number">{{ item.lineNumber }}</span>
         <span class="event-subtype">{{ item.event.subType }}</span>
@@ -56,6 +59,11 @@ const filteredConsoleLogs = computed(() => {
   });
 });
 
+// Method to determine class based on step index
+function getBackgroundClass(stepIndex: number) {
+  return stepIndex % 2 === 0 ? "even-step log-line" : "odd-step log-line";
+}
+
 watch(filteredConsoleLogs, () => {
   nextTick(() => {
     if (logContainer.value) {
@@ -87,6 +95,10 @@ watch(filteredConsoleLogs, () => {
   padding: 5px;
 }
 
+.log-line:hover {
+  background-color: #e9ecef;
+}
+
 .log-line {
   display: flex;
   align-items: baseline;
@@ -109,14 +121,18 @@ watch(filteredConsoleLogs, () => {
   word-break: break-word;
 }
 
-.log-line:hover {
-  background-color: #f9f9f9;
-}
-
 input[type="text"] {
   padding: 5px;
   font-size: 12px;
   width: 100%;
   box-sizing: border-box;
+}
+/* Alternating background styles */
+.even-step {
+  background-color: #ffffff; /* White background */
+}
+
+.odd-step {
+  background-color: #f9f9f9; /* Light gray background */
 }
 </style>
