@@ -7,23 +7,13 @@
       </div>
     </div>
 
-    <!-- Simulation Control -->
-    <div class="row">
-      <div class="col-12">
-        <simulation-control class="card-spacing" />
-      </div>
-    </div>
-
-    <!-- Main Content -->
     <div class="row mb-4">
-      <!-- Nodes Panel -->
-      <div class="col-lg-2 col-md-2 col-sm-12">
-        <div class="h-100">
-          <nodes-panel></nodes-panel>
-        </div>
+      <div class="col-lg-2 col-md-3 col-sm-12 mt-2 sticky h-100">
+        <Controller></Controller>
+        <nodes-panel></nodes-panel>
       </div>
 
-      <div class="col-lg-10 col-md-10 col-sm-12">
+      <div class="col-lg-10 col-md-9 col-sm-12">
         <div class="row">
           <div class="col-md-6 col-sm-12">
             <TrustGraph />
@@ -32,6 +22,12 @@
             <overlay-graph-base class="card-spacing" />
           </div>
         </div>
+        <div class="row">
+          <div class="col-12">
+            <simulation-control class="card-spacing" />
+          </div>
+        </div>
+
         <div class="row">
           <div class="col-12">
             <selected-node-panel />
@@ -48,6 +44,7 @@ import SimulationControl from "@/components/federated-voting/simulation-control/
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
 import TrustGraph from "@/components/federated-voting/trust-graph/trust-graph.vue";
 import SelectedNodePanel from "@/components/federated-voting/selected-nodes-panel/selected-node-panel.vue";
+import Controller from "@/components/federated-voting/simulation-control/controller.vue";
 </script>
 
 <style scoped>
@@ -70,5 +67,18 @@ import SelectedNodePanel from "@/components/federated-voting/selected-nodes-pane
 /* Optional: Add scrollbar if nodes list exceeds height */
 .nodes-panel {
   overflow-y: auto;
+}
+
+/* Default: Side panel is not sticky */
+.sticky {
+  position: static;
+}
+
+/* Sticky Side Panel on larger screens */
+@media (min-width: 768px) {
+  .sticky {
+    position: sticky;
+    top: 10px; /* Adds a 10px margin above the sticky side panel */
+  }
 }
 </style>

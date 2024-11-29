@@ -93,7 +93,6 @@ watch(filteredConsoleLogs, () => {
   font-family: monospace;
   font-size: 12px;
   background-color: white;
-  border: 1px solid lightgray;
   padding: 10px;
   display: flex;
   flex-direction: column;

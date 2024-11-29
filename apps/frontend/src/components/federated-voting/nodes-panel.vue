@@ -1,10 +1,7 @@
 <template>
-  <div class="card h-100">
-    <div class="card-header">
-      <h4 class="card-title">Nodes</h4>
-    </div>
+  <div class="card">
     <div class="card-body body">
-      <ul class="node-list sticky">
+      <ul class="node-list">
         <li
           v-for="nodeState in nodes"
           :key="nodeState.node.publicKey"
@@ -87,14 +84,11 @@ function selectNode(publicKey: string) {
 
 <style scoped>
 .node-list {
+  max-height: 75vh;
+  overflow-y: auto;
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-.node-list.sticky {
-  position: sticky;
-  top: 0;
 }
 
 .node-item {
@@ -171,5 +165,7 @@ function selectNode(publicKey: string) {
 
 .body {
   padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 </style>
