@@ -12,8 +12,6 @@ export class Voted extends ProtocolEvent {
 	}
 
 	toString(): string {
-		return `[${this.publicKey.toString()}][${
-			this.subType
-		}] Vote cast: ${this.vote.toString()}`;
+		return `[${this.subType}] ${this.vote.toString()}`;
 	}
 }

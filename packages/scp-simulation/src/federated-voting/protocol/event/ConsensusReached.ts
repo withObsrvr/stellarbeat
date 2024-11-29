@@ -12,7 +12,7 @@ export class ConsensusReached extends ProtocolEvent {
 	}
 
 	toString(): string {
-		return `[${this.publicKey.toString()}][${
+		return `[${
 			this.subType
 		}] Consensus reached on ${this.statement.toString()}`;
 	}

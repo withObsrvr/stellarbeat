@@ -13,10 +13,10 @@ export class AcceptVoteRatified extends ProtocolEvent {
 	}
 
 	toString(): string {
-		return `[${this.publicKey}][${
+		return `[${
 			this.subType
 		}] vote(accept(${this.statement.toString()})) ratified by quorum (${Array.from(
 			this.quorum.keys()
-		)}) in agreement attempt on statement ${this.statement.toString()}`;
+		)})`;
 	}
 }

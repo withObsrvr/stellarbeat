@@ -13,6 +13,6 @@ export class AcceptVoteVBlocked extends ProtocolEvent {
 	}
 
 	toString(): string {
-		return `[${this.publicKey}][${this.subType}] Accept(${this.statement}) votes from ${this.vBlockingSet} are v-blocking`;
+		return `[${this.subType}] Accept(${this.statement}) votes from ${this.vBlockingSet} are v-blocking`;
 	}
 }

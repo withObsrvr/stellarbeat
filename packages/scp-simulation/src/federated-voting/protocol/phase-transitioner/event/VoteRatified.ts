@@ -14,10 +14,10 @@ export class VoteRatified extends ProtocolEvent {
 	}
 
 	toString(): string {
-		return `[${this.publicKey}][${
+		return `[${
 			this.subType
 		}] vote(${this.statement.toString()}) ratified by quorum (${Array.from(
 			this.quorum.keys()
-		)}) for statement ${this.statement.toString()}`;
+		)})`;
 	}
 }

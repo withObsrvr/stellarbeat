@@ -1,19 +1,20 @@
 <template>
   <div class="console-output">
-    <!-- Console Search Box -->
-    <div class="search-box mb-2">
+    <div class="search-box">
       <input
-        v-model="consoleSearchQuery"
+        v-model="filter"
         type="text"
         class="form-control form-control-sm"
-        placeholder="Search events"
+        placeholder="Filter events"
       />
     </div>
-    <!-- Console Logs -->
     <div ref="logContainer" class="log-container">
-      <!-- Console log entries -->
-      <div v-for="item in filteredConsoleLogs" :key="item.lineNumber">
-        <span class="line-number">{{ item.lineNumber }}</span>
+      <div
+        v-for="item in filteredConsoleLogs"
+        :key="item.lineNumber"
+        :class="getBackgroundClass(item.stepIndex)"
+      >
+        <span class="line-number">{{ item.lineNumber }} | </span>
         <span class="log-entry">{{ item.log }}</span>
       </div>
     </div>
@@ -23,30 +24,34 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import { OverlayEvent, ProtocolEvent } from "scp-simulation";
 
-const consoleSearchQuery = ref("");
 const logContainer = ref<HTMLElement | null>(null);
+const filter = ref("");
+
+const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
 const filteredConsoleLogs = computed(() => {
   const eventLogs = federatedVotingStore.simulation.getFullEventLog(); // Returns Event[][]
 
-  // Flatten the events while adding step index and event index
-  const logsWithLineNumbers = eventLogs.flatMap((events, stepIndex) => {
-    return events.map((event, eventIndex) => {
-      return {
+  // Flatten and filter the events while adding step index and event index
+  return eventLogs.flatMap((events, stepIndex) => {
+    return events
+      .filter(
+        (event) =>
+          event instanceof ProtocolEvent || event instanceof OverlayEvent,
+      )
+      .filter((event) => event.publicKey === selectedNodeId.value)
+      .map((event, eventIndex) => ({
         log: event.toString(),
         lineNumber: `${stepIndex}.${eventIndex + 1}`,
         stepIndex: stepIndex,
-      };
-    });
+        event: event,
+      }))
+      .filter((item) =>
+        item.log.toLowerCase().includes(filter.value.toLowerCase()),
+      );
   });
-
-  if (consoleSearchQuery.value) {
-    return logsWithLineNumbers.filter((item) =>
-      item.log.toLowerCase().includes(consoleSearchQuery.value.toLowerCase()),
-    );
-  }
-  return logsWithLineNumbers;
 });
 
 // Method to determine class based on step index
@@ -64,6 +69,12 @@ watch(filteredConsoleLogs, () => {
 </script>
 
 <style scoped>
+.event-log {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .console-output {
   flex: 1;
   margin-right: 10px;
@@ -86,18 +97,29 @@ watch(filteredConsoleLogs, () => {
   flex: 1;
 }
 
+.line-number {
+  color: #999;
+  margin-right: 5px;
+}
+
 /* Alternating background styles */
 .even-step {
   background-color: #ffffff; /* White background */
 }
 
 .odd-step {
-  background-color: #b93131; /* Light gray background */
+  background-color: #f7f7f7; /* Light gray background */
 }
 
 /* Optional: Style for log entries */
 .line-number {
   color: #999;
   margin-right: 5px;
+}
+
+input[type="text"] {
+  padding: 5px;
+  margin-bottom: 5px;
+  font-size: 14px;
 }
 </style>

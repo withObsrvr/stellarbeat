@@ -6,7 +6,7 @@
         <p>{{ selectedNodeId }}</p>
       </div>
 
-      <NodeInformation />
+      <NodeInformation :public-key="selectedNodeId" />
       <ProcessedVotes />
 
       <!-- Quorum Set Section -->
@@ -14,6 +14,8 @@
         <h2>Quorum Set</h2>
         <quorum-set-display :quorum-set="quorumSet" :level="1" />
       </div>
+
+      <NodeEventLog />
     </div>
     <div v-else>
       <p>No node selected.</p>
@@ -27,6 +29,7 @@ import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import QuorumSetDisplay from "./quorum-set-display.vue";
 import ProcessedVotes from "./processed-votes.vue";
 import NodeInformation from "./node-information.vue";
+import NodeEventLog from "./node-event-log.vue"; // Import the new component
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 

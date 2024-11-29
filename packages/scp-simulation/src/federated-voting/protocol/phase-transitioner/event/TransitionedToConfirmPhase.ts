@@ -15,8 +15,6 @@ export class TransitionedToConfirmPhase extends ProtocolEvent {
 	}
 
 	toString(): string {
-		return `[${this.publicKey}][${this.subType}] Federated vote moved to phase ${
-			this.phase
-		} with statement ${this.statement.toString()}`;
+		return `[${this.subType}] ${this.statement.toString()}`;
 	}
 }

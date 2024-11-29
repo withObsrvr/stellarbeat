@@ -12,8 +12,6 @@ export class BroadcastVoteRequested extends ProtocolEvent {
 	}
 
 	toString(): string {
-		return `[${this.publicKey.toString()}][${
-			this.subType
-		}] vote: ${this.vote.toString()}`;
+		return `[${this.subType}] ${this.vote.toString()}`;
 	}
 }
