@@ -12,6 +12,6 @@ export class MessageSent extends OverlayEvent {
 	}
 
 	toString(): string {
-		return `[${this.subType}] ${this.message.toString()}`;
+		return `${this.message.toString()}`;
 	}
 }

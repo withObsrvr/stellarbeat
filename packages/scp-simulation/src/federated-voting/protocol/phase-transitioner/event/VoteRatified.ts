@@ -14,9 +14,7 @@ export class VoteRatified extends ProtocolEvent {
 	}
 
 	toString(): string {
-		return `[${
-			this.subType
-		}] vote(${this.statement.toString()}) ratified by quorum (${Array.from(
+		return `vote(${this.statement.toString()}) ratified by quorum (${Array.from(
 			this.quorum.keys()
 		)})`;
 	}

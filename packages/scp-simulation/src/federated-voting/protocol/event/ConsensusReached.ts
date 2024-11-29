@@ -12,8 +12,6 @@ export class ConsensusReached extends ProtocolEvent {
 	}
 
 	toString(): string {
-		return `[${
-			this.subType
-		}] Consensus reached on ${this.statement.toString()}`;
+		return `Consensus reached on ${this.statement.toString()}`;
 	}
 }

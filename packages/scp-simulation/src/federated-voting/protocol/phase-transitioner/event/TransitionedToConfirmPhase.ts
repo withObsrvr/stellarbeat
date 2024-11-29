@@ -15,6 +15,6 @@ export class TransitionedToConfirmPhase extends ProtocolEvent {
 	}
 
 	toString(): string {
-		return `[${this.subType}] ${this.statement.toString()}`;
+		return `${this.statement.toString()}`;
 	}
 }

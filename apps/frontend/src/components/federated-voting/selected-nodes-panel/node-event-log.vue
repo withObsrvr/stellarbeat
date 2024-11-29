@@ -12,9 +12,10 @@
       <div
         v-for="item in filteredConsoleLogs"
         :key="item.lineNumber"
-        :class="getBackgroundClass(item.stepIndex)"
+        class="log-line"
       >
-        <span class="line-number">{{ item.lineNumber }} | </span>
+        <span class="line-number">{{ item.lineNumber }}</span>
+        <span class="event-subtype">{{ item.event.subType }}</span>
         <span class="log-entry">{{ item.log }}</span>
       </div>
     </div>
@@ -32,9 +33,8 @@ const filter = ref("");
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
 const filteredConsoleLogs = computed(() => {
-  const eventLogs = federatedVotingStore.simulation.getFullEventLog(); // Returns Event[][]
+  const eventLogs = federatedVotingStore.simulation.getFullEventLog();
 
-  // Flatten and filter the events while adding step index and event index
   return eventLogs.flatMap((events, stepIndex) => {
     return events
       .filter(
@@ -54,11 +54,6 @@ const filteredConsoleLogs = computed(() => {
   });
 });
 
-// Method to determine class based on step index
-function getBackgroundClass(stepIndex: number) {
-  return stepIndex % 2 === 0 ? "even-step" : "odd-step";
-}
-
 watch(filteredConsoleLogs, () => {
   nextTick(() => {
     if (logContainer.value) {
@@ -69,23 +64,15 @@ watch(filteredConsoleLogs, () => {
 </script>
 
 <style scoped>
-.event-log {
+.console-output {
   display: flex;
   flex-direction: column;
   height: 100%;
-}
-
-.console-output {
-  flex: 1;
-  margin-right: 10px;
-  overflow-y: auto;
   font-family: monospace;
   font-size: 12px;
-  background-color: white;
-  border: 1px solid lightgray;
+  background-color: #fff;
+  border: 1px solid #ddd;
   padding: 10px;
-  display: flex;
-  flex-direction: column;
 }
 
 .search-box {
@@ -93,33 +80,40 @@ watch(filteredConsoleLogs, () => {
 }
 
 .log-container {
-  overflow-y: auto;
   flex: 1;
+  overflow-y: auto;
+}
+
+.log-line {
+  display: flex;
+  align-items: baseline;
+  padding: 2px 0;
 }
 
 .line-number {
   color: #999;
-  margin-right: 5px;
+  margin-right: 10px;
+  min-width: 50px;
 }
 
-/* Alternating background styles */
-.even-step {
-  background-color: #ffffff; /* White background */
+.event-subtype {
+  font-weight: bold;
+  margin-right: 10px;
 }
 
-.odd-step {
-  background-color: #f7f7f7; /* Light gray background */
+.log-entry {
+  flex: 1;
+  word-break: break-word;
 }
 
-/* Optional: Style for log entries */
-.line-number {
-  color: #999;
-  margin-right: 5px;
+.log-line:hover {
+  background-color: #f9f9f9;
 }
 
 input[type="text"] {
   padding: 5px;
-  margin-bottom: 5px;
-  font-size: 14px;
+  font-size: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 </style>

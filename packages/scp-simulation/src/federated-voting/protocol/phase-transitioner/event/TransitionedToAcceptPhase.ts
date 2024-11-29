@@ -14,6 +14,6 @@ export class TransitionedToAcceptPhase extends ProtocolEvent {
 	}
 
 	toString(): string {
-		return `[${this.subType}] ${this.statement.toString()}`;
+		return `${this.statement.toString()}`;
 	}
 }
