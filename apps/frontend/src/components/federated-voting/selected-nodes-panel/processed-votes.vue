@@ -10,6 +10,9 @@
         </tr>
       </thead>
       <tbody>
+        <tr v-if="processedVotes.length === 0">
+          <td colspan="3">No votes processed yet</td>
+        </tr>
         <tr v-for="(vote, index) in processedVotes" :key="index">
           <td>{{ vote.publicKey }}</td>
           <td>{{ vote.statement }}</td>

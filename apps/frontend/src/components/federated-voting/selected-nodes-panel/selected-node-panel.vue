@@ -1,23 +1,28 @@
 <template>
-  <div class="card selected-node-panel">
-    <div v-if="selectedNodeId">
-      <div class="header">
-        <h2>{{ selectedNodeId }} Info</h2>
-      </div>
-
-      <NodeInformation :public-key="selectedNodeId" class="mb-5" />
-      <ProcessedVotes />
-
-      <!-- Quorum Set Section -->
-      <div class="quorum-set">
-        <h3>Quorum Set</h3>
-        <quorum-set-display :quorum-set="quorumSet" :level="1" />
-      </div>
-
-      <NodeEventLog />
+  <div class="card mb-0">
+    <div class="card-header">
+      <h4 v-if="!federatedVotingStore.selectedNodeId" class="card-title">
+        Selected node Information
+      </h4>
+      <h4 v-else class="card-title">{{ selectedNodeId }}</h4>
+      <div></div>
     </div>
-    <div v-else>
-      <p>No node selected.</p>
+    <div class="card-body">
+      <div v-if="selectedNodeId">
+        <NodeInformation :public-key="selectedNodeId" class="mb-5" />
+        <ProcessedVotes />
+
+        <!-- Quorum Set Section -->
+        <div class="quorum-set">
+          <h3>Quorum Set</h3>
+          <quorum-set-display :quorum-set="quorumSet" :level="1" />
+        </div>
+
+        <NodeEventLog />
+      </div>
+      <div v-else>
+        <p>No node selected.</p>
+      </div>
     </div>
   </div>
 </template>
@@ -48,10 +53,6 @@ const quorumSet = computed(() => {
 </script>
 
 <style scoped>
-.selected-node-panel {
-  padding: 20px;
-}
-
 .header {
   text-align: center;
   margin-bottom: 30px;

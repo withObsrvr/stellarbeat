@@ -1,59 +1,58 @@
 <template>
-  <div class="card side-panel h-100">
-    <div
-      class="title d-flex justify-content-around align-items-baseline border-bottom pb-4 mb-2"
-    >
-      Nodes
+  <div class="card h-100">
+    <div class="card-header">
+      <h4 class="card-title">Nodes</h4>
     </div>
-
-    <ul class="node-list sticky">
-      <li
-        v-for="nodeState in nodes"
-        :key="nodeState.node.publicKey"
-        class="node-item"
-        :class="{
-          'selected-node': nodeState.node.publicKey === selectedNodeId,
-        }"
-        role="button"
-        tabindex="0"
-        :aria-pressed="nodeState.node.publicKey === selectedNodeId"
-        @click="selectNode(nodeState.node.publicKey)"
-        @keydown.enter.prevent="selectNode(nodeState.node.publicKey)"
-        @keydown.space.prevent="selectNode(nodeState.node.publicKey)"
-      >
-        <div class="node-info">
-          <div class="node-key d-flex align-items-center">
-            <span class="key-text">{{ nodeState.node.publicKey }}</span>
+    <div class="card-body body">
+      <ul class="node-list sticky">
+        <li
+          v-for="nodeState in nodes"
+          :key="nodeState.node.publicKey"
+          class="node-item"
+          :class="{
+            'selected-node': nodeState.node.publicKey === selectedNodeId,
+          }"
+          role="button"
+          tabindex="0"
+          :aria-pressed="nodeState.node.publicKey === selectedNodeId"
+          @click="selectNode(nodeState.node.publicKey)"
+          @keydown.enter.prevent="selectNode(nodeState.node.publicKey)"
+          @keydown.space.prevent="selectNode(nodeState.node.publicKey)"
+        >
+          <div class="node-info">
+            <div class="node-key d-flex align-items-center">
+              <span class="key-text">{{ nodeState.node.publicKey }}</span>
+            </div>
+            <div class="node-status">
+              <span v-if="nodeState.voted" class="badge badge-voted mb-1">
+                <BIconCheckCircle class="me-1" /> Voted:
+                {{ nodeState.voteValue || "N/A" }}
+              </span>
+              <span v-else class="badge badge-phase phase-unknown">
+                <BIconInfoCircleFill class="me-1" /> Not voted
+              </span>
+              <span
+                v-if="nodeState.phase !== 'unknown'"
+                class="badge badge-phase"
+                :class="{
+                  'phase-accepted': nodeState.phase === 'accepted',
+                  'phase-confirmed': nodeState.phase === 'confirmed',
+                }"
+              >
+                <template v-if="nodeState.phase === 'accepted'">
+                  <BIconInfoCircleFill class="me-1" /> Accepted:
+                  {{ nodeState.acceptedValue || "N/A" }}
+                </template>
+                <template v-else-if="nodeState.phase === 'confirmed'">
+                  <BIconCheckCircleFill class="me-1" /> Confirmed:
+                  {{ nodeState.confirmedValue || "N/A" }}
+                </template>
+              </span>
+            </div>
           </div>
-          <div class="node-status">
-            <span v-if="nodeState.voted" class="badge badge-voted mb-1">
-              <BIconCheckCircle class="me-1" /> Voted:
-              {{ nodeState.voteValue || "N/A" }}
-            </span>
-            <span v-else class="badge badge-phase phase-unknown">
-              <BIconInfoCircleFill class="me-1" /> Not voted
-            </span>
-            <span
-              v-if="nodeState.phase !== 'unknown'"
-              class="badge badge-phase"
-              :class="{
-                'phase-accepted': nodeState.phase === 'accepted',
-                'phase-confirmed': nodeState.phase === 'confirmed',
-              }"
-            >
-              <template v-if="nodeState.phase === 'accepted'">
-                <BIconInfoCircleFill class="me-1" /> Accepted:
-                {{ nodeState.acceptedValue || "N/A" }}
-              </template>
-              <template v-else-if="nodeState.phase === 'confirmed'">
-                <BIconCheckCircleFill class="me-1" /> Confirmed:
-                {{ nodeState.confirmedValue || "N/A" }}
-              </template>
-            </span>
-          </div>
-        </div>
-      </li>
-    </ul>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -87,11 +86,6 @@ function selectNode(publicKey: string) {
 </script>
 
 <style scoped>
-.side-panel {
-  padding: 1rem;
-  font-size: 0.9rem;
-}
-
 .node-list {
   list-style: none;
   margin: 0;
@@ -105,8 +99,8 @@ function selectNode(publicKey: string) {
 
 .node-item {
   padding: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
   margin-bottom: 0.5rem;
-  border-radius: 6px;
   background: #f8f9fa;
   display: flex;
   justify-content: space-between;
@@ -173,5 +167,9 @@ function selectNode(publicKey: string) {
 
 .selected-node {
   background-color: #e9ecef;
+}
+
+.body {
+  padding: 0;
 }
 </style>

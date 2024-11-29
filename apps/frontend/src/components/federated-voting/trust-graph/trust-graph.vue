@@ -1,11 +1,9 @@
 <template>
   <div class="card graph">
+    <div class="card-header">
+      <h4 class="card-title">Trust Graph</h4>
+    </div>
     <div class="card-body pt-4 pb-0">
-      <div
-        class="d-flex justify-content-around align-items-baseline border-bottom pt-0 pb-4"
-      >
-        <div class="title mb-0 pb-0">Trust Graph</div>
-      </div>
       <Graph
         ref="graph"
         :selected-vertices="selectedVertices"
@@ -24,7 +22,7 @@
         @vertex-selected="handleVertexSelected"
       />
     </div>
-    <div class="card-footer footer"></div>
+    <!--div class="card-footer footer"></div!-->
   </div>
 </template>
 <script setup lang="ts">
