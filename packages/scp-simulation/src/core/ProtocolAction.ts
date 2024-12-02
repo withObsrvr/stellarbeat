@@ -3,7 +3,6 @@
 
 import { Context } from './Context';
 
-//posibility to tamper with them (todo).
 export abstract class ProtocolAction {
 	public readonly type = 'ProtocolAction';
 	abstract readonly subType: string;

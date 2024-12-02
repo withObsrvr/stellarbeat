@@ -4,7 +4,8 @@ import {
 	InMemoryEventCollector,
 	Node,
 	PublicKey,
-	QuorumSet
+	QuorumSet,
+	UserAction
 } from '../core';
 
 import { Message } from './Message';
@@ -51,6 +52,22 @@ export class FederatedVotingContext
 	//for exposing the state in GUI. Should not be altered directly
 	getState(): FederatedVotingContextState {
 		return this.state;
+	}
+
+	executeActions(
+		protocolActions: ProtocolAction[],
+		userActions: UserAction[]
+	): ProtocolAction[] {
+		const newProtocolActions: ProtocolAction[] = [];
+		protocolActions.forEach((action) => {
+			newProtocolActions.push(...action.execute(this));
+		});
+
+		userActions.forEach((action) => {
+			newProtocolActions.push(...action.execute(this));
+		});
+
+		return newProtocolActions;
 	}
 
 	addNode(node: Node): void {

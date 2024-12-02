@@ -2,7 +2,7 @@ import { FederatedVotingContext } from './../FederatedVotingContext';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { FederatedVotingProtocol } from './../protocol/FederatedVotingProtocol';
 import { Statement, Node, QuorumSet } from '../../';
-import { ProtocolAction } from '../../core';
+import { ProtocolAction, UserAction } from '../../core';
 import { Message } from '../Message';
 import { BroadcastVoteRequested } from './../protocol/event/BroadcastVoteRequested';
 import { Vote, Voted } from '../protocol';
@@ -34,6 +34,31 @@ describe('FederatedVotingContext', () => {
 
 			expect(context.nodes.length).toBe(0);
 			expect(context.drainEvents()).toEqual([]);
+		});
+	});
+
+	describe('executeActions', () => {
+		it('should execute protocol actions', () => {
+			const protocolAction = mock<ProtocolAction>();
+			const returnedProtocolAction = mock<ProtocolAction>();
+			protocolAction.execute.mockReturnValue([returnedProtocolAction]);
+
+			const returnedActions = context.executeActions([protocolAction], []);
+
+			expect(returnedActions).toHaveLength(1);
+			expect(returnedActions[0]).toBe(returnedProtocolAction);
+		});
+
+		it('should execute user actions', () => {
+			const userAction = mock<UserAction>();
+			const returnedProtocolAction = mock<ProtocolAction>();
+
+			userAction.execute.mockReturnValue([returnedProtocolAction]);
+
+			const returnedActions = context.executeActions([], [userAction]);
+
+			expect(returnedActions).toHaveLength(1);
+			expect(returnedActions[0]).toBe(returnedProtocolAction);
 		});
 	});
 

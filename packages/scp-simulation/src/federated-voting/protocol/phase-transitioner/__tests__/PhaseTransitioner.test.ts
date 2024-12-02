@@ -167,7 +167,7 @@ describe('PhaseTransitioner', () => {
 			expect(phaseTransitioner.drainEvents().length).toEqual(0);
 		});
 
-		it('should accept if no v-blocking set of nodes has accepted the statement but a quorum has voted for it', () => {
+		it('should accept if no v-blocking set of nodes has accepted the statement but a quorum has voted or accepted it', () => {
 			const federatedVotingState = setupState('A');
 			const statement = createStatement();
 
@@ -183,7 +183,7 @@ describe('PhaseTransitioner', () => {
 
 			const quorumSetOfD = new QuorumSet(1, ['B'], []);
 			federatedVotingState.processedVotes.push(
-				new Vote(statement, false, 'D', quorumSetOfD)
+				new Vote(statement, true, 'D', quorumSetOfD)
 			);
 
 			jest

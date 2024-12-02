@@ -15,6 +15,9 @@
         v-for="action in filteredActions"
         :key="action.description"
         class="action-item"
+        :class="{
+          'disrupted-item': isActionDisrupted(action.actionRef),
+        }"
       >
         <span v-if="props.publicKey === null" class="action-public-key">{{
           action.publicKey
@@ -31,7 +34,7 @@
           "
           @click="handleEventAction(action.actionRef)"
         >
-          Disrupt
+          {{ isActionDisrupted(action.actionRef) ? "Undisrupt" : "Disrupt" }}
         </button>
       </div>
     </div>
@@ -44,6 +47,7 @@
 
 <script setup lang="ts">
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import { is } from "date-fns/locale";
 import { ProtocolAction, UserAction } from "scp-simulation";
 import { ref, computed, watch, nextTick } from "vue";
 
@@ -59,8 +63,24 @@ const props = withDefaults(
 );
 
 function handleEventAction(action: ProtocolAction) {
-  //todo
+  if (!(action instanceof ProtocolAction)) {
+    return;
+  }
+
+  if (isActionDisrupted(action)) {
+    federatedVotingStore.simulation.undisrupt(action);
+  } else {
+    federatedVotingStore.simulation.disrupt(action);
+  }
 }
+
+const isActionDisrupted = (action: ProtocolAction | UserAction) => {
+  if (!(action instanceof ProtocolAction)) {
+    return false;
+  }
+  return federatedVotingStore.simulation.isDisrupted(action);
+};
+
 function mapSubType(subType: string) {
   switch (subType) {
     case "VoteOnStatement":
@@ -181,5 +201,18 @@ watch(filteredActions, () => {
 }
 .search-box {
   margin-bottom: 5px;
+}
+.disrupted-item {
+  background-color: #f8d7da;
+  font-style: italic;
+}
+
+.disrupted-item button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.disrupted-item:hover {
+  background-color: #f9ced2;
 }
 </style>

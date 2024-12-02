@@ -3,14 +3,15 @@ import { Context } from '../../core/Context';
 import { UserAction } from '../../core/UserAction';
 import { ProtocolAction } from '../../core/ProtocolAction';
 import { Event } from '../../core/Event';
-import { mock } from 'jest-mock-extended';
+import { mock, MockProxy } from 'jest-mock-extended';
 
 describe('Simulation Class', () => {
 	let simulation: Simulation;
-	let context: Context;
+	let context: MockProxy<Context>;
 
 	beforeEach(() => {
 		context = mock<Context>();
+		context.executeActions.mockReturnValue([]);
 		simulation = new Simulation(context);
 	});
 
@@ -31,7 +32,8 @@ describe('Simulation Class', () => {
 	it('should execute step and process actions', () => {
 		const userAction = mock<UserAction>();
 		const generatedProtocolAction = mock<ProtocolAction>();
-		userAction.execute.mockReturnValue([generatedProtocolAction]);
+
+		context.executeActions.mockReturnValue([generatedProtocolAction]);
 
 		simulation.addUserAction(userAction);
 		simulation.executeStep();
@@ -41,12 +43,15 @@ describe('Simulation Class', () => {
 		expect(simulation.pendingProtocolActions()).toEqual([
 			generatedProtocolAction
 		]);
+
+		expect(context.executeActions).toHaveBeenCalledWith([], [userAction]);
 	});
 
 	it('should go back one step', () => {
 		const userAction = mock<UserAction>();
 		const generatedProtocolAction = mock<ProtocolAction>();
-		userAction.execute.mockReturnValue([generatedProtocolAction]);
+
+		context.executeActions.mockReturnValue([generatedProtocolAction]);
 
 		simulation.addUserAction(userAction);
 		simulation.executeStep();
@@ -63,31 +68,32 @@ describe('Simulation Class', () => {
 	it('should replay state when going back one step', () => {
 		const resetSpy = jest.spyOn(context, 'reset');
 		const userAction = mock<UserAction>();
-		userAction.execute.mockReturnValue([]);
+
+		context.executeActions.mockReturnValue([]);
+
 		simulation.addUserAction(userAction);
 		simulation.executeStep();
 
 		const secondUserAction = mock<UserAction>();
-		secondUserAction.execute.mockReturnValue([]);
 		simulation.addUserAction(secondUserAction);
 		simulation.executeStep();
 
 		simulation.goBackOneStep();
 		expect(resetSpy).toHaveBeenCalled();
-		expect(userAction.execute).toHaveBeenCalledTimes(2); //replayed
-		expect(secondUserAction.execute).toHaveBeenCalledTimes(1); //not replayed
+		expect(context.executeActions).toHaveBeenCalledTimes(3);
 	});
 
 	it('should reset state when going to first step and reset to the first pending user actions', () => {
 		const resetSpy = jest.spyOn(context, 'reset');
 
 		const userAction = mock<UserAction>();
-		userAction.execute.mockReturnValue([]);
+
+		context.executeActions.mockReturnValue([]);
 		simulation.addUserAction(userAction);
 		simulation.executeStep();
 
 		const secondUserAction = mock<UserAction>();
-		secondUserAction.execute.mockReturnValue([]);
+		context.executeActions.mockReturnValue([]);
 		simulation.addUserAction(secondUserAction);
 		simulation.executeStep();
 
@@ -101,8 +107,9 @@ describe('Simulation Class', () => {
 		expect(simulation.pendingProtocolActions()).toEqual([]);
 		expect(simulation.hasPreviousStep()).toBe(false);
 
-		//userAction should not have been called again
-		expect(userAction.execute).toHaveBeenCalledTimes(1);
+		//executActions should not have been called again after reset
+		expect(context.executeActions).toHaveBeenCalledTimes(2);
+		expect(context.drainEvents).toHaveBeenCalledTimes(3);
 	});
 
 	it('should get full event log', () => {

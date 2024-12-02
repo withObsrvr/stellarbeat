@@ -6,6 +6,7 @@ import { Event, Context, UserAction, ProtocolAction, Node } from '../core';
 interface SimulationStep {
 	userActions: UserAction[];
 	protocolActions: ProtocolAction[];
+	disruptedProtocolActions: ProtocolAction[];
 	previousEvents: Event[]; //the events executed in the previous step. Todo: or store executed events? Improve naming?
 	nextStep: SimulationStep | null;
 	previousStep: SimulationStep | null;
@@ -15,11 +16,13 @@ interface SimulationStep {
 export class Simulation {
 	private initialStep: SimulationStep; //handy to replay the state
 	private currentStep: SimulationStep;
+	private isScenario: boolean = true;
 
 	constructor(private context: Context) {
 		this.currentStep = {
 			userActions: [],
 			protocolActions: [],
+			disruptedProtocolActions: [],
 			previousEvents: [],
 			nextStep: null,
 			previousStep: null
@@ -49,6 +52,7 @@ export class Simulation {
 	}
 
 	public addUserAction(action: UserAction): void {
+		//this.isScenario = false; //enable once we allow user modification of the scenario
 		this.currentStep.userActions.push(action);
 	}
 
@@ -60,30 +64,51 @@ export class Simulation {
 		return this.currentStep.protocolActions;
 	}
 
+	public disrupt(action: ProtocolAction): void {
+		this.isScenario = false;
+		this.currentStep.disruptedProtocolActions.push(action);
+	}
+
+	public undisrupt(action: ProtocolAction): void {
+		this.isScenario = false;
+		const index = this.currentStep.disruptedProtocolActions.indexOf(action);
+		if (index > -1) {
+			this.currentStep.disruptedProtocolActions.splice(index, 1);
+		}
+	}
+
+	public isDisrupted(action: ProtocolAction): boolean {
+		return this.currentStep.disruptedProtocolActions.includes(action);
+	}
+
 	//Executes the pending actions. ProtocolActions are always first, then UserActions
 	public executeStep() {
+		const newActions = this.context.executeActions(
+			this.currentStep.protocolActions.filter(
+				(action) => !this.currentStep.disruptedProtocolActions.includes(action)
+			),
+			this.currentStep.userActions
+		);
+
+		if (this.isScenario && this.currentStep.nextStep !== null) {
+			this.context.drainEvents();
+			console.log(this.currentStep);
+			this.currentStep = this.currentStep.nextStep;
+			return; //context is deterministic, and if we are playing a scenario, we can reuse the next step, if there is one
+		}
+
 		const nextStep: SimulationStep = {
 			userActions: [],
-			protocolActions: [],
-			previousEvents: [],
+			disruptedProtocolActions: [],
+			protocolActions: newActions,
+			previousEvents: this.context.drainEvents(),
 			nextStep: null,
 			previousStep: this.currentStep
 		};
 
-		const newProtocolActions: ProtocolAction[] = [];
-		this.currentStep.protocolActions.forEach((action) => {
-			newProtocolActions.push(...action.execute(this.context));
-		});
-
-		this.currentStep.userActions.forEach((action) => {
-			newProtocolActions.push(...action.execute(this.context));
-		});
-
-		nextStep.protocolActions = newProtocolActions;
-
+		//todo: sanity check that garbage collection picks up discarded next steps
 		this.currentStep.nextStep = nextStep;
 		this.currentStep = nextStep;
-		this.currentStep.previousEvents = this.context.drainEvents();
 	}
 
 	public hasNextStep() {
@@ -101,6 +126,7 @@ export class Simulation {
 	goBackOneStep(): void {
 		if (this.currentStep.previousStep !== null) {
 			this.currentStep = this.currentStep.previousStep;
+			this.isScenario = true; //user has ability to go forward to the same steps, unless he modifies anything
 			this.replayState();
 		}
 	}
@@ -110,15 +136,17 @@ export class Simulation {
 		this.context.reset();
 		let stepIterator = this.initialStep;
 		while (stepIterator !== this.currentStep) {
-			stepIterator.protocolActions.forEach((action) => {
-				action.execute(this.context);
-			});
-			stepIterator.userActions.forEach((action) => {
-				action.execute(this.context);
-			});
+			this.context.executeActions(
+				stepIterator.protocolActions.filter(
+					(action) => !stepIterator.disruptedProtocolActions.includes(action)
+				),
+				stepIterator.userActions
+			);
+			this.context.drainEvents();
+			//we assume the context is deterministic and we don't need to store the generated actions and events
 
 			if (stepIterator.nextStep === null) {
-				break;
+				break; //should not happen...
 			}
 
 			stepIterator = stepIterator.nextStep;
@@ -126,7 +154,9 @@ export class Simulation {
 	}
 
 	goToFirstStep(): void {
+		this.isScenario = true; //user has ability to go forward to the same steps, unless he modifies anything
 		this.currentStep = this.initialStep;
 		this.context.reset();
+		this.context.drainEvents();
 	}
 }

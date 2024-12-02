@@ -140,8 +140,7 @@ export class PhaseTransitioner extends InMemoryEventCollector {
 		statement: Statement
 	) {
 		return state.processedVotes.filter(
-			(v) =>
-				v.statement.toString() === statement.toString() && !v.isVoteToAccept
+			(v) => v.statement.toString() === statement.toString()
 		);
 	}
 
