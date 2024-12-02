@@ -86,7 +86,6 @@ watch(filteredConsoleLogs, () => {
 <style scoped>
 .console-output {
   flex: 1;
-  margin-right: 10px;
   overflow-y: auto;
   font-family: monospace;
   font-size: 12px;

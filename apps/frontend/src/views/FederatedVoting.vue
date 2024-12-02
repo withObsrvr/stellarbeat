@@ -23,8 +23,27 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-12">
-            <simulation-control class="card-spacing" />
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header">
+                <h4 class="card-title">Network Actions (Happens next)</h4>
+              </div>
+
+              <div class="card-body px-2 py-0 d-flex">
+                <Actions style="height: 250px" />
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header">
+                <h4 class="card-title">Network Events (History)</h4>
+              </div>
+
+              <div class="card-body px-2 py-0 d-flex">
+                <EventLog style="height: 250px" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -40,11 +59,12 @@
 
 <script setup lang="ts">
 import NodesPanel from "@/components/federated-voting/nodes-panel.vue";
-import SimulationControl from "@/components/federated-voting/simulation-control/simulation-control.vue";
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
 import TrustGraph from "@/components/federated-voting/trust-graph/trust-graph.vue";
 import SelectedNodePanel from "@/components/federated-voting/selected-nodes-panel/selected-node-panel.vue";
 import Controller from "@/components/federated-voting/simulation-control/controller.vue";
+import EventLog from "@/components/federated-voting/simulation-control/event-log.vue";
+import Actions from "@/components/federated-voting/simulation-control/actions.vue";
 </script>
 
 <style scoped>
