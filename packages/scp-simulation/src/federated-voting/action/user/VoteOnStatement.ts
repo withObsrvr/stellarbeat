@@ -3,6 +3,7 @@ import { Statement } from '../../../federated-voting/protocol';
 import { FederatedVotingContext } from '../../FederatedVotingContext';
 
 export class VoteOnStatement extends UserAction {
+	subType = 'VoteOnStatement';
 	constructor(
 		public readonly publicKey: string,
 		public readonly statement: Statement
@@ -15,6 +16,6 @@ export class VoteOnStatement extends UserAction {
 	}
 
 	toString(): string {
-		return `Vote from ${this.publicKey} on ${this.statement}`;
+		return `${this.publicKey}:vote(${this.statement.toString()})`;
 	}
 }

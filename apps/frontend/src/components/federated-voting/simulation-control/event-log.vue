@@ -2,10 +2,10 @@
   <div class="console-output">
     <div class="search-box">
       <input
-        v-model="consoleSearchQuery"
+        v-model="filterQuery"
         type="text"
         class="form-control form-control-sm"
-        placeholder="Search events"
+        placeholder="Filter events"
       />
     </div>
     <div ref="logContainer" class="log-container">
@@ -33,7 +33,7 @@ import { ref, computed, nextTick, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { OverlayEvent, ProtocolEvent } from "scp-simulation";
 
-const consoleSearchQuery = ref("");
+const filterQuery = ref("");
 const logContainer = ref<HTMLElement | null>(null);
 
 const filteredConsoleLogs = computed(() => {
@@ -54,18 +54,16 @@ const filteredConsoleLogs = computed(() => {
       });
   });
 
-  if (consoleSearchQuery.value) {
+  if (filterQuery.value) {
     return logsWithLineNumbers.filter(
       (item) =>
-        item.log
-          .toLowerCase()
-          .includes(consoleSearchQuery.value.toLowerCase()) ||
+        item.log.toLowerCase().includes(filterQuery.value.toLowerCase()) ||
         item.event.subType
           .toLowerCase()
-          .includes(consoleSearchQuery.value.toLowerCase()) ||
+          .includes(filterQuery.value.toLowerCase()) ||
         item.event.publicKey
           .toLowerCase()
-          .includes(consoleSearchQuery.value.toLowerCase()),
+          .includes(filterQuery.value.toLowerCase()),
     );
   }
   return logsWithLineNumbers;

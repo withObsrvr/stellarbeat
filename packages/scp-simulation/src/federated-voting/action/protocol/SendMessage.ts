@@ -3,8 +3,11 @@ import { ProtocolAction } from '../../../core';
 import { FederatedVotingContext } from '../../FederatedVotingContext';
 
 export class SendMessage extends ProtocolAction {
+	subType = 'SendMessage';
+	public readonly publicKey: string;
 	constructor(public readonly message: Message) {
 		super();
+		this.publicKey = message.sender;
 	}
 
 	execute(context: FederatedVotingContext): ProtocolAction[] {
@@ -12,6 +15,6 @@ export class SendMessage extends ProtocolAction {
 	}
 
 	toString(): string {
-		return `[SendMessage] ${this.message.toString()}`;
+		return `${this.message.toString()}`;
 	}
 }

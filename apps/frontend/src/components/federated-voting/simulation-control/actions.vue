@@ -1,7 +1,7 @@
 <template>
   <div class="actions-panel">
     <!-- Actions Search Box -->
-    <div class="mb-2">
+    <div class="search-box">
       <input
         v-model="actionsFilter"
         type="text"
@@ -12,28 +12,30 @@
     <!-- Actions List -->
     <div class="actions-list">
       <div
-        v-for="action in actions"
+        v-for="action in filteredActions"
         :key="action.toString()"
         class="action-item"
-        :style="
-          action instanceof ProtocolAction
-            ? 'background-color: #e0f7ff;'
-            : 'background-color: #f5f7fb'
-        "
       >
-        <span>{{ action.toString() }}</span>
+        <span class="action-public-key">{{ action.publicKey }}</span>
+        <span class="action-sub-type">{{ mapSubType(action.subType) }}</span>
+        <span>{{ action.description }}</span>
         <button
+          v-if="action.actionRef instanceof ProtocolAction"
           class="btn btn-sm"
-          :class="action instanceof UserAction ? 'btn-primary' : 'btn-danger'"
-          @click="handleEventAction(action)"
+          :class="
+            action.actionRef instanceof UserAction
+              ? 'btn-primary'
+              : 'btn-danger'
+          "
+          @click="handleEventAction(action.actionRef)"
         >
-          {{ action instanceof UserAction ? "Cancel" : "Disrupt" }}
+          Disrupt
         </button>
       </div>
     </div>
     <!-- Events Counter Footer -->
     <div class="mt-2 text-center text-muted" style="font-size: 0.9em">
-      {{ actions.length }} actions will be executed
+      {{ actions.length }} actions will be executed next
     </div>
   </div>
 </template>
@@ -41,35 +43,64 @@
 <script setup lang="ts">
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { ProtocolAction, UserAction } from "scp-simulation";
-import { ref, computed } from "vue";
+import { ref, computed, ComputedRef } from "vue";
 
-function handleEventAction(action: ProtocolAction | UserAction) {
+function handleEventAction(action: ProtocolAction) {
   //todo
+}
+function mapSubType(subType: string) {
+  switch (subType) {
+    case "VoteOnStatement":
+      return "Vote";
+    case "AddNode":
+      return "AddNode";
+
+    default:
+      return subType;
+  }
 }
 
 const actionsFilter = ref("");
 const actions = computed(() => {
-  return federatedVotingStore.simulation
-    .pendingProtocolActions()
-    .concat(federatedVotingStore.simulation.pendingUserActions());
+  return [
+    ...federatedVotingStore.simulation.pendingProtocolActions(),
+    ...federatedVotingStore.simulation.pendingUserActions(),
+  ];
 });
 
 const filteredActions = computed(() => {
-  let filteredActions = actions.value;
+  const mappedActions = actions.value.map((action) => {
+    return {
+      publicKey: action.publicKey,
+      subType: action.subType,
+      description: action.toString(),
+      actionRef: action,
+    };
+  });
+
   if (actionsFilter.value) {
-    filteredActions = filteredActions.filter((event) =>
-      event
-        .toString()
-        .toLowerCase()
-        .includes(actionsFilter.value.toLowerCase()),
+    return mappedActions.filter(
+      (action) =>
+        action.description
+          .toLowerCase()
+          .includes(actionsFilter.value.toLowerCase()) ||
+        action.subType
+          .toLowerCase()
+          .includes(actionsFilter.value.toLowerCase()) ||
+        action.publicKey
+          .toLowerCase()
+          .includes(actionsFilter.value.toLowerCase()),
     );
+  } else {
+    return mappedActions;
   }
-  return actions;
 });
 </script>
 
 <style scoped>
 .actions-panel {
+  flex: 1;
+  margin-right: 10px;
   overflow-y: auto;
   font-family: monospace;
   font-size: 12px;
@@ -89,9 +120,6 @@ const filteredActions = computed(() => {
 }
 
 .action-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 2px 4px;
   margin: 2px 0;
 }
@@ -109,5 +137,27 @@ const filteredActions = computed(() => {
   margin-left: 0.1rem;
   padding: 0rem 0.2rem;
   font-size: 0.65rem;
+}
+
+.action-item:hover {
+  background-color: #e9ecef;
+}
+.action-sub-type {
+  font-weight: bold;
+  margin-right: 10px;
+}
+.action-public-key {
+  background-color: #e9ecef;
+  padding: 0px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-right: 8px;
+  text-transform: none;
+  display: inline-block;
+  font-size: 11px;
+  word-break: break-all;
+}
+.search-box {
+  margin-bottom: 5px;
 }
 </style>

@@ -3,6 +3,7 @@ import { FederatedVotingContext } from '../../FederatedVotingContext';
 import { FederatedVotingProtocolState } from '../../protocol';
 
 export class AddNode extends UserAction {
+	subType = 'AddNode';
 	constructor(
 		public readonly publicKey: string,
 		public readonly quorumSet: QuorumSet
