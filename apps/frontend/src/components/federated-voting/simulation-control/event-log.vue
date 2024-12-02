@@ -9,7 +9,10 @@
       />
     </div>
     <div ref="logContainer" class="log-container">
-      <div v-if="filteredConsoleLogs.length === 0" class="no-events-message">
+      <div
+        v-if="filteredConsoleLogs.length === 0 && filterQuery === ''"
+        class="no-events-message"
+      >
         No events yet, start the simulation
       </div>
 
@@ -20,7 +23,9 @@
         :class="getBackgroundClass(item.stepIndex)"
       >
         <span class="line-number">{{ item.lineNumber }}</span>
-        <span class="event-publickey">{{ item.event.publicKey }}</span>
+        <span v-if="props.publicKey === null" class="event-publickey">{{
+          item.event.publicKey
+        }}</span>
         <span class="event-subtype">{{ item.event.subType }}</span>
         <span class="log-entry">{{ item.log }}</span>
       </div>
@@ -33,6 +38,14 @@ import { ref, computed, nextTick, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { OverlayEvent, ProtocolEvent } from "scp-simulation";
 
+const props = withDefaults(
+  defineProps<{
+    publicKey?: string | null;
+  }>(),
+  {
+    publicKey: null,
+  },
+);
 const filterQuery = ref("");
 const logContainer = ref<HTMLElement | null>(null);
 
@@ -43,6 +56,9 @@ const filteredConsoleLogs = computed(() => {
       .filter(
         (event) =>
           event instanceof ProtocolEvent || event instanceof OverlayEvent,
+      )
+      .filter((event) =>
+        props.publicKey ? event.publicKey === props.publicKey : true,
       )
       .map((event, eventIndex) => {
         return {

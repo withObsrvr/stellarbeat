@@ -13,10 +13,12 @@
     <div ref="actionsList" class="actions-list">
       <div
         v-for="action in filteredActions"
-        :key="action.toString()"
+        :key="action.description"
         class="action-item"
       >
-        <span class="action-public-key">{{ action.publicKey }}</span>
+        <span v-if="props.publicKey === null" class="action-public-key">{{
+          action.publicKey
+        }}</span>
         <span class="action-sub-type">{{ mapSubType(action.subType) }}</span>
         <span>{{ action.description }}</span>
         <button
@@ -35,7 +37,7 @@
     </div>
     <!-- Events Counter Footer -->
     <div class="mt-2 text-center text-muted" style="font-size: 0.9em">
-      {{ actions.length }} actions will be executed next
+      {{ actions.length }} action(s) will be executed next
     </div>
   </div>
 </template>
@@ -46,6 +48,15 @@ import { ProtocolAction, UserAction } from "scp-simulation";
 import { ref, computed, watch, nextTick } from "vue";
 
 const actionsList = ref<HTMLElement | null>(null);
+
+const props = withDefaults(
+  defineProps<{
+    publicKey?: string | null;
+  }>(),
+  {
+    publicKey: null,
+  },
+);
 
 function handleEventAction(action: ProtocolAction) {
   //todo
@@ -67,9 +78,10 @@ const actions = computed(() => {
   return [
     ...federatedVotingStore.simulation.pendingProtocolActions(),
     ...federatedVotingStore.simulation.pendingUserActions(),
-  ];
+  ].filter((action) =>
+    props.publicKey !== null ? action.publicKey === props.publicKey : true,
+  );
 });
-
 const filteredActions = computed(() => {
   const mappedActions = actions.value.map((action) => {
     return {

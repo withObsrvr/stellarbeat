@@ -18,7 +18,16 @@
           <quorum-set-display :quorum-set="quorumSet" :level="1" />
         </div>
 
-        <NodeEventLog />
+        <div class="row">
+          <div class="col-lg-6">
+            <h4>Actions executed next</h4>
+            <Actions :public-key="selectedNodeId" />
+          </div>
+          <div class="col-lg-6">
+            <h4>Events</h4>
+            <EventLog :public-key="selectedNodeId" />
+          </div>
+        </div>
       </div>
       <div v-else>
         <p>No node selected.</p>
@@ -33,7 +42,8 @@ import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import QuorumSetDisplay from "./quorum-set-display.vue";
 import ProcessedVotes from "./processed-votes.vue";
 import NodeInformation from "./node-information.vue";
-import NodeEventLog from "./node-event-log.vue"; // Import the new component
+import EventLog from "../simulation-control/event-log.vue";
+import Actions from "../simulation-control/actions.vue";
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
