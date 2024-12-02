@@ -8,7 +8,7 @@
     </div>
 
     <div class="row mb-4">
-      <div class="col-lg-2 col-md-3 col-sm-12 mt-2 sticky h-100">
+      <div class="col-lg-2 col-md-3 col-sm-12 sticky h-100">
         <Controller></Controller>
         <nodes-panel></nodes-panel>
       </div>

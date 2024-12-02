@@ -7,7 +7,7 @@
       <Graph
         ref="graph"
         :selected-vertices="selectedVertices"
-        style="height: 400px"
+        style="height: 250px"
         :full-screen="false"
         :view-graph="viewGraph"
         :is-loading="false"

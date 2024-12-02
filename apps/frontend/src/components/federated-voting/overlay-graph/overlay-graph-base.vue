@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <h4 class="card-title">Overlay Graph</h4>
+      <h4 class="card-title">Network Overlay</h4>
     </div>
     <div class="card-body pt-4 pb-0">
       <div class="chart-container">
@@ -185,7 +185,7 @@ const height = (): number => {
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 400px;
+  height: 250px;
 }
 .overlay-graph {
   width: 100%;

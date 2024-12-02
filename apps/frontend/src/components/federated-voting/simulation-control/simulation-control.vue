@@ -3,7 +3,7 @@
     <!-- Control Panel -->
     <div class="card mt-2">
       <div class="card-header">
-        <h4 class="card-title">Network Events and Actions</h4>
+        <h4 class="card-title">Simulation log</h4>
       </div>
       <div class="card-body p-2 d-flex">
         <div class="row w-100">
