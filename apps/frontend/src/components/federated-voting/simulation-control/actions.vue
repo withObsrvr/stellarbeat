@@ -10,7 +10,7 @@
       />
     </div>
     <!-- Actions List -->
-    <div class="actions-list">
+    <div ref="actionsList" class="actions-list">
       <div
         v-for="action in filteredActions"
         :key="action.toString()"
@@ -43,7 +43,9 @@
 <script setup lang="ts">
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { ProtocolAction, UserAction } from "scp-simulation";
-import { ref, computed, ComputedRef } from "vue";
+import { ref, computed, watch, nextTick } from "vue";
+
+const actionsList = ref<HTMLElement | null>(null);
 
 function handleEventAction(action: ProtocolAction) {
   //todo
@@ -94,6 +96,14 @@ const filteredActions = computed(() => {
   } else {
     return mappedActions;
   }
+});
+
+watch(filteredActions, () => {
+  nextTick(() => {
+    if (actionsList.value) {
+      actionsList.value.scrollTop = actionsList.value.scrollHeight;
+    }
+  });
 });
 </script>
 
