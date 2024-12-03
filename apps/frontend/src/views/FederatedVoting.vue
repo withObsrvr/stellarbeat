@@ -10,6 +10,24 @@
     <div class="row mb-4">
       <div class="col-lg-2 col-md-3 col-sm-12 sticky h-100">
         <Controller></Controller>
+        <div class="consensus-status">
+          <!-- Needs to become way more elaborate but need intact/well-behaved/... node info -->
+          <div
+            v-if="isStuck"
+            class="alert alert-warning mt-3 text-center"
+            role="alert"
+          >
+            This vote is stuck
+            {{ someNodesReachedConsensus ? "for some befouled nodes" : "" }}
+          </div>
+          <div
+            v-if="consensusReached"
+            class="alert alert-success mt-3 text-center"
+            role="alert"
+          >
+            Consensus reached
+          </div>
+        </div>
         <nodes-panel></nodes-panel>
       </div>
 
@@ -58,6 +76,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import NodesPanel from "@/components/federated-voting/nodes-panel.vue";
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
 import TrustGraph from "@/components/federated-voting/trust-graph/trust-graph.vue";
@@ -65,6 +85,26 @@ import SelectedNodePanel from "@/components/federated-voting/selected-nodes-pane
 import Controller from "@/components/federated-voting/simulation-control/controller.vue";
 import EventLog from "@/components/federated-voting/simulation-control/event-log.vue";
 import Actions from "@/components/federated-voting/simulation-control/actions.vue";
+
+const hasNoNextMoves = computed(() => {
+  return !federatedVotingStore.simulation.hasNextStep();
+});
+
+const consensusReached = computed(() => {
+  return federatedVotingStore.protocolContextState.protocolStates.every(
+    (state) => state.confirmed,
+  );
+});
+
+const someNodesReachedConsensus = computed(() => {
+  return federatedVotingStore.protocolContextState.protocolStates.some(
+    (state) => state.confirmed,
+  );
+});
+
+const isStuck = computed(() => {
+  return hasNoNextMoves.value && !consensusReached.value;
+});
 </script>
 
 <style scoped>

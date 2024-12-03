@@ -47,7 +47,6 @@
 
 <script setup lang="ts">
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import { is } from "date-fns/locale";
 import { ProtocolAction, UserAction } from "scp-simulation";
 import { ref, computed, watch, nextTick } from "vue";
 
