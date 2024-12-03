@@ -68,14 +68,12 @@ import {
   type LinkDatum,
   type NodeDatum,
 } from "@/components/federated-voting/overlay-graph/GraphManager";
-import OverlayGraphOptions from "@/components/federated-voting/overlay-graph/overlay-graph-options.vue";
 import { SimulationManager } from "@/components/federated-voting/overlay-graph/SimulationManager";
 import GraphLink from "@/components/federated-voting/overlay-graph/graph-link.vue";
 import GraphNode from "@/components/federated-voting/overlay-graph/graph-node.vue";
-import { MessageSent } from "scp-simulation";
+import { Event, MessageSent } from "scp-simulation";
 
 const initialRepellingForce = 1000;
-const initialTopology = "complete";
 const overlayGraph = ref<SVGElement | null>(null);
 const graphManager = reactive(new GraphManager([], []));
 
@@ -103,6 +101,7 @@ const handleNodeClick = (node: NodeDatum) => {
 
 const nodes: Ref<NodeDatum[]> = ref([]);
 const links: Ref<LinkDatum[]> = ref([]);
+let latestSendsHash: string = "";
 
 const updateLinks = () => {
   const newLinks: LinkDatum[] = [];
@@ -122,6 +121,16 @@ const updateLinks = () => {
 };
 
 watch(federatedVotingStore.simulation, () => {
+  //probably needs a better solution. Need to think reactivity on the simulation class.
+  const newLatestSendsHash = federatedVotingStore.simulation
+    .getLatestEvents()
+    .filter((event) => event instanceof MessageSent)
+    .map((event) => event.message.sender + event.message.receiver)
+    .join("");
+
+  if (newLatestSendsHash === latestSendsHash) return;
+  latestSendsHash = newLatestSendsHash;
+
   federatedVotingStore.simulation
     .getLatestEvents()
     .filter((event) => event instanceof MessageSent)

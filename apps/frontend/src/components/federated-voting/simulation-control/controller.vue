@@ -60,8 +60,6 @@ import {
 } from "bootstrap-vue";
 import { ref } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import Actions from "./actions.vue";
-import ScenarioSelector from "./scenario-selector.vue";
 
 const playing = ref(false);
 const tickTime = 2000;
