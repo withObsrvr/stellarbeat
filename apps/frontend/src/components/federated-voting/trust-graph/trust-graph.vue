@@ -22,7 +22,29 @@
         @vertex-selected="handleVertexSelected"
       />
     </div>
-    <!--div class="card-footer footer"></div!-->
+    <div class="card-footer footer">
+      <div v-if="selectedVertices.length > 0" class="legend">
+        <span class="legend-item">
+          <span class="legend-color incoming"></span> Incoming Connection
+        </span>
+        <span class="legend-item">
+          <span class="legend-color outgoing"></span> Outgoing Connection
+        </span>
+      </div>
+      <div v-else class="legend">
+        <span class="legend-item">
+          <span class="legend-circle active-node"></span> Active
+        </span>
+        <span class="legend-item">
+          <span class="legend-color transitive-quorum-set-node"></span>
+          Transitive Quorum Set
+        </span>
+        <span class="legend-item">
+          <span class="legend-color strongly-connected-node"></span> Strongly
+          Connected
+        </span>
+      </div>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -64,5 +86,53 @@ const handleVertexSelected = (vertex: ViewVertex) => {
   color: #333;
   font-size: 24px;
   font-weight: bold;
+}
+.legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.legend-item {
+  margin: 0 10px;
+  display: flex;
+  align-items: center;
+}
+
+.legend-color {
+  width: 20px;
+  height: 10px;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.legend-color.incoming {
+  background-color: #73bfb8;
+}
+
+.legend-color.outgoing {
+  background-color: #fec601;
+}
+.legend-circle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.legend-circle.active-node {
+  background-color: #1687b2;
+}
+
+.legend-color.transitive-quorum-set-node {
+  background-color: #1687b2;
+  opacity: 0.25;
+}
+
+.legend-color.strongly-connected-node {
+  border: 4px solid #1687b2;
+  opacity: 0.25;
+  background-color: transparent;
 }
 </style>

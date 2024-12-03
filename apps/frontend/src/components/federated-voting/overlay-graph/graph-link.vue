@@ -30,16 +30,12 @@ const link: Ref<LinkDatum> = toRefs(props).link;
 .link {
   fill: none;
   stroke: #1687b2;
-  stroke-width: 2px;
+  stroke-width: 0.5px;
   cursor: pointer;
 }
 
-.link:hover {
-  stroke-width: 4px;
-}
-
 .link.selected {
-  stroke-width: 4px;
+  stroke-width: 1px;
   stroke: $yellow;
 }
 </style>

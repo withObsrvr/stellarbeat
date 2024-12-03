@@ -4,7 +4,7 @@
     class="node-container"
     @click="$emit('nodeClick', node)"
   >
-    <circle :class="circleClassName" r="8"></circle>
+    <circle :class="circleClassName" r="6"></circle>
     <g>
       <rect
         :class="rectClassName"
@@ -81,7 +81,6 @@ const rectLabelClassName = computed(() => {
   text-anchor: middle;
   font-weight: 400;
   fill: #1687b2;
-  text-transform: lowercase;
 }
 
 .node-container {

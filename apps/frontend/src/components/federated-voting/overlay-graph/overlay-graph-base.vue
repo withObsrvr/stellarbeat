@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <h4 class="card-title">Network Overlay</h4>
+      <h4 class="card-title">Network connections (overlay)</h4>
     </div>
     <div class="card-body pt-4 pb-0">
       <div class="chart-container">
@@ -35,13 +35,28 @@
           </g>
         </svg>
       </div>
-      <!--div class="card-footer">
-        <overlay-graph-options
+      <div class="card-footer">
+        <div class="legend">
+          <span class="legend-item">
+            <span class="legend-circle active-node"></span> Active
+          </span>
+          <span v-if="!federatedVotingStore.selectedNodeId" class="legend-item">
+            <span class="legend-rectangle bidirectional-connection"></span>
+            Bidirectional Connection
+          </span>
+          <span v-else>
+            <span
+              class="legend-rectangle bidirectional-selected-connection"
+            ></span>
+            Bidirectional Connection
+          </span>
+        </div>
+        <!--overlay-graph-options
           :initial-repelling-force="initialRepellingForce"
           :initial-topology="initialTopology"
           @updateRepellingForce="updateRepellingForce"
-        />
-      </div!-->
+        /!-->
+      </div>
     </div>
   </div>
 </template>
@@ -75,6 +90,7 @@ const handleLinkClick = (link: LinkDatum) => {
 };
 
 const handleNodeClick = (node: NodeDatum) => {
+  federatedVotingStore.selectedNodeId = node.id;
   if (addLinkSourceNode) {
     graphManager.addLink(addLinkSourceNode, node);
     if (simulationManager)
@@ -183,6 +199,43 @@ const height = (): number => {
 </script>
 
 <style scoped>
+.legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.legend-item {
+  margin: 0 10px;
+  display: flex;
+  align-items: center;
+}
+
+.legend-circle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.legend-rectangle {
+  width: 20px;
+  height: 10px;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.legend-circle.active-node {
+  background-color: #1687b2;
+}
+
+.legend-rectangle.bidirectional-connection {
+  background-color: #1687b2;
+}
+.legend-rectangle.bidirectional-selected-connection {
+  background-color: #fec601;
+}
 .chart-container {
   width: 100%;
   height: 250px;
