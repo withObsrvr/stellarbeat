@@ -26,24 +26,28 @@
                 {{ nodeState.voteValue || "N/A" }}
               </span>
               <span v-else class="badge badge-phase phase-unknown">
-                <BIconInfoCircleFill class="me-1" /> Not voted
+                <BIconInfoCircleFill class="me-1 mb-1" /> Not voted
               </span>
               <span
                 v-if="nodeState.phase !== 'unknown'"
-                class="badge badge-phase"
+                class="badge badge-phase mb-1"
                 :class="{
                   'phase-accepted': nodeState.phase === 'accepted',
                   'phase-confirmed': nodeState.phase === 'confirmed',
                 }"
               >
                 <template v-if="nodeState.phase === 'accepted'">
-                  <BIconInfoCircleFill class="me-1" /> Accepted:
+                  <BIconInfoCircleFill class="me-1 mb-1" /> Accepted:
                   {{ nodeState.acceptedValue || "N/A" }}
                 </template>
                 <template v-else-if="nodeState.phase === 'confirmed'">
-                  <BIconCheckCircleFill class="me-1" /> Confirmed:
+                  <BIconCheckCircleFill class="me-1 mb-1" /> Confirmed:
                   {{ nodeState.confirmedValue || "N/A" }}
                 </template>
+              </span>
+              <span v-if="nodeState.illBehaved" class="badge badge-danger mb-1">
+                <BIconExclamationCircleFill class="me-1" />
+                Ill-behaved
               </span>
             </div>
           </div>
@@ -60,6 +64,7 @@ import {
   BIconCheckCircle,
   BIconInfoCircleFill,
   BIconCheckCircleFill,
+  BIconExclamationCircleFill,
 } from "bootstrap-vue";
 
 const nodes = computed(() => {
@@ -71,8 +76,13 @@ const nodes = computed(() => {
       voteValue: protocolState.voted,
       acceptedValue: protocolState.accepted,
       confirmedValue: protocolState.confirmed,
+      illBehaved: illBehavedNodes.value.includes(protocolState.node.publicKey),
     }),
   );
+});
+
+const illBehavedNodes = computed(() => {
+  return federatedVotingStore.simulation.getDisruptedNodes();
 });
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
@@ -130,6 +140,11 @@ function selectNode(publicKey: string) {
 .badge-voted {
   background-color: #d4edda;
   color: #155724;
+}
+
+.badge-danger {
+  background-color: #dc3545;
+  color: #fff;
 }
 
 .badge-phase.phase-unknown {
