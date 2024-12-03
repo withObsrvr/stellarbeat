@@ -91,8 +91,6 @@ export class QuorumSetService {
 			}
 		});
 
-		console.log(counter);
-
 		return counter >= quorumSet.threshold;
 	}
 }

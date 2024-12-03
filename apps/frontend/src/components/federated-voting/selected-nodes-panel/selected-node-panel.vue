@@ -12,6 +12,9 @@
         <span v-else-if="isLivenessBefouled" class="badge badge-warning ms-2">
           Befouled (liveness)
         </span>
+        <span v-if="isPartOfTransitiveQuorumSet" class="badge badge-info ms-2">
+          Part of Network Transitive Quorum-Set
+        </span>
       </h4>
       <div></div>
     </div>
@@ -79,6 +82,13 @@ const isLivenessBefouled = computed(() => {
   if (!selectedNodeId.value) return false;
   return federatedVotingStore.befouledNodes().includes(selectedNodeId.value);
 });
+
+const isPartOfTransitiveQuorumSet = computed(() => {
+  if (!selectedNodeId.value) return false;
+  return federatedVotingStore.trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(
+    selectedNodeId.value,
+  );
+});
 </script>
 
 <style scoped>
@@ -117,5 +127,10 @@ const isLivenessBefouled = computed(() => {
 .badge-warning {
   background-color: #ffc107;
   color: #212529;
+}
+
+.badge-info {
+  background-color: #cce5ff;
+  color: #004085;
 }
 </style>

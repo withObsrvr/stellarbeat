@@ -30,9 +30,8 @@ import Graph from "@/components/visual-navigator/graph/graph.vue";
 import ViewGraph from "@/components/visual-navigator/graph/view-graph";
 import ViewVertex from "@/components/visual-navigator/graph/view-vertex";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import { TrustGraph } from "shared";
 import { ref, onMounted, watch, computed } from "vue";
-import { TrustGraphBuilder } from "./TrustGraphBuilder";
-import { FederatedVotingProtocolState } from "scp-simulation";
 
 const viewGraph = ref<ViewGraph>(new ViewGraph());
 const selectedVertices = computed(() => {
@@ -45,19 +44,11 @@ const selectedVertices = computed(() => {
   return vertex ? [vertex] : [];
 });
 
-const trustGraph = () => {
-  return TrustGraphBuilder.buildTrustGraph(
-    federatedVotingStore.protocolContextState
-      .protocolStates as FederatedVotingProtocolState[],
-  );
-};
-
-watch(federatedVotingStore.protocolContextState, () => {
-  viewGraph.value = ViewGraph.fromNodes(trustGraph(), viewGraph.value);
-});
-
 onMounted(() => {
-  viewGraph.value = ViewGraph.fromNodes(trustGraph(), viewGraph.value);
+  viewGraph.value = ViewGraph.fromNodes(
+    federatedVotingStore.trustGraph as TrustGraph,
+    viewGraph.value,
+  );
 });
 
 const handleVertexSelected = (vertex: ViewVertex) => {

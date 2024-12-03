@@ -21,8 +21,15 @@
               <span class="key-text">{{ nodeState.node.publicKey }}</span>
             </div>
             <div class="node-status">
+              <span
+                v-if="nodeState.partOfNetworkTransitiveQuorumSet"
+                class="badge badge-info mb-1"
+              >
+                <BIconStarFill class="me-1" />
+                Network transitive qset
+              </span>
               <span v-if="nodeState.voted" class="badge badge-voted mb-1">
-                <BIconCheckCircle class="me-1" /> Voted:
+                <BIconInfoCircleFill class="me-1" /> Voted:
                 {{ nodeState.voteValue || "N/A" }}
               </span>
               <span v-else class="badge badge-phase phase-unknown">
@@ -72,6 +79,8 @@ import {
   BIconInfoCircleFill,
   BIconCheckCircleFill,
   BIconExclamationCircleFill,
+  BIconBoundingBoxCircles,
+  BIconStarFill,
 } from "bootstrap-vue";
 
 const nodes = computed(() => {
@@ -85,6 +94,10 @@ const nodes = computed(() => {
       confirmedValue: protocolState.confirmed,
       illBehaved: illBehavedNodes.value.includes(protocolState.node.publicKey),
       befouled: befouledNodes.value.includes(protocolState.node.publicKey),
+      partOfNetworkTransitiveQuorumSet:
+        federatedVotingStore.trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(
+          protocolState.node.publicKey,
+        ),
     }),
   );
 });
@@ -143,7 +156,6 @@ function selectNode(publicKey: string) {
 .badge {
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
-  border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -165,6 +177,11 @@ function selectNode(publicKey: string) {
 }
 
 .badge-phase.phase-accepted {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.badge-info {
   background-color: #cce5ff;
   color: #004085;
 }
