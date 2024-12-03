@@ -3,7 +3,6 @@ import vue from "@vitejs/plugin-vue2";
 import topLevelAwait from "vite-plugin-top-level-await";
 import eslint from "vite-plugin-eslint";
 import tsConfigPaths from "vite-tsconfig-paths";
-import path from "path";
 
 /** @type {import('vite').UserConfig} */
 export default defineConfig({
