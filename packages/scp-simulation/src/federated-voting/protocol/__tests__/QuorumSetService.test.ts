@@ -50,4 +50,53 @@ describe('QuorumSetService', () => {
 			);
 		});
 	});
+	describe('QuorumSetCanReachThreshold', () => {
+		const quorumSet = new QuorumSet(
+			3,
+			['A', 'B'],
+			[new QuorumSet(2, ['C', 'D'], [])]
+		);
+
+		it('can not reach threshold', () => {
+			expect(
+				QuorumSetService.quorumSetCanReachThreshold(quorumSet, ['A'])
+			).toBeFalsy();
+			expect(
+				QuorumSetService.quorumSetCanReachThreshold(quorumSet, ['C'])
+			).toBeFalsy();
+		});
+		it('can reach threshold', () => {
+			expect(
+				QuorumSetService.quorumSetCanReachThreshold(quorumSet, [])
+			).toBeTruthy();
+		});
+	});
+
+	describe('calculatePotentiallyBlockedNodes', () => {
+		it('should return blocked nodes', () => {
+			const quorumSets = new Map([
+				['A', new QuorumSet(1, ['B'], [])],
+				['B', new QuorumSet(1, ['A'], [])]
+			]);
+
+			const blockedNodes = QuorumSetService.calculatePotentiallyBlockedNodes(
+				quorumSets,
+				['A']
+			);
+			expect(blockedNodes).toEqual(new Set(['B']));
+		});
+
+		it('should return cascading blocked nodes', () => {
+			const quorumSets = new Map([
+				['A', new QuorumSet(1, ['B'], [])],
+				['B', new QuorumSet(2, ['A', 'C'], [])],
+				['C', new QuorumSet(1, ['D'], [])]
+			]);
+			const blockedNodes = QuorumSetService.calculatePotentiallyBlockedNodes(
+				quorumSets,
+				['D']
+			);
+			expect(blockedNodes).toEqual(new Set(['A', 'B', 'C']));
+		});
+	});
 });

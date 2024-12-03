@@ -109,7 +109,6 @@ export class Simulation {
 
 		if (this.isScenario && this.currentStep.nextStep !== null) {
 			this.context.drainEvents();
-			console.log(this.currentStep);
 			this.currentStep = this.currentStep.nextStep;
 			return; //context is deterministic, and if we are playing a scenario, we can reuse the next step, if there is one
 		}

@@ -49,6 +49,13 @@
                 <BIconExclamationCircleFill class="me-1" />
                 Ill-behaved
               </span>
+              <span
+                v-else-if="nodeState.befouled"
+                class="badge badge-warning mb-1"
+              >
+                <BIconExclamationCircleFill class="me-1" />
+                Befouled (liveness)
+              </span>
             </div>
           </div>
         </li>
@@ -77,12 +84,17 @@ const nodes = computed(() => {
       acceptedValue: protocolState.accepted,
       confirmedValue: protocolState.confirmed,
       illBehaved: illBehavedNodes.value.includes(protocolState.node.publicKey),
+      befouled: befouledNodes.value.includes(protocolState.node.publicKey),
     }),
   );
 });
 
 const illBehavedNodes = computed(() => {
-  return federatedVotingStore.simulation.getDisruptedNodes();
+  return federatedVotingStore.illBehavedNodes();
+});
+
+const befouledNodes = computed(() => {
+  return federatedVotingStore.befouledNodes();
 });
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
@@ -160,6 +172,11 @@ function selectNode(publicKey: string) {
 .badge-phase.phase-confirmed {
   background-color: #d4edda;
   color: #155724;
+}
+
+.badge-warning {
+  background-color: #ffc107;
+  color: #212529;
 }
 
 .key-text {

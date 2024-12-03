@@ -44,4 +44,55 @@ export class QuorumSetService {
 			1
 		);
 	}
+
+	public static calculatePotentiallyBlockedNodes(
+		quorumSets: Map<PublicKey, QuorumSet>,
+		illBehavedNodes: Array<PublicKey>
+	) {
+		const blockedNodes = new Set<PublicKey>();
+		let recalculateBlockedNodes = true;
+
+		while (recalculateBlockedNodes) {
+			recalculateBlockedNodes = false;
+			quorumSets.forEach((quorumSet, publicKey) => {
+				if (illBehavedNodes.includes(publicKey)) {
+					return;
+				}
+				if (blockedNodes.has(publicKey)) {
+					return;
+				}
+				if (
+					this.quorumSetCanReachThreshold(
+						quorumSet,
+						Array.from(blockedNodes).concat(illBehavedNodes)
+					)
+				) {
+					return;
+				}
+
+				blockedNodes.add(publicKey);
+				recalculateBlockedNodes = true;
+			});
+		}
+		return blockedNodes;
+	}
+
+	public static quorumSetCanReachThreshold(
+		quorumSet: QuorumSet,
+		livenessBefouledNodes: PublicKey[]
+	) {
+		let counter = quorumSet.validators.filter(
+			(validator) => !livenessBefouledNodes.includes(validator)
+		).length;
+
+		quorumSet.innerQuorumSets.forEach((innerQS) => {
+			if (this.quorumSetCanReachThreshold(innerQS, livenessBefouledNodes)) {
+				counter++;
+			}
+		});
+
+		console.log(counter);
+
+		return counter >= quorumSet.threshold;
+	}
 }

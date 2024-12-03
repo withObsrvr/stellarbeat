@@ -11,3 +11,4 @@ export { TransitionedToConfirmPhase } from './phase-transitioner/event/Transitio
 export { VoteRatified } from './phase-transitioner/event/VoteRatified';
 export { FederatedVotingProtocolState } from './FederatedVotingProtocolState';
 export { BroadcastVoteRequested } from './event/BroadcastVoteRequested';
+export { QuorumSetService } from './QuorumSetService';

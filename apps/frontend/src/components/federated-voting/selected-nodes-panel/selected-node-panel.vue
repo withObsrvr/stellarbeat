@@ -9,6 +9,9 @@
         <span v-if="isIllBehaved" class="badge badge-danger ms-2">
           Ill-behaved
         </span>
+        <span v-else-if="isLivenessBefouled" class="badge badge-warning ms-2">
+          Befouled (liveness)
+        </span>
       </h4>
       <div></div>
     </div>
@@ -66,12 +69,15 @@ const quorumSet = computed(() => {
   return protocolState.value ? protocolState.value.node.quorumSet : null;
 });
 
-const illBehavedNodes = computed(() => {
-  return federatedVotingStore.simulation.getDisruptedNodes();
+const isIllBehaved = computed(() => {
+  return federatedVotingStore
+    .illBehavedNodes()
+    .some((node) => node === selectedNodeId.value);
 });
 
-const isIllBehaved = computed(() => {
-  return illBehavedNodes.value.some((node) => node === selectedNodeId.value);
+const isLivenessBefouled = computed(() => {
+  if (!selectedNodeId.value) return false;
+  return federatedVotingStore.befouledNodes().includes(selectedNodeId.value);
 });
 </script>
 
@@ -103,7 +109,13 @@ const isIllBehaved = computed(() => {
   background-color: #dc3545;
   color: #fff;
 }
+
 .ms-2 {
   margin-left: 0.5rem;
+}
+
+.badge-warning {
+  background-color: #ffc107;
+  color: #212529;
 }
 </style>
