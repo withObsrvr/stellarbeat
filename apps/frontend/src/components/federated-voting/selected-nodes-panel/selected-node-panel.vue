@@ -4,7 +4,12 @@
       <h4 v-if="!federatedVotingStore.selectedNodeId" class="card-title">
         Selected node Information
       </h4>
-      <h4 v-else class="card-title">{{ selectedNodeId }}</h4>
+      <h4 v-else class="card-title">
+        {{ selectedNodeId }}
+        <span v-if="isIllBehaved" class="badge badge-danger ms-2">
+          Ill-behaved
+        </span>
+      </h4>
       <div></div>
     </div>
     <div class="card-body">
@@ -60,6 +65,14 @@ const protocolState = computed(() => {
 const quorumSet = computed(() => {
   return protocolState.value ? protocolState.value.node.quorumSet : null;
 });
+
+const illBehavedNodes = computed(() => {
+  return federatedVotingStore.simulation.getDisruptedNodes();
+});
+
+const isIllBehaved = computed(() => {
+  return illBehavedNodes.value.some((node) => node === selectedNodeId.value);
+});
 </script>
 
 <style scoped>
@@ -84,5 +97,13 @@ const quorumSet = computed(() => {
 
 .quorum-set {
   margin-bottom: 40px;
+}
+
+.badge-danger {
+  background-color: #dc3545;
+  color: #fff;
+}
+.ms-2 {
+  margin-left: 0.5rem;
 }
 </style>
