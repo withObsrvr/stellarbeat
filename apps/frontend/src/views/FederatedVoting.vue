@@ -3,7 +3,9 @@
     <!-- Page Header -->
     <div class="page-header d-flex justify-content-between py-3">
       <div class="d-flex align-items-center">
-        <h2 class="page-title">Federated Voting Simulation</h2>
+        <h2 class="page-title">
+          Federated Voting Simulation (Work in Progress)
+        </h2>
       </div>
     </div>
 

@@ -5,7 +5,9 @@
       <p><strong>Validators:</strong></p>
       <ul>
         <li v-for="(validator, index) in quorumSet.validators" :key="index">
-          {{ validator }}
+          <a href="#" @click.prevent="selectValidator(validator)">{{
+            validator
+          }}</a>
         </li>
       </ul>
       <div
@@ -30,12 +32,17 @@
 </template>
 
 <script setup lang="ts">
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { QuorumSet } from "scp-simulation";
 
 defineProps<{
   quorumSet: QuorumSet | null;
   level: number;
 }>();
+
+function selectValidator(validator: string) {
+  federatedVotingStore.selectedNodeId = validator;
+}
 </script>
 
 <style scoped>
