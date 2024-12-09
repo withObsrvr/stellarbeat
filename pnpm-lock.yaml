@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@stellar/stellar-base':
-        specifier: 13.0.0-beta.1
-        version: 13.0.0-beta.1
+        specifier: 13.0.1
+        version: 13.0.1
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -91,8 +91,8 @@ importers:
         specifier: ^7.119.1
         version: 7.119.1
       '@stellarbeat/stellar-history-archive-hasher':
-        specifier: 0.6.0
-        version: 0.6.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@stellarbeat/stellar_analysis_nodejs':
         specifier: ^0.6.2
         version: 0.6.2
@@ -1509,14 +1509,14 @@ packages:
   '@stellar/js-xdr@3.1.2':
     resolution: {integrity: sha512-VVolPL5goVEIsvuGqDc5uiKxV03lzfWdvYg1KikvwheDmTBO68CKDji3bAZ/kppZrx5iTA8z3Ld5yuytcvhvOQ==}
 
-  '@stellar/stellar-base@13.0.0-beta.1':
-    resolution: {integrity: sha512-S5c2FyKwUOc28/3sDoOfPIcdzcbUyfiYRmcUlscZrEX/VVzV12216XRkdWy2MYa8KQNK60MpR7wrGp2MamvVGg==}
+  '@stellar/stellar-base@13.0.1':
+    resolution: {integrity: sha512-Xbd12mc9Oj/130Tv0URmm3wXG77XMshZtZ2yNCjqX5ZbMD5IYpbBs3DVCteLU/4SLj/Fnmhh1dzhrQXnk4r+pQ==}
 
   '@stellarbeat/stellar-halting-analysis@1.2.0':
     resolution: {integrity: sha512-W/OfQOgIcogIxpwyQ93RTr8Ke55z4/mvqG9UNUdB4AgJLwfgelYFn+RMdmWw4I77koQ3zdw19kuTm6pbg4yUkw==}
 
-  '@stellarbeat/stellar-history-archive-hasher@0.6.0':
-    resolution: {integrity: sha512-M0tUwzdTJVoai+e0Y+t1JJScua0srg8LjH15EHUAe4m5DAKR6yiRlDW0uXa38isROvTh1cQBtz0xKpbl4yH8mg==}
+  '@stellarbeat/stellar-history-archive-hasher@0.7.0':
+    resolution: {integrity: sha512-lpTmgPAPNwFF2EF7O7yhQ2chFaKK+L6KnSF82jk6PXw5BG/fuXU4awpcdzVvYBLtvWpzGj6tPKY21SgYdgCMkA==}
 
   '@stellarbeat/stellar_analysis_nodejs@0.6.2':
     resolution: {integrity: sha512-YHyZ2DvO3Ouyhs3fh3Iq5jHHg4Nc4hjKXmkE9DYp9RCebFYkus8cgDmLb17VH21bE/Z+G6S8eUrG4wVvGlQw3A==}
@@ -4039,6 +4039,9 @@ packages:
   sodium-native@4.2.1:
     resolution: {integrity: sha512-48X3PfRLW+f0fgb3J7f7mkZ9eBKcGR/bD5mdXXLAx4RWwKUe3095yPQgiUUQTfh8Q29JzwhSQATitQDBIozN/w==}
 
+  sodium-native@4.3.1:
+    resolution: {integrity: sha512-YdP64gAdpIKHfL4ttuX4aIfjeunh9f+hNeQJpE9C8UMndB3zkgZ7YmmGT4J2+v6Ibyp6Wem8D1TcSrtdW0bqtg==}
+
   sonic-boom@4.1.0:
     resolution: {integrity: sha512-NGipjjRicyJJ03rPiZCJYjwlsuP2d1/5QUviozRXC7S3WdVWNK5e3Ojieb9CCyfhq2UC+3+SRd9nG3I2lPRvUw==}
 
@@ -6196,7 +6199,7 @@ snapshots:
 
   '@stellar/js-xdr@3.1.2': {}
 
-  '@stellar/stellar-base@13.0.0-beta.1':
+  '@stellar/stellar-base@13.0.1':
     dependencies:
       '@stellar/js-xdr': 3.1.2
       base32.js: 0.1.0
@@ -6205,11 +6208,11 @@ snapshots:
       sha.js: 2.4.11
       tweetnacl: 1.0.3
     optionalDependencies:
-      sodium-native: 4.2.1
+      sodium-native: 4.3.1
 
   '@stellarbeat/stellar-halting-analysis@1.2.0': {}
 
-  '@stellarbeat/stellar-history-archive-hasher@0.6.0': {}
+  '@stellarbeat/stellar-history-archive-hasher@0.7.0': {}
 
   '@stellarbeat/stellar_analysis_nodejs@0.6.2': {}
 
@@ -9052,6 +9055,11 @@ snapshots:
   sodium-native@4.2.1:
     dependencies:
       node-gyp-build: 4.8.2
+
+  sodium-native@4.3.1:
+    dependencies:
+      node-gyp-build: 4.8.2
+    optional: true
 
   sonic-boom@4.1.0:
     dependencies:

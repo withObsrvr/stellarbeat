@@ -30,7 +30,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@stellar/stellar-base": "13.0.0-beta.1",
+		"@stellar/stellar-base": "13.0.1",
 		"dotenv": "^16.4.5",
 		"lru-cache": "^11.0.1",
 		"neverthrow": "^8.0.0",
