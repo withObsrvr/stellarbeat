@@ -6,41 +6,20 @@
     <div class="card-body pt-4 pb-0" style="height: 400px">
       <svg ref="svgRef" width="100%" height="100%">
         <g class="links">
-          <g v-for="(link, i) in otherLinks" :key="i" class="link-group">
+          <g v-for="(link, i) in links" :key="i" class="link-group">
             <path
-              :class="['link', { 'self-loop': false }]"
+              :class="['link', { 'self-loop': link.selfLoop }]"
               fill="none"
               :stroke="linkStrokeColor(link)"
               :stroke-width="isHoveredLink(link) ? 6 : 3"
               stroke-opacity="0.9"
-              :d="linkPath(link)"
+              :d="link.selfLoop ? selfLoopPath(link) : linkPath(link)"
             ></path>
             <path
               class="arrowhead"
               d="M -7,-7 L 7,0 L -7,7 Z"
               :fill="linkStrokeColor(link)"
-              :transform="arrowTransform(link, false)"
-            ></path>
-          </g>
-
-          <g
-            v-for="(link, i) in selfLoopLinks"
-            :key="'selfloop-' + i"
-            class="link-group"
-          >
-            <path
-              :class="['link', { 'self-loop': true }]"
-              fill="none"
-              :stroke="linkStrokeColor(link)"
-              :stroke-width="isHoveredLink(link) ? 6 : 3"
-              stroke-opacity="0.9"
-              :d="selfLoopPath(link)"
-            ></path>
-            <path
-              class="arrowhead"
-              d="M -7,-7 L 7,0 L -7,7 Z"
-              :fill="linkStrokeColor(link)"
-              :transform="arrowTransform(link, true)"
+              :transform="arrowTransform(link, link.selfLoop ?? false)"
             ></path>
           </g>
         </g>
@@ -83,8 +62,8 @@
               pointer-events="none"
             >
               {{
-                node.threshold && node.quorumSet
-                  ? `${node.threshold}/${node.quorumSet.length}`
+                node.threshold && node.validators
+                  ? `${node.threshold}/${node.validators.length}`
                   : ""
               }}
             </text>
@@ -105,11 +84,12 @@ import {
   SimulationNodeDatum,
   SimulationLinkDatum,
 } from "d3-force";
-import { ref, onMounted, nextTick, watch } from "vue";
+import { ref, onMounted, computed, Ref } from "vue";
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 interface Node extends SimulationNodeDatum {
   id: string;
-  quorumSet?: string[];
+  validators?: string[];
   threshold?: number;
   vote: string;
   accept: string;
@@ -125,109 +105,69 @@ interface Link extends SimulationLinkDatum<Node> {
 
 const height = 400;
 const svgRef = ref<SVGSVGElement | null>(null);
-
-// Initial graph data
-const graphNodes: Node[] = [
-  {
-    id: "Alice",
-    quorumSet: ["Bob", "Chad", "Alice"],
-    threshold: 2,
-    vote: "pizza",
-    accept: "pizza",
-    confirm: "pizza",
-  },
-  {
-    id: "Bob",
-    quorumSet: ["Alice", "Chad", "Bob"],
-    threshold: 2,
-    vote: "pizza",
-    accept: "pizza",
-    confirm: "",
-  },
-  {
-    id: "Chad",
-    quorumSet: ["Alice", "Bob", "Chad"],
-    threshold: 3,
-    vote: "burger",
-    accept: "",
-    confirm: "",
-  },
-  {
-    id: "Steve",
-    quorumSet: ["Bob", "Chad"],
-    threshold: 2,
-    vote: "burger",
-    accept: "",
-    confirm: "",
-  },
-];
-
-const graphLinks: Link[] = [];
-const nodesById = new Map<string, Node>();
-graphNodes.forEach((node) => nodesById.set(node.id, node));
-
-// Create links based on quorum sets
-graphNodes.forEach((node) => {
-  node.quorumSet?.forEach((qsMember) => {
-    if (qsMember === node.id) {
-      graphLinks.push({ source: node.id, target: qsMember, selfLoop: true });
-    } else {
-      graphLinks.push({ source: node.id, target: qsMember });
-    }
-  });
-});
-
-const linkKey = (link: any) => {
-  const sourceId =
-    typeof link.source === "string" ? link.source : link.source.id;
-  const targetId =
-    typeof link.target === "string" ? link.target : link.target.id;
-  return `${sourceId}-${targetId}`;
-};
-
-// Identify bidirectional links
-const linkMap = new Map<string, Link>();
-graphLinks.forEach((link) => linkMap.set(linkKey(link), link));
-graphLinks.forEach((link) => {
-  const reverseKey = linkKey({ source: link.target, target: link.source });
-  if (linkMap.has(reverseKey)) {
-    if (link.source !== link.target) {
-      link.bidirectional = true;
-      linkMap.get(reverseKey)!.bidirectional = true;
-    }
-  } else {
-    link.bidirectional = false;
-  }
-});
-
-const selfLoopArr = graphLinks.filter((link) => link.selfLoop);
-const otherLinksArr = graphLinks.filter((link) => !link.selfLoop);
-
-const nodes = ref<Node[]>(graphNodes);
-const otherLinks = ref<Link[]>(otherLinksArr);
-const selfLoopLinks = ref<Link[]>(selfLoopArr);
-
 const hoveredNode = ref<Node | null>(null);
 
+const nodes: Ref<Node[]> = ref(
+  federatedVotingStore.protocolContextState.protocolStates.map((state) => {
+    return {
+      id: state.node.publicKey,
+      validators: state.node.quorumSet.validators,
+      threshold: state.node.quorumSet.threshold,
+      vote: state.voted,
+      accept: state.accepted,
+      confirm: state.confirmed,
+    } as Node;
+  }),
+);
+
+const links: Ref<Link[]> = ref([]);
+
 onMounted(() => {
-  otherLinks.value.forEach((link) => {
-    if (typeof link.source === "string")
-      link.source = nodesById.get(link.source)!;
-    if (typeof link.target === "string")
-      link.target = nodesById.get(link.target)!;
-  });
-  selfLoopLinks.value.forEach((link) => {
-    if (typeof link.source === "string")
-      link.source = nodesById.get(link.source)!;
-    link.target = link.source;
-  });
+  links.value = (() => {
+    const links: Link[] = [];
+    nodes.value.forEach((node) => {
+      node.validators?.forEach((validator) => {
+        links.push({
+          source: node.id,
+          target: validator,
+          selfLoop: validator === node.id,
+        });
+      });
+    });
+
+    // Identify bidirectional links
+    const linkMap = new Map<string, Link>();
+    const linkKey = (link: Link) => {
+      const sourceId = (link.source as Node).id;
+      const targetId = (link.target as Node).id;
+      return `${sourceId}-${targetId}`;
+    };
+
+    links.forEach((link) => linkMap.set(linkKey(link), link));
+    links.forEach((link) => {
+      const reverseKey = linkKey({
+        source: link.target,
+        target: link.source,
+      } as Link);
+      if (linkMap.has(reverseKey)) {
+        if (link.source !== link.target) {
+          link.bidirectional = true;
+          linkMap.get(reverseKey)!.bidirectional = true;
+        }
+      } else {
+        link.bidirectional = false;
+      }
+    });
+
+    return links;
+  })();
 
   forceSimulation<Node>(nodes.value)
     .force(
       "link",
-      forceLink<Node, Link>(otherLinks.value)
+      forceLink<Node, Link>(links.value)
         .id((node: Node) => node.id)
-        .distance(200),
+        .distance(200), //todo: handle distance for selfloops
     )
     .force("charge", forceManyBody().strength(-2000))
     .force("center", forceCenter(width() / 2, height / 2))
@@ -238,13 +178,15 @@ onMounted(() => {
     .on("tick", () => {
       nodes.value = [...nodes.value]; //when updating to vue3, we could simply use reactive instead of refs
     });
+
+  links.value = [...links.value];
 });
 
 function getNodeRadius(node: Node): number {
   const nameLength = node.id.length;
   const thresholdTextLength =
-    node.threshold && node.quorumSet
-      ? `${node.threshold}/${node.quorumSet.length}`.length
+    node.threshold && node.validators
+      ? `${node.threshold}/${node.validators.length}`.length
       : 0;
   const maxLabelLength = Math.max(nameLength, thresholdTextLength);
   const baseRadius = 20;
@@ -262,12 +204,6 @@ function nodeFillColor(node: Node): string {
   } else {
     return "#A9A9A9"; // Dark gray if only voted
   }
-}
-
-function nodeTransform(node: Node) {
-  const x = typeof node.x === "number" ? node.x : 0;
-  const y = typeof node.y === "number" ? node.y : 0;
-  return `translate(${x},${y})`;
 }
 
 function linkStrokeColor(link: Link): string {
