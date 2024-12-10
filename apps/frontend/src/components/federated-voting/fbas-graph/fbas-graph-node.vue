@@ -2,8 +2,8 @@
   <g
     :transform="transform"
     style="cursor: grab"
-    @mouseover="handleMouseOver($event, node)"
-    @mouseout="handleMouseOut($event, node)"
+    @mouseover="emit('mouseover', $event, node)"
+    @mouseout="emit('mouseout', $event, node)"
   >
     <circle
       :r="getNodeRadius"
@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { SimulationNodeDatum } from "d3-force";
-import { computed, PropType } from "vue";
+import { computed, PropType, defineEmits } from "vue";
 
 export interface Node extends SimulationNodeDatum {
   id: string;
@@ -57,6 +57,8 @@ export interface Node extends SimulationNodeDatum {
   fy?: number | null;
 }
 
+const emit = defineEmits(["mouseover", "mouseout"]);
+
 const transform = computed(() => {
   return `translate(${props.node.x}, ${props.node.y})`;
 });
@@ -66,8 +68,6 @@ const props = defineProps({
     type: Object as PropType<Node>,
     required: true,
   },
-  handleMouseOver: Function,
-  handleMouseOut: Function,
 });
 
 const getNodeRadius = computed(() => {
