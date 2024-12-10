@@ -1,9 +1,9 @@
 <template>
   <div class="card graph">
     <div class="card-header">
-      <h4 class="card-title">QuorumSet Connections</h4>
+      <h4 class="card-title">FBAS</h4>
     </div>
-    <div class="card-body pt-4 pb-0" style="height: 400px">
+    <div class="card-body pt-4 pb-0" style="height: 500px">
       <svg ref="svgRef" width="100%" height="100%">
         <g class="links">
           <FbasGraphLink
@@ -40,8 +40,9 @@ import { ref, onMounted, Ref, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasGraphNode, { Node } from "./fbas-graph-node.vue";
 import FbasGraphLink, { Link } from "./fbas-graph-link.vue";
+import { OverlayEvent, ProtocolEvent } from "scp-simulation";
 
-const height = 400;
+const height = 500;
 const svgRef = ref<SVGSVGElement | null>(null);
 const hoveredNode = ref<Node | null>(null);
 
@@ -54,9 +55,17 @@ const updateNodesAndLinks = () => {
       (state) => state.node.publicKey === node.id,
     );
     if (state) {
-      node.vote = state.voted ? true : false;
-      node.accept = state.accepted ? true : false;
-      node.confirm = state.confirmed ? true : false;
+      node.vote = state.voted ? state.voted.toString() : null;
+      node.accept = state.accepted ? state.accepted.toString() : null;
+      node.confirm = state.confirmed ? state.confirmed.toString() : null;
+      node.events = federatedVotingStore.simulation
+        .getLatestEvents()
+        .filter((event) => {
+          return (
+            (event instanceof ProtocolEvent || event instanceof OverlayEvent) &&
+            event.publicKey === node.id
+          );
+        }) as (ProtocolEvent | OverlayEvent)[];
     }
   });
 };
@@ -67,11 +76,12 @@ const createNodesAndLinks = () => {
         id: state.node.publicKey,
         validators: state.node.quorumSet.validators,
         threshold: state.node.quorumSet.threshold,
-        vote: state.voted ? true : false,
-        accept: state.accepted ? true : false,
-        confirm: state.confirmed ? true : false,
+        vote: state.voted ? state.voted.toString() : null,
+        accept: state.accepted ? state.accepted.toString() : null,
+        confirm: state.confirmed ? state.confirmed.toString() : null,
         x: 0,
         y: 0,
+        events: [],
       };
     },
   );

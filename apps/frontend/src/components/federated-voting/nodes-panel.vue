@@ -21,12 +21,9 @@
               <span class="key-text">{{ nodeState.node.publicKey }}</span>
             </div>
             <div class="node-status">
-              <span
-                v-if="nodeState.partOfNetworkTransitiveQuorumSet"
-                class="badge badge-info mb-1"
-              >
+              <span v-if="nodeState.topTierNode" class="badge badge-info mb-1">
                 <BIconStarFill class="me-1" />
-                Network transitive qset
+                Top Tier
               </span>
               <span v-if="nodeState.voted" class="badge badge-voted mb-1">
                 <BIconInfoCircleFill class="me-1" /> Voted:
@@ -75,11 +72,9 @@
 import { computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import {
-  BIconCheckCircle,
   BIconInfoCircleFill,
   BIconCheckCircleFill,
   BIconExclamationCircleFill,
-  BIconBoundingBoxCircles,
   BIconStarFill,
 } from "bootstrap-vue";
 
@@ -94,7 +89,7 @@ const nodes = computed(() => {
       confirmedValue: protocolState.confirmed,
       illBehaved: illBehavedNodes.value.includes(protocolState.node.publicKey),
       befouled: befouledNodes.value.includes(protocolState.node.publicKey),
-      partOfNetworkTransitiveQuorumSet:
+      topTierNode:
         federatedVotingStore.trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(
           protocolState.node.publicKey,
         ),

@@ -12,8 +12,8 @@
         <span v-else-if="isLivenessBefouled" class="badge badge-warning ms-2">
           Befouled (liveness)
         </span>
-        <span v-if="isPartOfTransitiveQuorumSet" class="badge badge-info ms-2">
-          Part of Network Transitive Quorum-Set
+        <span v-if="isTopTierNode" class="badge badge-info ms-2">
+          Top Tier Node
         </span>
       </h4>
       <div></div>
@@ -83,7 +83,7 @@ const isLivenessBefouled = computed(() => {
   return federatedVotingStore.befouledNodes().includes(selectedNodeId.value);
 });
 
-const isPartOfTransitiveQuorumSet = computed(() => {
+const isTopTierNode = computed(() => {
   if (!selectedNodeId.value) return false;
   return federatedVotingStore.trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(
     selectedNodeId.value,

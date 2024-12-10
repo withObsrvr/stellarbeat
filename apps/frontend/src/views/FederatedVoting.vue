@@ -35,13 +35,19 @@
 
       <div class="col-lg-10 col-md-9 col-sm-12">
         <div class="row">
-          <div class="col-md-6 col-sm-12">
+          <div class="col-12">
             <FbasGraphPrototype class="card-spacing" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 col-sm-12">
+            <TrustGraph class="card-spacing" />
           </div>
           <div class="col-md-6 col-sm-12">
             <overlay-graph-base class="card-spacing" />
           </div>
         </div>
+
         <div class="row">
           <div class="col-lg-6">
             <div class="card">

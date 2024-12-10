@@ -247,7 +247,7 @@ const height = (): number => {
 }
 .chart-container {
   width: 100%;
-  height: 400px;
+  height: 250px;
 }
 .overlay-graph {
   width: 100%;
