@@ -36,7 +36,7 @@
       <div class="col-lg-10 col-md-9 col-sm-12">
         <div class="row">
           <div class="col-md-6 col-sm-12">
-          <FbasGraphPrototype class="card-spacing" /> 
+            <FbasGraphPrototype class="card-spacing" />
           </div>
           <div class="col-md-6 col-sm-12">
             <overlay-graph-base class="card-spacing" />
@@ -87,7 +87,7 @@ import SelectedNodePanel from "@/components/federated-voting/selected-nodes-pane
 import Controller from "@/components/federated-voting/simulation-control/controller.vue";
 import EventLog from "@/components/federated-voting/simulation-control/event-log.vue";
 import Actions from "@/components/federated-voting/simulation-control/actions.vue";
-import FbasGraphPrototype from "@/components/federated-voting/fbas-graph-prototype.vue";
+import FbasGraphPrototype from "@/components/federated-voting/fbas-graph/fbas-graph-prototype.vue";
 
 const hasNoNextMoves = computed(() => {
   return !federatedVotingStore.simulation.hasNextStep();

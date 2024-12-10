@@ -25,49 +25,13 @@
         </g>
 
         <g class="nodes">
-          <g
+          <FbasGraphNode
             v-for="node in nodes"
             :key="node.id"
-            :transform="`translate(${node.x}, ${node.y})`"
-            style="cursor: grab"
-            @mouseover="handleMouseOver($event, node)"
-            @mouseout="handleMouseOut($event, node)"
-          >
-            <circle
-              :r="getNodeRadius(node)"
-              :fill="nodeFillColor(node)"
-              stroke="#fff"
-              stroke-width="1.5"
-            ></circle>
-            <text
-              class="node-label name"
-              text-anchor="middle"
-              dy="-0.3em"
-              font-family="Arial, sans-serif"
-              font-size="12"
-              fill="#fff"
-              font-weight="bold"
-              pointer-events="none"
-            >
-              {{ node.id }}
-            </text>
-            <text
-              class="node-label threshold"
-              text-anchor="middle"
-              dy="1em"
-              font-family="Arial, sans-serif"
-              font-size="12"
-              fill="#fff"
-              font-weight="bold"
-              pointer-events="none"
-            >
-              {{
-                node.threshold && node.validators
-                  ? `${node.threshold}/${node.validators.length}`
-                  : ""
-              }}
-            </text>
-          </g>
+            :node="node"
+            :handleMouseOver="handleMouseOver"
+            :handleMouseOut="handleMouseOut"
+          />
         </g>
       </svg>
     </div>
@@ -80,23 +44,11 @@ import {
   forceLink,
   forceManyBody,
   forceSimulation,
-  forceCollide,
-  SimulationNodeDatum,
   SimulationLinkDatum,
 } from "d3-force";
-import { ref, onMounted, computed, Ref } from "vue";
+import { ref, onMounted, Ref, nextTick, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-
-interface Node extends SimulationNodeDatum {
-  id: string;
-  validators?: string[];
-  threshold?: number;
-  vote: string;
-  accept: string;
-  confirm: string;
-  fx?: number | null;
-  fy?: number | null;
-}
+import FbasGraphNode, { Node } from "./fbas-graph-node.vue";
 
 interface Link extends SimulationLinkDatum<Node> {
   bidirectional?: boolean;
@@ -107,22 +59,37 @@ const height = 400;
 const svgRef = ref<SVGSVGElement | null>(null);
 const hoveredNode = ref<Node | null>(null);
 
-const nodes: Ref<Node[]> = ref(
-  federatedVotingStore.protocolContextState.protocolStates.map((state) => {
-    return {
-      id: state.node.publicKey,
-      validators: state.node.quorumSet.validators,
-      threshold: state.node.quorumSet.threshold,
-      vote: state.voted,
-      accept: state.accepted,
-      confirm: state.confirmed,
-    } as Node;
-  }),
-);
-
+const nodes: Ref<Node[]> = ref([]);
 const links: Ref<Link[]> = ref([]);
 
-onMounted(() => {
+const updateNodesAndLinks = () => {
+  nodes.value.forEach((node) => {
+    const state = federatedVotingStore.protocolContextState.protocolStates.find(
+      (state) => state.node.publicKey === node.id,
+    );
+    if (state) {
+      node.vote = state.voted ? true : false;
+      node.accept = state.accepted ? true : false;
+      node.confirm = state.confirmed ? true : false;
+    }
+  });
+};
+const createNodesAndLinks = () => {
+  nodes.value = federatedVotingStore.protocolContextState.protocolStates.map(
+    (state) => {
+      return {
+        id: state.node.publicKey,
+        validators: state.node.quorumSet.validators,
+        threshold: state.node.quorumSet.threshold,
+        vote: state.voted ? true : false,
+        accept: state.accepted ? true : false,
+        confirm: state.confirmed ? true : false,
+        x: 0,
+        y: 0,
+      };
+    },
+  );
+
   links.value = (() => {
     const links: Link[] = [];
     nodes.value.forEach((node) => {
@@ -161,7 +128,14 @@ onMounted(() => {
 
     return links;
   })();
+};
 
+watch(federatedVotingStore.protocolContext, () => {
+  updateNodesAndLinks();
+});
+
+onMounted(() => {
+  createNodesAndLinks();
   forceSimulation<Node>(nodes.value)
     .force(
       "link",
@@ -170,41 +144,8 @@ onMounted(() => {
         .distance(200), //todo: handle distance for selfloops
     )
     .force("charge", forceManyBody().strength(-2000))
-    .force("center", forceCenter(width() / 2, height / 2))
-    .force(
-      "collide",
-      forceCollide<Node>().radius((node) => getNodeRadius(node) + 10),
-    )
-    .on("tick", () => {
-      nodes.value = [...nodes.value]; //when updating to vue3, we could simply use reactive instead of refs
-    });
-
-  links.value = [...links.value];
+    .force("center", forceCenter(width() / 2, height / 2));
 });
-
-function getNodeRadius(node: Node): number {
-  const nameLength = node.id.length;
-  const thresholdTextLength =
-    node.threshold && node.validators
-      ? `${node.threshold}/${node.validators.length}`.length
-      : 0;
-  const maxLabelLength = Math.max(nameLength, thresholdTextLength);
-  const baseRadius = 20;
-  const extraRadius = maxLabelLength * 3;
-  const lineHeight = 14;
-  const totalHeight = lineHeight * 2;
-  return Math.max(baseRadius + extraRadius, totalHeight);
-}
-
-function nodeFillColor(node: Node): string {
-  if (node.confirm) {
-    return "#2ca02c"; // Green if confirmed
-  } else if (node.accept) {
-    return "#1f77b4"; // Blue if accepted a value
-  } else {
-    return "#A9A9A9"; // Dark gray if only voted
-  }
-}
 
 function linkStrokeColor(link: Link): string {
   const targetNode = link.target as Node;
