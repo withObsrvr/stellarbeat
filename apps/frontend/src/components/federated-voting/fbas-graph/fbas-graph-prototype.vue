@@ -138,9 +138,9 @@ onMounted(() => {
       "link",
       forceLink<Node, Link>(links.value)
         .id((node: Node) => node.id)
-        .distance(200), //todo: handle distance for selfloops
+        .distance(150),
     )
-    .force("charge", forceManyBody().strength(-2000))
+    .force("charge", forceManyBody().strength(-500))
     .force("center", forceCenter(width() / 2, height / 2));
 });
 

@@ -10,7 +10,7 @@
     ></path>
     <path
       class="arrowhead"
-      d="M -7,-7 L 7,0 L -7,7 Z"
+      d="M -5,-5 L 5,0 L -5,5 Z"
       :fill="linkStrokeColor"
       :transform="arrowTransform"
     ></path>
@@ -35,7 +35,7 @@ const props = defineProps<{
 }>();
 
 const strokeWidth = computed(() => {
-  return props.link.hoovered ? 6 : 3;
+  return props.link.hoovered ? 5 : 2;
 });
 
 const path = computed(() => {
@@ -92,7 +92,7 @@ const selfLoopPath = computed(() => {
 
   const sx = sourceNode.x;
   const sy = sourceNode.y;
-  const pathRadius = 40;
+  const pathRadius = 20;
   const dx = sx - props.centerX;
   const dy = sy - props.centerY;
   const distance = Math.sqrt(dx * dx + dy * dy) || 1;

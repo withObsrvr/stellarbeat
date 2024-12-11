@@ -6,11 +6,11 @@
     @mouseout="handleMouseOut"
   >
     <circle
+      ref="nodeCircle"
       :r="nodeRadius"
       :fill="nodeFillColor"
       stroke="#fff"
       stroke-width="1.5"
-      ref="nodeCircle"
       role="img"
       :aria-label="
         currentEvents.length > 0
@@ -21,43 +21,15 @@
     ></circle>
 
     <g class="default-text">
-      <text
-        class="node-label name"
-        text-anchor="middle"
-        dy="-0.6em"
-        font-family="Arial, sans-serif"
-        font-size="12"
-        fill="#fff"
-        font-weight="bold"
-        pointer-events="none"
-      >
+      <text class="node-label name" dy="-0.6em">
         {{ node.id }}
       </text>
 
-      <text
-        v-if="statusText"
-        class="node-label status"
-        text-anchor="middle"
-        dy="0.5em"
-        font-family="Arial, sans-serif"
-        font-size="12"
-        fill="#fff"
-        font-weight="bold"
-        pointer-events="none"
-      >
+      <text v-if="statusText" class="node-label status" dy="0.4em">
         {{ statusText }}
       </text>
 
-      <text
-        class="node-label threshold"
-        text-anchor="middle"
-        dy="1.7em"
-        font-family="Arial, sans-serif"
-        font-size="12"
-        fill="#fff"
-        font-weight="bold"
-        pointer-events="none"
-      >
+      <text class="node-label threshold" dy="1.6em">
         {{
           node.threshold && node.validators
             ? `${node.threshold}/${node.validators.length}`
@@ -209,7 +181,7 @@ const computedDialogHeight = computed(
   () => paddingTop * 2 + currentEvents.value.length * lineHeight,
 );
 
-const nodeRadius = 35;
+const nodeRadius = 25;
 
 function animateEvents() {
   triggerPulseOnCircle();
@@ -258,6 +230,7 @@ const events = toRef(props.node, "events");
 
 watch(events, (newEvents) => {
   currentEvents.value = [];
+  initialDialogShow.value = false;
   newEvents.forEach((event) => {
     if (event instanceof Voted && !event.vote.isVoteToAccept) {
       currentEvents.value.push(
@@ -309,16 +282,13 @@ const nodeFillColor = computed(() => {
 </script>
 
 <style scoped>
-.node-label.name {
-  font-size: 12px;
-}
-
-.node-label.threshold {
-  font-size: 12px;
-}
-
-.node-label.status {
-  font-size: 12px;
+.node-label {
+  text-anchor: middle;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  pointer-events: none;
+  fill: #ffff;
+  font-size: 10px;
 }
 
 /* Pulse Animation applied to the circle */
