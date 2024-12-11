@@ -3,38 +3,53 @@
     <div class="card-header">
       <h4 class="card-title">FBAS</h4>
     </div>
-    <div class="card-body pt-4 pb-0" style="height: 500px">
-      <svg ref="svgRef" width="100%" height="100%">
-        <g class="animation-layer">
-          <AnimatedMessage
-            v-for="message in messages"
-            :key="message.id"
-            :startX="message.startX"
-            :startY="message.startY"
-            :endX="message.endX"
-            :endY="message.endY"
-            :duration="message.duration"
-          />
-        </g>
-
-        <g class="links">
-          <FbasGraphLink
-            v-for="(link, i) in links"
-            :key="i"
-            :link="link"
-            :center-x="width() / 2"
-            :center-y="height / 2"
-          />
-        </g>
-
-        <g class="nodes">
-          <FbasGraphNode
-            v-for="node in nodes"
-            :key="node.id"
-            :node="node"
-            @mouseover="handleMouseOver($event, node)"
-            @mouseout="handleMouseOut($event, node)"
-          />
+    <div class="card-body pt-4 pb-0" style="height: 500px; overflow: hidden">
+      <svg
+        ref="svgRef"
+        width="100%"
+        height="100%"
+        @mousedown="startPan"
+        @mousemove="pan"
+        @mouseup="endPan"
+        @mouseleave="endPan"
+        @wheel.prevent="zoom"
+        @touchstart="startPan"
+        @touchmove="pan"
+        @touchend="endPan"
+      >
+        <g
+          :transform="`translate(${translateX}, ${translateY}) scale(${scale})`"
+        >
+          <g class="animation-layer">
+            <AnimatedMessage
+              v-for="message in messages"
+              :key="message.id"
+              :startX="message.startX"
+              :startY="message.startY"
+              :endX="message.endX"
+              :endY="message.endY"
+              :duration="message.duration"
+            />
+          </g>
+          <g class="links">
+            <FbasGraphLink
+              v-for="(link, i) in links"
+              :key="i"
+              :link="link"
+              :center-x="width / 2"
+              :center-y="height / 2"
+              :highlight="false"
+            />
+          </g>
+          <g class="nodes">
+            <FbasGraphNode
+              v-for="node in nodes"
+              :key="node.id"
+              :node="node"
+              @mouseover="handleMouseOver(node)"
+              @mouseout="handleMouseOut(node)"
+            />
+          </g>
         </g>
       </svg>
     </div>
@@ -48,16 +63,22 @@ import {
   forceManyBody,
   forceSimulation,
 } from "d3-force";
-import { ref, onMounted, Ref, watch, computed } from "vue";
+import { ref, onMounted, Ref, watch, computed, onBeforeUnmount } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasGraphNode, { Node } from "./fbas-graph-node.vue";
 import FbasGraphLink, { Link } from "./fbas-graph-link.vue";
 import { MessageSent, OverlayEvent, ProtocolEvent } from "scp-simulation";
 import AnimatedMessage from "./animated-message.vue";
+import { usePanning } from "./usePanning";
+
+const { translateX, translateY, scale, startPan, pan, endPan, zoom } =
+  usePanning();
 
 const height = 500;
 const svgRef = ref<SVGSVGElement | null>(null);
+
 const hoveredNode = ref<Node | null>(null);
+
 const messages = ref<
   Array<{
     id: number;
@@ -70,6 +91,9 @@ const messages = ref<
 >([]);
 let messageCounter = 0;
 
+const nodes: Ref<Node[]> = ref([]);
+const links: Ref<Link[]> = ref([]);
+
 function animateMessage(source: Node, target: Node) {
   messages.value.push({
     id: messageCounter++,
@@ -80,9 +104,6 @@ function animateMessage(source: Node, target: Node) {
     duration: federatedVotingStore.simulationStepDurationInSeconds,
   });
 }
-
-const nodes: Ref<Node[]> = ref([]);
-const links: Ref<Link[]> = ref([]);
 
 const updateNodesAndLinks = () => {
   nodes.value.forEach((node) => {
@@ -104,6 +125,7 @@ const updateNodesAndLinks = () => {
     }
   });
 };
+
 const createNodesAndLinks = () => {
   nodes.value = federatedVotingStore.protocolContextState.protocolStates.map(
     (state) => {
@@ -129,7 +151,7 @@ const createNodesAndLinks = () => {
           source: node.id,
           target: validator,
           selfLoop: validator === node.id,
-          hoovered: false,
+          hovered: false,
         });
       });
     });
@@ -181,11 +203,16 @@ watch(events, (newEvents) => {
   });
 });
 
-watch(federatedVotingStore.protocolContext, () => {
-  updateNodesAndLinks();
-});
+watch(
+  () => federatedVotingStore.protocolContext,
+  () => {
+    updateNodesAndLinks();
+  },
+  { deep: true },
+);
 
 onMounted(() => {
+  updateDimensions();
   createNodesAndLinks();
   forceSimulation<Node>(nodes.value)
     .force(
@@ -195,36 +222,45 @@ onMounted(() => {
         .distance(150),
     )
     .force("charge", forceManyBody().strength(-500))
-    .force("center", forceCenter(width() / 2, height / 2));
+    .force("center", forceCenter(width.value / 2, height / 2));
 });
 
-function handleMouseOver(event: MouseEvent, node: Node) {
+function handleMouseOver(node: Node) {
   hoveredNode.value = node;
 
   links.value.forEach((link) => {
     if (link.source === node) {
-      link.hoovered = true;
+      link.hovered = true;
     }
   });
 }
-function handleMouseOut(event: MouseEvent, node: Node) {
+
+function handleMouseOut(node: Node) {
+  hoveredNode.value = null;
+
   links.value.forEach((link) => {
-    link.hoovered = false;
+    link.hovered = false;
   });
 }
 
-function width() {
-  return (svgRef.value as SVGElement).clientWidth;
+// Helper function to get SVG width and height
+const width = ref(800); // Set initial width
+const heightRef = ref(500); // Set initial height
+
+function updateDimensions() {
+  if (svgRef.value) {
+    width.value = svgRef.value.clientWidth;
+    heightRef.value = svgRef.value.clientHeight;
+  }
 }
 </script>
 
 <style scoped>
 .animation-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
   pointer-events: none;
+}
+
+.graph {
+  cursor: grab;
 }
 </style>

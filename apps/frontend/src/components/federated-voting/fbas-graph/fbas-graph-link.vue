@@ -25,7 +25,7 @@ import { computed } from "vue";
 export interface Link extends SimulationLinkDatum<Node> {
   bidirectional?: boolean;
   selfLoop?: boolean;
-  hoovered: boolean;
+  hovered: boolean;
 }
 
 const props = defineProps<{
@@ -35,7 +35,7 @@ const props = defineProps<{
 }>();
 
 const strokeWidth = computed(() => {
-  return props.link.hoovered ? 5 : 2;
+  return props.link.hovered ? 5 : 2;
 });
 
 const path = computed(() => {
