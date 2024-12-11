@@ -50,7 +50,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, nextTick } from "vue";
+import { onMounted, onBeforeUnmount, nextTick, computed } from "vue";
 import {
   BIconPauseFill,
   BIconPlayFill,
@@ -62,9 +62,11 @@ import { ref } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 const playing = ref(false);
-const tickTime = 2000;
 const progressBar = ref<HTMLElement | null>(null);
 let playInterval: NodeJS.Timeout | null = null;
+const tickTime = computed(
+  () => federatedVotingStore.simulationStepDurationInSeconds * 1000,
+);
 
 function play() {
   playing.value = true;
@@ -80,7 +82,7 @@ function play() {
       clearPlayingInterval();
       playing.value = false;
     }
-  }, tickTime);
+  }, tickTime.value);
 }
 
 function resetAnimation() {
@@ -90,7 +92,7 @@ function resetAnimation() {
       progressBar.value.style.animation = "none";
       // Trigger reflow to restart the animation
       void progressBar.value.offsetWidth;
-      progressBar.value.style.animation = `tickAnimation ${tickTime}ms linear`;
+      progressBar.value.style.animation = `tickAnimation ${tickTime.value}ms linear`;
     }
   });
 }

@@ -1,4 +1,4 @@
-import { computed, reactive, ref, type Ref } from "vue";
+import { reactive, ref, type Ref } from "vue";
 import {
   BasicFederatedVotingScenario,
   FederatedVotingContext,
@@ -15,6 +15,7 @@ class FederatedVotingStore {
   scenarios: string[] = ["FBAS QI scenario"];
   selectedScenario: string = this.scenarios[0];
   selectedNodeId: string | null = null;
+  readonly simulationStepDurationInSeconds: number = 2;
 
   protocolContext: FederatedVotingContext;
   protocolContextState: FederatedVotingContextState;

@@ -5,6 +5,18 @@
     </div>
     <div class="card-body pt-4 pb-0" style="height: 500px">
       <svg ref="svgRef" width="100%" height="100%">
+        <g class="animation-layer">
+          <AnimatedMessage
+            v-for="message in messages"
+            :key="message.id"
+            :startX="message.startX"
+            :startY="message.startY"
+            :endX="message.endX"
+            :endY="message.endY"
+            :duration="message.duration"
+          />
+        </g>
+
         <g class="links">
           <FbasGraphLink
             v-for="(link, i) in links"
@@ -36,15 +48,38 @@ import {
   forceManyBody,
   forceSimulation,
 } from "d3-force";
-import { ref, onMounted, Ref, watch } from "vue";
+import { ref, onMounted, Ref, watch, computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasGraphNode, { Node } from "./fbas-graph-node.vue";
 import FbasGraphLink, { Link } from "./fbas-graph-link.vue";
-import { OverlayEvent, ProtocolEvent } from "scp-simulation";
+import { MessageSent, OverlayEvent, ProtocolEvent } from "scp-simulation";
+import AnimatedMessage from "./animated-message.vue";
 
 const height = 500;
 const svgRef = ref<SVGSVGElement | null>(null);
 const hoveredNode = ref<Node | null>(null);
+const messages = ref<
+  Array<{
+    id: number;
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+    duration: number;
+  }>
+>([]);
+let messageCounter = 0;
+
+function animateMessage(source: Node, target: Node) {
+  messages.value.push({
+    id: messageCounter++,
+    startX: source.x ?? 0,
+    startY: source.y ?? 0,
+    endX: target.x ?? 0,
+    endY: target.y ?? 0,
+    duration: federatedVotingStore.simulationStepDurationInSeconds,
+  });
+}
 
 const nodes: Ref<Node[]> = ref([]);
 const links: Ref<Link[]> = ref([]);
@@ -127,6 +162,25 @@ const createNodesAndLinks = () => {
   })();
 };
 
+const events = computed(() => {
+  return federatedVotingStore.simulation.getLatestEvents();
+});
+
+watch(events, (newEvents) => {
+  messages.value = [];
+  newEvents.forEach((event) => {
+    if (event instanceof MessageSent) {
+      const sourceNode = nodes.value.find((n) => n.id === event.message.sender);
+      const targetNode = nodes.value.find(
+        (n) => n.id === event.message.receiver,
+      );
+      if (sourceNode && targetNode) {
+        animateMessage(sourceNode, targetNode);
+      }
+    }
+  });
+});
+
 watch(federatedVotingStore.protocolContext, () => {
   updateNodesAndLinks();
 });
@@ -149,7 +203,6 @@ function handleMouseOver(event: MouseEvent, node: Node) {
 
   links.value.forEach((link) => {
     if (link.source === node) {
-      console.log("TRUE");
       link.hoovered = true;
     }
   });
@@ -165,4 +218,13 @@ function width() {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.animation-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+</style>
