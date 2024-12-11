@@ -6,7 +6,7 @@ main();
 
 async function main() {
 	const kernel = await Kernel.getInstance();
-	const verifySingleArchive = kernel.container.get(VerifyArchives);
+	const verifyArchives = kernel.container.get(VerifyArchives);
 	//handle shutdown
 	process
 		.on('SIGTERM', async () => {
@@ -28,7 +28,9 @@ async function main() {
 		loop = false;
 	}
 
-	await verifySingleArchive.execute({
+	console.log('EXEC');
+
+	await verifyArchives.execute({
 		persist: persist,
 		loop: loop
 	});
