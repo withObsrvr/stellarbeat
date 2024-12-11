@@ -122,6 +122,7 @@ import { SimulationNodeDatum } from "d3-force";
 import {
   AcceptVoteRatified,
   AcceptVoteVBlocked,
+  ConsensusReached,
   OverlayEvent,
   ProtocolEvent,
   Voted,
@@ -210,29 +211,7 @@ const computedDialogHeight = computed(
 
 const nodeRadius = 35;
 
-function animateEvents(events: ProtocolEvent[]) {
-  currentEvents.value = [];
-  events.forEach((event) => {
-    if (event instanceof VoteRatified) {
-      currentEvents.value.push(
-        `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "${event.statement}"`,
-      );
-    }
-
-    if (event instanceof AcceptVoteVBlocked) {
-      currentEvents.value.push(
-        `Accept vote on "${event.statement}" VBlocked by [${Array.from(
-          event.vBlockingSet,
-        ).join(", ")}]`,
-      );
-    }
-
-    if (event instanceof AcceptVoteRatified) {
-      currentEvents.value.push(
-        `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "accept(${event.statement})"`,
-      );
-    }
-  });
+function animateEvents() {
   triggerPulseOnCircle();
 
   // Start a timeout to clear events after 2 seconds
@@ -278,15 +257,39 @@ function handleMouseOut() {
 const events = toRef(props.node, "events");
 
 watch(events, (newEvents) => {
-  const protocolEvents = newEvents.filter(
-    (event) =>
-      event instanceof AcceptVoteVBlocked ||
-      event instanceof AcceptVoteRatified ||
-      event instanceof VoteRatified,
-  ) as ProtocolEvent[];
-  if (protocolEvents.length > 0) {
-    console.log(protocolEvents);
-    animateEvents(protocolEvents);
+  currentEvents.value = [];
+  newEvents.forEach((event) => {
+    if (event instanceof Voted && !event.vote.isVoteToAccept) {
+      currentEvents.value.push(
+        `${event.publicKey} voted "${event.vote.statement}"`,
+      );
+    } else if (event instanceof Voted && event.vote.isVoteToAccept) {
+      currentEvents.value.push(
+        `${event.publicKey} accepted "${event.vote.statement}"`,
+      );
+    } else if (event instanceof VoteRatified) {
+      currentEvents.value.push(
+        `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "${event.statement}"`,
+      );
+    } else if (event instanceof AcceptVoteVBlocked) {
+      currentEvents.value.push(
+        `Accept vote on "${event.statement}" VBlocked by [${Array.from(
+          event.vBlockingSet,
+        ).join(", ")}]`,
+      );
+    } else if (event instanceof AcceptVoteRatified) {
+      currentEvents.value.push(
+        `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "accept(${event.statement})"`,
+      );
+    } else if (event instanceof ConsensusReached) {
+      currentEvents.value.push(
+        `${event.publicKey} confirmed "${event.statement}"`,
+      );
+    }
+  });
+
+  if (currentEvents.value.length > 0) {
+    animateEvents();
   }
 });
 
