@@ -2,19 +2,22 @@
   <div class="row row-cards row-deck">
     <div class="col-md-6 col-lg-3 col-xl-3">
       <network-statistics-card
-        :value="network.networkStatistics.nrOfActiveWatchers"
+        :value="
+          network.networkStatistics.nrOfActiveWatchers +
+          network.networkStatistics.nrOfActiveValidators
+        "
         :is-loading="isLoading"
-        title="Watcher nodes"
-        tooltip="Number of active watcher nodes"
+        title="Nodes allowing connections"
+        tooltip="Number of nodes allowing incoming connections"
         :initial-data-loaded="initialDataLoaded"
         stats-property="nrOfActiveWatchersAverage"
         :year-statistics="yearStatistics"
       >
         <template #info>
-          <h3>Watcher nodes</h3>
+          <h3>Nodes allowing incoming connections</h3>
           <p class="my-4">
-            Watcher nodes are configured to watch the activity from the network.
-            They do not actively vote on the network.
+            Number of nodes that allow incoming connections (including
+            validators)
           </p>
 
           <h4>What if your node is missing?</h4>
@@ -45,7 +48,8 @@
         <template #info>
           <h3>Validator nodes</h3>
           <p class="my-4">
-            Nodes that are actively voting on the network in the current crawl.
+            Nodes that allow incoming connections and are actively voting on the
+            network in the current crawl (including full validators)
           </p>
 
           <h4>What if your node not showing up?</h4>
@@ -188,9 +192,8 @@
         <template #info>
           <h3>Top tier validators</h3>
           <p class="my-4">
-            The top tier is the set of nodes in the network that is exclusively
-            relevant when determining the liveness and safety "buffers" of the
-            network.
+            The top tier is the set of nodes in the network that make up the
+            minimal quorums of the network.
           </p>
 
           <p class="my-4">

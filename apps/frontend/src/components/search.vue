@@ -100,7 +100,7 @@ const filteredList: ComputedRef<Match[]> = computed(() => {
     .map((node) => {
       return {
         name: node.displayName,
-        type: node.isValidator ? "validator node" : "watcher node",
+        type: node.isValidator ? "validator node" : "Non-validating node",
         route: {
           name: "node-dashboard",
           params: { publicKey: node.publicKey },

@@ -4,7 +4,7 @@
       <h1 class="card-title">
         <b-badge variant="success">{{ numberOfActiveNodes }}</b-badge>
         active
-        {{ store.includeWatcherNodes ? "nodes" : "validators" }}
+        {{ store.includeAllNodes ? "nodes" : "validators" }}
       </h1>
       <div class="card-options">
         <form>
@@ -63,7 +63,7 @@ const fields = computed(() => {
 });
 
 const numberOfActiveNodes = computed(() => {
-  if (store.includeWatcherNodes)
+  if (store.includeAllNodes)
     return network.nodes.filter((node) => !network.isNodeFailing(node)).length;
   else
     return network.nodes.filter(
@@ -73,7 +73,7 @@ const numberOfActiveNodes = computed(() => {
 
 const validators = computed(() => {
   return network.nodes
-    .filter((node) => node.isValidator || store.includeWatcherNodes)
+    .filter((node) => node.isValidator || store.includeAllNodes)
     .map((node) => {
       const mappedNode: TableNode = {
         name: node.displayName,

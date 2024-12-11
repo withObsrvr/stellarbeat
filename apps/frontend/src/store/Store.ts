@@ -40,15 +40,15 @@ interface Data {
   isTimeTravel: boolean;
   networkAnalysisMergeBy: MergeBy;
   timeTravelDate?: Date;
-  includeWatcherNodes: boolean;
+  includeAllConnectableNodes: boolean;
   selectedOrganization?: Organization;
   latestTermsChangeTimestamp: number;
 }
 
 export default class Store {
   public networkContext: NetworkContext;
-  public watcherNodeFilter = (node: Node) => {
-    return this.includeWatcherNodes || node.isValidator;
+  public allNodesFilter = (node: Node) => {
+    return this.includeAllNodes || node.isValidator;
   };
 
   public networkContexts: Map<NetworkId, NetworkContext> = new Map();
@@ -74,7 +74,7 @@ export default class Store {
     isTimeTravel: false,
     networkAnalysisMergeBy: MergeBy.DoNotMerge,
     timeTravelDate: undefined,
-    includeWatcherNodes: false,
+    includeAllConnectableNodes: false,
     selectedOrganization: undefined,
     latestTermsChangeTimestamp: new Date("2023-01-01").getTime(), //todo: better location
   });
@@ -167,13 +167,13 @@ export default class Store {
     return this.data.measurementsStartDate;
   }
 
-  get includeWatcherNodes(): boolean {
-    return this.data.includeWatcherNodes;
+  get includeAllNodes(): boolean {
+    return this.data.includeAllConnectableNodes;
   }
 
   //used in v-model
-  set includeWatcherNodes(value: boolean) {
-    this.data.includeWatcherNodes = value;
+  set includeAllNodes(value: boolean) {
+    this.data.includeAllConnectableNodes = value;
   }
 
   get network(): Network {

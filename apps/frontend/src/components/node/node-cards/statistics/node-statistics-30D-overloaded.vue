@@ -15,7 +15,7 @@
           {{ +node.statistics.overLoaded30DaysPercentage.toFixed(2) }}%
         </div>
         <div v-else class="strong">N/A</div>
-        <div class="text-muted">30D Overload</div>
+        <div class="text-muted">30D Crawler rejected</div>
       </div>
     </div>
   </div>

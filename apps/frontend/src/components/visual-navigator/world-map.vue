@@ -106,7 +106,7 @@ const network = store.network;
 const route = useRoute();
 const router = useRouter();
 const markersData = computed(() =>
-  store.network.nodes.filter(store.watcherNodeFilter),
+  store.network.nodes.filter(store.allNodesFilter),
 );
 
 const center = computed(() => {

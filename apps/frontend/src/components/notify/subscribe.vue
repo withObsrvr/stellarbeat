@@ -162,7 +162,7 @@
           <a href="https://dashboard.stellar.org" target="_blank"
             >official Stellar network dashboard</a
           >. There could be an issue with the Stellarbeat crawler, which itself
-          is in essence a Watcher node.
+          is in essence a non-validating node.
         </li>
         <li>
           To improve the chances of the Stellarbeat crawler connecting to your

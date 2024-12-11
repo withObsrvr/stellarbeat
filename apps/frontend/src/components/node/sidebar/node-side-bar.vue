@@ -172,7 +172,7 @@ const network = store.network;
 const nodeType = computed(() => {
   if (selectedNode.value.isValidator)
     return selectedNode.value.isFullValidator ? "Full Validator" : "Validator";
-  else return "Watcher";
+  else return "Connectable Node";
 });
 
 function loadTomlExport() {

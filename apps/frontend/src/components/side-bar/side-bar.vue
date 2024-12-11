@@ -140,12 +140,12 @@
               <ul class="sb-nav-list">
                 <li class="sb-nav-item">
                   <b-form-checkbox
-                    v-model="store.includeWatcherNodes"
+                    v-model="store.includeAllNodes"
                     name="include-watcher-nodes-button"
                     class="sb-nav-item sb-nav-toggle"
                     switch
                   >
-                    Watcher nodes
+                    All connectable nodes
                   </b-form-checkbox>
                 </li>
               </ul>
@@ -171,10 +171,7 @@ import {
 } from "bootstrap-vue";
 import useStore from "@/store/useStore";
 import NavLink from "@/components/side-bar/nav-link.vue";
-import {
-  type BaseQuorumSet,
-  Network,
-} from "shared";
+import { type BaseQuorumSet, Network } from "shared";
 
 Vue.component("BIconBullseye", BIconBullseye);
 Vue.component("BIconBuilding", BIconBuilding);

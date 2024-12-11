@@ -27,7 +27,7 @@
           1H
         </button>
       </div>
-      <h5 class="card-title">
+      <h5 class="card-title pt-1">
         {{ subject }}
       </h5>
     </div>

@@ -32,14 +32,14 @@
                 <div class="col-sm-6">
                   <label class="custom-switch mt-2">
                     <input
-                      v-model="optionShowWatchers"
+                      v-model="optionShowAllConnectableNodes"
                       name="custom-switch-checkbox"
                       class="custom-switch-input"
                       type="checkbox"
                     />
                     <span class="custom-switch-indicator"></span>
                     <span class="custom-switch-description"
-                      >Include watcher nodes</span
+                      >Include all connectable nodes</span
                     >
                   </label>
                 </div>
@@ -67,7 +67,7 @@
             <pre><code>
 Index = (TypeIndex + ActiveIndex + ValidationIndex + VersionIndex + TrustIndex + AgeIndex)/6
 
-TypeIndex = Full validator | Basic validator | Watcher node
+TypeIndex = Full validator | Basic validator | Connectable node
 ActiveIndex = Active percentage last 30 days
 ValidationIndex = Validation percentage last 30 days
 Version = How far away from the latest stable Stellar core version
@@ -101,7 +101,7 @@ defineProps({
 const store = useStore();
 
 const optionShowInactive = ref(false);
-const optionShowWatchers = ref(false);
+const optionShowAllConnectableNodes = ref(false);
 const filter = ref("");
 
 const fieldsBase = [
@@ -139,7 +139,7 @@ if (!store.isSimulation) {
     });
     fieldsBase.push({
       key: "overLoaded24Hour",
-      label: "24H overloaded",
+      label: "24H Crawler rejected",
       sortable: true,
     });
     fieldsBase.push({
@@ -164,13 +164,13 @@ const getNodeType = (node: Node): string => {
   }
   if (node.isValidator) return "Validator";
 
-  return "Watcher";
+  return "Connectable Node";
 };
 
 const nodes: ComputedRef<TableNode[]> = computed(() => {
   return store.network.nodes
     .filter((node) => node.active || optionShowInactive.value)
-    .filter((node) => node.isValidator || optionShowWatchers.value)
+    .filter((node) => node.isValidator || optionShowAllConnectableNodes.value)
     .map((node) => {
       const mappedNode: TableNode = {
         name: node.displayName,

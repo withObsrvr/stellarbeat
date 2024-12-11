@@ -42,9 +42,9 @@ const store: Store = useStore();
 const network = store.network;
 const countryDistributionGraph: Ref<ChartItem | null> = ref(null);
 
-watch(() => store.includeWatcherNodes, onWatcherNodesOptionChanged);
+watch(() => store.includeAllNodes, onAllNodesOptionChanged);
 
-function onWatcherNodesOptionChanged() {
+function onAllNodesOptionChanged() {
   if (!chart.value || !chart.value.data.datasets) return;
   chart.value.data.datasets[0].data = chartData.value;
   chart.value.update();
@@ -52,7 +52,7 @@ function onWatcherNodesOptionChanged() {
 
 const sortedCountries = computed(() => {
   const countries = network.nodes
-    .filter(useStore().watcherNodeFilter)
+    .filter(useStore().allNodesFilter)
     .filter((node) => node.geoData.countryName)
     .map((node) => node.geoData.countryName)
     .reduce(

@@ -40,7 +40,7 @@ const store: Store = useStore();
 const network = store.network;
 
 watch(
-  () => store.includeWatcherNodes,
+  () => store.includeAllNodes,
   () => {
     if (!chart.value || !chart.value.data.datasets) return;
     chart.value.data.datasets[0].data = chartData.value;
@@ -50,7 +50,7 @@ watch(
 
 const sortedVersions = computed(() => {
   const versions: Record<string, number | undefined> = network.nodes
-    .filter(useStore().watcherNodeFilter)
+    .filter(useStore().allNodesFilter)
     .filter((node) => node.versionStr)
     .map((node) =>
       (node.versionStr as string)

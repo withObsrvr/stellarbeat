@@ -1,6 +1,6 @@
 <template>
   <div class="card">
-    <div class="text-muted mx-3 mt-3">Validator load</div>
+    <div class="text-muted mx-3 mt-3">Crawler rejected</div>
     <div class="card-body d-flex flex-row justify-content-center p-1">
       <div
         class="canvas-container"
@@ -70,7 +70,7 @@ function initializeBarChart() {
     type: "doughnut",
     // The data for our dataset
     data: {
-      labels: ["low load", "high load"],
+      labels: ["No", "Yes"],
       datasets: [
         {
           label: "nodes",

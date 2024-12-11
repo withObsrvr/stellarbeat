@@ -83,7 +83,7 @@ const props = defineProps({
 });
 
 const type = computed(() => props.type);
-const includeWatcherNodes = computed(() => store.includeWatcherNodes);
+const includeAllNodes = computed(() => store.includeAllNodes);
 const selectedNode = computed(() => store.selectedNode);
 const selectedOrganization = computed(() => store.selectedOrganization);
 const optionFilterTrustCluster = computed(() => props.optionFilterTrustCluster);
@@ -101,7 +101,7 @@ watch(type, () => {
   updateGraph();
 });
 
-watch(includeWatcherNodes, () => {
+watch(includeAllNodes, () => {
   updateGraph();
 });
 
@@ -179,7 +179,7 @@ const selectedKeys = computed(() => {
 function updateGraph(merge = false) {
   isLoading.value = true;
 
-  const allNodes = store.includeWatcherNodes
+  const allNodes = store.includeAllNodes
     ? store.network.nodes
     : store.network.nodes.filter((node) => node.isValidator);
 

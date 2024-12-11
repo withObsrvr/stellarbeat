@@ -84,14 +84,14 @@
         <pre><code>
 Index = (TypeIndex + ActiveIndex + ValidationIndex + VersionIndex + TrustIndex + AgeIndex)/6
 
-TypeIndex = Full validator | Basic validator | Watcher node
+TypeIndex = Full validator | Basic validator | Connectable node
 ActiveIndex = Active percentage last 30 days
 ValidationIndex = Validation percentage last 30 days
 Version = How far away from the latest stable Stellar core version
 Trust = How many active validators trust this node
 Age = Time since discovery
                         </code></pre>
-        <h3>Why is my validator 'overloaded'?</h3>
+        <h3>Why does my validator reject the crawler?</h3>
         <p>
           When your validator disconnects from the crawler with an
           <a
@@ -100,11 +100,11 @@ Age = Time since discovery
             href="https://github.com/stellar/stellar-core/blob/cc6208b268d3102381c4e2502fcbb6e3afd4249a/src/xdr/Stellar-overlay.x#L16"
             >err_load</a
           >
-          message, it is marked as overloaded. It indicates how easily new nodes
-          can connect to your validator. A possible solution is to increase
-          MAX_ADDITIONAL_PEER_CONNECTIONS (inbound connections). Another way a
-          node is marked overloaded when it takes too long to send/process
-          messages. In this case you will see a high cpu usage on your node.
+          message, it is marked as 'rejected by crawler'. The crawler is
+          rejected when it can successfully connect with your node, but it is
+          then rejected because your node is out of sync, or your node is at
+          maximum connection capacity. A possible solution is to increase
+          MAX_ADDITIONAL_PEER_CONNECTIONS (inbound connections).
         </p>
         <h3>How can I add my organization?</h3>
         <p>

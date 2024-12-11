@@ -2,7 +2,7 @@
   <div id="isp-list-card" class="card">
     <div class="card-header pl-3">
       <h1 class="card-title">
-        {{ store.includeWatcherNodes ? "Node " : "Validator " }} ISPs
+        {{ store.includeAllNodes ? "Node " : "Validator" }} ISPs
       </h1>
     </div>
 
@@ -96,7 +96,7 @@ const ispToKeyMap = computed(() => {
   network.nodes
     .filter(
       (node) =>
-        (node.isValidator && node.isValidating) || store.includeWatcherNodes,
+        (node.isValidator && node.isValidating) || store.includeAllNodes,
     )
     .forEach((node) => {
       if (node.isp) {
@@ -113,7 +113,7 @@ const keyToIspMap = computed(() => {
   network.nodes
     .filter(
       (node) =>
-        (node.isValidator && node.isValidating) || store.includeWatcherNodes,
+        (node.isValidator && node.isValidating) || store.includeAllNodes,
     )
     .forEach((node) => {
       if (node.isp) {
@@ -136,8 +136,7 @@ const ispList = computed(() => {
         .filter(
           (node) =>
             node.isp &&
-            ((node.isValidator && node.isValidating) ||
-              store.includeWatcherNodes),
+            ((node.isValidator && node.isValidating) || store.includeAllNodes),
         )
         .map((node) => node.isp) as string[]
     ).map((isp) => removeSpecialCharacters(isp.toLowerCase())),

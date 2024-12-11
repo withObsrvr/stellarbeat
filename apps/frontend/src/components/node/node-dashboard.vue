@@ -128,7 +128,7 @@
       </div>
       <div v-if="selectedNode.isValidator" class="col-md-12 col-lg-6 col-xl-4">
         <history-card
-          :subject="'Overloaded'"
+          :subject="'Crawler rejected'"
           :entity-id="selectedNode.publicKey"
           :fetch-day-measurements="
             (publicKey, from, to) =>
