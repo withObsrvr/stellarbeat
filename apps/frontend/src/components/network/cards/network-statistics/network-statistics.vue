@@ -7,7 +7,7 @@
           network.networkStatistics.nrOfActiveValidators
         "
         :is-loading="isLoading"
-        title="Nodes allowing connections"
+        title="Connectable nodes"
         tooltip="Number of nodes allowing incoming connections"
         :initial-data-loaded="initialDataLoaded"
         stats-property="nrOfActiveWatchersAverage"
