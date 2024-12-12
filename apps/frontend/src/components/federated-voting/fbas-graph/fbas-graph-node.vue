@@ -178,10 +178,10 @@ watch(events, (newEvents) => {
         fullDescription: `${event.publicKey} voted "${event.vote.statement}"`,
       });
     } else if (event instanceof Voted && event.vote.isVoteToAccept) {
-      currentEvents.value.push({
+      /*currentEvents.value.push({
         shortDescription: `Accepted "${event.vote.statement}"`,
         fullDescription: `${event.publicKey} accepted "${event.vote.statement}"`,
-      });
+      });*/
     } else if (event instanceof VoteRatified) {
       currentEvents.value.push({
         shortDescription: `Quorum ratified "${event.statement}"`,
@@ -194,14 +194,14 @@ watch(events, (newEvents) => {
       });
     } else if (event instanceof AcceptVoteRatified) {
       currentEvents.value.push({
-        shortDescription: `Quorum Ratified Accept("${event.statement}")`,
+        shortDescription: `Quorum ratified accept("${event.statement}")`,
         fullDescription: `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "accept(${event.statement})"`,
       });
     } else if (event instanceof ConsensusReached) {
-      currentEvents.value.push({
+      /*currentEvents.value.push({
         shortDescription: `Confirmed "${event.statement}"`,
         fullDescription: `${event.publicKey} confirmed "${event.statement}"`,
-      });
+      });*/
     }
   });
   if (currentEvents.value.length > 0) {

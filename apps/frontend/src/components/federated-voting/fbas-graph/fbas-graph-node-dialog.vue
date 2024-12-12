@@ -15,22 +15,27 @@
         rx="8"
         ry="8"
       ></rect>
+      <path class="dialog-pointer" :d="trianglePath"></path>
       <g class="dialog-content">
-        <text
+        <foreignObject
           v-for="(event, index) in events"
           :key="index"
-          :x="dialogX + dialogWidth / 2"
-          :y="dialogY + paddingTop + index * lineHeight + lineHeight / 2"
-          text-anchor="middle"
-          alignment-baseline="middle"
-          font-family="Arial, sans-serif"
-          font-size="12"
-          :fill="getEventTextColor(event.fullDescription)"
-          font-weight="bold"
-          pointer-events="none"
+          :x="dialogX + padding"
+          :y="
+            index === 0
+              ? dialogY + padding + 1
+              : dialogY +
+                padding +
+                eventSpacing +
+                1 * (lineHeight * linesPerEvent[index - 1])
+          "
+          :width="dialogWidth - padding * 2"
+          :height="lineHeight * linesPerEvent[index]"
         >
-          {{ isHovered ? event.fullDescription : event.shortDescription }}
-        </text>
+          <div xmlns="http://www.w3.org/1999/xhtml" class="event-text">
+            {{ event.shortDescription }}
+          </div>
+        </foreignObject>
       </g>
     </g>
   </transition>
@@ -45,36 +50,44 @@ const props = defineProps<{
   showDialog: boolean;
 }>();
 
-const { events, isHovered, showDialog } = toRefs(props);
+const { events, showDialog } = toRefs(props);
 
-const paddingTop = 10;
-const lineHeight = 18;
+const maxWidth = 120;
+const padding = 6;
+const lineHeight = 15;
+const eventSpacing = 10;
 const nodeRadius = 25;
 
-const dialogWidth = computed(() => {
-  const minWidth = 160;
-  const maxEventLength = events.value.reduce((max, event) => {
-    const text = isHovered.value
-      ? event.fullDescription
-      : event.shortDescription;
-    return text.length > max ? text.length : max;
-  }, 0);
-  const calculatedWidth = maxEventLength * 7;
-  return Math.max(calculatedWidth, minWidth);
+const dialogWidth = computed(() => maxWidth);
+
+const dialogX = computed(() => -dialogWidth.value / 2 - maxWidth / 2 + 20);
+
+const linesPerEvent = computed(() => {
+  return events.value.map((event) => {
+    const text = event.shortDescription;
+    const charsPerLine = maxWidth / 6;
+    return Math.ceil(text.length / charsPerLine);
+  });
 });
 
-const dialogX = computed(() => -dialogWidth.value / 2);
-const dialogY = computed(() => nodeRadius + 10);
-const computedDialogHeight = computed(
-  () => paddingTop * 2 + events.value.length * lineHeight,
-);
+const computedDialogHeight = computed(() => {
+  const totalLines = linesPerEvent.value.reduce((acc, val) => acc + val, 0);
+  const totalEventSpacing = eventSpacing * (events.value.length - 1);
+  return padding * 2.5 + totalLines * lineHeight + totalEventSpacing;
+});
 
-const getEventTextColor = (event: string): string => {
-  if (event.toLowerCase().includes("error")) return "#FF4C4C";
-  if (event.toLowerCase().includes("warning")) return "#FFA500";
-  if (event.toLowerCase().includes("success")) return "#32CD32";
-  return "#1E90FF";
-};
+const dialogY = computed(() => -nodeRadius - computedDialogHeight.value - 10);
+
+const trianglePath = computed(() => {
+  const triangleWidth = 12;
+  const triangleHeight = 8;
+  const centerX = 0;
+  const x1 = centerX - triangleWidth / 2;
+  const x2 = centerX + triangleWidth / 2;
+  const y1 = dialogY.value + computedDialogHeight.value;
+  const y2 = y1 + triangleHeight;
+  return `M ${x1},${y1} L ${centerX},${y2} L ${x2},${y1} Z`;
+});
 </script>
 
 <style scoped>
@@ -97,6 +110,21 @@ const getEventTextColor = (event: string): string => {
 .event-dialog {
   pointer-events: none;
 }
+
+.event-text {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  color: #1f77b4;
+  justify-content: center;
+}
 .dialog-background {
   fill: #e0f7fa;
 }
@@ -107,12 +135,15 @@ const getEventTextColor = (event: string): string => {
 
 .dialog-background {
   fill: #e0f7fa;
-  stroke: #0288d1;
 }
 
 .dialog-content text {
   pointer-events: none;
   user-select: none;
   fill: #0288d1;
+}
+
+.dialog-pointer {
+  fill: #e0f7fa;
 }
 </style>
