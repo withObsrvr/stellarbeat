@@ -17,11 +17,6 @@
               v-for="link in links"
               :key="'overlay' + link.source.id + link.target.id"
               :link="link"
-              :selected="
-                link.source.id === federatedVotingStore.selectedNodeId ||
-                link.target.id === federatedVotingStore.selectedNodeId
-              "
-              @linkClick="handleLinkClick"
             />
           </g>
           <g>
@@ -29,8 +24,6 @@
               v-for="nody in nodes"
               :key="'overlay' + nody.id"
               :node="nody"
-              :selected="nody.id === federatedVotingStore.selectedNodeId"
-              @nodeClick="handleNodeClick"
             />
           </g>
         </svg>
@@ -71,7 +64,7 @@ import {
 import { SimulationManager } from "@/components/federated-voting/overlay-graph/SimulationManager";
 import GraphLink from "@/components/federated-voting/overlay-graph/graph-link.vue";
 import GraphNode from "@/components/federated-voting/overlay-graph/graph-node.vue";
-import { Event, MessageSent } from "scp-simulation";
+import { MessageSent } from "scp-simulation";
 
 const initialRepellingForce = 1000;
 const overlayGraph = ref<SVGElement | null>(null);
@@ -101,7 +94,6 @@ const handleNodeClick = (node: NodeDatum) => {
 
 const nodes: Ref<NodeDatum[]> = ref([]);
 const links: Ref<LinkDatum[]> = ref([]);
-let latestSendsHash: string = "";
 
 const updateLinks = () => {
   const newLinks: LinkDatum[] = [];
@@ -120,54 +112,7 @@ const updateLinks = () => {
   links.value = newLinks;
 };
 
-watch(federatedVotingStore.simulation, () => {
-  //probably needs a better solution. Need to think reactivity on the simulation class.
-  const newLatestSendsHash = federatedVotingStore.simulation
-    .getLatestEvents()
-    .filter((event) => event instanceof MessageSent)
-    .map((event) => event.message.sender + event.message.receiver)
-    .join("");
-
-  if (newLatestSendsHash === latestSendsHash) return;
-  latestSendsHash = newLatestSendsHash;
-
-  federatedVotingStore.simulation
-    .getLatestEvents()
-    .filter((event) => event instanceof MessageSent)
-    .forEach((event) => {
-      const messageEvent = event as MessageSent;
-      const sourceNode = nodes.value.find(
-        (n) => n.id === messageEvent.message.sender,
-      );
-      const targetNode = nodes.value.find(
-        (n) => n.id === messageEvent.message.receiver,
-      );
-      if (sourceNode && targetNode) {
-        animateMessage(sourceNode, targetNode);
-      }
-    });
-});
-
-import { select } from "d3-selection";
 import "d3-transition";
-
-const animateMessage = (source: NodeDatum, target: NodeDatum) => {
-  const svg = select(overlayGraph.value);
-  const messageDot = svg
-    .append("circle")
-    .attr("r", 5)
-    .attr("fill", "#f1c40f")
-    .attr("cx", source.x ?? 0)
-    .attr("cy", source.y ?? 0);
-
-  messageDot
-    //@ts-ignore
-    .transition()
-    .duration(2000)
-    .attr("cx", target.x)
-    .attr("cy", target.y)
-    .remove();
-};
 
 onMounted(() => {
   nodes.value = federatedVotingStore.protocolContextState.protocolStates.map(

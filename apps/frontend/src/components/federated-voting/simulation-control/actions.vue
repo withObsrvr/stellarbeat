@@ -6,7 +6,7 @@
         v-model="actionsFilter"
         type="text"
         class="form-control form-control-sm"
-        placeholder="Filter actions"
+        placeholder="Filter next executed actions"
       />
     </div>
     <!-- Actions List -->
@@ -19,9 +19,13 @@
           'disrupted-item': isActionDisrupted(action.actionRef),
         }"
       >
-        <span v-if="props.publicKey === null" class="action-public-key">{{
-          action.publicKey
-        }}</span>
+        <span
+          v-if="props.publicKey === null"
+          class="action-public-key clickable"
+          @click="selectNode(action.publicKey)"
+        >
+          {{ action.publicKey }}
+        </span>
         <span class="action-sub-type">{{ mapSubType(action.subType) }}</span>
         <span>{{ action.description }}</span>
         <button
@@ -136,6 +140,10 @@ watch(filteredActions, () => {
     }
   });
 });
+
+function selectNode(publicKey: string) {
+  federatedVotingStore.selectedNodeId = publicKey;
+}
 </script>
 
 <style scoped>
@@ -213,5 +221,13 @@ watch(filteredActions, () => {
 
 .disrupted-item:hover {
   background-color: #f9ced2;
+}
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  color: #0056b3;
+  background-color: white;
 }
 </style>

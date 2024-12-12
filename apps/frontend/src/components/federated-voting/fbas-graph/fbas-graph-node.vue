@@ -1,16 +1,17 @@
 <template>
   <g
     :transform="transform"
-    style="cursor: grab"
+    style="cursor: pointer"
     @mouseover="handleMouseOver"
     @mouseout="handleMouseOut"
+    @click="handleClick"
   >
     <circle
       ref="nodeCircle"
       :r="nodeRadius"
       :fill="nodeFillColor"
-      stroke="#fff"
-      stroke-width="1.5"
+      :stroke="strokeColor"
+      :stroke-width="strokeWidth"
       role="img"
       :aria-label="
         currentEvents.length > 0
@@ -67,6 +68,7 @@ import {
   VoteRatified,
 } from "scp-simulation";
 import FbasGraphNodeDialog from "./fbas-graph-node-dialog.vue";
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 export interface Node extends SimulationNodeDatum {
   id: string;
@@ -120,7 +122,12 @@ const statusText = computed(() => {
   }
 });
 
-const nodeRadius = 25;
+const nodeRadius = computed(() => {
+  return isHovered.value ||
+    federatedVotingStore.selectedNodeId === props.node.id
+    ? 30
+    : 25;
+});
 
 function animateEvents() {
   triggerPulseOnCircle();
@@ -163,6 +170,10 @@ function handleMouseOut() {
     }, 2000);
   }
   emit("mouseout");
+}
+
+function handleClick() {
+  federatedVotingStore.selectedNodeId = props.node.id;
 }
 
 const events = toRef(props.node, "events");
@@ -213,6 +224,14 @@ const transform = computed(() => {
   return `translate(${props.node.x}, ${props.node.y})`;
 });
 
+const strokeColor = computed(() => {
+  if (federatedVotingStore.illBehavedNodes().includes(props.node.id)) {
+    return "#ff0000";
+  } else if (federatedVotingStore.befouledNodes().includes(props.node.id)) {
+    return "orange";
+  }
+  return "#fff";
+});
 const nodeFillColor = computed(() => {
   if (props.node.confirm) {
     return "#2ca02c"; // Green if confirmed
@@ -221,6 +240,12 @@ const nodeFillColor = computed(() => {
   } else {
     return "#A9A9A9"; // Dark gray if only voted
   }
+});
+const strokeWidth = computed(() => {
+  return isHovered.value ||
+    federatedVotingStore.selectedNodeId === props.node.id
+    ? 3
+    : 2;
 });
 </script>
 

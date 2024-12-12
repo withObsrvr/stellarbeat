@@ -1,9 +1,10 @@
 <template>
-  <div class="card graph">
-    <div class="card-header">
-      <h4 class="card-title">FBAS</h4>
-    </div>
-    <div class="card-body pt-4 pb-0" style="height: 500px; overflow: hidden">
+  <div class="card">
+    <div
+      class="card-body graph pt-4 pb-0"
+      style="height: 500px; overflow: hidden; position: relative"
+    >
+      <BreadCrumbs class="breadcrumbs" />
       <svg
         ref="svgRef"
         width="100%"
@@ -70,6 +71,7 @@ import FbasGraphLink, { Link } from "./fbas-graph-link.vue";
 import { MessageSent, OverlayEvent, ProtocolEvent } from "scp-simulation";
 import AnimatedMessage from "./animated-message.vue";
 import { usePanning } from "./usePanning";
+import BreadCrumbs from "../bread-crumbs.vue";
 
 const { translateX, translateY, scale, startPan, pan, endPan, zoom } =
   usePanning();
@@ -262,5 +264,21 @@ function updateDimensions() {
 
 .graph {
   cursor: grab;
+  background: white;
+}
+
+.breadcrumbs {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10; /* Ensure it floats above the SVG */
+  background: rgba(
+    255,
+    255,
+    255,
+    0.8
+  ); /* Optional: semi-transparent background */
+  padding: 5px 10px;
+  border-radius: 4px;
 }
 </style>

@@ -10,10 +10,9 @@
     </div>
 
     <div class="row mb-4">
-      <div class="col-lg-2 col-md-3 col-sm-12 sticky h-100">
+      <div class="col-lg-12">
         <Controller></Controller>
-        <div class="consensus-status">
-          <!-- Needs to become way more elaborate but need intact/well-behaved/... node info -->
+        <!--div class="consensus-status">
           <div
             v-if="isStuck"
             class="alert alert-warning mt-3 text-center"
@@ -29,55 +28,38 @@
           >
             Consensus reached
           </div>
-        </div>
-        <nodes-panel></nodes-panel>
+        </div!-->
       </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <FbasGraphPrototype class="card-spacing" />
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="pt-3 px-3" style="height: 30px">
+            <BreadCrumbs />
+          </div>
+          <div
+            v-if="!federatedVotingStore.selectedNodeId"
+            class="card-body p-0"
+          >
+            <EventLog style="height: 235px" />
 
-      <div class="col-lg-10 col-md-9 col-sm-12">
-        <div class="row">
-          <div class="col-12">
-            <FbasGraphPrototype class="card-spacing" />
+            <Actions style="height: 235px" />
+          </div>
+          <div v-else class="card-body p-0">
+            <SelectedNodePanel />
           </div>
         </div>
-        <div class="row">
-          <div class="col-md-6 col-sm-12">
-            <TrustGraph class="card-spacing" />
-          </div>
-          <div class="col-md-6 col-sm-12">
-            <overlay-graph-base class="card-spacing" />
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-lg-6">
-            <div class="card">
-              <div class="card-header">
-                <h4 class="card-title">Network Actions (Happens next)</h4>
-              </div>
-
-              <div class="card-body px-2 py-0 d-flex">
-                <Actions style="height: 250px" />
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="card">
-              <div class="card-header">
-                <h4 class="card-title">Network Events (History)</h4>
-              </div>
-
-              <div class="card-body px-2 py-0 d-flex">
-                <EventLog style="height: 250px" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-12">
-            <selected-node-panel />
-          </div>
-        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 col-sm-12">
+        <TrustGraph class="card-spacing" />
+      </div>
+      <div class="col-md-6 col-sm-12">
+        <overlay-graph-base class="card-spacing" />
       </div>
     </div>
   </div>
@@ -89,11 +71,20 @@ import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import NodesPanel from "@/components/federated-voting/nodes-panel.vue";
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
 import TrustGraph from "@/components/federated-voting/trust-graph/trust-graph.vue";
-import SelectedNodePanel from "@/components/federated-voting/selected-nodes-panel/selected-node-panel.vue";
-import Controller from "@/components/federated-voting/simulation-control/controller.vue";
 import EventLog from "@/components/federated-voting/simulation-control/event-log.vue";
 import Actions from "@/components/federated-voting/simulation-control/actions.vue";
 import FbasGraphPrototype from "@/components/federated-voting/fbas-graph/fbas-graph-prototype.vue";
+import SelectedNodePanel from "@/components/federated-voting/selected-nodes-panel/selected-node-panel.vue";
+import Controller from "@/components/federated-voting/simulation-control/controller.vue";
+import BreadCrumbs from "@/components/federated-voting/bread-crumbs.vue";
+
+// Computed property to get the currently selected node ID
+const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
+
+// Function to unselect the node
+function unselectNode() {
+  federatedVotingStore.selectedNodeId = null;
+}
 
 const hasNoNextMoves = computed(() => {
   return !federatedVotingStore.simulation.hasNextStep();

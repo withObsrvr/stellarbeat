@@ -5,7 +5,7 @@
         v-model="filterQuery"
         type="text"
         class="form-control form-control-sm"
-        placeholder="Filter events"
+        placeholder="Filter past events"
       />
     </div>
     <div ref="logContainer" class="log-container">
@@ -23,9 +23,12 @@
         :class="getBackgroundClass(item.stepIndex)"
       >
         <span class="line-number">{{ item.lineNumber }}</span>
-        <span v-if="props.publicKey === null" class="event-publickey">{{
-          item.event.publicKey
-        }}</span>
+        <span
+          v-if="props.publicKey === null"
+          class="event-publickey clickable"
+          @click="selectNode(item.event.publicKey)"
+          >{{ item.event.publicKey }}</span
+        >
         <span class="event-subtype">{{ item.event.subType }}</span>
         <span class="log-entry">{{ item.log }}</span>
       </div>
@@ -97,6 +100,10 @@ watch(filteredConsoleLogs, () => {
     }
   });
 });
+
+function selectNode(publicKey: string) {
+  federatedVotingStore.selectedNodeId = publicKey;
+}
 </script>
 
 <style scoped>
@@ -173,5 +180,13 @@ input[type="text"] {
   display: inline-block;
   font-size: 11px;
   word-break: break-all;
+}
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  color: #0056b3;
+  background-color: white;
 }
 </style>

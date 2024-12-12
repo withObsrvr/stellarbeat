@@ -1,6 +1,5 @@
 <template>
-  <div class="card mb-0">
-    <div class="card-header">
+  <!--div class="card-header">
       <h4 v-if="!federatedVotingStore.selectedNodeId" class="card-title">
         Selected node Information
       </h4>
@@ -17,32 +16,29 @@
         </span>
       </h4>
       <div></div>
-    </div>
-    <div class="card-body">
-      <div v-if="selectedNodeId">
-        <NodeInformation :public-key="selectedNodeId" class="mb-5" />
-        <ProcessedVotes />
+    </div!-->
+  <div class="selected">
+    <div v-if="selectedNodeId">
+      <NodeInformation :public-key="selectedNodeId" class="px-3 pt-2" />
+      <!--ProcessedVotes /!-->
 
-        <!-- Quorum Set Section -->
-        <div class="quorum-set">
+      <!-- Quorum Set Section -->
+      <!--div class="quorum-set">
           <h3>Quorum Set</h3>
           <quorum-set-display :quorum-set="quorumSet" :level="1" />
-        </div>
+        </div!-->
 
-        <div class="row">
-          <div class="col-lg-6">
-            <h4>Actions executed next</h4>
-            <Actions :public-key="selectedNodeId" />
-          </div>
-          <div class="col-lg-6">
-            <h4>Events</h4>
-            <EventLog :public-key="selectedNodeId" />
-          </div>
+      <div class="row">
+        <div class="col-12">
+          <EventLog :public-key="selectedNodeId" style="height: 215px" />
+        </div>
+        <div class="col-12">
+          <Actions :public-key="selectedNodeId" style="height: 200px" />
         </div>
       </div>
-      <div v-else>
-        <p>No node selected.</p>
-      </div>
+    </div>
+    <div v-else>
+      <p>No node selected.</p>
     </div>
   </div>
 </template>
@@ -92,6 +88,11 @@ const isTopTierNode = computed(() => {
 </script>
 
 <style scoped>
+.selected {
+  padding: 2px;
+  background: white;
+}
+
 .header {
   text-align: center;
   margin-bottom: 30px;

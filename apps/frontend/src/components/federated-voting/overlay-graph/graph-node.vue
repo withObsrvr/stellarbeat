@@ -83,10 +83,6 @@ const rectLabelClassName = computed(() => {
   fill: #1687b2;
 }
 
-.node-container {
-  cursor: pointer;
-}
-
 .rect-selected {
   fill: white;
   opacity: 0.9;

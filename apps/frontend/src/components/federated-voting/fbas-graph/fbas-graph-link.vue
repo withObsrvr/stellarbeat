@@ -21,6 +21,8 @@
 import { SimulationLinkDatum } from "d3-force";
 import { Node } from "./fbas-graph-node.vue";
 import { computed } from "vue";
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import { isObject } from "shared";
 
 export interface Link extends SimulationLinkDatum<Node> {
   bidirectional?: boolean;
@@ -35,7 +37,13 @@ const props = defineProps<{
 }>();
 
 const strokeWidth = computed(() => {
-  return props.link.hovered ? 5 : 2;
+  const sourceId = isObject(props.link.source)
+    ? props.link.source.id
+    : props.link.source;
+  return props.link.hovered ||
+    federatedVotingStore.selectedNodeId === sourceId 
+    ? 5
+    : 2;
 });
 
 const path = computed(() => {
