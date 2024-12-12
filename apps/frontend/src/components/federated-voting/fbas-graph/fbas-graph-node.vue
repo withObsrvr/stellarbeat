@@ -38,45 +38,11 @@
       </text>
     </g>
 
-    <!-- Event Dialog -->
-    <transition name="fade-slide">
-      <g
-        v-if="showDialog"
-        class="event-dialog"
-        role="alert"
-        aria-live="assertive"
-      >
-        <!-- Dialog Background -->
-        <rect
-          class="dialog-background"
-          :x="dialogX"
-          :y="dialogY"
-          :width="dialogWidth"
-          :height="computedDialogHeight"
-          rx="8"
-          ry="8"
-        ></rect>
-
-        <!-- Event Texts -->
-        <g class="dialog-content">
-          <text
-            v-for="(event, index) in currentEvents"
-            :key="index"
-            :x="dialogX + dialogWidth / 2"
-            :y="dialogY + paddingTop + index * lineHeight + lineHeight / 2"
-            text-anchor="middle"
-            alignment-baseline="middle"
-            font-family="Arial, sans-serif"
-            font-size="12"
-            :fill="getEventTextColor(event)"
-            font-weight="bold"
-            pointer-events="none"
-          >
-            {{ event }}
-          </text>
-        </g>
-      </g>
-    </transition>
+    <FbasGraphNodeDialog
+      :events="currentEvents"
+      :is-hovered="isHovered"
+      :show-dialog="showDialog"
+    />
   </g>
 </template>
 
@@ -100,6 +66,7 @@ import {
   Voted,
   VoteRatified,
 } from "scp-simulation";
+import FbasGraphNodeDialog from "./fbas-graph-node-dialog.vue";
 
 export interface Node extends SimulationNodeDatum {
   id: string;
@@ -124,7 +91,9 @@ const emit = defineEmits(["mouseover", "mouseout"]);
 
 const nodeCircle = ref<SVGCircleElement | null>(null);
 
-const currentEvents = ref<string[]>([]);
+const currentEvents = ref<
+  Array<{ shortDescription: string; fullDescription: string }>
+>([]);
 
 // Flags to control pulse animation and hover state
 const isPulseActive = ref(false);
@@ -150,36 +119,6 @@ const statusText = computed(() => {
     return "";
   }
 });
-
-const getEventTextColor = (event: string): string => {
-  if (event.toLowerCase().includes("error")) return "#FF4C4C"; // Brighter Red
-  if (event.toLowerCase().includes("warning")) return "#FFA500"; // Brighter Orange
-  if (event.toLowerCase().includes("success")) return "#32CD32"; // Lime Green
-  return "#1E90FF";
-};
-
-// Dialog Dimensions and Positioning
-const paddingTop = 10;
-const lineHeight = 18;
-
-const dialogWidth = computed(() => {
-  // Ensure a minimum width
-  const minWidth = 160;
-  // Calculate based on the longest event string
-  const maxEventLength = currentEvents.value.reduce(
-    (max, event) => (event.length > max ? event.length : max),
-    0,
-  );
-  const calculatedWidth = maxEventLength * 7; // Approximate width per character
-  return Math.max(calculatedWidth, minWidth);
-});
-
-const dialogX = computed(() => -dialogWidth.value / 2);
-const dialogY = computed(() => nodeRadius + 10);
-
-const computedDialogHeight = computed(
-  () => paddingTop * 2 + currentEvents.value.length * lineHeight,
-);
 
 const nodeRadius = 25;
 
@@ -231,36 +170,40 @@ const events = toRef(props.node, "events");
 watch(events, (newEvents) => {
   currentEvents.value = [];
   initialDialogShow.value = false;
+
   newEvents.forEach((event) => {
     if (event instanceof Voted && !event.vote.isVoteToAccept) {
-      currentEvents.value.push(
-        `${event.publicKey} voted "${event.vote.statement}"`,
-      );
+      currentEvents.value.push({
+        shortDescription: `Voted "${event.vote.statement}"`,
+        fullDescription: `${event.publicKey} voted "${event.vote.statement}"`,
+      });
     } else if (event instanceof Voted && event.vote.isVoteToAccept) {
-      currentEvents.value.push(
-        `${event.publicKey} accepted "${event.vote.statement}"`,
-      );
+      currentEvents.value.push({
+        shortDescription: `Accepted "${event.vote.statement}"`,
+        fullDescription: `${event.publicKey} accepted "${event.vote.statement}"`,
+      });
     } else if (event instanceof VoteRatified) {
-      currentEvents.value.push(
-        `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "${event.statement}"`,
-      );
+      currentEvents.value.push({
+        shortDescription: `Quorum ratified "${event.statement}"`,
+        fullDescription: `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "${event.statement}"`,
+      });
     } else if (event instanceof AcceptVoteVBlocked) {
-      currentEvents.value.push(
-        `Accept vote on "${event.statement}" VBlocked by [${Array.from(
-          event.vBlockingSet,
-        ).join(", ")}]`,
-      );
+      currentEvents.value.push({
+        shortDescription: `VBlocking set accepted "${event.statement}"`,
+        fullDescription: `VBlocking set [${Array.from(event.vBlockingSet).join(", ")}] accepted "${event.statement}"`,
+      });
     } else if (event instanceof AcceptVoteRatified) {
-      currentEvents.value.push(
-        `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "accept(${event.statement})"`,
-      );
+      currentEvents.value.push({
+        shortDescription: `Quorum Ratified Accept("${event.statement}")`,
+        fullDescription: `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "accept(${event.statement})"`,
+      });
     } else if (event instanceof ConsensusReached) {
-      currentEvents.value.push(
-        `${event.publicKey} confirmed "${event.statement}"`,
-      );
+      currentEvents.value.push({
+        shortDescription: `Confirmed "${event.statement}"`,
+        fullDescription: `${event.publicKey} confirmed "${event.statement}"`,
+      });
     }
   });
-
   if (currentEvents.value.length > 0) {
     animateEvents();
   }
@@ -310,40 +253,5 @@ const nodeFillColor = computed(() => {
     transform: scale(1);
     opacity: 1;
   }
-}
-
-/* Transition for Dialog */
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition:
-    opacity 0.5s ease-in-out,
-    transform 0.5s ease-in-out;
-}
-
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.fade-slide-enter-to,
-.fade-slide-leave-from {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.event-dialog {
-  pointer-events: none;
-}
-
-.dialog-background {
-  fill: #e0f7fa;
-  stroke: #0288d1;
-}
-
-.dialog-content text {
-  pointer-events: none;
-  user-select: none;
-  fill: #0288d1;
 }
 </style>
