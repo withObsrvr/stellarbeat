@@ -123,14 +123,7 @@ const statusText = computed(() => {
 });
 
 const nodeRadius = computed(() => {
-  return isHovered.value ||
-    federatedVotingStore.selectedNodeId === props.node.id
-    ? 30
-    : 25;
-});
-
-const isSelected = computed(() => {
-  return federatedVotingStore.selectedNodeId === props.node.id;
+  return isHovered.value || isSelected.value ? 30 : 25;
 });
 
 function animateEvents() {
@@ -245,11 +238,18 @@ const nodeFillColor = computed(() => {
     return "#A9A9A9"; // Dark gray if only voted
   }
 });
+
+const selectedNodeId = computed(() => {
+  return federatedVotingStore.selectedNodeId;
+});
+
+const isSelected = computed(() => {
+  console.log(selectedNodeId.value === props.node.id);
+  return selectedNodeId.value === props.node.id;
+});
+
 const strokeWidth = computed(() => {
-  return isHovered.value ||
-    federatedVotingStore.selectedNodeId === props.node.id
-    ? 3
-    : 2;
+  return isHovered.value || isSelected.value ? 3 : 2;
 });
 </script>
 

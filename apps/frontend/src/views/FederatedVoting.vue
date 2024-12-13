@@ -37,12 +37,14 @@
       </div>
       <div class="col-md-6">
         <div class="card" v-if="!federatedVotingStore.selectedNodeId">
-          <div class="pt-3 px-3 card-header">
-            <BreadCrumbs root="Events & actions" />
+          <div
+            class="pt-3 px-3 card-header d-flex justify-content-between align-items-center"
+          >
+            <BreadCrumbs root="FBAS Status" />
+            <span class="badge ms-2">Quorum Intersection</span>
           </div>
           <div class="card-body p-0">
             <EventLog style="height: 250px" />
-
             <Actions style="height: 250px" />
           </div>
         </div>
@@ -139,5 +141,10 @@ const isStuck = computed(() => {
     position: sticky;
     top: 10px; /* Adds a 10px margin above the sticky side panel */
   }
+}
+
+.badge {
+  background-color: #d4edda;
+  color: #155724;
 }
 </style>

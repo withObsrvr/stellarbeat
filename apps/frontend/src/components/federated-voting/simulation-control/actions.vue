@@ -23,6 +23,7 @@
           v-if="props.publicKey === null"
           class="action-public-key clickable"
           @click="selectNode(action.publicKey)"
+          role="link"
         >
           {{ action.publicKey }}
         </span>
@@ -41,7 +42,14 @@
           {{ isActionDisrupted(action.actionRef) ? "Undisrupt" : "Disrupt" }}
         </button>
       </div>
+      <div v-if="filteredActions.length === 0 && actionsFilter === ''">
+        No actions will be executed next
+      </div>
+      <div v-if="filteredActions.length === 0 && actionsFilter !== ''">
+        No results
+      </div>
     </div>
+
     <!-- Events Counter Footer -->
     <div class="mt-2 text-center text-muted" style="font-size: 0.9em">
       {{ actions.length }} action(s) will be executed next

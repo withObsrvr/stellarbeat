@@ -15,6 +15,12 @@
       >
         No events yet, start the simulation
       </div>
+      <div
+        v-if="filteredConsoleLogs.length === 0 && filterQuery !== ''"
+        class="no-events-message"
+      >
+        No results
+      </div>
 
       <div
         v-for="item in filteredConsoleLogs"
@@ -27,6 +33,7 @@
           v-if="props.publicKey === null"
           class="event-publickey clickable"
           @click="selectNode(item.event.publicKey)"
+          role="link"
           >{{ item.event.publicKey }}</span
         >
         <span class="event-subtype">{{ item.event.subType }}</span>

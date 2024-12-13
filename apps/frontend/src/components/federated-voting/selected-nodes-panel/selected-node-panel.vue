@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-header header">
-      <BreadCrumbs root="Events & actions" />
+      <BreadCrumbs root="FBAS Status" />
       <div class="labels">
         <span v-if="isIllBehaved" class="badge badge-danger ms-2">
           Ill-behaved

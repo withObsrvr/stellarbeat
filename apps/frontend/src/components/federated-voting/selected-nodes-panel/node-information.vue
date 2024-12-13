@@ -58,20 +58,6 @@ const props = defineProps({
   },
 });
 
-const isIllBehaved = computed(() => {
-  return federatedVotingStore.illBehavedNodes().includes(props.publicKey);
-});
-
-const isLivenessBefouled = computed(() => {
-  return federatedVotingStore.befouledNodes().includes(props.publicKey);
-});
-
-const isTopTierNode = computed(() => {
-  return federatedVotingStore.trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(
-    props.publicKey,
-  );
-});
-
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
 const protocolState = computed(() => {
