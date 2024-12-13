@@ -12,7 +12,7 @@
       :fill="nodeFillColor"
       :stroke="strokeColor"
       :stroke-width="strokeWidth"
-      role="img"
+      role="link"
       :aria-label="
         currentEvents.length > 0
           ? `Node ${node.id} has ${currentEvents.length} event(s)`
