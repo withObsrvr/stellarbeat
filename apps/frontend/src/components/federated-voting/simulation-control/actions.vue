@@ -6,7 +6,7 @@
         v-model="actionsFilter"
         type="text"
         class="form-control form-control-sm"
-        placeholder="Filter next executed actions"
+        placeholder="Filter actions executed next"
       />
     </div>
     <!-- Actions List -->

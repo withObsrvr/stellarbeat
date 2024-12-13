@@ -1,10 +1,8 @@
 <template>
-  <!--div class="card-header">
-      <h4 v-if="!federatedVotingStore.selectedNodeId" class="card-title">
-        Selected node Information
-      </h4>
-      <h4 v-else class="card-title">
-        {{ selectedNodeId }}
+  <div class="card">
+    <div class="card-header header">
+      <BreadCrumbs root="Events & actions" />
+      <div class="labels">
         <span v-if="isIllBehaved" class="badge badge-danger ms-2">
           Ill-behaved
         </span>
@@ -14,12 +12,10 @@
         <span v-if="isTopTierNode" class="badge badge-info ms-2">
           Top Tier Node
         </span>
-      </h4>
-      <div></div>
-    </div!-->
-  <div class="selected">
-    <div v-if="selectedNodeId">
-      <NodeInformation :public-key="selectedNodeId" class="px-3 pt-2" />
+      </div>
+    </div>
+    <div class="selected">
+      <NodeInformation :public-key="selectedNodeId" class="px-3 py-3" />
       <!--ProcessedVotes /!-->
 
       <!-- Quorum Set Section -->
@@ -30,15 +26,12 @@
 
       <div class="row">
         <div class="col-12">
-          <EventLog :public-key="selectedNodeId" style="height: 215px" />
+          <EventLog :public-key="selectedNodeId" style="height: 250px" />
         </div>
         <div class="col-12">
           <Actions :public-key="selectedNodeId" style="height: 200px" />
         </div>
       </div>
-    </div>
-    <div v-else>
-      <p>No node selected.</p>
     </div>
   </div>
 </template>
@@ -46,13 +39,17 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import QuorumSetDisplay from "./quorum-set-display.vue";
-import ProcessedVotes from "./processed-votes.vue";
 import NodeInformation from "./node-information.vue";
 import EventLog from "../simulation-control/event-log.vue";
 import Actions from "../simulation-control/actions.vue";
+import BreadCrumbs from "../bread-crumbs.vue";
 
-const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
+const props = defineProps({
+  selectedNodeId: {
+    type: String,
+    required: true,
+  },
+});
 
 const contextState = computed(() => {
   return federatedVotingStore.protocolContextState;
@@ -60,7 +57,7 @@ const contextState = computed(() => {
 
 const protocolState = computed(() => {
   return contextState.value.protocolStates.find(
-    (state) => state.node.publicKey === selectedNodeId.value,
+    (state) => state.node.publicKey === props.selectedNodeId,
   );
 });
 
@@ -71,18 +68,18 @@ const quorumSet = computed(() => {
 const isIllBehaved = computed(() => {
   return federatedVotingStore
     .illBehavedNodes()
-    .some((node) => node === selectedNodeId.value);
+    .some((node) => node === props.selectedNodeId);
 });
 
 const isLivenessBefouled = computed(() => {
-  if (!selectedNodeId.value) return false;
-  return federatedVotingStore.befouledNodes().includes(selectedNodeId.value);
+  if (!props.selectedNodeId) return false;
+  return federatedVotingStore.befouledNodes().includes(props.selectedNodeId);
 });
 
 const isTopTierNode = computed(() => {
-  if (!selectedNodeId.value) return false;
+  if (!props.selectedNodeId) return false;
   return federatedVotingStore.trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(
-    selectedNodeId.value,
+    props.selectedNodeId,
   );
 });
 </script>
@@ -95,7 +92,7 @@ const isTopTierNode = computed(() => {
 
 .header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 5px;
 }
 
 .header h1 {
@@ -133,5 +130,10 @@ const isTopTierNode = computed(() => {
 .badge-info {
   background-color: #cce5ff;
   color: #004085;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
 }
 </style>

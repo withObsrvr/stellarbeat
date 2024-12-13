@@ -36,21 +36,20 @@
         <FbasGraphPrototype class="card-spacing" />
       </div>
       <div class="col-md-6">
-        <div class="card">
-          <div class="pt-3 px-3" style="height: 30px">
-            <BreadCrumbs />
+        <div class="card" v-if="!federatedVotingStore.selectedNodeId">
+          <div class="pt-3 px-3 card-header">
+            <BreadCrumbs root="Events & actions" />
           </div>
-          <div
-            v-if="!federatedVotingStore.selectedNodeId"
-            class="card-body p-0"
-          >
-            <EventLog style="height: 235px" />
+          <div class="card-body p-0">
+            <EventLog style="height: 250px" />
 
-            <Actions style="height: 235px" />
+            <Actions style="height: 250px" />
           </div>
-          <div v-else class="card-body p-0">
-            <SelectedNodePanel />
-          </div>
+        </div>
+        <div v-else class="card-body p-0">
+          <SelectedNodePanel
+            :selectedNodeId="federatedVotingStore.selectedNodeId"
+          />
         </div>
       </div>
     </div>

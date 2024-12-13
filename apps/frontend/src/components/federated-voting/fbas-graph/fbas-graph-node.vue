@@ -21,7 +21,7 @@
       :class="{ 'pulse-animation': isPulseActive }"
     ></circle>
 
-    <g class="default-text">
+    <g class="default-text" :font-size="isSelected ? 11 : 10">
       <text class="node-label name" dy="-0.6em">
         {{ node.id }}
       </text>
@@ -127,6 +127,10 @@ const nodeRadius = computed(() => {
     federatedVotingStore.selectedNodeId === props.node.id
     ? 30
     : 25;
+});
+
+const isSelected = computed(() => {
+  return federatedVotingStore.selectedNodeId === props.node.id;
 });
 
 function animateEvents() {
@@ -256,7 +260,6 @@ const strokeWidth = computed(() => {
   font-weight: bold;
   pointer-events: none;
   fill: #ffff;
-  font-size: 10px;
 }
 
 /* Pulse Animation applied to the circle */

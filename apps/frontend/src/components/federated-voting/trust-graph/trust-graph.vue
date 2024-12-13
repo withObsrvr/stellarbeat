@@ -1,7 +1,7 @@
 <template>
   <div class="card graph">
     <div class="card-header">
-      <h4 class="card-title">Trust Graph</h4>
+      <BreadCrumbs root="Trust graph" />
     </div>
     <div class="card-body pt-4 pb-0">
       <Graph
@@ -54,6 +54,7 @@ import ViewVertex from "@/components/visual-navigator/graph/view-vertex";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { TrustGraph } from "shared";
 import { ref, onMounted, watch, computed } from "vue";
+import BreadCrumbs from "../bread-crumbs.vue";
 
 const viewGraph = ref<ViewGraph>(new ViewGraph());
 const selectedVertices = computed(() => {

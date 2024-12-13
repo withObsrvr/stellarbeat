@@ -1,15 +1,5 @@
 <template>
   <div class="node-info-container">
-    <div class="top-row">
-      <div class="badge-row">
-        <span v-if="isIllBehaved" class="badge badge-danger">Ill-behaved</span>
-        <span v-else-if="isLivenessBefouled" class="badge badge-warning"
-          >Befouled (liveness)</span
-        >
-        <span v-if="isTopTierNode" class="badge badge-info">Top Tier Node</span>
-      </div>
-    </div>
-
     <div class="info-row">
       <div class="info-item">
         <span class="label">Phase:</span>
@@ -61,7 +51,12 @@ import {
   BIconQuestionCircleFill,
 } from "bootstrap-vue";
 
-const props = defineProps<{ publicKey: string }>();
+const props = defineProps({
+  publicKey: {
+    type: String,
+    required: true,
+  },
+});
 
 const isIllBehaved = computed(() => {
   return federatedVotingStore.illBehavedNodes().includes(props.publicKey);
@@ -98,37 +93,9 @@ const selectedNodePhase = computed(() => {
   line-height: 1.2;
 }
 
-.top-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.public-key-section {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.9em;
-  font-weight: bold;
-}
-
-.public-key-label {
-  font-weight: bolder;
-  color: #343a40;
-}
-
-.public-key-value {
-  font-family: monospace;
-  background: #f8f9fa;
-  padding: 2px 5px;
-  border-radius: 4px;
-  color: #495057;
-}
-
 .badge-row {
   display: flex;
   flex-direction: row;
-  gap: 6px;
   align-items: center;
 }
 
@@ -136,7 +103,7 @@ const selectedNodePhase = computed(() => {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 6px;
   align-items: center;
   justify-content: flex-start;
 }

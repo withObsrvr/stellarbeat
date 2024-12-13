@@ -1,10 +1,9 @@
 <template>
   <div class="card">
-    <div
-      class="card-body graph pt-4 pb-0"
-      style="height: 500px; overflow: hidden; position: relative"
-    >
-      <BreadCrumbs class="breadcrumbs" />
+    <div class="card-header">
+      <BreadCrumbs />
+    </div>
+    <div class="card-body graph pt-4 pb-0" style="height: 500px">
       <svg
         ref="svgRef"
         width="100%"
