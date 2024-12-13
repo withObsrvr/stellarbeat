@@ -20,6 +20,14 @@
         <g
           :transform="`translate(${translateX}, ${translateY}) scale(${scale})`"
         >
+          <g class="hull-layer" v-if="topTierHullPath">
+            <path
+              :d="topTierHullPath"
+              fill="#f5f7fb"
+              stroke="#f5f7fb"
+              stroke-width="60"
+            ></path>
+          </g>
           <g class="animation-layer">
             <AnimatedMessage
               v-for="message in messages"
@@ -31,6 +39,7 @@
               :duration="message.duration"
             />
           </g>
+
           <g class="links">
             <FbasGraphLink
               v-for="(link, i) in links"
@@ -65,6 +74,7 @@ import {
   forceX,
   forceY,
 } from "d3-force";
+import { polygonHull } from "d3-polygon"; // Import the polygonHull function
 import { ref, onMounted, watch, computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasGraphNode, { Node } from "./fbas-graph-node.vue";
@@ -73,6 +83,7 @@ import { MessageSent, OverlayEvent, ProtocolEvent } from "scp-simulation";
 import AnimatedMessage from "./animated-message.vue";
 import { usePanning } from "./usePanning";
 import BreadCrumbs from "../bread-crumbs.vue";
+import { curveCatmullRomClosed, line } from "d3-shape";
 
 const { translateX, translateY, scale, startPan, pan, endPan, zoom } =
   usePanning();
@@ -260,6 +271,32 @@ function handleMouseOut(node: Node) {
   });
 }
 
+// Compute hull path for top-tier nodes
+const topTierHullPath = computed(() => {
+  const topTierNodes = nodes.value.filter((node) =>
+    topTierNodeIds.value.includes(node.id),
+  );
+  // We need at least 3 points to form a hull
+  if (topTierNodes.length < 3) return null;
+
+  const points: [number, number][] = topTierNodes.map(
+    (d) => [d.x ?? 0, d.y ?? 0] as [number, number],
+  );
+  const hull = polygonHull(points);
+  if (!hull) return null;
+
+  const valueLine = line()
+    .x(function (d) {
+      return d[0];
+    })
+    .y(function (d) {
+      return d[1];
+    })
+    .curve(curveCatmullRomClosed); //we want a smooth line
+
+  return valueLine(hull);
+});
+
 // Helper function to get SVG width and height
 const width = ref(800); // Set initial width
 const heightRef = ref(500); // Set initial height
@@ -280,5 +317,10 @@ function updateDimensions() {
 .graph {
   cursor: grab;
   background: white;
+}
+
+/* Optional styling adjustments for hull */
+.hull-layer path {
+  pointer-events: none; /* Hull should not interfere with node interactions */
 }
 </style>

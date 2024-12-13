@@ -40,7 +40,7 @@
           <div
             class="pt-3 px-3 card-header d-flex justify-content-between align-items-center"
           >
-            <BreadCrumbs root="FBAS Status" />
+            <BreadCrumbs root="Federated Voting Status" />
             <span class="badge ms-2">Quorum Intersection</span>
           </div>
           <div class="card-body p-0">
@@ -56,9 +56,6 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-6 col-sm-12">
-        <TrustGraph class="card-spacing" />
-      </div>
       <div class="col-md-6 col-sm-12">
         <overlay-graph-base class="card-spacing" />
       </div>
