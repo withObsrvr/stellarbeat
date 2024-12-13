@@ -49,4 +49,10 @@ function unselectNode() {
   padding-left: 4px;
   padding-right: 4px;
 }
+
+.active {
+  color: #6c757d;
+  text-decoration: none;
+  cursor: default;
+}
 </style>

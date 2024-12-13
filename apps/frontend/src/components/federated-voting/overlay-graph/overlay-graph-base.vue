@@ -28,7 +28,7 @@
           </g>
         </svg>
       </div>
-      <div class="card-footer">
+      <!--div class="card-footer">
         <div class="legend">
           <span class="legend-item">
             <span class="legend-circle active-node"></span> Active
@@ -43,13 +43,13 @@
             ></span>
             Bidirectional Connection
           </span>
-        </div>
-        <!--overlay-graph-options
+        </div!-->
+      <!--overlay-graph-options
           :initial-repelling-force="initialRepellingForce"
           :initial-topology="initialTopology"
           @updateRepellingForce="updateRepellingForce"
         /!-->
-      </div>
+      <!--/div!-->
     </div>
   </div>
 </template>
