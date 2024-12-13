@@ -62,8 +62,10 @@ import {
   forceLink,
   forceManyBody,
   forceSimulation,
+  forceX,
+  forceY,
 } from "d3-force";
-import { ref, onMounted, Ref, watch, computed, onBeforeUnmount } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasGraphNode, { Node } from "./fbas-graph-node.vue";
 import FbasGraphLink, { Link } from "./fbas-graph-link.vue";
@@ -92,8 +94,12 @@ const messages = ref<
 >([]);
 let messageCounter = 0;
 
-const nodes: Ref<Node[]> = ref([]);
-const links: Ref<Link[]> = ref([]);
+const nodes = ref<Node[]>([]);
+const links = ref<Link[]>([]);
+
+const topTierNodeIds = computed(() => {
+  return Array.from(federatedVotingStore.trustGraph.networkTransitiveQuorumSet);
+});
 
 function animateMessage(source: Node, target: Node) {
   messages.value.push({
@@ -145,10 +151,10 @@ const createNodesAndLinks = () => {
   );
 
   links.value = (() => {
-    const links: Link[] = [];
+    const constructedLinks: Link[] = [];
     nodes.value.forEach((node) => {
       node.validators?.forEach((validator) => {
-        links.push({
+        constructedLinks.push({
           source: node.id,
           target: validator,
           selfLoop: validator === node.id,
@@ -165,8 +171,8 @@ const createNodesAndLinks = () => {
       return `${sourceId}-${targetId}`;
     };
 
-    links.forEach((link) => linkMap.set(linkKey(link), link));
-    links.forEach((link) => {
+    constructedLinks.forEach((link) => linkMap.set(linkKey(link), link));
+    constructedLinks.forEach((link) => {
       const reverseKey = linkKey({
         source: link.target,
         target: link.source,
@@ -181,7 +187,7 @@ const createNodesAndLinks = () => {
       }
     });
 
-    return links;
+    return constructedLinks;
   })();
 };
 
@@ -222,13 +228,24 @@ onMounted(() => {
         .id((node: Node) => node.id)
         .distance(150),
     )
-    .force("charge", forceManyBody().strength(-500))
-    .force("center", forceCenter(width.value / 2, height / 2));
+    .force("charge", forceManyBody().strength(-2000))
+    .force("center", forceCenter(width.value / 2, height / 2))
+    .force(
+      "topTierX",
+      forceX<Node>(width.value / 2).strength((node) =>
+        topTierNodeIds.value.includes(node.id) ? 0.2 : 0,
+      ),
+    )
+    .force(
+      "topTierY",
+      forceY<Node>(height / 2).strength((node) =>
+        topTierNodeIds.value.includes(node.id) ? 0.2 : 0,
+      ),
+    );
 });
 
 function handleMouseOver(node: Node) {
   hoveredNode.value = node;
-
   links.value.forEach((link) => {
     if (link.source === node) {
       link.hovered = true;
@@ -238,7 +255,6 @@ function handleMouseOver(node: Node) {
 
 function handleMouseOut(node: Node) {
   hoveredNode.value = null;
-
   links.value.forEach((link) => {
     link.hovered = false;
   });
@@ -264,20 +280,5 @@ function updateDimensions() {
 .graph {
   cursor: grab;
   background: white;
-}
-
-.breadcrumbs {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 10; /* Ensure it floats above the SVG */
-  background: rgba(
-    255,
-    255,
-    255,
-    0.8
-  ); /* Optional: semi-transparent background */
-  padding: 5px 10px;
-  border-radius: 4px;
 }
 </style>
