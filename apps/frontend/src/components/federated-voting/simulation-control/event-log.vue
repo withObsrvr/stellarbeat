@@ -32,8 +32,8 @@
         <span
           v-if="props.publicKey === null"
           class="event-publickey clickable"
-          @click="selectNode(item.event.publicKey)"
           role="link"
+          @click="selectNode(item.event.publicKey)"
           >{{ item.event.publicKey }}</span
         >
         <span class="event-subtype">{{ item.event.subType }}</span>

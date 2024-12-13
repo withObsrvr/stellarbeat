@@ -15,13 +15,13 @@
         @mouseleave="endPan"
         @wheel.prevent="zoom"
         @touchstart="startPan"
-        @touchmove.prevent="pan"
+        @touchmove.passive="pan"
         @touchend="endPan"
       >
         <g
           :transform="`translate(${translateX}, ${translateY}) scale(${scale})`"
         >
-          <g class="hull-layer" v-if="topTierHullPath">
+          <g v-if="topTierHullPath" class="hull-layer">
             <path
               :d="topTierHullPath"
               fill="#f5f7fb"
@@ -33,10 +33,10 @@
             <AnimatedMessage
               v-for="message in messages"
               :key="message.id"
-              :startX="message.startX"
-              :startY="message.startY"
-              :endX="message.endX"
-              :endY="message.endY"
+              :start-x="message.startX"
+              :start-y="message.startY"
+              :end-x="message.endX"
+              :end-y="message.endY"
               :duration="message.duration"
             />
           </g>

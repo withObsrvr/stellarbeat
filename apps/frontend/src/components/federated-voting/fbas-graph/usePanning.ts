@@ -18,57 +18,60 @@ export function usePanning() {
   let initialScale = 1;
 
   function startPan(event: MouseEvent | TouchEvent) {
-    if (event instanceof MouseEvent && event.button !== 0) return;
-
-    if (event instanceof TouchEvent && event.touches.length === 2) {
-      // Pinch-to-zoom start
-      isPanning.value = false;
-      initialPinchDistance = getDistance(event.touches[0], event.touches[1]);
-      initialScale = scale.value;
-    } else {
-      // Panning start
+    if (event instanceof MouseEvent) {
+      if (event.button !== 0) return;
       isPanning.value = true;
-      if (event instanceof MouseEvent) {
-        panStart.value = { x: event.clientX, y: event.clientY };
-      } else if (event instanceof TouchEvent && event.touches.length === 1) {
+      panStart.value = { x: event.clientX, y: event.clientY };
+      translateStart.value = { x: translateX.value, y: translateY.value };
+    } else if (event instanceof TouchEvent) {
+      if (event.touches.length === 2) {
+        // Pinch-to-zoom start
+        isPanning.value = false;
+        initialPinchDistance = getDistance(event.touches[0], event.touches[1]);
+        initialScale = scale.value;
+      } else if (event.touches.length === 1) {
+        // Touch panning start
+        isPanning.value = true;
         const touch = event.touches[0];
         panStart.value = { x: touch.clientX, y: touch.clientY };
+        translateStart.value = { x: translateX.value, y: translateY.value };
       }
-      translateStart.value = { x: translateX.value, y: translateY.value };
     }
   }
 
   function pan(event: MouseEvent | TouchEvent) {
-    if (event instanceof TouchEvent && event.touches.length === 2) {
-      // Pinch-to-zoom move
-      const currentDistance = getDistance(event.touches[0], event.touches[1]);
-      const scaleFactor = currentDistance / initialPinchDistance;
-      scale.value = Math.min(Math.max(0.5, initialScale * scaleFactor), 5);
-    } else if (isPanning.value) {
-      // Panning move
-      let currentX = 0;
-      let currentY = 0;
-
-      if (event instanceof MouseEvent) {
-        currentX = event.clientX;
-        currentY = event.clientY;
-      } else if (event instanceof TouchEvent && event.touches.length === 1) {
-        const touch = event.touches[0];
-        currentX = touch.clientX;
-        currentY = touch.clientY;
-      } else {
-        return;
-      }
+    if (event instanceof MouseEvent && isPanning.value) {
+      // Mouse panning
+      const currentX = event.clientX;
+      const currentY = event.clientY;
 
       const dx = currentX - panStart.value.x;
       const dy = currentY - panStart.value.y;
 
       translateX.value = translateStart.value.x + dx;
       translateY.value = translateStart.value.y + dy;
+    } else if (event instanceof TouchEvent) {
+      if (event.touches.length === 2) {
+        // Pinch-to-zoom move
+        const currentDistance = getDistance(event.touches[0], event.touches[1]);
+        const scaleFactor = currentDistance / initialPinchDistance;
+        scale.value = Math.min(Math.max(0.5, initialScale * scaleFactor), 5);
+      } else if (isPanning.value && event.touches.length === 1) {
+        // Touch panning
+        const touch = event.touches[0];
+        const currentX = touch.clientX;
+        const currentY = touch.clientY;
+
+        const dx = currentX - panStart.value.x;
+        const dy = currentY - panStart.value.y;
+
+        translateX.value = translateStart.value.x + dx;
+        translateY.value = translateStart.value.y + dy;
+      }
     }
   }
 
-  function endPan() {
+  function endPan(event: MouseEvent | TouchEvent) {
     isPanning.value = false;
   }
 

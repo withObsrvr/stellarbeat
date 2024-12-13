@@ -22,8 +22,8 @@
         <span
           v-if="props.publicKey === null"
           class="action-public-key clickable"
-          @click="selectNode(action.publicKey)"
           role="link"
+          @click="selectNode(action.publicKey)"
         >
           {{ action.publicKey }}
         </span>
