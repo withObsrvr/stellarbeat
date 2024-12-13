@@ -18,7 +18,7 @@
         <FbasGraphPrototype class="card-spacing" />
       </div>
       <div class="col-md-6">
-        <div class="card" v-if="!federatedVotingStore.selectedNodeId">
+        <div v-if="!federatedVotingStore.selectedNodeId" class="card">
           <div
             class="pt-3 px-3 card-header d-flex justify-content-between align-items-center"
           >
@@ -39,7 +39,7 @@
         </div>
         <div v-else class="card-body p-0">
           <SelectedNodePanel
-            :selectedNodeId="federatedVotingStore.selectedNodeId"
+            :selected-node-id="federatedVotingStore.selectedNodeId"
           />
         </div>
       </div>
