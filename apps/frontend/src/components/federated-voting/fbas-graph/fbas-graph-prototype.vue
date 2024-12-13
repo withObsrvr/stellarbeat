@@ -2,6 +2,7 @@
   <div class="card">
     <div class="card-header">
       <BreadCrumbs />
+      <span class="badge ms-2">Quorum Intersection</span>
     </div>
     <div class="card-body graph pt-4 pb-0" style="height: 500px">
       <svg
@@ -322,5 +323,15 @@ function updateDimensions() {
 /* Optional styling adjustments for hull */
 .hull-layer path {
   pointer-events: none; /* Hull should not interfere with node interactions */
+}
+.badge {
+  background-color: #28a745;
+  color: white;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

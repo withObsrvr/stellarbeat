@@ -8,27 +8,9 @@
         </h2>
       </div>
     </div>
-
     <div class="row mb-4">
       <div class="col-lg-12">
         <Controller></Controller>
-        <!--div class="consensus-status">
-          <div
-            v-if="isStuck"
-            class="alert alert-warning mt-3 text-center"
-            role="alert"
-          >
-            This vote is stuck
-            {{ someNodesReachedConsensus ? "for some befouled nodes" : "" }}
-          </div>
-          <div
-            v-if="consensusReached"
-            class="alert alert-success mt-3 text-center"
-            role="alert"
-          >
-            Consensus reached
-          </div>
-        </div!-->
       </div>
     </div>
     <div class="row">
@@ -41,7 +23,14 @@
             class="pt-3 px-3 card-header d-flex justify-content-between align-items-center"
           >
             <BreadCrumbs root="Federated Voting Status" />
-            <span class="badge ms-2">Quorum Intersection</span>
+            <div class="d-flex align-items-center">
+              <span v-if="consensusReached" class="badge consensus ms-2">
+                Consensus Reached
+              </span>
+              <span v-else-if="isStuck" class="badge stuck ms-2">
+                Vote Stuck
+              </span>
+            </div>
           </div>
           <div class="card-body p-0">
             <EventLog style="height: 250px" />
@@ -66,23 +55,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import NodesPanel from "@/components/federated-voting/nodes-panel.vue";
-import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
-import TrustGraph from "@/components/federated-voting/trust-graph/trust-graph.vue";
+import BreadCrumbs from "@/components/federated-voting/bread-crumbs.vue";
 import EventLog from "@/components/federated-voting/simulation-control/event-log.vue";
 import Actions from "@/components/federated-voting/simulation-control/actions.vue";
 import FbasGraphPrototype from "@/components/federated-voting/fbas-graph/fbas-graph-prototype.vue";
 import SelectedNodePanel from "@/components/federated-voting/selected-nodes-panel/selected-node-panel.vue";
 import Controller from "@/components/federated-voting/simulation-control/controller.vue";
-import BreadCrumbs from "@/components/federated-voting/bread-crumbs.vue";
-
-// Computed property to get the currently selected node ID
-const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
-
-// Function to unselect the node
-function unselectNode() {
-  federatedVotingStore.selectedNodeId = null;
-}
+import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
 
 const hasNoNextMoves = computed(() => {
   return !federatedVotingStore.simulation.hasNextStep();
@@ -90,12 +69,6 @@ const hasNoNextMoves = computed(() => {
 
 const consensusReached = computed(() => {
   return federatedVotingStore.protocolContextState.protocolStates.every(
-    (state) => state.confirmed,
-  );
-});
-
-const someNodesReachedConsensus = computed(() => {
-  return federatedVotingStore.protocolContextState.protocolStates.some(
     (state) => state.confirmed,
   );
 });
@@ -110,11 +83,24 @@ const isStuck = computed(() => {
   margin-bottom: 20px;
 }
 
-/* Optional: Adjust margins for smaller screens */
 @media (max-width: 767.98px) {
   .card-spacing {
     margin-bottom: 15px;
   }
+}
+
+.badge:not(:last-child) {
+  margin-right: 0.5rem;
+}
+
+.consensus {
+  background-color: #28a745;
+  color: white;
+}
+
+.stuck {
+  background-color: #dc3545;
+  color: white;
 }
 
 /* Ensure nodes-panel content stretches */
@@ -138,10 +124,5 @@ const isStuck = computed(() => {
     position: sticky;
     top: 10px; /* Adds a 10px margin above the sticky side panel */
   }
-}
-
-.badge {
-  background-color: #d4edda;
-  color: #155724;
 }
 </style>

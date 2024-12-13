@@ -3,8 +3,9 @@
     <div class="card-header header">
       <BreadCrumbs root="Federated Voting Status" />
       <div class="labels">
+        <span v-if="isStuck" class="badge badge-danger ms-2"> Stuck </span>
         <span v-if="isIllBehaved" class="badge badge-danger ms-2">
-          Ill-behaved
+          Ill-behaved (liveness)
         </span>
         <span v-else-if="isLivenessBefouled" class="badge badge-warning ms-2">
           Befouled (liveness)
@@ -61,10 +62,6 @@ const protocolState = computed(() => {
   );
 });
 
-const quorumSet = computed(() => {
-  return protocolState.value ? protocolState.value.node.quorumSet : null;
-});
-
 const isIllBehaved = computed(() => {
   return federatedVotingStore
     .illBehavedNodes()
@@ -80,6 +77,13 @@ const isTopTierNode = computed(() => {
   if (!props.selectedNodeId) return false;
   return federatedVotingStore.trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(
     props.selectedNodeId,
+  );
+});
+
+const isStuck = computed(() => {
+  return (
+    !federatedVotingStore.simulation.hasNextStep() &&
+    !protocolState.value?.confirmed
   );
 });
 </script>
