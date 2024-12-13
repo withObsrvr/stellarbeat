@@ -7,7 +7,7 @@
 		"build:ts": "tsc --build",
 		"build:ts:force": "tsc --build --force",
 		"build": "tsc --build --verbose && pnpm --parallel post-build && pnpm --filter frontend run build",
-		"dev": "pnpm build:ts && concurrently -n backend,frontend -c yellow,blue \"pnpm --filter backend run start-api\" \"pnpm --filter frontend run dev --force\"",
+		"dev": "pnpm build:ts && concurrently -n backend,frontend -c yellow,blue \"pnpm --filter backend run start-api\" \"pnpm --filter frontend run dev --force --host\"",
 		"test:unit": "jest --testPathIgnorePatterns '\\.integration\\.test' --maxWorkers=50% ",
 		"test:unit:scp-simulation": "jest --testPathIgnorePatterns '\\.integration\\.test' --testPathPattern 'scp-simulation' --maxWorkers=50% ",
 		"test:unit:crawler": "jest --testPathIgnorePatterns '\\.integration\\.test' --testPathPattern 'crawler' --maxWorkers=50% ",

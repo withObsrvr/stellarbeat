@@ -15,7 +15,7 @@
         @mouseleave="endPan"
         @wheel.prevent="zoom"
         @touchstart="startPan"
-        @touchmove="pan"
+        @touchmove.prevent="pan"
         @touchend="endPan"
       >
         <g
