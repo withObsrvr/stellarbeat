@@ -10,12 +10,18 @@ import {
 import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
 import { TrustGraphBuilder } from "@/components/federated-voting/trust-graph/TrustGraphBuilder";
 import { TrustGraph } from "shared";
+import {
+  findAllDSets,
+  findAllIntactNodes,
+} from "@/components/federated-voting/analysis/DSetAnalysis";
+import { findSubSetsOfSize } from "@/components/federated-voting/analysis/Sets";
 
 class FederatedVotingStore {
   scenarios: string[] = ["FBAS QI scenario"];
   selectedScenario: string = this.scenarios[0];
   selectedNodeId: string | null = null;
   readonly simulationStepDurationInSeconds: number = 2;
+  dSets: Set<string>[] = [];
 
   protocolContext: FederatedVotingContext;
   protocolContextState: FederatedVotingContextState;
@@ -37,6 +43,20 @@ class FederatedVotingStore {
       this.protocolContextState
         .protocolStates as FederatedVotingProtocolState[],
     );
+    this.dSets = findAllDSets({
+      nodes: Array.from(this._trustGraph.vertices.keys()),
+      Q: new Map(
+        this.protocolContextState.protocolStates.map((state) => [
+          state.node.publicKey,
+          Array.from(
+            findSubSetsOfSize(
+              new Set(state.node.quorumSet.validators),
+              state.node.quorumSet.threshold,
+            ).map((set) => set.add(state.node.publicKey)),
+          ),
+        ]),
+      ),
+    });
   }
 
   get trustGraph(): TrustGraph {
@@ -44,25 +64,14 @@ class FederatedVotingStore {
   }
 
   public illBehavedNodes = () => {
-    return federatedVotingStore.simulation.getDisruptedNodes();
+    return this.simulation.getDisruptedNodes();
   };
 
-  public befouledNodes = () => {
-    //todo: implement safety checks (quorum intersection despite...)
-    //at the moment only calculates liveness befouling. Because our only demo network has QI and
-    //we are not tampering with vote content, we do not have to worry about this...yet.
-    const quorumSets = new Map(
-      this.protocolContextState.protocolStates.map((state) => [
-        state.node.publicKey,
-        state.node.quorumSet,
-      ]),
-    );
-
-    return Array.from(
-      QuorumSetService.calculatePotentiallyBlockedNodes(
-        quorumSets,
-        this.illBehavedNodes(),
-      ),
+  public intactNodes = () => {
+    return findAllIntactNodes(
+      Array.from(this._trustGraph.vertices.keys()),
+      new Set(this.illBehavedNodes()),
+      this.dSets,
     );
   };
 }

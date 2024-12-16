@@ -10,6 +10,7 @@
 		"dev": "pnpm build:ts && concurrently -n backend,frontend -c yellow,blue \"pnpm --filter backend run start-api\" \"pnpm --filter frontend run dev --force --host\"",
 		"test:unit": "jest --testPathIgnorePatterns '\\.integration\\.test' --maxWorkers=50% ",
 		"test:unit:scp-simulation": "jest --testPathIgnorePatterns '\\.integration\\.test' --testPathPattern 'scp-simulation' --maxWorkers=50% ",
+		"test:unit:frontend": "jest --testPathIgnorePatterns '\\.integration\\.test' --testPathPattern 'frontend' --maxWorkers=50% ",
 		"test:unit:crawler": "jest --testPathIgnorePatterns '\\.integration\\.test' --testPathPattern 'crawler' --maxWorkers=50% ",
 		"tu": "pnpm test:unit",
 		"test:integration": "jest --testMatch '**/*.integration.test.[jt]s?(x)' --runInBand",

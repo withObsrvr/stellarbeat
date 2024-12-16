@@ -5,11 +5,13 @@
       <div class="labels">
         <span v-if="isStuck" class="badge badge-danger ms-2"> Stuck </span>
         <span v-if="isIllBehaved" class="badge badge-danger ms-2">
-          Ill-behaved (liveness)
+          Ill-behaved
         </span>
-        <span v-else-if="isLivenessBefouled" class="badge badge-warning ms-2">
-          Befouled (liveness)
+        <span v-else-if="isBefouled" class="badge badge-warning ms-2">
+          Befouled
         </span>
+        <span v-else class="badge badge-success ms-w"> Intact </span>
+
         <span v-if="isTopTierNode" class="badge badge-info ms-2">
           Top Tier Node
         </span>
@@ -68,9 +70,9 @@ const isIllBehaved = computed(() => {
     .some((node) => node === props.selectedNodeId);
 });
 
-const isLivenessBefouled = computed(() => {
+const isBefouled = computed(() => {
   if (!props.selectedNodeId) return false;
-  return federatedVotingStore.befouledNodes().includes(props.selectedNodeId);
+  return !federatedVotingStore.intactNodes().includes(props.selectedNodeId);
 });
 
 const isTopTierNode = computed(() => {

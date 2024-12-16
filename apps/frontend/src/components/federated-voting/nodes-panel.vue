@@ -58,7 +58,14 @@
                 class="badge badge-warning mb-1"
               >
                 <BIconExclamationCircleFill class="me-1" />
-                Befouled (liveness)
+                Befouled
+              </span>
+              <span
+                v-else-if="!nodeState.befouled"
+                class="badge badge-success mb-1"
+              >
+                <BIconExclamationCircleFill class="me-1" />
+                Intact
               </span>
             </div>
           </div>
@@ -88,7 +95,7 @@ const nodes = computed(() => {
       acceptedValue: protocolState.accepted,
       confirmedValue: protocolState.confirmed,
       illBehaved: illBehavedNodes.value.includes(protocolState.node.publicKey),
-      befouled: befouledNodes.value.includes(protocolState.node.publicKey),
+      befouled: !intactNodes.value.includes(protocolState.node.publicKey),
       topTierNode:
         federatedVotingStore.trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(
           protocolState.node.publicKey,
@@ -101,8 +108,8 @@ const illBehavedNodes = computed(() => {
   return federatedVotingStore.illBehavedNodes();
 });
 
-const befouledNodes = computed(() => {
-  return federatedVotingStore.befouledNodes();
+const intactNodes = computed(() => {
+  return federatedVotingStore.intactNodes();
 });
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
