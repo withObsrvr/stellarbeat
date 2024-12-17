@@ -111,7 +111,6 @@ export function checkLivenessDespiteB(fbas: FBAS, B: Set<NodeID>): boolean {
 }
 
 export function isDSet(fbas: FBAS, B: Set<NodeID>): boolean {
-  if (B.size === 0) return false;
   const safety = checkSafetyDespiteB(fbas, B);
   const liveness = checkLivenessDespiteB(fbas, B);
 

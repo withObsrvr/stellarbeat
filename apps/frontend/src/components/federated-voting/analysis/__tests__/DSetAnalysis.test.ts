@@ -120,30 +120,42 @@ describe("FBAS DSet computation and intact node detection", () => {
   });
 
   test("isDSet", () => {
-    // {b,c,d} leaving this set out?
-    // isDSet means safety & liveness hold after removing that set
-    // Removing {b,c,d} leaves {a}, single node set {a} form a quorum by itself?
-    // a needs {a,b,c}, we only have a, no b,c. no quorum. no liveness if we consider must have a quorum
-    expect(isDSet(fbas, new Set(["b", "c", "d"]))).toBe(false);
-
-    // {c}?
-    // We saw removing {c} fails liveness
+    // Removing {c} fails liveness
     expect(isDSet(fbas, new Set(["c"]))).toBe(false);
 
-    // {a}? After removing {a}, safety = true and liveness?
-    // liveness after removing a?
-    // nodes {b,c,d}, {b,c,d} is a quorum. liveness = true
-    // safety = true from previous test
+    // {b,c,d} remains as only quorum
     expect(isDSet(fbas, new Set(["a"]))).toBe(true);
   });
 
   test("findAllDSets", () => {
-    const all = findAllDSets(fbas);
-    expect(all.length).toBe(2);
+    const dsets = findAllDSets(fbas);
+    expect(dsets.length).toBe(3);
     expect(
-      all.find((d) => isEqualSet(d, new Set(["a", "b", "c", "d"]))),
+      dsets.find((d) => isEqualSet(d, new Set(["a", "b", "c", "d"]))),
     ).toBeTruthy();
-    expect(all.find((d) => isEqualSet(d, new Set(["a"])))).toBeTruthy();
+    expect(dsets.find((d) => isEqualSet(d, new Set(["a"])))).toBeTruthy();
+    expect(dsets.find((d) => isEqualSet(d, new Set([])))).toBeTruthy(); //empty DSET is necessary for the
+    //scenario of no ill-behaved nodes
+  });
+
+  test("findAllDSets in an unsafe FBAS", () => {
+    const unsafeFBAS = {
+      nodes: ["a", "b"],
+      Q: new Map([
+        ["a", [new Set(["a"])]],
+        ["b", [new Set(["b"])]],
+      ]),
+    };
+
+    const dsets = findAllDSets(unsafeFBAS);
+    expect(dsets.length).toBe(3);
+
+    expect(dsets.find((d) => isEqualSet(d, new Set(["a", "b"])))).toBeTruthy();
+    expect(dsets.find((d) => isEqualSet(d, new Set(["a"])))).toBeTruthy();
+    expect(dsets.find((d) => isEqualSet(d, new Set(["b"])))).toBeTruthy();
+
+    //empty set is NOT a DSET.
+    expect(dsets.find((d) => isEqualSet(d, new Set([])))).toBeFalsy();
   });
 
   test("isNodeIntact", () => {
