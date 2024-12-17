@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div>
     <div class="card-header header">
       <BreadCrumbs root="Federated Voting Status" />
       <div class="labels">

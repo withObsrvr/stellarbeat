@@ -146,12 +146,6 @@ const befouledNodes = computed(() => {
   color: #212529;
 }
 
-.node:hover {
-  background-color: #e2e6ea;
-  color: #0056b3;
-  cursor: pointer;
-}
-
 .dset-group {
   display: flex;
   align-items: flex-start;

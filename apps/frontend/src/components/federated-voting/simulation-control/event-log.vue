@@ -5,7 +5,7 @@
         v-model="filterQuery"
         type="text"
         class="form-control form-control-sm"
-        placeholder="Filter past events"
+        placeholder="Filter Events"
       />
     </div>
     <div ref="logContainer" class="log-container">
