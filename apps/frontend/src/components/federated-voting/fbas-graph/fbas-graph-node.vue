@@ -249,7 +249,7 @@ const isSelected = computed(() => {
 });
 
 const strokeWidth = computed(() => {
-  return isHovered.value || isSelected.value ? 4 : 3;
+  return isHovered.value || isSelected.value ? 5 : 4;
 });
 </script>
 

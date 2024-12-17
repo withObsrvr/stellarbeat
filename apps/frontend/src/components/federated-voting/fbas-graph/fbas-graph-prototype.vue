@@ -63,6 +63,30 @@
         </g>
       </svg>
     </div>
+    <div class="card-footer">
+      <div class="legend">
+        <div class="legend-item">
+          <span class="legend-color accepted-node"></span>
+          <span>Accepted</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color confirmed-node"></span>
+          <span>Confirmed</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color intact-node"></span>
+          <span>Intact</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color ill-behaved-node"></span>
+          <span>Ill-Behaved</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color befouled-node"></span>
+          <span>Befouled</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -311,6 +335,50 @@ function updateDimensions() {
 </script>
 
 <style scoped>
+.legend {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-right: 8px;
+  border: 2px solid;
+}
+
+.legend-color.intact-node {
+  background-color: white;
+  border-color: #28a745;
+}
+
+.legend-color.ill-behaved-node {
+  background-color: white;
+  border-color: #dc3545;
+}
+
+.legend-color.befouled-node {
+  background-color: white;
+  border-color: #ffa500;
+}
+
+.legend-color.accepted-node {
+  background-color: #1f77b4;
+  border-color: #1f77b4;
+}
+
+.legend-color.confirmed-node {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
 .animation-layer {
   pointer-events: none;
 }
