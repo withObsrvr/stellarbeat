@@ -1,10 +1,10 @@
 <template>
-  <div class="card">
+  <div class="card h-100">
     <div class="card-header">
       <h4 class="card-title">Network connections (overlay)</h4>
     </div>
-    <div class="card-body pt-4 pb-0">
-      <div class="chart-container">
+    <div class="card-body h-100">
+      <div class="chart-container h-100">
         <svg
           ref="overlayGraph"
           class="overlay-graph"
@@ -192,7 +192,6 @@ const height = (): number => {
 }
 .chart-container {
   width: 100%;
-  height: 250px;
 }
 .overlay-graph {
   width: 100%;

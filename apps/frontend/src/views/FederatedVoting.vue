@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="h-100">
     <!-- Page Header -->
     <div class="page-header d-flex justify-content-between py-3">
       <div class="d-flex align-items-center">
@@ -15,18 +15,18 @@
     </div>
     <div class="row">
       <div class="col-md-6">
-        <FbasGraphPrototype class="card-spacing" />
+        <FbasGraphPrototype />
       </div>
       <div class="col-md-6">
         <FederatedVotingStatus />
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-6 col-sm-12">
-        <overlay-graph-base class="card-spacing" />
+    <div class="row pb-5" style="height: 400px">
+      <div class="col-md-6 col-sm-12 h-100">
+        <overlay-graph-base />
       </div>
-      <div class="col-md-6 col-sm-12">
-        <ProcessedVotes />
+      <div class="col-md-6 col-sm-12 h-100">
+        <ProcessedVotes class="h-100" />
       </div>
     </div>
   </div>
