@@ -227,7 +227,7 @@ const strokeColor = computed(() => {
   } else if (!federatedVotingStore.intactNodes().includes(props.node.id)) {
     return "orange";
   }
-  return "#fff";
+  return "#2ca02c";
 });
 const nodeFillColor = computed(() => {
   if (props.node.confirm) {
@@ -249,7 +249,7 @@ const isSelected = computed(() => {
 });
 
 const strokeWidth = computed(() => {
-  return isHovered.value || isSelected.value ? 3 : 2;
+  return isHovered.value || isSelected.value ? 4 : 3;
 });
 </script>
 

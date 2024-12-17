@@ -21,12 +21,17 @@
         <FederatedVotingStatus />
       </div>
     </div>
-    <div class="row pb-5" style="height: 400px">
-      <div class="col-md-6 col-sm-12 h-100">
-        <overlay-graph-base />
-      </div>
+    <div class="row pb-5" style="height: 500px">
       <div class="col-md-6 col-sm-12 h-100">
         <ProcessedVotes class="h-100" />
+      </div>
+      <div class="col-md-6 col-sm-12 h-100">
+        <DSets />
+      </div>
+    </div>
+    <div class="row pb-5" style="height: 400px">
+      <div class="col-6">
+        <OverlayGraphBase />
       </div>
     </div>
   </div>
@@ -38,53 +43,7 @@ import Controller from "@/components/federated-voting/simulation-control/control
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
 import ProcessedVotes from "@/components/federated-voting/selected-nodes-panel/processed-votes.vue";
 import FederatedVotingStatus from "@/components/federated-voting/federated-voting-status.vue";
+import DSets from "@/components/federated-voting/intactness.vue";
 </script>
 
-<style scoped>
-.card-spacing {
-  margin-bottom: 20px;
-}
-
-@media (max-width: 767.98px) {
-  .card-spacing {
-    margin-bottom: 15px;
-  }
-}
-
-.badge:not(:last-child) {
-  margin-right: 0.5rem;
-}
-
-.consensus {
-  background-color: #28a745;
-  color: white;
-}
-
-.stuck {
-  background-color: #dc3545;
-  color: white;
-}
-
-/* Ensure nodes-panel content stretches */
-.nodes-panel {
-  height: 100%;
-}
-
-/* Optional: Add scrollbar if nodes list exceeds height */
-.nodes-panel {
-  overflow-y: auto;
-}
-
-/* Default: Side panel is not sticky */
-.sticky {
-  position: static;
-}
-
-/* Sticky Side Panel on larger screens */
-@media (min-width: 768px) {
-  .sticky {
-    position: sticky;
-    top: 10px; /* Adds a 10px margin above the sticky side panel */
-  }
-}
-</style>
+<style scoped></style>
