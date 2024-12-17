@@ -18,12 +18,7 @@ export function usePanning() {
   let initialScale = 1;
 
   function startPan(event: MouseEvent | TouchEvent) {
-    if (event instanceof MouseEvent) {
-      if (event.button !== 0) return;
-      isPanning.value = true;
-      panStart.value = { x: event.clientX, y: event.clientY };
-      translateStart.value = { x: translateX.value, y: translateY.value };
-    } else if (event instanceof TouchEvent) {
+    if (typeof TouchEvent !== "undefined" && event instanceof TouchEvent) {
       if (event.touches.length === 2) {
         // Pinch-to-zoom start
         isPanning.value = false;
@@ -36,21 +31,19 @@ export function usePanning() {
         panStart.value = { x: touch.clientX, y: touch.clientY };
         translateStart.value = { x: translateX.value, y: translateY.value };
       }
+    } else if (
+      typeof MouseEvent !== "undefined" &&
+      event instanceof MouseEvent
+    ) {
+      if (event.button !== 0) return; // Only allow left mouse button
+      isPanning.value = true;
+      panStart.value = { x: event.clientX, y: event.clientY };
+      translateStart.value = { x: translateX.value, y: translateY.value };
     }
   }
 
   function pan(event: MouseEvent | TouchEvent) {
-    if (event instanceof MouseEvent && isPanning.value) {
-      // Mouse panning
-      const currentX = event.clientX;
-      const currentY = event.clientY;
-
-      const dx = currentX - panStart.value.x;
-      const dy = currentY - panStart.value.y;
-
-      translateX.value = translateStart.value.x + dx;
-      translateY.value = translateStart.value.y + dy;
-    } else if (event instanceof TouchEvent) {
+    if (typeof TouchEvent !== "undefined" && event instanceof TouchEvent) {
       if (event.touches.length === 2) {
         // Pinch-to-zoom move
         const currentDistance = getDistance(event.touches[0], event.touches[1]);
@@ -68,6 +61,20 @@ export function usePanning() {
         translateX.value = translateStart.value.x + dx;
         translateY.value = translateStart.value.y + dy;
       }
+    } else if (
+      isPanning.value &&
+      typeof MouseEvent !== "undefined" &&
+      event instanceof MouseEvent
+    ) {
+      // Mouse panning
+      const currentX = event.clientX;
+      const currentY = event.clientY;
+
+      const dx = currentX - panStart.value.x;
+      const dy = currentY - panStart.value.y;
+
+      translateX.value = translateStart.value.x + dx;
+      translateY.value = translateStart.value.y + dy;
     }
   }
 
