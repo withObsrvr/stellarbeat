@@ -1,7 +1,7 @@
 <template>
   <div class="card h-100">
     <div class="card-header">
-      <h4 class="card-title">Intactness</h4>
+      <BreadCrumbs root="Intactness"></BreadCrumbs>
     </div>
     <div class="card-body content h-100">
       <div class="section">
@@ -54,7 +54,12 @@
         >
           <strong class="dset-label">DSet {{ index + 1 }}:</strong>
           <div v-if="dsetNodes.length > 0" class="node-list">
-            <span v-for="node in dsetNodes" :key="node" class="node">
+            <span
+              v-for="node in dsetNodes"
+              :key="node"
+              class="node"
+              :class="statusClass(node)"
+            >
               {{ node }}
             </span>
           </div>
@@ -68,10 +73,25 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import BreadCrumbs from "./bread-crumbs.vue";
+
+const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
 const detectedDSets = computed(() => {
-  return federatedVotingStore.dSets.map((dset) => Array.from(dset));
+  return federatedVotingStore.dSets
+    .filter((dset) =>
+      selectedNodeId.value ? dset.has(selectedNodeId.value) : true,
+    )
+    .map((dset) => Array.from(dset));
 });
+
+const statusClass = (nodeId: string) => {
+  return {
+    intact: intactNodes.value.includes(nodeId),
+    "ill-behaved": illBehavedNodes.value.includes(nodeId),
+    befouled: befouledNodes.value.includes(nodeId),
+  };
+};
 
 const intactNodes = computed(() => federatedVotingStore.intactNodes());
 const illBehavedNodes = computed(() => federatedVotingStore.illBehavedNodes());
