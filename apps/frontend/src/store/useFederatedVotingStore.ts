@@ -4,7 +4,6 @@ import {
   FederatedVotingContext,
   FederatedVotingContextFactory,
   FederatedVotingProtocolState,
-  QuorumSetService,
   Simulation,
 } from "scp-simulation";
 import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
@@ -13,6 +12,8 @@ import { TrustGraph } from "shared";
 import {
   findAllDSets,
   findAllIntactNodes,
+  findMinimalQuorums,
+  findQuorums,
 } from "@/components/federated-voting/analysis/DSetAnalysis";
 import { findSubSetsOfSize } from "@/components/federated-voting/analysis/Sets";
 
@@ -22,7 +23,9 @@ class FederatedVotingStore {
   selectedNodeId: string | null = null;
   readonly simulationStepDurationInSeconds: number = 2;
   dSets: Set<string>[] = [];
-
+  quorumSlices: Map<string, Set<string>[]> = new Map();
+  quorums: Set<string>[] = [];
+  minimalQuorums: Set<string>[] = [];
   protocolContext: FederatedVotingContext;
   protocolContextState: FederatedVotingContextState;
   simulation: Simulation;
@@ -43,20 +46,27 @@ class FederatedVotingStore {
       this.protocolContextState
         .protocolStates as FederatedVotingProtocolState[],
     );
+
+    this.quorumSlices = new Map(
+      this.protocolContextState.protocolStates.map((state) => [
+        state.node.publicKey,
+        Array.from(
+          findSubSetsOfSize(
+            new Set(state.node.quorumSet.validators),
+            state.node.quorumSet.threshold,
+          ).map((set) => set.add(state.node.publicKey)),
+        ),
+      ]),
+    );
     this.dSets = findAllDSets({
       nodes: Array.from(this._trustGraph.vertices.keys()),
-      Q: new Map(
-        this.protocolContextState.protocolStates.map((state) => [
-          state.node.publicKey,
-          Array.from(
-            findSubSetsOfSize(
-              new Set(state.node.quorumSet.validators),
-              state.node.quorumSet.threshold,
-            ).map((set) => set.add(state.node.publicKey)),
-          ),
-        ]),
-      ),
+      Q: this.quorumSlices,
     });
+    this.quorums = findQuorums(
+      Array.from(this._trustGraph.vertices.keys()),
+      this.quorumSlices,
+    );
+    this.minimalQuorums = findMinimalQuorums(this.quorums);
   }
 
   get trustGraph(): TrustGraph {

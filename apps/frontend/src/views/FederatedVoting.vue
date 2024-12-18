@@ -29,7 +29,10 @@
         <DSets />
       </div>
     </div>
-    <div class="row pb-5" style="height: 400px">
+    <div class="row pb-5" style="height: 500px">
+      <div class="col-6">
+        <Quorums />
+      </div>
       <div class="col-6">
         <OverlayGraphBase />
       </div>
@@ -44,6 +47,7 @@ import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overla
 import ProcessedVotes from "@/components/federated-voting/selected-nodes-panel/processed-votes.vue";
 import FederatedVotingStatus from "@/components/federated-voting/federated-voting-status.vue";
 import DSets from "@/components/federated-voting/intactness.vue";
+import Quorums from "@/components/federated-voting/quorums.vue";
 </script>
 
 <style scoped></style>
