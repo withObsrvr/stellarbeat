@@ -29,8 +29,8 @@ describe('test queries', () => {
 		await kernel.close();
 	});
 
-	test('findLatest', async () => {
-		const time = new Date();
+	test('findLatest, distinct on organizationId', async () => {
+		const time = new Date('2020-01-01');
 		const organization = Organization.create(
 			createDummyOrganizationId(),
 			'home',
@@ -44,6 +44,10 @@ describe('test queries', () => {
 		);
 
 		await organizationRepository.save([organization, organization2], time);
+
+		const updateTime = new Date('2021-01-01');
+		organization2.updateDescription('nice!', updateTime);
+		await organizationRepository.save([organization2], updateTime);
 
 		const latest = await organizationSnapShotRepository.findLatest();
 		expect(latest.length).toEqual(2);

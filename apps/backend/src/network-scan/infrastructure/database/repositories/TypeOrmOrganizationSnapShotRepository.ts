@@ -34,14 +34,14 @@ export default class TypeOrmOrganizationSnapShotRepository
 	}
 
 	async findLatest(at: Date = new Date()) {
-		return await this.baseRepository.find({
-			where: {
-				startDate: LessThanOrEqual(at)
-			},
-			take: 10,
-			order: {
-				startDate: 'DESC'
-			}
-		});
+		return await this.baseRepository
+			.createQueryBuilder('snapshot')
+			.innerJoinAndSelect('snapshot._organization', 'organization')
+			.distinctOn(['organization.id'])
+			.where('snapshot.startDate <= :at', { at })
+			.orderBy('organization.id')
+			.addOrderBy('snapshot.startDate', 'DESC')
+			.take(10)
+			.getMany();
 	}
 }
