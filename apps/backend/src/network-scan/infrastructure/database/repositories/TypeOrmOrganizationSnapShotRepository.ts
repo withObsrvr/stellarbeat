@@ -33,14 +33,25 @@ export default class TypeOrmOrganizationSnapShotRepository
 		});
 	}
 
+	/**
+	 * If performance degrades because of too many rows,
+	 * (which is unlikely because of indexes and nature of table),
+	 * we could limit the subquery to latest x months
+	 *  or we could write a permant raw subquery.
+	 */
 	async findLatest(at: Date = new Date()) {
+		const subQuery = this.baseRepository
+			.createQueryBuilder('sub')
+			.select('MAX(sub.id)', 'id')
+			.where('sub.startDate <= :at', { at })
+			.groupBy('sub."OrganizationId"');
+
 		return await this.baseRepository
 			.createQueryBuilder('snapshot')
 			.innerJoinAndSelect('snapshot._organization', 'organization')
-			.distinctOn(['organization.id'])
-			.where('snapshot.startDate <= :at', { at })
-			.orderBy('organization.id')
-			.addOrderBy('snapshot.startDate', 'DESC')
+			.where('snapshot.id IN (' + subQuery.getQuery() + ')')
+			.setParameters({ at })
+			.orderBy('snapshot.startDate', 'DESC')
 			.take(10)
 			.getMany();
 	}
