@@ -1,12 +1,26 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue2";
 import topLevelAwait from "vite-plugin-top-level-await";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 import eslint from "vite-plugin-eslint";
 import tsConfigPaths from "vite-tsconfig-paths";
 
 /** @type {import('vite').UserConfig} */
 export default defineConfig({
-  plugins: [tsConfigPaths(), vue(), eslint(), topLevelAwait()],
+  plugins: [
+    tsConfigPaths(),
+    vue(),
+    eslint(),
+    topLevelAwait(),
+    viteStaticCopy({
+      targets: [
+        {
+          src: "node_modules/shared/schemas/*",
+          dest: "schemas",
+        },
+      ],
+    }),
+  ],
   envPrefix: "VUE_",
   worker: {
     plugins: () => [topLevelAwait()],

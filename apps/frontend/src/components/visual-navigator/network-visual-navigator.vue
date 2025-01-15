@@ -402,13 +402,10 @@ function navigateToView() {
 }
 
 .view-link {
-  text-underline: none;
+  text-decoration: none;
   padding-left: 7px;
   color: #818181;
   cursor: pointer;
-}
-
-.view-link-active {
 }
 
 .view-link a {
