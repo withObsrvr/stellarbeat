@@ -15,7 +15,7 @@ export function createDummyOrganizationV1(): OrganizationV1 {
 		homeDomain: 'homeDomain',
 		has24HourStats: true,
 		has30DayStats: true,
-		isTierOneOrganization: true,
+		hasReliableUptime: true,
 		keybase: 'keybase',
 		horizonUrl: 'horizonUrl',
 		phoneNumber: 'phoneNumber',

@@ -71,10 +71,10 @@
           quorumset. If 50% or more of the validators of an organization are
           validating correctly, this subquorum is marked as available.
         </p>
-        <h3>What is a tier one organization</h3>
+        <h3>What is a top tier organization</h3>
         <p>
-          A tier one organization has at least three validators and subquorum
-          availability of at least 99 percent over 30 days.
+          A top tier organization is part of every quorum (in a healthy network
+          with quorum intersection).
         </p>
         <h3>What is the node index?</h3>
         <p>

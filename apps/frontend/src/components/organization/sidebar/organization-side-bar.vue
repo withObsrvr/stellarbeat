@@ -133,8 +133,8 @@ const validators = computed(() => {
 });
 
 const organizationType = computed(() => {
-  return selectedOrganization.value.isTierOneOrganization
-    ? "T1 Organization"
+  return selectedOrganization.value.hasReliableUptime
+    ? "Organization"
     : "Organization";
 });
 

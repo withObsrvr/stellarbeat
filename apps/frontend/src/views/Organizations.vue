@@ -108,7 +108,7 @@ const organizations: ComputedRef<TableOrganization[]> = computed(() => {
       blocked: store.network.isOrganizationBlocked(organization),
       subQuorum24HAvailability: organization.subQuorum24HoursAvailability + "%",
       subQuorum30DAvailability: organization.subQuorum30DaysAvailability + "%",
-      isTierOneOrganization: organization.isTierOneOrganization,
+      hasReliableUptime: organization.hasReliableUptime,
     };
     return mappedOrganization;
   });

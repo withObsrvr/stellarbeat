@@ -1,6 +1,6 @@
-import {OrganizationId, PublicKey} from './network';
+import { OrganizationId, PublicKey } from './network';
 import PropertyMapper from './PropertyMapper';
-import {OrganizationV1} from "./dto/organization-v1";
+import { OrganizationV1 } from './dto/organization-v1';
 
 export function isOrganization(
 	organization: Organization | undefined
@@ -30,7 +30,7 @@ export class Organization {
 	subQuorum30DaysAvailability = 0;
 	public unknown = false;
 	homeDomain: string | null = null; //todo: not nullable
-	tomlState = 'Unknown'
+	tomlState = 'Unknown';
 
 	dateDiscovered?: Date;
 
@@ -49,7 +49,7 @@ export class Organization {
 		); //simple majority
 	}
 
-	get isTierOneOrganization(): boolean {
+	get hasReliableUptime(): boolean {
 		if (!this.has30DayStats) return false;
 		return (
 			this.subQuorum30DaysAvailability >= 99 && this.validators.length >= 3
@@ -77,8 +77,9 @@ export class Organization {
 			subQuorum30DaysAvailability: this.subQuorum30DaysAvailability,
 			has30DayStats: this.has30DayStats,
 			has24HourStats: this.has24HourStats,
-			dateDiscovered: this.dateDiscovered?.toISOString() ?? new Date().toISOString(),
-			isTierOneOrganization: this.isTierOneOrganization,
+			dateDiscovered:
+				this.dateDiscovered?.toISOString() ?? new Date().toISOString(),
+			hasReliableUptime: this.hasReliableUptime,
 			homeDomain: this.homeDomain ?? 'unknown',
 			tomlState: this.tomlState
 		};
@@ -87,7 +88,6 @@ export class Organization {
 	static fromOrganizationV1DTO(
 		organizationV1DTO: OrganizationV1
 	): Organization {
-
 		const organization = new Organization(
 			organizationV1DTO.id,
 			organizationV1DTO.name ?? organizationV1DTO.id
@@ -97,7 +97,7 @@ export class Organization {
 			'id',
 			'name',
 			'dateDiscovered',
-			'isTierOneOrganization'
+			'hasReliableUptime'
 		]);
 
 		organization.dateDiscovered = new Date(organizationV1DTO.dateDiscovered);

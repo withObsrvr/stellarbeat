@@ -132,7 +132,7 @@ export default class StellarCoreConfigurationGenerator {
 				const organization = this.network.getOrganizationById(
 					validatorNode.organizationId
 				);
-				if (organization!.isTierOneOrganization) quality = Quality.HIGH;
+				if (organization!.hasReliableUptime) quality = Quality.HIGH;
 			}
 
 			if (!alreadyAddedHomeDomains.has(validatorNode.homeDomain)) {

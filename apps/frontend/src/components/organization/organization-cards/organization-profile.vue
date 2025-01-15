@@ -5,8 +5,8 @@
     >
       <h3 class="my-1">
         <span
-          v-if="organization.isTierOneOrganization"
-          v-tooltip="'Tier one organization'"
+          v-if="organization.hasReliableUptime"
+          v-tooltip="'>99% uptime with at least 3 validators'"
           class="badge sb-badge badge-primary"
         >
           <b-icon-shield />

@@ -5,7 +5,7 @@
       :show-dropdown-toggle="true"
       :drop-down-showing="showing"
       :show-sub-title="true"
-      :sub-title="'Transitive quorum set'"
+      :sub-title="'Top Tier'"
       :has-warnings="hasGeneralValidatorsWarning"
       :warnings="generalValidatorsWarning"
       @click="toggleShow"

@@ -1,12 +1,9 @@
-import {
-	OrganizationSnapshotV1,
-	OrganizationV1
-} from 'shared';
+import { OrganizationSnapshotV1, OrganizationV1 } from 'shared';
 import { OrganizationMeasurementAverage } from '../domain/organization/OrganizationMeasurementAverage';
 import Organization from '../domain/organization/Organization';
 import { injectable } from 'inversify';
 import 'reflect-metadata';
-import { TierOneCandidatePolicy } from '../domain/organization/TierOneCandidatePolicy';
+import { ReliableUptimePolicy } from '../domain/organization/ReliableUptimePolicy';
 
 @injectable()
 export class OrganizationV1DTOMapper {
@@ -40,7 +37,7 @@ export class OrganizationV1DTOMapper {
 			has30DayStats: measurement30DayAverage !== undefined,
 			subQuorum30DaysAvailability:
 				measurement30DayAverage?.isSubQuorumAvailableAvg || 0,
-			isTierOneOrganization: TierOneCandidatePolicy.isTierOneCandidate(
+			hasReliableUptime: ReliableUptimePolicy.hasReliableUptime(
 				organization,
 				measurement30DayAverage
 			),

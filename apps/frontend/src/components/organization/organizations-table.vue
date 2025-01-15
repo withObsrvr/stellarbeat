@@ -46,7 +46,7 @@
               <span
                 v-if="network.isNodeFailing(validator)"
                 v-tooltip="network.getNodeFailingReason(validator).description"
-                class="badge sb-badge badge-danger ml-1"
+                class="badge sb-badgebadge-danger ml-1"
                 >{{ network.getNodeFailingReason(validator).label }}</span
               >
               <span
@@ -92,9 +92,9 @@
       <template #cell(name)="row">
         <div class="d-flex flex-row justify-content-start align-items-center">
           <span
-            v-if="row.item.isTierOneOrganization"
-            v-tooltip="'Tier one organization'"
-            title="Tier one organization"
+            v-if="row.item.hasReliableUptime"
+            v-tooltip="'>99% uptime with at least 3 validators'"
+            title=">99% uptime with at least 3 validators"
             class="badge sb-badge badge-primary mr-1"
           >
             <b-icon-shield />
@@ -227,7 +227,7 @@ const totalRows = computed(() => props.organizations.length);
 export type TableOrganization = {
   name: string;
   id: string;
-  isTierOneOrganization?: boolean;
+  hasReliableUptime?: boolean;
   failAt?: number;
   hasWarning?: boolean;
   warning?: string;

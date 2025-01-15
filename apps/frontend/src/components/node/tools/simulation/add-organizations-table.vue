@@ -26,10 +26,10 @@
     >
       <template #cell(name)="row">
         <span
-          v-if="row.item.isTierOneOrganization"
-          v-tooltip.hover="'Tier 1 organization'"
+          v-if="row.item.hasReliableUptime"
+          v-tooltip.hover="'>99% uptime and at least 3 validators'"
           class="badge sb-badge badge-success full-validator-badge pt-1 mr-1"
-          title="Tier 1 organization"
+          title=">99% uptime and at least 3 validators"
         >
           <b-icon-shield />
         </span>

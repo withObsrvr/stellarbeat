@@ -1,7 +1,7 @@
 import { Organization } from '../src';
-import Ajv from "ajv";
-import * as addFormats from "ajv-formats";
-import {OrganizationV1Schema} from "../src/dto/organization-v1";
+import Ajv from 'ajv';
+import * as addFormats from 'ajv-formats';
+import { OrganizationV1Schema } from '../src/dto/organization-v1';
 
 describe('json', () => {
 	const dateDiscovered = new Date();
@@ -43,15 +43,14 @@ describe('json', () => {
 	organizationObject.id = '1';
 	organizationObject.subQuorum24HoursAvailability = 30;
 	organizationObject.subQuorum30DaysAvailability = 40.9;
-	organizationObject.isTierOneOrganization = false;
+	organizationObject.hasReliableUptime = false;
 	organizationObject.has24HourStats = false;
 	organizationObject.has30DayStats = false;
 	organizationObject.subQuorumAvailable = false;
 	organizationObject.homeDomain = 'homeDomain.com';
 	organizationObject.horizonUrl = null;
 	organizationObject.dateDiscovered = dateDiscovered.toISOString();
-	organizationObject.tomlState = 'Unknown'
-
+	organizationObject.tomlState = 'Unknown';
 
 	test('OrgToJson', () => {
 		expect(JSON.parse(JSON.stringify(organization))).toEqual(
@@ -61,11 +60,11 @@ describe('json', () => {
 	test('JsonToOrg', () => {
 		const ajv = new Ajv();
 		addFormats.default(ajv);
-		const validate  = ajv.compile(OrganizationV1Schema);
+		const validate = ajv.compile(OrganizationV1Schema);
 		const valid = validate(organizationObject);
 		expect(valid).toBeTruthy();
 		if (!valid) {
-			return
+			return;
 		}
 		expect(Organization.fromOrganizationV1DTO(organizationObject)).toEqual(
 			organization
@@ -84,14 +83,14 @@ describe('subquorum', () => {
 	});
 });
 
-describe('tierOne', () => {
+describe('reliableUptime', () => {
 	test('true', () => {
 		const organization = new Organization('1', 'me');
 		organization.has30DayStats = true;
 		organization.subQuorum30DaysAvailability = 99.5;
 		organization.validators.push(...['1', '2', '3']);
 
-		expect(organization.isTierOneOrganization).toBeTruthy();
+		expect(organization.hasReliableUptime).toBeTruthy();
 	});
 
 	test('not enough validators', () => {
@@ -100,7 +99,7 @@ describe('tierOne', () => {
 		organization.subQuorum30DaysAvailability = 99.5;
 		organization.validators.push(...['1', '2']);
 
-		expect(organization.isTierOneOrganization).toBeFalsy();
+		expect(organization.hasReliableUptime).toBeFalsy();
 	});
 
 	test('not enough measurements', () => {
@@ -109,7 +108,7 @@ describe('tierOne', () => {
 		organization.subQuorum30DaysAvailability = 99.5;
 		organization.validators.push(...['1', '2', '3']);
 
-		expect(organization.isTierOneOrganization).toBeFalsy();
+		expect(organization.hasReliableUptime).toBeFalsy();
 	});
 
 	test('availability too low', () => {
@@ -118,6 +117,6 @@ describe('tierOne', () => {
 		organization.subQuorum30DaysAvailability = 98;
 		organization.validators.push(...['1', '2', '3']);
 
-		expect(organization.isTierOneOrganization).toBeFalsy();
+		expect(organization.hasReliableUptime).toBeFalsy();
 	});
 });

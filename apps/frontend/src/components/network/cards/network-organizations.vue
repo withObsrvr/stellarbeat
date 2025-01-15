@@ -85,7 +85,7 @@ const organizations = computed(() => {
       dangers: store.getOrganizationFailingReason(organization),
       blocked: network.isOrganizationBlocked(organization),
       subQuorum30DAvailability: organization.subQuorum30DaysAvailability + "%",
-      isTierOneOrganization: organization.isTierOneOrganization,
+      hasReliableUptime: organization.hasReliableUptime,
     };
   });
 });

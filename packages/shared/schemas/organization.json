@@ -29,7 +29,7 @@
 		"id": {
 			"type": "string"
 		},
-		"isTierOneOrganization": {
+		"hasReliableUptime": {
 			"type": "boolean"
 		},
 		"keybase": {
