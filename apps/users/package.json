@@ -1,0 +1,32 @@
+{
+	"name": "users",
+	"description": "Users email service",
+	"scripts": {
+		"build": "tsc --declaration",
+		"build-and-start": "pnpm build; node lib/index.js",
+		"start": "node lib/index.js",
+		"test": "pnpm build; node lib/__tests__/all.test.js"
+	},
+	"types": "lib/index.d.ts",
+	"main": "index.js",
+	"license": "MIT",
+	"private": true,
+	"devDependencies": {
+		"@types/express": "^4.17.1",
+		"@types/node": "^16.9.6",
+		"@types/sodium-native": "^2.3.5"
+	},
+	"dependencies": {
+		"axios": "^1.7.9",
+		"body-parser": "^1.20.3",
+		"dotenv": "^10.0.0",
+		"express": "^4.21.2",
+		"express-basic-auth": "^1.2.1",
+		"express-validator": "^7.2.1",
+		"helmet": "^8.0.0",
+		"pg": "^8.13.1",
+		"sodium-native": "^4.3.1",
+		"typeorm": "^0.3.20",
+		"@sentry/node": "^7.119.1"
+	}
+}

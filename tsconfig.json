@@ -12,6 +12,7 @@
 		{ "path": "./packages/node-connector" },
 		{ "path": "./packages/crawler" },
 		{ "path": "./packages/scp-simulation" },
-		{ "path": "./apps/backend" }
+		{ "path": "./apps/backend" },
+		{ "path": "./apps/users" }
 	]
 }
