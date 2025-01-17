@@ -1,5 +1,23 @@
 # Monorepo for Stellarbeat project
 
+## Devcontainer development
+
+For easy development a devcontainer configuration is provided in the .devcontainer folder: https://containers.dev/
+
+You can develop on github codespaces or localy using vscode and devcontainers extension.
+
+A debian docker image with non-root user 'node' is used with nodejs and rust support. 
+Two postgress databases are added for development and integration testing.
+A persistant volume is created linked to the remote 'workspace' folder.  
+
+Also works with podman. 
+
+Container config and postgresql credentials: 
+``` 
+cd .devcontainer
+cat docker-compose.yml
+```
+
 ## install
 
 ```
