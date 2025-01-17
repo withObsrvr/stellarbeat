@@ -1,0 +1,8 @@
+{
+	"name": "stellarbeat",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "stellarbeat",
+	"remoteUser": "node",
+	"containerUser": "node",
+	"workspaceFolder": "/workspace"
+}

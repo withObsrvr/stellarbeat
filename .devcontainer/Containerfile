@@ -1,0 +1,25 @@
+FROM mcr.microsoft.com/devcontainers/javascript-node:20
+
+##############
+### RUST  ####
+##############
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+USER node 
+
+# Install rustup and set up Rust stable
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+    && . $HOME/.cargo/env \
+    && rustup default stable
+
+# Ensure cargo binaries are on the PATH 
+ENV PATH="/home/node/.cargo/bin:${PATH}"
+
+#install wasm-pack
+RUN cargo install wasm-pack
+

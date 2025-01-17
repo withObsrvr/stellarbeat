@@ -1,0 +1,45 @@
+version: "3"
+
+x-podman:
+  in_pod: false
+
+services:
+  stellarbeat:
+    user: "node"
+    userns_mode: "keep-id"
+    security_opt:
+      - label=disable
+    build:
+      context: .
+      dockerfile: Containerfile # Refers to the Containerfile used to build your custom dev environment
+    environment:
+      DATABASE_TEST_URL: postgresql://user:password@pgsql-test:5432/mydb # Database connection string
+      DATABASE_DEV_URL: postgresql://user:password@pgsql-dev:5432/mydb # Database connection string
+    depends_on:
+      - pgsql-test # Make sure the PostgreSQL service starts first
+      - pgsql-dev
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    ports:
+      - 8080:8080 
+    volumes:
+      - ..:/workspace
+
+  pgsql-test:
+    image: docker.io/library/postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    ports:
+      - 5433:5432 
+    
+  pgsql-dev:
+    image: docker.io/library/postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    ports:
+      - 5432:5432 # Expose PostgreSQL on port 5432
