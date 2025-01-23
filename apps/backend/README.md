@@ -1,19 +1,29 @@
-[![Known Vulnerabilities](https://snyk.io/test/github/stellarbeat/js-stellarbeat-backend/badge.svg)](https://snyk.io/test/github/stellarbeat/js-stellarbeat-backend)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+# Stellarbeat Backend
 
-# Stellarbeat backend
+Core service for the Stellarbeat platform that monitors and analyzes the Stellar network. Built with Nodejs/TypeScript and follows Clean Architecture principles.
 
-_Warning: Backend is under active development and subject to a changing API. Use
-at own risk. BC breaks between versions will be documented in changelog file._
+## Modules
 
-The backend consists of three major modules.
+The backend follows clean architecture and is divided into modules that are loosely coupled. 
+Every module has a domain folder for domain code. And interface folder for the database, cli scripts, ... and use-cases that describe and execute the available functionality. 
 
-1. Network-scan: Collects, updates and exposes network data (nodes,
-   organizatins, stats,...).
-2. Notifications: Allows users to subscribe to network events and receive
-   (email) notifications.
-3. History-scan: Scans history archives for errors.
+### Network Scanner
+- Crawls and monitors the Stellar network using the crawler package
+- Collects node and organization data through TOML files and direct connections
+- Tracks network health, node versions, and quorum set configurations
+- Provides network metrics via REST APIs
 
+### Notifications
+- Manages user subscriptions for network events
+- Sends email notifications through the users microservice
+- Alerts on network outages, validator failures, and quorum set changes
+
+### History Archive Scanner
+- Verifies integrity of validator history archives
+- Detects missing or corrupted history records
+- Reports archive availability issues
+
+### Core
 The core module contains app wide functionality like logging, configuration,
 database, etc.
 
@@ -29,7 +39,7 @@ Copy env.dist to .env and configure the environment variables.
 
 ## Usage
 
-Every package has a README.md file with more detailed information.
+Every module has a README.md file with more detailed information.
 
 ### Run dev environment
 
@@ -93,12 +103,11 @@ src/core/infrastructure/database/migrations/{{MIGRATION_DESCRIPTION}} -d
 lib/core/infrastructure/database/AppDataSource.js
 
 ```
+## API Documentation
+OpenAPI spec available at openapi.json
+Swagger UI available at /api-docs when running in development
 
 ## history
 
 Code from https://github.com/stellarbeat/js-stellarbeat-backend was moved to
 this monorepo. For history consult this archive.
-
-```
-
-```

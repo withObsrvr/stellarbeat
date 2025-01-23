@@ -1,9 +1,28 @@
 # Stellarbeat frontend
 
-Frontend
+The Stellarbeat frontend provides an intuitive web dashboard for monitoring and analyzing the Stellar network. Built with Vue.js (currently on v2.7, with Vue 3 migration in progress)
 
-Built with the https://vuejs.org/ framework. (Migration to vue3 is in progress,
-currently on 2.7)
+## Features
+- Network visualizations and analytics
+- Node and organization explorer
+- Simulation tools
+- Email notification management
+- History archive analysis
+- Mobile-responsive design
+- Bootstrap based UI
+
+## Architecture
+- Components: Reusable Vue components in src/components
+- Views: Page components in src/views
+- Config: Environment configuration via Config
+- Router: Vue Router setup in src/router
+- Assets: Static files in src/assets
+
+## Development Tools
+- Vite for builds
+- TypeScript for type safety
+- ESLint & Prettier for code quality
+- Jest for unit testing
 
 ## Usage
 

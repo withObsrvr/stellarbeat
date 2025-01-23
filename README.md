@@ -1,4 +1,58 @@
+[![Known Vulnerabilities](https://snyk.io/test/github/stellarbeat/stellarbeat/badge.svg)](https://snyk.io/test/github/stellarbeat/stellarbeat)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+
+
 # Monorepo for Stellarbeat project
+
+## About
+
+Stellarbeat is a monitoring and analytics platform for the Stellar network. It collects and visualizes network data with the ability to time-travel, has simulation options, provides REST APIs for integration, implements email notifications, scans validator history archives for errors and provides educational tools to aid in understanding the Stellar Consensus Protocol. 
+
+## Architecture
+
+This monorepo is organized into several main components:
+
+### Apps
+- **Backend** ([apps/backend](apps/backend/README.md)) - Core application with three major modules:
+  - Network-scan: Collects and updates network data
+  - Notifications: Handles user subscriptions and email notifications
+  - History-scan: Scans history archives for errors
+
+  Provides REST APIs documented using the OpenAPI standard. 
+
+- **Frontend** ([apps/frontend](apps/frontend/README.MD)) - Vue.js based web dashboard
+- **Users** ([apps/users](apps/users/README.md)) - User email microservice
+
+### Packages
+- **Crawler** ([packages/crawler](packages/crawler/)) - Stellar network crawler that identifies nodes and determines their status
+- **Shared** ([packages/shared](packages/shared/)) - Common code used by both frontend and backend, including DTO classes and TrustGraph calculations
+- **SCP Simulation** ([packages/scp-simulation](packages/scp-simulation/)) - Educational implementation of the Stellar Consensus Protocol
+- **Node Connector** ([packages/node-connector](packages/node-connector/)) - Nodejs package to connect to Stellar nodes
+
+### Apps communication
+Backend, frontend and users share data through REST API's.
+
+### Development
+The project uses:
+- Nodejs on the backend
+- Vuejs on the frontend using Vite build system
+- REST for API's
+- TypeScript with unified configuration inherited from tsconfig.base.json
+- pnpm for package management and monorepo setup
+- Jest for testing
+- ESLint for code quality
+- Docker/Devcontainer support for development environments
+- OpenAPI documentation
+
+### Database
+- PostgreSQL for data persistence
+- Automatic migrations on first run (TypeORM)
+- Separate test database instance for integration testing
+
+### Deployment
+Adheres to [twelve factor app methodology](https://en.wikipedia.org/wiki/Twelve-Factor_App_methodology) for easy deployment on Heroku.
+
+For history scanning think carefully about network traffic and costs when choosing a provider. 
 
 ## Devcontainer development
 
@@ -23,6 +77,7 @@ cat docker-compose.yml
 ```
 pnpm install
 ```
+Afterwards implement the necessary .env files (based on .env.dist) in the applications
 
 ## list available commands
 
@@ -165,3 +220,4 @@ pnpm test:integration
 ```
 pnpm test:all
 ```
+
