@@ -1,11 +1,9 @@
 import * as Sentry from '@sentry/node';
-import { injectable } from 'inversify';
-import { JobMonitor, MonitoringJob } from '../../services/JobMonitor';
+import { JobMonitor, MonitoringJob } from './JobMonitor';
 import 'reflect-metadata';
 import { err, ok, Result } from 'neverthrow';
-import { mapUnknownToError } from '../../utilities/mapUnknownToError';
+import { mapUnknownToError } from 'shared';
 
-@injectable()
 export class SentryJobMonitor implements JobMonitor {
 	private checkInId: string | null = null;
 

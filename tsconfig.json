@@ -9,6 +9,8 @@
 	],
 	"references": [
 		{ "path": "./packages/shared" },
+		{ "path": "./packages/job-monitor" },
+		{ "path": "./packages/exception-logger" },
 		{ "path": "./packages/node-connector" },
 		{ "path": "./packages/crawler" },
 		{ "path": "./packages/scp-simulation" },

@@ -22,7 +22,7 @@ import { NodeMeasurementAverage } from '../../domain/node/NodeMeasurementAverage
 import { mapUnknownToError } from '../../../core/utilities/mapUnknownToError';
 import { NodeAddressMapper } from './NodeAddressMapper';
 import { CORE_TYPES } from '../../../core/infrastructure/di/di-types';
-import { JobMonitor } from '../../../core/services/JobMonitor';
+import { JobMonitor } from 'job-monitor';
 
 interface ShutDownRequest {
 	callback: () => void;
@@ -52,6 +52,7 @@ export class ScanNetwork {
 
 	async execute(dto: ScanNetworkDTO): Promise<Result<undefined, Error>> {
 		try {
+			this.exceptionLogger.captureException(new Error('test'));
 			await this.checkIn('in_progress');
 			if (dto.updateNetwork) {
 				const updateNetworkResult = await this.updateNetwork(
@@ -114,9 +115,8 @@ export class ScanNetwork {
 	): Promise<Result<void, Error>> {
 		if (dryRun) return ok(undefined);
 		this.isPersisting = true;
-		const persistResult = await this.persistScanResultAndNotifyInternal(
-			scanResult
-		);
+		const persistResult =
+			await this.persistScanResultAndNotifyInternal(scanResult);
 		this.isPersisting = false;
 		if (this.shutdownRequest) this.shutdownRequest.callback();
 
@@ -258,7 +258,7 @@ export class ScanNetwork {
 					? await this.nodeMeasurementDayRepository.findXDaysAverageAt(
 							scanResult.nodeScan.time,
 							30
-					  )
+						)
 					: [];
 			return ok(nodeMeasurementAverages);
 		} catch (error) {
@@ -270,9 +270,8 @@ export class ScanNetwork {
 		networkId: NetworkId
 	): Promise<Result<Network | null, Error>> {
 		try {
-			const network = await this.networkRepository.findActiveByNetworkId(
-				networkId
-			);
+			const network =
+				await this.networkRepository.findActiveByNetworkId(networkId);
 			if (!network) return ok(null);
 			return ok(network);
 		} catch (error) {

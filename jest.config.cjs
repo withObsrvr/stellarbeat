@@ -38,6 +38,18 @@ module.exports = {
 		{
 			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],
 			preset: 'ts-jest',
+			displayName: 'job-monitor',
+			rootDir: 'packages/job-monitor'
+		},
+		{
+			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],
+			preset: 'ts-jest',
+			displayName: 'exception-logger',
+			rootDir: 'packages/exception-logger'
+		},
+		{
+			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],
+			preset: 'ts-jest',
 			displayName: 'node-connector',
 			rootDir: 'packages/node-connector'
 		},

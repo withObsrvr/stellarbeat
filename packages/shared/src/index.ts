@@ -46,3 +46,4 @@ export { isArray, isNumber, isObject, isString } from './typeguards';
 export { default as NetworkStatisticsAggregation } from './network-statistics-aggregation';
 export { default as NetworkStatistics } from './network-statistics';
 export { default as StellarCoreConfigurationGenerator } from './stellar-core-configuration-generator';
+export { mapUnknownToError } from './mapUnknownToError';

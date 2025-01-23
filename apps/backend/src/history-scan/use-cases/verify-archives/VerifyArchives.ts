@@ -3,7 +3,7 @@ import { Scanner } from '../../domain/scanner/Scanner';
 import { inject, injectable } from 'inversify';
 import { ScanRepository } from '../../domain/scan/ScanRepository';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';
-import { mapUnknownToError } from '../../../core/utilities/mapUnknownToError';
+import { mapUnknownToError } from 'shared';
 import { Scan } from '../../domain/scan/Scan';
 import { TYPES } from '../../infrastructure/di/di-types';
 import { asyncSleep } from '../../../core/utilities/asyncSleep';
@@ -12,7 +12,7 @@ import { VerifyArchivesDTO } from './VerifyArchivesDTO';
 import { ScanJob } from '../../domain/scan/ScanJob';
 import { HistoryArchiveService } from '../../domain/history-archive/HistoryArchiveService';
 import { CORE_TYPES } from '../../../core/infrastructure/di/di-types';
-import { JobMonitor } from '../../../core/services/JobMonitor';
+import { JobMonitor } from 'job-monitor';
 
 @injectable()
 export class VerifyArchives {

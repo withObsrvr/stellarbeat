@@ -3,7 +3,7 @@ import express from 'express';
 import Kernel from '../Kernel';
 import { DataSource } from 'typeorm';
 import { Config, getConfigFromEnv } from '../../config/Config';
-import { ExceptionLogger } from '../../services/ExceptionLogger';
+import { ExceptionLogger } from 'exception-logger';
 import { subscriptionRouter } from '../../../notifications/infrastructure/http/SubscriptionRouter';
 import bodyParser from 'body-parser';
 import { Server } from 'net';

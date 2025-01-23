@@ -7,17 +7,16 @@ import { AxiosHttpService } from '../http/AxiosHttpService';
 import { HeartBeater } from '../../services/HeartBeater';
 import { DeadManSnitchHeartBeater } from '../../../network-scan/infrastructure/services/DeadManSnitchHeartBeater';
 import { DummyHeartBeater } from '../../../network-scan/infrastructure/services/DummyHeartBeater';
-import {
-	ConsoleExceptionLogger,
-	ExceptionLogger,
-	SentryExceptionLogger
-} from '../../services/ExceptionLogger';
 import { HttpQueue } from '../../services/HttpQueue';
 import { LoopTimer } from '../../services/LoopTimer';
-import { JobMonitor } from '../../services/JobMonitor';
+import { JobMonitor } from 'job-monitor';
 import { CORE_TYPES } from './di-types';
-import { SentryJobMonitor } from '../services/SentryJobMonitor';
-import { LoggerJobMonitor } from '../services/LoggerJobMonitor';
+import { SentryJobMonitor, LoggerJobMonitor } from 'job-monitor';
+import {
+	ExceptionLogger,
+	SentryExceptionLogger,
+	ConsoleExceptionLogger
+} from 'exception-logger';
 
 export function load(container: Container, config: Config) {
 	container

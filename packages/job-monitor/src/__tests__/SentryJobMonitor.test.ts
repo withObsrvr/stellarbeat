@@ -1,5 +1,5 @@
+import { MonitoringJob } from '../JobMonitor';
 import { SentryJobMonitor } from '../SentryJobMonitor';
-import { MonitoringJob } from '../../../services/JobMonitor';
 
 jest.mock('@sentry/node', () => ({
 	init: jest.fn(),

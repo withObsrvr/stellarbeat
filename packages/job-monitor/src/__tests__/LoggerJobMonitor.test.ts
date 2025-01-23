@@ -1,6 +1,6 @@
 import { mock } from 'jest-mock-extended';
-import { Logger } from '../../../services/PinoLogger';
-import { MonitoringJob } from '../../../services/JobMonitor';
+import { Logger } from '../LoggerJobMonitor';
+import { MonitoringJob } from '../JobMonitor';
 import { LoggerJobMonitor } from '../LoggerJobMonitor';
 
 describe('LoggerJobMonitor', () => {

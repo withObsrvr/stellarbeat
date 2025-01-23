@@ -20,7 +20,7 @@ import { NodeScan } from '../../../domain/node/scan/NodeScan';
 import NetworkScan from '../../../domain/network/scan/NetworkScan';
 import { NotifyError } from '../../../../notifications/use-cases/determine-events-and-notify-subscribers/NotifyError';
 import { asyncSleep } from '../../../../core/utilities/asyncSleep';
-import { JobMonitor } from '../../../../core/services/JobMonitor';
+import { JobMonitor } from 'job-monitor';
 
 describe('ScanNetwork', () => {
 	it('should scan the network', async function () {
