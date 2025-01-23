@@ -52,7 +52,6 @@ export class ScanNetwork {
 
 	async execute(dto: ScanNetworkDTO): Promise<Result<undefined, Error>> {
 		try {
-			this.exceptionLogger.captureException(new Error('test'));
 			await this.checkIn('in_progress');
 			if (dto.updateNetwork) {
 				const updateNetworkResult = await this.updateNetwork(
