@@ -49,9 +49,8 @@ export interface Config {
 	userServiceUsername?: string;
 	userServicePassword?: string;
 	logLevel?: string;
-	historyMaxFileMs?: number;
-	historySlowArchiveMaxLedgers?: number;
 	networkScanLoopIntervalMs?: number;
+	registerHistoryScanSecret?: string;
 }
 
 export class DefaultConfig implements Config {
@@ -77,6 +76,7 @@ export class DefaultConfig implements Config {
 	historySlowArchiveMaxLedgers?: number;
 	logLevel = 'info';
 	networkScanLoopIntervalMs?: number;
+	registerHistoryScanSecret?: string;
 
 	constructor(
 		public networkConfig: NetworkConfig,
@@ -289,14 +289,9 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		config.frontendBaseUrl = 'http://localhost:3000';
 	}
 
-	const historyMaxFileMs = Number(process.env.HISTORY_MAX_FILE_MS);
-	if (!isNaN(historyMaxFileMs)) config.historyMaxFileMs = historyMaxFileMs;
-
-	const historySlowArchiveMaxLedgers = Number(
-		process.env.HISTORY_SLOW_ARCHIVE_MAX_LEDGERS
-	);
-	if (!isNaN(historySlowArchiveMaxLedgers))
-		config.historySlowArchiveMaxLedgers = historySlowArchiveMaxLedgers;
+	const registerHistoryScanSecret = process.env.REGISTER_HISTORY_SCAN_SECRET;
+	if (isString(registerHistoryScanSecret))
+		config.registerHistoryScanSecret = registerHistoryScanSecret;
 
 	return ok(config);
 }

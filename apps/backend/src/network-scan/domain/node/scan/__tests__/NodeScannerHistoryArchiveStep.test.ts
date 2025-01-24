@@ -1,7 +1,5 @@
 import { NodeScannerHistoryArchiveStep } from '../NodeScannerHistoryArchiveStep';
-import { HistoryArchiveService } from '../../../../../history-scan/domain/history-archive/HistoryArchiveService';
 import { mock } from 'jest-mock-extended';
-import { Logger } from 'logger';
 import { HistoryArchiveStatusFinder } from '../HistoryArchiveStatusFinder';
 import { NodeScan } from '../NodeScan';
 

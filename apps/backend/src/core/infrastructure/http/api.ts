@@ -11,7 +11,6 @@ import { ConfirmSubscription } from '../../../notifications/use-cases/confirm-su
 import { Subscribe } from '../../../notifications/use-cases/subscribe/Subscribe';
 import { UnmuteNotification } from '../../../notifications/use-cases/unmute-notification/UnmuteNotification';
 import { Unsubscribe } from '../../../notifications/use-cases/unsubscribe/Unsubscribe';
-import { historyScanRouter } from '../../../history-scan/infrastructure/http/HistoryScanRouter';
 import { networkRouter } from '../../../network-scan/infrastructure/http/NetworkRouter';
 
 const swaggerDocument = require('../../../../openapi.json');
@@ -32,6 +31,8 @@ import { GetOrganizations } from '../../../network-scan/use-cases/get-organizati
 import { GetMeasurementsFactory } from '../../../network-scan/use-cases/get-measurements/GetMeasurementsFactory';
 import { GetMeasurementAggregations } from '../../../network-scan/use-cases/get-measurement-aggregations/GetMeasurementAggregations';
 import { RequestUnsubscribeLink } from '../../../notifications/use-cases/request-unsubscribe-link/RequestUnsubscribeLink';
+import { RegisterScan } from '../../../history-scan/use-cases/register-scan/RegisterScan';
+import { historyScanRouter } from '../../../history-scan/infrastructure/http/HistoryScanRouter';
 
 let server: Server;
 const api = express();
@@ -111,7 +112,9 @@ const listen = async () => {
 	api.use(
 		'/v1/history-scan',
 		historyScanRouter({
-			getLatestScan: kernel.container.get(GetLatestScan)
+			getLatestScan: kernel.container.get(GetLatestScan),
+			registerScan: kernel.container.get(RegisterScan),
+			writeSecret: config.registerHistoryScanSecret
 		})
 	);
 

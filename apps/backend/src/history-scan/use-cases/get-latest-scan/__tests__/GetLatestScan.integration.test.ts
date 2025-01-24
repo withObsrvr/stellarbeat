@@ -4,9 +4,9 @@ import { TYPES } from '../../../infrastructure/di/di-types';
 import { ScanRepository } from '../../../domain/scan/ScanRepository';
 import { Scan } from '../../../domain/scan/Scan';
 import { GetLatestScan } from '../GetLatestScan';
-import { createDummyHistoryBaseUrl } from '../../../domain/history-archive/__fixtures__/HistoryBaseUrl';
 import { HistoryArchiveScan } from 'shared';
 import { InvalidUrlError } from '../InvalidUrlError';
+import { Url } from 'http-helper';
 
 let kernel: Kernel;
 jest.setTimeout(60000); //slow integration tests
@@ -22,7 +22,9 @@ it('fetch latest archive', async function () {
 	const historyArchiveScanRepository: ScanRepository = kernel.container.get(
 		TYPES.HistoryArchiveScanRepository
 	);
-	const url = createDummyHistoryBaseUrl();
+	const urlResult = Url.create('https://test.com');
+	if (urlResult.isErr()) throw new Error('Invalid url');
+	const url = urlResult.value;
 	await historyArchiveScanRepository.save([
 		new Scan(new Date(), new Date(), new Date(), url, 0, null)
 	]);
