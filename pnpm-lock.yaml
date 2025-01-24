@@ -117,6 +117,9 @@ importers:
       crawler:
         specifier: workspace:*
         version: link:../../packages/crawler
+      custom-error:
+        specifier: workspace:*
+        version: link:../../packages/custom-error
       dotenv:
         specifier: ^10.0.0
         version: 10.0.0
@@ -135,6 +138,9 @@ importers:
       helmet:
         specifier: ^4.6.0
         version: 4.6.0
+      http-helper:
+        specifier: workspace:*
+        version: link:../../packages/http-helper
       inversify:
         specifier: ^6.0.2
         version: 6.0.2
@@ -404,12 +410,21 @@ importers:
 
   apps/history-scanner:
     dependencies:
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
+      custom-error:
+        specifier: workspace:*
+        version: link:../../packages/custom-error
       dotenv:
         specifier: ^10.0.0
         version: 10.0.0
       exception-logger:
         specifier: workspace:*
         version: link:../../packages/exception-logger
+      http-helper:
+        specifier: workspace:*
+        version: link:../../packages/http-helper
       inversify:
         specifier: ^6.0.2
         version: 6.0.2
@@ -428,6 +443,16 @@ importers:
       validator:
         specifier: ^13.12.0
         version: 13.12.0
+      yn:
+        specifier: ^3.1.1
+        version: 3.1.1
+    devDependencies:
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.21
+      express:
+        specifier: ^4.21.0
+        version: 4.21.2
 
   apps/users:
     dependencies:
@@ -491,6 +516,8 @@ importers:
         specifier: ^3.2.7
         version: 3.2.24
 
+  packages/custom-error: {}
+
   packages/exception-logger:
     dependencies:
       '@sentry/node':
@@ -505,6 +532,34 @@ importers:
       shared:
         specifier: workspace:*
         version: link:../shared
+
+  packages/http-helper:
+    dependencies:
+      async:
+        specifier: ^3.2.6
+        version: 3.2.6
+      custom-error:
+        specifier: workspace:*
+        version: link:../custom-error
+      logger:
+        specifier: workspace:*
+        version: link:../logger
+      neverthrow:
+        specifier: ^6.2.2
+        version: 6.2.2
+      shared:
+        specifier: workspace:*
+        version: link:../shared
+      validator:
+        specifier: ^13.12.0
+        version: 13.12.0
+    devDependencies:
+      '@types/async':
+        specifier: ^3.2.24
+        version: 3.2.24
+      '@types/validator':
+        specifier: ^13.12.2
+        version: 13.12.2
 
   packages/job-monitor:
     dependencies:

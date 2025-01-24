@@ -8,8 +8,10 @@
 		"*.test.ts"
 	],
 	"references": [
+		{ "path": "./packages/custom-error" },
 		{ "path": "./packages/logger" },
 		{ "path": "./packages/shared" },
+		{ "path": "./packages/http-helper" },
 		{ "path": "./packages/job-monitor" },
 		{ "path": "./packages/exception-logger" },
 		{ "path": "./packages/node-connector" },

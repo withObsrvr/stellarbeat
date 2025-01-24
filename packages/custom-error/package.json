@@ -1,0 +1,15 @@
+{
+	"name": "custom-error",
+	"description": "custom Error class",
+	"scripts": {
+		"preversion": "pnpm run build",
+		"build": "../../node_modules/typescript/bin/tsc  --declaration",
+		"test:unit": "jest"
+	},
+	"author": "pieterjan84@github",
+	"license": "MIT",
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"dependencies": {},
+	"devDependencies": {}
+}

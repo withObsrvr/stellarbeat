@@ -1,0 +1,25 @@
+{
+	"name": "http-helper",
+	"description": "Http service abstraction and http queue",
+	"scripts": {
+		"preversion": "pnpm run build",
+		"build": "../../node_modules/typescript/bin/tsc  --declaration",
+		"test:unit": "jest"
+	},
+	"author": "pieterjan84@github",
+	"license": "MIT",
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"dependencies": {
+		"validator": "^13.12.0",
+		"neverthrow": "^6.2.2",
+		"shared": "workspace:*",
+		"logger": "workspace:*",
+		"async": "^3.2.6",
+		"custom-error": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/async": "^3.2.24",
+		"@types/validator": "^13.12.2"
+	}
+}

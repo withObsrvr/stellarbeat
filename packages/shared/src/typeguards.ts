@@ -13,3 +13,7 @@ export function isObject(obj: unknown): obj is Record<string, unknown> {
 export function isNumber(number: unknown): number is number {
 	return typeof number === 'number';
 }
+
+export function instanceOfError(object: unknown): object is Error {
+	return isObject(object) && 'name' in object && 'message' in object;
+}

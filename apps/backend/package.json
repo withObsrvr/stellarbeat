@@ -56,7 +56,9 @@
 		"uuid": "^8.3.2",
 		"validator": "^13.12.0",
 		"winston": "^3.15.0",
-		"workerpool": "^6.5.1"
+		"workerpool": "^6.5.1",
+		"http-helper": "workspace:*",
+		"custom-error": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/async": "^3.2.24",

@@ -1,11 +1,9 @@
-import 'reflect-metadata';
-import { Url } from '../domain/Url';
+import { Url } from './Url';
 import { eachLimit } from 'async';
-import { inject, injectable } from 'inversify';
-import { Logger } from './Logger';
+import { Logger } from 'logger';
 import { err, ok, Result } from 'neverthrow';
-import { CustomError } from '../errors/CustomError';
-import { asyncSleep } from '../utilities/asyncSleep';
+import { CustomError } from 'custom-error';
+import { asyncSleep } from './asyncSleep';
 import { setMaxListeners } from 'events';
 
 import {
@@ -14,7 +12,7 @@ import {
 	HttpResponse,
 	HttpService
 } from './HttpService';
-import { instanceOfError } from '../utilities/TypeGuards';
+import { instanceOfError } from 'shared';
 
 export interface HttpQueueOptions {
 	rampUpConnections: boolean; //ramp up connections slowly
@@ -74,11 +72,10 @@ export interface Request<
 	method: RequestMethod;
 }
 
-@injectable()
 export class HttpQueue {
 	constructor(
-		@inject('HttpService') protected httpService: HttpService,
-		@inject('Logger') private logger: Logger
+		protected httpService: HttpService,
+		private logger: Logger
 	) {}
 
 	async sendRequests<
