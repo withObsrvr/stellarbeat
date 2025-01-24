@@ -20,6 +20,12 @@ module.exports = {
 		{
 			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],
 			preset: 'ts-jest',
+			displayName: 'history-scanner',
+			rootDir: 'apps/history-scanner'
+		},
+		{
+			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],
+			preset: 'ts-jest',
 			displayName: 'crawler',
 			rootDir: 'packages/crawler'
 		},

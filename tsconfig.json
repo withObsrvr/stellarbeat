@@ -18,6 +18,7 @@
 		{ "path": "./packages/crawler" },
 		{ "path": "./packages/scp-simulation" },
 		{ "path": "./apps/backend" },
-		{ "path": "./apps/users" }
+		{ "path": "./apps/users" },
+		{ "path": "./apps/history-scanner" }
 	]
 }

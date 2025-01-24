@@ -5,8 +5,9 @@ import { HttpService, HttpError } from '../HttpService';
 import { err, ok } from 'neverthrow';
 import { Url } from '../Url';
 
-const dummyUrl = Url.create('http://test.com');
-if (!dummyUrl.isOk()) throw dummyUrl.error;
+const dummyUrlResult = Url.create('http://test.com');
+if (!dummyUrlResult.isOk()) throw dummyUrlResult.error;
+const dummyUrl = dummyUrlResult.value;
 
 it('should bust cache', async function () {
 	const httpService = mock<HttpService>();
@@ -18,7 +19,7 @@ it('should bust cache', async function () {
 	await httpQueue.sendRequests(
 		[
 			{
-				url: dummyUrl.value,
+				url: dummyUrl,
 				meta: {},
 				method: RequestMethod.GET
 			}
