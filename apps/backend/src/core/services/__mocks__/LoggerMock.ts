@@ -1,5 +1,5 @@
-import { logFn, Logger } from '../PinoLogger';
- 
+import { logFn, Logger } from 'logger';
+
 export class LoggerMock implements Logger {
 	debug: logFn = (message, context) => {
 		console.log(message, context);

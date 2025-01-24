@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { Url } from '../domain/Url';
 import { AsyncWorker, eachLimit, ErrorCallback } from 'async';
 import { inject, injectable } from 'inversify';
-import { Logger } from './PinoLogger';
+import { Logger } from './Logger';
 import { err, ok, Result } from 'neverthrow';
 import { CustomError } from '../errors/CustomError';
 import { asyncSleep } from '../utilities/asyncSleep';

@@ -8,6 +8,7 @@
 		"*.test.ts"
 	],
 	"references": [
+		{ "path": "./packages/logger" },
 		{ "path": "./packages/shared" },
 		{ "path": "./packages/job-monitor" },
 		{ "path": "./packages/exception-logger" },

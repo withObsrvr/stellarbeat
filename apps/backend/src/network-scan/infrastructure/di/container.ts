@@ -49,7 +49,7 @@ import { TomlService } from '../../domain/network/scan/TomlService';
 import { GeoDataService } from '../../domain/node/scan/GeoDataService';
 import { HistoryArchiveStatusFinder } from '../../domain/node/scan/HistoryArchiveStatusFinder';
 import { Archiver } from '../../domain/network/scan/archiver/Archiver';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 import { HistoryService } from '../../domain/node/scan/history/HistoryService';
 import { IpStackGeoDataService } from '../services/IpStackGeoDataService';
 import { HttpService } from '../../../core/services/HttpService';

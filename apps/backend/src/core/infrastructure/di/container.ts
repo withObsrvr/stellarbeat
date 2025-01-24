@@ -1,7 +1,7 @@
 import { Config } from '../../config/Config';
 import { interfaces } from 'inversify';
 import Container = interfaces.Container;
-import { Logger, PinoLogger } from '../../services/PinoLogger';
+import { Logger, PinoLogger } from 'logger';
 import { HttpService } from '../../services/HttpService';
 import { AxiosHttpService } from '../http/AxiosHttpService';
 import { HeartBeater } from '../../services/HeartBeater';

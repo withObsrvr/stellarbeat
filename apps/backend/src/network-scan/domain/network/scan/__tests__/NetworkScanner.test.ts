@@ -1,6 +1,6 @@
 import { NetworkScanner } from '../NetworkScanner';
 import { mock } from 'jest-mock-extended';
-import { Logger } from '../../../../../core/services/PinoLogger';
+import { Logger } from 'logger';
 import { NodeScan } from '../../../node/scan/NodeScan';
 import FbasAnalyzerService from '../fbas-analysis/FbasAnalyzerService';
 import NetworkScan from '../NetworkScan';

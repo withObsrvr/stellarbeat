@@ -1,7 +1,7 @@
 import { err, ok, Result } from 'neverthrow';
 import NetworkScan from './NetworkScan';
 import { inject, injectable } from 'inversify';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from '../../../../core/services/Logger';
 import { NodeScan } from '../../node/scan/NodeScan';
 import { OrganizationScan } from '../../organization/scan/OrganizationScan';
 import { TrustGraphFactory } from '../../node/scan/TrustGraphFactory';

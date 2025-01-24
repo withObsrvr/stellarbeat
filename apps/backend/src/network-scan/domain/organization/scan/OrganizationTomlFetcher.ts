@@ -10,7 +10,7 @@ import { OrganizationTomlInfo } from './OrganizationTomlInfo';
 import { TomlState } from './TomlState';
 import { ErrorToTomlStateMapper } from './ErrorToTomlStateMapper';
 import { TomlVersionChecker } from '../../network/scan/TomlVersionChecker';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from '../../../../core/services/Logger';
 import { HttpError } from '../../../../core/services/HttpService';
 
 type homeDomain = string;

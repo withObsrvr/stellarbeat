@@ -13,7 +13,7 @@ import {
 } from './NotifyError';
 import { NetworkV1 } from 'shared';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 import { Notifier } from '../../domain/notifier/Notifier';
 import { SubscriberRepository } from '../../domain/subscription/SubscriberRepository';
 import { Notification } from '../../domain/subscription/Notification';
@@ -110,9 +110,8 @@ export class Notify {
 	): Promise<
 		Result<{ network: NetworkV1; previousNetwork: NetworkV1 }, NotifyError>
 	> {
-		const networkOrError = await this.networkService.getNetworkDTOAt(
-			networkUpdateTime
-		);
+		const networkOrError =
+			await this.networkService.getNetworkDTOAt(networkUpdateTime);
 		if (networkOrError.isErr()) {
 			return err(new InCompleteNetworkError(networkUpdateTime));
 		}

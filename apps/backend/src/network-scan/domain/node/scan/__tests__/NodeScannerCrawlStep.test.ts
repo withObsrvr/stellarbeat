@@ -2,7 +2,7 @@ import { NodeScannerCrawlStep } from '../NodeScannerCrawlStep';
 import { CrawlerService } from '../node-crawl/CrawlerService';
 import { mock } from 'jest-mock-extended';
 import { NodeRepository } from '../../NodeRepository';
-import { Logger } from '../../../../../core/services/PinoLogger';
+import { Logger } from 'logger';
 import { NodeScan } from '../NodeScan';
 import { createDummyNode } from '../../__fixtures__/createDummyNode';
 import { NetworkQuorumSetConfiguration } from '../../../network/NetworkQuorumSetConfiguration';

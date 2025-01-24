@@ -1,5 +1,5 @@
 import { mock } from 'jest-mock-extended';
-import { Logger } from '../../../../../core/services/PinoLogger';
+import { Logger } from 'logger';
 import { createDummyPublicKey } from '../../__fixtures__/createDummyPublicKey';
 import { NodeScanner } from '../NodeScanner';
 import { StellarCoreVersion } from '../../../network/StellarCoreVersion';

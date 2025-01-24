@@ -1,6 +1,6 @@
 import { CheckPointGenerator } from '../check-point/CheckPointGenerator';
 import { inject, injectable } from 'inversify';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 import { err, ok, Result } from 'neverthrow';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';
 import { BucketScanState, CategoryScanState } from './ScanState';
@@ -67,13 +67,12 @@ export class RangeScanner {
 				? {
 						ledger: latestScannedLedger,
 						hash: latestScannedLedgerHeaderHash
-				  }
+					}
 				: undefined
 		);
 
-		const bucketHashesOrError = await this.scanHASFilesAndReturnBucketHashes(
-			hasScanState
-		);
+		const bucketHashesOrError =
+			await this.scanHASFilesAndReturnBucketHashes(hasScanState);
 		if (bucketHashesOrError.isErr()) return err(bucketHashesOrError.error);
 		const bucketHashesToScan = bucketHashesOrError.value.bucketHashes;
 
@@ -88,7 +87,7 @@ export class RangeScanner {
 				? {
 						ledger: latestScannedLedger,
 						hash: latestScannedLedgerHeaderHash
-				  }
+					}
 				: undefined
 		);
 		const categoryScanResult = await this.scanCategories(categoryScanState);

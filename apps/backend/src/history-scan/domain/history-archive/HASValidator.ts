@@ -1,6 +1,6 @@
 import { err, ok, Result } from 'neverthrow';
 import { inject, injectable } from 'inversify';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 import { CustomError } from '../../../core/errors/CustomError';
 import Ajv, { ValidateFunction } from 'ajv';
 import {

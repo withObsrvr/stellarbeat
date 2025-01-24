@@ -6,7 +6,7 @@ import FbasAnalyzerFacade, {
 	FbasAnalysisOrganization,
 	MergeBy
 } from './FbasAnalyzerFacade';
-import { Logger } from '../../../../../core/services/PinoLogger';
+import { Logger } from '../../../../../core/services/Logger';
 import Organization from '../../../organization/Organization';
 import Node from '../../../node/Node';
 import { FbasMapper } from './FbasMapper';

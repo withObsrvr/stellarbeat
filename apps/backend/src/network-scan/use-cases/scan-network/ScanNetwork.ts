@@ -2,7 +2,7 @@ import { err, ok, Result } from 'neverthrow';
 import { inject, injectable } from 'inversify';
 import { HeartBeater } from '../../../core/services/HeartBeater';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 import { Archiver } from '../../domain/network/scan/archiver/Archiver';
 import { Notify } from '../../../notifications/use-cases/determine-events-and-notify-subscribers/Notify';
 import { NETWORK_TYPES } from '../../infrastructure/di/di-types';
@@ -52,7 +52,6 @@ export class ScanNetwork {
 
 	async execute(dto: ScanNetworkDTO): Promise<Result<undefined, Error>> {
 		try {
-			this.exceptionLogger.captureException(new Error('test'));
 			await this.checkIn('in_progress');
 			if (dto.updateNetwork) {
 				const updateNetworkResult = await this.updateNetwork(

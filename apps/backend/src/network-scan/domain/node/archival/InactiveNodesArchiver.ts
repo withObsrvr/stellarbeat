@@ -6,7 +6,7 @@ import Node from '../Node';
 import { NodeScan } from '../scan/NodeScan';
 import { hasNoActiveTrustingNodes } from './hasNoActiveTrustingNodes';
 import 'reflect-metadata';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from '../../../../core/services/Logger';
 
 @injectable()
 export class InactiveNodesArchiver {

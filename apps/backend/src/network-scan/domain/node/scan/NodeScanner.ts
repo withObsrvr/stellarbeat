@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from '../../../../core/services/Logger';
 import { err, ok, Result } from 'neverthrow';
 import { NetworkQuorumSetConfiguration } from '../../network/NetworkQuorumSetConfiguration';
 import { StellarCoreVersion } from '../../network/StellarCoreVersion';

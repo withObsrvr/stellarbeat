@@ -144,6 +144,9 @@ importers:
       latest-semver:
         specifier: ^3.0.0
         version: 3.0.0
+      logger:
+        specifier: workspace:*
+        version: link:../../packages/logger
       lru-cache:
         specifier: ^7.18.3
         version: 7.18.3
@@ -399,6 +402,33 @@ importers:
         specifier: 2.1.6
         version: 2.1.6(typescript@5.6.2)
 
+  apps/history-scanner:
+    dependencies:
+      dotenv:
+        specifier: ^10.0.0
+        version: 10.0.0
+      exception-logger:
+        specifier: workspace:*
+        version: link:../../packages/exception-logger
+      inversify:
+        specifier: ^6.0.2
+        version: 6.0.2
+      job-monitor:
+        specifier: workspace:*
+        version: link:../../packages/job-monitor
+      logger:
+        specifier: workspace:*
+        version: link:../../packages/logger
+      neverthrow:
+        specifier: ^6.2.2
+        version: 6.2.2
+      shared:
+        specifier: workspace:*
+        version: link:../../packages/shared
+      validator:
+        specifier: ^13.12.0
+        version: 13.12.0
+
   apps/users:
     dependencies:
       '@sentry/node':
@@ -466,6 +496,9 @@ importers:
       '@sentry/node':
         specifier: ^7.119.1
         version: 7.119.1
+      logger:
+        specifier: workspace:*
+        version: link:../logger
       neverthrow:
         specifier: ^6.2.2
         version: 6.2.2
@@ -478,12 +511,21 @@ importers:
       '@sentry/node':
         specifier: ^7.119.1
         version: 7.119.1
+      logger:
+        specifier: workspace:*
+        version: link:../logger
       neverthrow:
         specifier: ^6.2.2
         version: 6.2.2
       shared:
         specifier: workspace:*
         version: link:../shared
+
+  packages/logger:
+    dependencies:
+      pino:
+        specifier: 9.4.0
+        version: 9.4.0
 
   packages/node-connector:
     dependencies:

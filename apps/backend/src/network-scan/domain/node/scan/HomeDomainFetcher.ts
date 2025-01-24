@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { queue } from 'async';
 import { CustomError } from '../../../../core/errors/CustomError';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from '../../../../core/services/Logger';
 
 interface CacheResult {
 	domain: string | null;

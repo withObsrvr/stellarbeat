@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import { HttpService } from '../../../../../core/services/HttpService';
 import { Url } from '../../../../../core/domain/Url';
 import { CustomError } from '../../../../../core/errors/CustomError';
-import { Logger } from '../../../../../core/services/PinoLogger';
+import { Logger } from '../../../../../core/services/Logger';
 import { HistoryArchiveScanService } from './HistoryArchiveScanService';
 import { NETWORK_TYPES } from '../../../../infrastructure/di/di-types';
 
@@ -73,9 +73,8 @@ export class HistoryService {
 		historyUrl: string,
 		latestLedger: string
 	): Promise<boolean> {
-		const stellarHistoryResult = await this.fetchStellarHistoryLedger(
-			historyUrl
-		);
+		const stellarHistoryResult =
+			await this.fetchStellarHistoryLedger(historyUrl);
 
 		if (stellarHistoryResult.isErr()) {
 			this.logger.info(stellarHistoryResult.error.message);

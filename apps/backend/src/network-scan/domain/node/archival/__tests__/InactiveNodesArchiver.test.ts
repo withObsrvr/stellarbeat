@@ -7,7 +7,7 @@ import { Edge, TrustGraph, Vertex } from 'shared';
 import { StronglyConnectedComponentsFinder } from 'shared';
 import { NetworkTransitiveQuorumSetFinder } from 'shared';
 import { Snapshot } from '../../../../../core/domain/Snapshot';
-import { Logger } from '../../../../../core/services/PinoLogger';
+import { Logger } from 'logger';
 import NodeMeasurement from '../../NodeMeasurement';
 
 describe('InactiveNodesArchiver', () => {

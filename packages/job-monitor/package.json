@@ -13,6 +13,7 @@
 	"dependencies": {
 		"neverthrow": "^6.2.2",
 		"@sentry/node": "^7.119.1",
-		"shared": "workspace:*"
+		"shared": "workspace:*",
+		"logger": "workspace:*"
 	}
 }

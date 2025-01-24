@@ -6,7 +6,7 @@ import {
 	TomlParseError,
 	TomlService
 } from '../../../network/scan/TomlService';
-import { Logger } from '../../../../../core/services/PinoLogger';
+import { Logger } from 'logger';
 import { TomlState } from '../TomlState';
 
 describe('OrganizationTomlFetcher', () => {

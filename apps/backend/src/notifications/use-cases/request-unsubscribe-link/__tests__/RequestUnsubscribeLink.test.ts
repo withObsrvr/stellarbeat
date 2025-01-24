@@ -4,7 +4,7 @@ import { MessageCreator } from '../../../domain/notifier/MessageCreator';
 import { SubscriberRepository } from '../../../domain/subscription/SubscriberRepository';
 import { IUserService } from '../../../../core/domain/IUserService';
 import { ExceptionLogger } from '../../../../core/services/ExceptionLogger';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from 'logger';
 import { err, ok } from 'neverthrow';
 import { createDummySubscriber } from '../../../domain/subscription/__fixtures__/Subscriber.fixtures';
 import { Message } from '../../../../core/domain/Message';

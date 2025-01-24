@@ -1,7 +1,7 @@
 import Node from '../Node';
 import { inject, injectable } from 'inversify';
 import { NodeMeasurementDayRepository } from '../NodeMeasurementDayRepository';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from '../../../../core/services/Logger';
 import { TrustGraph } from 'shared';
 import 'reflect-metadata';
 import { NETWORK_TYPES } from '../../../infrastructure/di/di-types';

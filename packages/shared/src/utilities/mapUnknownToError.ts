@@ -1,4 +1,4 @@
-import { isString } from "./typeguards";
+import { isString } from '../typeguards';
 
 export function mapUnknownToError(e: unknown): Error {
 	if (e instanceof Error) {

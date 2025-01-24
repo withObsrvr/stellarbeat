@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 import { ScanNetworkLoopedDTO } from './ScanNetworkLoopedDTO';
 import { ScanNetwork } from '../scan-network/ScanNetwork';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';

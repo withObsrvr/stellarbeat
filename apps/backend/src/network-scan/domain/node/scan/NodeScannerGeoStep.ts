@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { GeoDataService } from './GeoDataService';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from '../../../../core/services/Logger';
 import NodeGeoDataLocation from '../NodeGeoDataLocation';
 import { NodeScan } from './NodeScan';
 

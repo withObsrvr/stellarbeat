@@ -14,7 +14,7 @@ import { InvalidOverlayRangeError } from './InvalidOverlayRangeError';
 import { StellarCoreVersion } from '../../domain/network/StellarCoreVersion';
 import { InvalidStellarCoreVersionError } from './InvalidStellarCoreVersionError';
 import { RepositoryError } from './RepositoryError';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 
 @injectable()
 export class UpdateNetwork {
@@ -56,9 +56,8 @@ export class UpdateNetwork {
 				stellarCoreVersion: stellarCoreVersionOrError.value
 			};
 
-			const network = await this.networkRepository.findActiveByNetworkId(
-				networkId
-			);
+			const network =
+				await this.networkRepository.findActiveByNetworkId(networkId);
 
 			if (!network) {
 				this.logger.info('Network not found, creating new one', {

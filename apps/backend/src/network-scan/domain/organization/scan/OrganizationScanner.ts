@@ -9,7 +9,7 @@ import Organization from '../Organization';
 import { mapUnknownToError } from '../../../../core/utilities/mapUnknownToError';
 import { CouldNotRetrieveArchivedOrganizationsError } from './errors/CouldNotRetrieveArchivedOrganizationsError';
 import { OrganizationScanError } from './errors/OrganizationScanError';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from '../../../../core/services/Logger';
 
 @injectable()
 export class OrganizationScanner {

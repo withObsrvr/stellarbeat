@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import * as AWS from '@aws-sdk/client-s3';
 import { err, ok, Result } from 'neverthrow';
 import { CustomError } from '../../../core/errors/CustomError';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 import { Archiver } from '../../domain/network/scan/archiver/Archiver';
 import { NetworkDTOService } from '../../services/NetworkDTOService';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
@@ -28,9 +28,8 @@ export class S3Archiver implements Archiver {
 	) {}
 
 	async archive(time: Date): Promise<Result<void, Error>> {
-		const networkDTOOrError = await this.networkDTOService.getNetworkDTOAt(
-			time
-		);
+		const networkDTOOrError =
+			await this.networkDTOService.getNetworkDTOAt(time);
 		if (networkDTOOrError.isErr()) return err(networkDTOOrError.error);
 		if (networkDTOOrError.value === null)
 			return err(new Error('Could not find networkDTO for archival'));

@@ -23,6 +23,7 @@
 		"shared": "workspace:*",
 		"job-monitor": "workspace:*",
 		"exception-logger": "workspace:*",
+		"logger": "workspace:*",
 		"@stellarbeat/stellar-history-archive-hasher": "0.7.0",
 		"@stellarbeat/stellar_analysis_nodejs": "^0.6.2",
 		"ajv": "^8.17.1",

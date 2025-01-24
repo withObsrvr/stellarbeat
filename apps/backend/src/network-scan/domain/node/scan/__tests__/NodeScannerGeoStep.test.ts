@@ -1,7 +1,7 @@
 import { NodeScannerGeoStep } from '../NodeScannerGeoStep';
 import { GeoDataService, GeoDataUpdateError } from '../GeoDataService';
 import { mock } from 'jest-mock-extended';
-import { Logger } from '../../../../../core/services/PinoLogger';
+import { Logger } from 'logger';
 import { NodeScan } from '../NodeScan';
 import { err, ok } from 'neverthrow';
 

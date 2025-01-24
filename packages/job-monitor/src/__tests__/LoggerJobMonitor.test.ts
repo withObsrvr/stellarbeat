@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended';
-import { Logger } from '../LoggerJobMonitor';
 import { MonitoringJob } from '../JobMonitor';
 import { LoggerJobMonitor } from '../LoggerJobMonitor';
+import { Logger } from 'logger';
 
 describe('LoggerJobMonitor', () => {
 	test('should log job check in', async () => {

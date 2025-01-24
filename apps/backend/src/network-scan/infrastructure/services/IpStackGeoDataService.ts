@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 import { HttpService } from '../../../core/services/HttpService';
 import { err, ok, Result } from 'neverthrow';
 import { Url } from '../../../core/domain/Url';

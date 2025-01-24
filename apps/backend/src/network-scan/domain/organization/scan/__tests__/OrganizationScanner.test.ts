@@ -10,7 +10,7 @@ import { createDummyOrganizationId } from '../../__fixtures__/createDummyOrganiz
 import { NodeScan } from '../../../node/scan/NodeScan';
 import { OrganizationRepository } from '../../OrganizationRepository';
 import OrganizationMeasurement from '../../OrganizationMeasurement';
-import { Logger } from '../../../../../core/services/PinoLogger';
+import { Logger } from 'logger';
 import { CouldNotRetrieveArchivedOrganizationsError } from '../errors/CouldNotRetrieveArchivedOrganizationsError';
 import { createDummyPublicKeyString } from '../../../node/__fixtures__/createDummyPublicKey';
 import { TomlState } from '../TomlState';
@@ -87,9 +87,7 @@ describe('OrganizationScanner', function () {
 		const archivedOrganization = Organization.create(
 			createDummyOrganizationId(),
 			'other-domain.com',
-			new Date(
-				'2021-01-01'
-			)
+			new Date('2021-01-01')
 		);
 		setup.organizationRepository.findByHomeDomains.mockResolvedValue([
 			archivedOrganization
@@ -112,7 +110,9 @@ describe('OrganizationScanner', function () {
 			'domain',
 			new Date('2021-01-02')
 		);
-		const organizationScan = new OrganizationScan(new Date('2021-01-02'), [organization]);
+		const organizationScan = new OrganizationScan(new Date('2021-01-02'), [
+			organization
+		]);
 		const result = await setup.organizationScanner.execute(
 			organizationScan,
 			nodeScan

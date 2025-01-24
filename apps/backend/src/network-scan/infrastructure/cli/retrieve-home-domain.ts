@@ -1,9 +1,8 @@
- 
 import { HomeDomainFetcher } from '../../domain/node/scan/HomeDomainFetcher';
 import { HorizonService } from '../../domain/network/scan/HorizonService';
 // noinspection JSIgnoredPromiseFromCall
 import { getConfigFromEnv } from '../../../core/config/Config';
-import { PinoLogger } from '../../../core/services/PinoLogger';
+import { PinoLogger } from 'logger';
 import { AxiosHttpService } from '../../../core/infrastructure/http/AxiosHttpService';
 
 main();

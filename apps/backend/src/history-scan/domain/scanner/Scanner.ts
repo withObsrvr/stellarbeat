@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 import { Scan } from '../scan/Scan';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';
 import { RangeScanner } from './RangeScanner';

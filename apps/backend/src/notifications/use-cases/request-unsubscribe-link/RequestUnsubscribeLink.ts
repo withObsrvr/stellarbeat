@@ -10,7 +10,7 @@ import { mapUnknownToError } from '../../../core/utilities/mapUnknownToError';
 import { TYPES } from '../../infrastructure/di/di-types';
 import { MessageCreator } from '../../domain/notifier/MessageCreator';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 import 'reflect-metadata';
 
 export interface FailedSubscription {

@@ -2,7 +2,7 @@ import 'reflect-metadata';
 
 import Kernel from '../../../core/infrastructure/Kernel';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from '../../../core/services/Logger';
 import { ScanNetwork } from '../../use-cases/scan-network/ScanNetwork';
 import { ScanNetworkLooped } from '../../use-cases/scan-network-looped/ScanNetworkLooped';
 

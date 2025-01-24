@@ -1,6 +1,6 @@
 {
-	"name": "exception-logger",
-	"description": "Log exceptions (console, Sentry,...)",
+	"name": "logger",
+	"description": "Abstract logger",
 	"scripts": {
 		"preversion": "pnpm run build",
 		"build": "../../node_modules/typescript/bin/tsc  --declaration",
@@ -11,10 +11,7 @@
 	"main": "lib/index.js",
 	"types": "lib/index.d.ts",
 	"dependencies": {
-		"@sentry/node": "^7.119.1",
-		"neverthrow": "^6.2.2",
-		"shared": "workspace:*",
-		"logger": "workspace:*"
+		"pino": "9.4.0"
 	},
 	"devDependencies": {}
 }

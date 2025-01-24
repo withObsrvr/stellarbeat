@@ -1,15 +1,10 @@
 import { ValidatorDemoter } from '../ValidatorDemoter';
 import { mock } from 'jest-mock-extended';
-import { Logger } from '../../../../../core/services/PinoLogger';
+import { Logger } from 'logger';
 import { NodeMeasurementDayRepository } from '../../NodeMeasurementDayRepository';
 import { createDummyNode } from '../../__fixtures__/createDummyNode';
 import NodeQuorumSet from '../../NodeQuorumSet';
-import {
-	Edge,
-	QuorumSet,
-	TrustGraph,
-	Vertex
-} from 'shared';
+import { Edge, QuorumSet, TrustGraph, Vertex } from 'shared';
 import { StronglyConnectedComponentsFinder } from 'shared';
 import { NetworkTransitiveQuorumSetFinder } from 'shared';
 import { NodeScan } from '../../scan/NodeScan';

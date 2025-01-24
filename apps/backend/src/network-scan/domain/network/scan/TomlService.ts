@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { HttpError, HttpService } from '../../../../core/services/HttpService';
 import { Url } from '../../../../core/domain/Url';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from '../../../../core/services/Logger';
 import { mapUnknownToError } from '../../../../core/utilities/mapUnknownToError';
 import { retryHttpRequestIfNeeded } from '../../../../core/utilities/HttpRequestRetry';
 import { CustomError } from '../../../../core/errors/CustomError';
@@ -21,7 +21,10 @@ export class TomlParseError extends CustomError {
 
 export class TomlFetchError {
 	public message: string;
-	constructor(public domain: string, public cause: HttpError | TomlParseError) {
+	constructor(
+		public domain: string,
+		public cause: HttpError | TomlParseError
+	) {
 		this.message = 'Fetch toml failed for ' + domain;
 	}
 }

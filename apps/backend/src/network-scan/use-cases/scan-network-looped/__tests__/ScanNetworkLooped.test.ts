@@ -4,7 +4,7 @@ import { mock } from 'jest-mock-extended';
 import { ScanNetwork } from '../../scan-network/ScanNetwork';
 import { LoopTimer } from '../../../../core/services/LoopTimer';
 import { ExceptionLogger } from '../../../../core/services/ExceptionLogger';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from 'logger';
 import { err, ok } from 'neverthrow';
 
 describe('ScanNetworkLooped', () => {

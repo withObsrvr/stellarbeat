@@ -1,6 +1,6 @@
 import { CrawlerService, CrawlResult } from './node-crawl/CrawlerService';
 import { inject, injectable } from 'inversify';
-import { Logger } from '../../../../core/services/PinoLogger';
+import { Logger } from '../../../../core/services/Logger';
 import { err, Ok, ok, Result } from 'neverthrow';
 import { NetworkQuorumSetConfiguration } from '../../network/NetworkQuorumSetConfiguration';
 import Node from '../Node';

@@ -3,7 +3,7 @@ import { NodeScanner } from '../node/scan/NodeScanner';
 import { mock } from 'jest-mock-extended';
 import { OrganizationScanner } from '../organization/scan/OrganizationScanner';
 import { NetworkScanner } from '../network/scan/NetworkScanner';
-import { Logger } from '../../../core/services/PinoLogger';
+import { Logger } from 'logger';
 import { Network } from '../network/Network';
 import { createDummyNetworkProps } from '../network/__fixtures__/createDummyNetworkProps';
 import { NetworkId } from '../network/NetworkId';
