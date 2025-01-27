@@ -1,10 +1,10 @@
-import Kernel from '../../../../core/infrastructure/Kernel';
-import { ConfigMock } from '../../../../core/config/__mocks__/configMock';
+import Kernel from '../../../../../core/infrastructure/Kernel';
+import { ConfigMock } from '../../../../../core/config/__mocks__/configMock';
 import { createDummyHistoryBaseUrl } from '../../../domain/history-archive/__fixtures__/HistoryBaseUrl';
-import { TYPES } from '../../di/di-types';
-import { ScanRepository } from '../../../domain/scan/ScanRepository';
-import { Scan } from '../../../domain/scan/Scan';
-import { ScanError, ScanErrorType } from '../../../domain/scan/ScanError';
+import { TYPES } from '../../../di/di-types';
+import { ScanRepository } from '../../../../domain/scan/ScanRepository';
+import { Scan } from '../../../../domain/scan/Scan';
+import { ScanError, ScanErrorType } from '../../../../domain/scan/ScanError';
 
 let kernel: Kernel;
 jest.setTimeout(60000); //slow integration tests
