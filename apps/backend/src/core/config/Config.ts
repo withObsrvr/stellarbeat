@@ -50,7 +50,7 @@ export interface Config {
 	userServicePassword?: string;
 	logLevel?: string;
 	networkScanLoopIntervalMs?: number;
-	registerHistoryScanSecret?: string;
+	historyScanSecretKey?: string;
 }
 
 export class DefaultConfig implements Config {
@@ -76,7 +76,7 @@ export class DefaultConfig implements Config {
 	historySlowArchiveMaxLedgers?: number;
 	logLevel = 'info';
 	networkScanLoopIntervalMs?: number;
-	registerHistoryScanSecret?: string;
+	historyScanSecretKey?: string;
 
 	constructor(
 		public networkConfig: NetworkConfig,
@@ -289,9 +289,9 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		config.frontendBaseUrl = 'http://localhost:3000';
 	}
 
-	const registerHistoryScanSecret = process.env.REGISTER_HISTORY_SCAN_SECRET;
+	const registerHistoryScanSecret = process.env.HISTORY_SCAN_SECRET_KEY;
 	if (isString(registerHistoryScanSecret))
-		config.registerHistoryScanSecret = registerHistoryScanSecret;
+		config.historyScanSecretKey = registerHistoryScanSecret;
 
 	return ok(config);
 }

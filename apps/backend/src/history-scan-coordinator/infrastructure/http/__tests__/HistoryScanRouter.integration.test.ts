@@ -8,15 +8,19 @@ import { GetLatestScan } from '../../../use-cases/get-latest-scan/GetLatestScan'
 import { RegisterScan } from '../../../use-cases/register-scan/RegisterScan';
 import { InvalidUrlError } from '../../../use-cases/get-latest-scan/InvalidUrlError';
 import { ScanDTO } from '../../../use-cases/register-scan/ScanDTO';
+import { GetScanJobs } from '../../../use-cases/get-scan-jobs/GetScanJobs';
+import { ScanJob } from '../../../domain/ScanJob';
 
 describe('HistoryScanRouter.integration', () => {
 	let app: express.Application;
 	let getLatestScan: jest.Mocked<GetLatestScan>;
 	let registerScan: jest.Mocked<RegisterScan>;
+	let getScanJobs: jest.Mocked<GetScanJobs>;
 
 	beforeEach(() => {
 		getLatestScan = mock<GetLatestScan>();
 		registerScan = mock<RegisterScan>();
+		getScanJobs = mock<GetScanJobs>();
 
 		app = express();
 		app.use(express.json());
@@ -25,7 +29,8 @@ describe('HistoryScanRouter.integration', () => {
 			HistoryScanRouterWrapper({
 				getLatestScan,
 				registerScan,
-				writeSecret: 'secret'
+				getScanJobs,
+				secret: 'secret'
 			})
 		);
 	});
@@ -102,6 +107,51 @@ describe('HistoryScanRouter.integration', () => {
 				});
 
 			expect(registerScan.execute).toHaveBeenCalledWith(validBody);
+		});
+	});
+
+	describe('GET /jobs', () => {
+		it('should return 401 without authentication', async () => {
+			await request(app).get('/history-scan/jobs').expect(401);
+		});
+
+		it('should return 401 with wrong credentials', async () => {
+			await request(app)
+				.get('/history-scan/jobs')
+				.auth('admin', 'wrong-secret')
+				.expect(401);
+		});
+
+		it('should return scan jobs when authenticated', async () => {
+			const mockJobs: ScanJob[] = [
+				new ScanJob('https://test.com', 100, 'hash')
+			];
+
+			getScanJobs.execute.mockResolvedValue(ok(mockJobs));
+
+			await request(app)
+				.get('/history-scan/jobs')
+				.auth('admin', 'secret')
+				.expect(200)
+				.expect('Content-Type', /json/)
+				.expect((response) => {
+					expect(response.body).toEqual(mockJobs);
+				});
+
+			expect(getScanJobs.execute).toHaveBeenCalled();
+		});
+
+		it('should return 500 when getScanJobs fails', async () => {
+			getScanJobs.execute.mockResolvedValue(err(new Error('Database error')));
+
+			await request(app)
+				.get('/history-scan/jobs')
+				.auth('admin', 'secret')
+				.expect(500)
+				.expect('Content-Type', /json/)
+				.expect((response) => {
+					expect(response.body.error).toBeDefined();
+				});
 		});
 	});
 });
