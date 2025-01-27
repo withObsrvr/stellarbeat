@@ -9,7 +9,7 @@ import {
 	RequestMethod,
 	RetryableQueueError
 } from 'http-helper';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { mapHttpQueueErrorToScanError } from './mapHttpQueueErrorToScanError';
 import { createGunzip } from 'zlib';
 import { createHash } from 'crypto';
@@ -18,10 +18,11 @@ import { pipeline } from 'stream/promises';
 import { mapUnknownToError } from 'shared';
 import { ScanError, ScanErrorType } from '../scan/ScanError';
 import { isZLibError } from './isZLibError';
+import { TYPES } from '../../infrastructure/di/di-types';
 
 @injectable()
 export class BucketScanner {
-	constructor(private httpQueue: HttpQueue) {}
+	constructor(@inject(TYPES.HttpQueue) private httpQueue: HttpQueue) {}
 
 	async scan(
 		scanState: BucketScanState,

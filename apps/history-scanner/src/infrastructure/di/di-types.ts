@@ -1,6 +1,11 @@
+import { HttpQueue } from 'http-helper';
+
 export const TYPES = {
 	CheckPointFrequency: Symbol('CheckPointFrequency'),
-	HistoryArchiveScanRepository: Symbol('HistoryArchiveScanRepository'),
 	ScanScheduler: Symbol('ScanScheduler'),
-	HistoryArchiveService: Symbol('HistoryArchiveService')
+	ScanCoordinatorService: Symbol('ScanCoordinatorService'),
+	JobMonitor: Symbol('JobMonitor'),
+	ExceptionLogger: Symbol('ExceptionLogger'),
+	HttpQueue: Symbol('HttpQueue'),
+	HttpService: Symbol('HttpService')
 };

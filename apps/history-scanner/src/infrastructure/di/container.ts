@@ -12,14 +12,19 @@ import { RangeScanner } from '../../domain/scanner/RangeScanner';
 import { VerifySingleArchive } from '../../use-cases/verify-single-archive/VerifySingleArchive';
 import { VerifyArchives } from '../../use-cases/verify-archives/VerifyArchives';
 import { ArchivePerformanceTester } from '../../domain/scanner/ArchivePerformanceTester';
-import {
-	RestartAtLeastOneScan,
-	ScanScheduler
-} from '../../domain/scanner/ScanScheduler';
 import { ScanSettingsFactory } from '../../domain/scan/ScanSettingsFactory';
 import { CategoryVerificationService } from '../../domain/scanner/CategoryVerificationService';
 import { Config } from '../config/Config';
-import { HttpQueue } from 'http-helper';
+import { AxiosHttpService, HttpQueue, HttpService } from 'http-helper';
+import { ScanCoordinatorService } from 'src/domain/scan/ScanCoordinatorService';
+import { RESTScanCoordinatorService } from '../services/RESTScanCoordinatorService';
+import { JobMonitor, LoggerJobMonitor, SentryJobMonitor } from 'job-monitor';
+import {
+	ConsoleExceptionLogger,
+	ExceptionLogger,
+	SentryExceptionLogger
+} from 'exception-logger';
+import { Logger, PinoLogger } from 'logger';
 
 export function load(container: Container, config: Config) {
 	container.bind(CategoryScanner).toSelf();
@@ -44,7 +49,7 @@ export function load(container: Container, config: Config) {
 			() =>
 				new ArchivePerformanceTester(
 					container.get(CheckPointGenerator),
-					container.get(HttpQueue),
+					container.get<HttpQueue>(TYPES.HttpQueue),
 					config.historyMaxFileMs
 				)
 		);
@@ -53,7 +58,43 @@ export function load(container: Container, config: Config) {
 		.toDynamicValue(() => {
 			return new StandardCheckPointFrequency();
 		});
-	container.bind<ScanScheduler>(TYPES.ScanScheduler).toDynamicValue(() => {
-		return new RestartAtLeastOneScan();
+	container
+		.bind<ScanCoordinatorService>(TYPES.ScanCoordinatorService)
+		.toDynamicValue(() => {
+			return new RESTScanCoordinatorService(
+				container.get<HttpService>(TYPES.HttpService),
+				config.coordinatorAPIBaseUrl,
+				config.coordinatorAPIUsername,
+				config.coordinatorAPIPassword
+			);
+		});
+	container.bind<ExceptionLogger>(TYPES.ExceptionLogger).toDynamicValue(() => {
+		if (config.enableSentry && config.sentryDSN)
+			return new SentryExceptionLogger(
+				config.sentryDSN,
+				container.get<Logger>('Logger')
+			);
+		else return new ConsoleExceptionLogger();
+	});
+	container
+		.bind<Logger>('Logger')
+		.toDynamicValue(() => {
+			return new PinoLogger(config.logLevel);
+		})
+		.inSingletonScope();
+	container.bind<JobMonitor>(TYPES.JobMonitor).toDynamicValue(() => {
+		if (config.enableSentry && config.sentryDSN)
+			return new SentryJobMonitor(config.sentryDSN);
+		return new LoggerJobMonitor(container.get<Logger>('Logger'));
+	});
+	container.bind<HttpService>(TYPES.HttpService).toDynamicValue(() => {
+		return new AxiosHttpService(config.userAgent);
+	});
+
+	container.bind<HttpQueue>(TYPES.HttpQueue).toDynamicValue(() => {
+		return new HttpQueue(
+			container.get<HttpService>(TYPES.HttpService),
+			container.get<Logger>('Logger')
+		);
 	});
 }

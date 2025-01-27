@@ -1,10 +1,10 @@
 import Kernel from '../../../../../core/infrastructure/Kernel';
 import { ConfigMock } from '../../../../../core/config/__mocks__/configMock';
-import { createDummyHistoryBaseUrl } from '../../../domain/history-archive/__fixtures__/HistoryBaseUrl';
 import { TYPES } from '../../../di/di-types';
 import { ScanRepository } from '../../../../domain/scan/ScanRepository';
 import { Scan } from '../../../../domain/scan/Scan';
 import { ScanError, ScanErrorType } from '../../../../domain/scan/ScanError';
+import { Url } from 'http-helper';
 
 let kernel: Kernel;
 jest.setTimeout(60000); //slow integration tests
@@ -15,6 +15,13 @@ beforeAll(async () => {
 afterAll(async () => {
 	await kernel.close();
 });
+
+let counter = 0;
+const createDummyHistoryBaseUrl = () => {
+	const url = Url.create('https://history.stellar.org/' + counter++);
+	if (url.isErr()) throw url.error;
+	return url.value;
+};
 
 it('should find the latest scans', async function () {
 	const repo: ScanRepository = kernel.container.get(

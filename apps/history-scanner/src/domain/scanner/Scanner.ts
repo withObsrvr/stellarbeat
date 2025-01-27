@@ -9,6 +9,7 @@ import { ScanSettingsFactory } from '../scan/ScanSettingsFactory';
 import { ScanSettings } from '../scan/ScanSettings';
 import { ScanResult } from '../scan/ScanResult';
 import { Url } from 'http-helper';
+import { TYPES } from '../../infrastructure/di/di-types';
 
 export interface LedgerHeader {
 	ledger: number;
@@ -21,7 +22,7 @@ export class Scanner {
 		private rangeScanner: RangeScanner,
 		private scanJobSettingsFactory: ScanSettingsFactory,
 		@inject('Logger') private logger: Logger,
-		@inject('ExceptionLogger') private exceptionLogger: ExceptionLogger,
+		@inject(TYPES.ExceptionLogger) private exceptionLogger: ExceptionLogger,
 		private readonly rangeSize = 1000000
 	) {}
 

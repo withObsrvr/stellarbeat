@@ -10,12 +10,18 @@ import { asyncSleep } from 'shared';
 import { VerifyArchivesDTO } from './VerifyArchivesDTO';
 import { ScanJob } from '../../domain/scan/ScanJob';
 import { JobMonitor } from 'job-monitor';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../../infrastructure/di/di-types';
 
+@injectable()
 export class VerifyArchives {
 	constructor(
 		private scanner: Scanner,
+		@inject(TYPES.ScanCoordinatorService)
 		private scanCoordinator: ScanCoordinatorService,
+		@inject(TYPES.ExceptionLogger)
 		private exceptionLogger: ExceptionLogger,
+		@inject(TYPES.JobMonitor)
 		private jobMonitor: JobMonitor
 	) {}
 
@@ -27,7 +33,7 @@ export class VerifyArchives {
 					await this.scanCoordinator.getPendingScanJobs();
 				if (pendingScanJobsResult.isErr()) {
 					this.exceptionLogger.captureException(pendingScanJobsResult.error);
-					await asyncSleep(60 * 60000); //maybe temporary db connection error
+					await asyncSleep(60 * 1000); //maybe temporary db connection error
 					continue;
 				}
 
@@ -38,7 +44,7 @@ export class VerifyArchives {
 			} catch (e) {
 				//general catch all in case we missed an edge case
 				this.exceptionLogger.captureException(mapUnknownToError(e));
-				await asyncSleep(60 * 60000);
+				await asyncSleep(60 * 1000);
 			}
 		} while (!shutDown && verifyArchivesDTO.loop);
 	}

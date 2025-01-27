@@ -10,7 +10,6 @@ import { Url } from 'http-helper';
 export class VerifySingleArchive {
 	constructor(
 		private scanner: Scanner,
-		private scanRepository: ScanCoordinatorService,
 		private exceptionLogger: ExceptionLogger
 	) {}
 

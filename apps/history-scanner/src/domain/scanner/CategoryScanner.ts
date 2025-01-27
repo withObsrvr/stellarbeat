@@ -12,7 +12,7 @@ import {
 	asyncSleep
 } from 'http-helper';
 import { HASValidator } from '../history-archive/HASValidator';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { HASBucketHashExtractor } from '../history-archive/HASBucketHashExtractor';
 import { mapHttpQueueErrorToScanError } from './mapHttpQueueErrorToScanError';
 import { isObject, mapUnknownToError } from 'shared';
@@ -32,6 +32,7 @@ import { CategoryVerificationService } from './CategoryVerificationService';
 import { HasherPool } from './HasherPool';
 import { isZLibError } from './isZLibError';
 import { getMaximumNumber } from './getMaximumNumber';
+import { TYPES } from './../../infrastructure/di/di-types';
 
 type Ledger = number;
 type Hash = string;
@@ -63,7 +64,7 @@ export class CategoryScanner {
 
 	constructor(
 		private hasValidator: HASValidator,
-		private httpQueue: HttpQueue,
+		@inject(TYPES.HttpQueue) private httpQueue: HttpQueue,
 		private checkPointGenerator: CheckPointGenerator,
 		private categoryVerificationService: CategoryVerificationService
 	) {}

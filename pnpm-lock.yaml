@@ -556,6 +556,9 @@ importers:
       async:
         specifier: ^3.2.6
         version: 3.2.6
+      axios:
+        specifier: 1.7.9
+        version: 1.7.9
       custom-error:
         specifier: workspace:*
         version: link:../custom-error

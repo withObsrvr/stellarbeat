@@ -11,6 +11,9 @@ import { ScanJob } from '../../domain/ScanJob';
 /**
  * Schedules new scan jobs for history archives based on a configured scheduling strategy.
  * At the moment the strategy is basic, but could be expanded to support multiple scanners.
+ * TODO: it would be even simpler to just return one 'next' scanJob to worker. This would allow easy scaling.
+ * If a scan would fail, it would be picked up by another worker after all other urls are scanned (round robin like)
+ *
  * */
 @injectable()
 export class GetScanJobs {

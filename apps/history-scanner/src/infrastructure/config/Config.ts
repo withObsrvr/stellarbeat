@@ -13,9 +13,9 @@ export interface Config {
 	sentryDSN?: string;
 	environment?: string;
 	userAgent: string;
-	backendAPIBaseUrl: string;
-	backendAPIPassword: string;
-	backendAPIUsername: string;
+	coordinatorAPIBaseUrl: string;
+	coordinatorAPIPassword: string;
+	coordinatorAPIUsername: string;
 	logLevel: string;
 	historyMaxFileMs: number;
 	historySlowArchiveMaxLedgers: number;
@@ -29,14 +29,14 @@ const defaultConfig = {
 	logLevel: 'info',
 	historyMaxFileMs: 60000,
 	historySlowArchiveMaxLedgers: 1000
-} as const;
+};
 
 export function getConfigFromEnv(): Result<Config, Error> {
 	// Required env vars validation
 	const required = [
-		'BACKEND_API_BASE_URL',
-		'BACKEND_API_USERNAME',
-		'BACKEND_API_PASSWORD'
+		'COORDINATOR_API_BASE_URL',
+		'COORDINATOR_API_USERNAME',
+		'COORDINATOR_API_PASSWORD'
 	];
 
 	const missing = required.filter((key) => !process.env[key]);
@@ -74,9 +74,9 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		sentryDSN: enableSentry ? process.env.SENTRY_DSN : undefined,
 		environment: process.env.ENVIRONMENT,
 		userAgent: process.env.USER_AGENT ?? defaultConfig.userAgent,
-		backendAPIBaseUrl: process.env.BACKEND_API_BASE_URL!,
-		backendAPIUsername: process.env.BACKEND_API_USERNAME!,
-		backendAPIPassword: process.env.BACKEND_API_PASSWORD!,
+		coordinatorAPIBaseUrl: process.env.COORDINATOR_API_BASE_URL!,
+		coordinatorAPIPassword: process.env.COORDINATOR_API_PASSWORD!,
+		coordinatorAPIUsername: process.env.COORDINATOR_API_USERNAME!,
 		logLevel: process.env.LOG_LEVEL ?? defaultConfig.logLevel,
 		historyMaxFileMs,
 		historySlowArchiveMaxLedgers

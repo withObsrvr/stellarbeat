@@ -7,7 +7,6 @@ import { AxiosHttpService } from '../http/AxiosHttpService';
 import { HeartBeater } from '../../services/HeartBeater';
 import { DeadManSnitchHeartBeater } from '../../../network-scan/infrastructure/services/DeadManSnitchHeartBeater';
 import { DummyHeartBeater } from '../../../network-scan/infrastructure/services/DummyHeartBeater';
-import { HttpQueue } from '../../services/HttpQueue';
 import { LoopTimer } from '../../services/LoopTimer';
 import { JobMonitor } from 'job-monitor';
 import { CORE_TYPES } from './di-types';
@@ -56,6 +55,5 @@ export function load(container: Container, config: Config) {
 		else return new ConsoleExceptionLogger();
 	});
 
-	container.bind(HttpQueue).toSelf();
 	container.bind(LoopTimer).toSelf();
 }

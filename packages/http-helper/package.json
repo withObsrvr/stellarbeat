@@ -16,7 +16,8 @@
 		"shared": "workspace:*",
 		"logger": "workspace:*",
 		"async": "^3.2.6",
-		"custom-error": "workspace:*"
+		"custom-error": "workspace:*",
+		"axios": "1.7.9"
 	},
 	"devDependencies": {
 		"@types/async": "^3.2.24",

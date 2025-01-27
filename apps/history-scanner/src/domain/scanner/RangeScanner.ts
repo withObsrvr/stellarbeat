@@ -11,6 +11,7 @@ import { CategoryScanner } from './CategoryScanner';
 import { BucketScanner } from './BucketScanner';
 import { ScanError } from '../scan/ScanError';
 import { LedgerHeader } from './Scanner';
+import { TYPES } from '../../infrastructure/di/di-types';
 
 export interface RangeScanResult {
 	latestLedgerHeader?: LedgerHeader;
@@ -25,9 +26,9 @@ export class RangeScanner {
 		private checkPointGenerator: CheckPointGenerator,
 		private categoryScanner: CategoryScanner,
 		private bucketScanner: BucketScanner,
-		private httpQueue: HttpQueue,
+		@inject(TYPES.HttpQueue) private httpQueue: HttpQueue,
 		@inject('Logger') private logger: Logger,
-		@inject('ExceptionLogger') private exceptionLogger: ExceptionLogger
+		@inject(TYPES.ExceptionLogger) private exceptionLogger: ExceptionLogger
 	) {}
 
 	async scan(
