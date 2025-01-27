@@ -1,22 +1,20 @@
-import { Url } from 'http-helper';
 import { Scanner } from '../../domain/scanner/Scanner';
-import { ScanRepository } from '../../domain/scan/ScanRepository';
+import {
+	ScanCoordinatorService,
+	PendingScanJob
+} from '../../domain/scan/ScanCoordinatorService';
 import { ExceptionLogger } from 'exception-logger';
 import { mapUnknownToError } from 'shared';
 import { Scan } from '../../domain/scan/Scan';
 import { asyncSleep } from 'shared';
-import { ScanScheduler } from '../../domain/scanner/ScanScheduler';
 import { VerifyArchivesDTO } from './VerifyArchivesDTO';
 import { ScanJob } from '../../domain/scan/ScanJob';
-import { HistoryArchiveRepository } from '../../domain/history-archive/HistoryArchiveRepository';
 import { JobMonitor } from 'job-monitor';
 
 export class VerifyArchives {
 	constructor(
 		private scanner: Scanner,
-		private scanRepository: ScanRepository,
-		private historyArchiveService: HistoryArchiveRepository,
-		private scanScheduler: ScanScheduler,
+		private scanCoordinator: ScanCoordinatorService,
 		private exceptionLogger: ExceptionLogger,
 		private jobMonitor: JobMonitor
 	) {}
@@ -25,32 +23,38 @@ export class VerifyArchives {
 		const shutDown = false; //todo: implement graceful shutdown
 		do {
 			try {
-				const historyArchivesOrError =
-					await this.historyArchiveService.getHistoryArchiveUrls();
-				if (historyArchivesOrError.isErr()) {
-					this.exceptionLogger.captureException(historyArchivesOrError.error);
+				const pendingScanJobsResult =
+					await this.scanCoordinator.getPendingScanJobs();
+				if (pendingScanJobsResult.isErr()) {
+					this.exceptionLogger.captureException(pendingScanJobsResult.error);
 					await asyncSleep(60 * 60000); //maybe temporary db connection error
 					continue;
 				}
 
-				await this.scanArchives(
-					historyArchivesOrError.value,
+				await this.performPendingScanJobs(
+					pendingScanJobsResult.value,
 					verifyArchivesDTO.persist
 				);
 			} catch (e) {
+				//general catch all in case we missed an edge case
 				this.exceptionLogger.captureException(mapUnknownToError(e));
 				await asyncSleep(60 * 60000);
 			}
 		} while (!shutDown && verifyArchivesDTO.loop);
 	}
 
-	private async scanArchives(archives: Url[], persist = false) {
-		const previousScans = await this.scanRepository.findLatest();
-		const scanJobs = this.scanScheduler.schedule(archives, previousScans);
-		console.log(scanJobs);
-		for (const scanJob of scanJobs) {
+	private async performPendingScanJobs(
+		pendingScanJobs: PendingScanJob[],
+		persist = false
+	) {
+		for (const pendingScanJob of pendingScanJobs) {
+			const scanJobResult = ScanJob.fromPendingScanJob(pendingScanJob);
+			if (scanJobResult.isErr()) {
+				this.exceptionLogger.captureException(scanJobResult.error);
+				continue;
+			}
 			await this.checkIn('in_progress');
-			await this.perform(scanJob, persist);
+			await this.perform(scanJobResult.value, persist);
 			await this.checkIn('ok');
 		}
 	}
@@ -64,7 +68,7 @@ export class VerifyArchives {
 
 	private async persist(scan: Scan) {
 		try {
-			await this.scanRepository.save([scan]);
+			await this.scanCoordinator.saveScanResult(scan);
 		} catch (e: unknown) {
 			this.exceptionLogger.captureException(mapUnknownToError(e));
 		}

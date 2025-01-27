@@ -3,6 +3,8 @@ import { Scan } from './Scan';
 import { ScanSettings } from './ScanSettings';
 import { ScanError } from './ScanError';
 import { ScanResult } from './ScanResult';
+import { PendingScanJob } from './ScanCoordinatorService';
+import { err, ok, Result } from 'neverthrow';
 
 //a scheduled scan with optional settings. Has no start and end time yet.
 export class ScanJob {
@@ -15,6 +17,27 @@ export class ScanJob {
 		public readonly toLedger: number | null = null,
 		public readonly concurrency = 0
 	) {}
+
+	static fromPendingScanJob(
+		pendingScanJob: PendingScanJob
+	): Result<ScanJob, Error> {
+		const urlResult = Url.create(pendingScanJob.url);
+		if (urlResult.isErr()) {
+			return err(urlResult.error);
+		}
+
+		return ok(
+			new ScanJob(
+				urlResult.value,
+				pendingScanJob.latestScannedLedger,
+				pendingScanJob.latestScannedLedgerHeaderHash,
+				pendingScanJob.chainInitDate,
+				pendingScanJob.latestScannedLedger + 1,
+				null,
+				0
+			)
+		);
+	}
 
 	static continueScanChain(
 		previousScan: Scan,

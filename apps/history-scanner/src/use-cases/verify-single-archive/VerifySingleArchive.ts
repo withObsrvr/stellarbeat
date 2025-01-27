@@ -1,9 +1,8 @@
 import { err, ok, Result } from 'neverthrow';
 import { Scanner } from '../../domain/scanner/Scanner';
-import { ScanRepository } from '../../domain/scan/ScanRepository';
+import { ScanCoordinatorService } from '../../domain/scan/ScanCoordinatorService';
 import { ExceptionLogger } from 'exception-logger';
 import { mapUnknownToError } from 'shared';
-import { Scan } from '../../domain/scan/Scan';
 import { VerifySingleArchiveDTO } from './VerifySingleArchiveDTO';
 import { ScanJob } from '../../domain/scan/ScanJob';
 import { Url } from 'http-helper';
@@ -11,7 +10,7 @@ import { Url } from 'http-helper';
 export class VerifySingleArchive {
 	constructor(
 		private scanner: Scanner,
-		private scanRepository: ScanRepository,
+		private scanRepository: ScanCoordinatorService,
 		private exceptionLogger: ExceptionLogger
 	) {}
 
@@ -30,7 +29,6 @@ export class VerifySingleArchive {
 
 			await this.scanArchive(
 				historyArchiveOrError.value,
-				verifySingleArchiveDTO.persist,
 				verifySingleArchiveDTO.fromLedger,
 				verifySingleArchiveDTO.toLedger,
 				verifySingleArchiveDTO.maxConcurrency
@@ -55,7 +53,6 @@ export class VerifySingleArchive {
 
 	private async scanArchive(
 		archive: Url,
-		persist = false,
 		fromLedger?: number,
 		toLedger?: number,
 		concurrency?: number
@@ -69,15 +66,5 @@ export class VerifySingleArchive {
 		const scan = await this.scanner.perform(new Date(), scanJob);
 
 		console.log(scan);
-		//todo: logger
-		if (persist) await this.persist(scan);
-	}
-
-	private async persist(scan: Scan) {
-		try {
-			await this.scanRepository.save([scan]);
-		} catch (e: unknown) {
-			this.exceptionLogger.captureException(mapUnknownToError(e));
-		}
 	}
 }
