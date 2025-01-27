@@ -17,7 +17,7 @@ const swaggerDocument = require('../../../../openapi.json');
 
 import helmet from 'helmet';
 import { GetNetwork } from '../../../network-scan/use-cases/get-network/GetNetwork';
-import { GetLatestScan } from '../../../history-scan/use-cases/get-latest-scan/GetLatestScan';
+import { GetLatestScan } from '../../../history-scan-coordinator/use-cases/get-latest-scan/GetLatestScan';
 import { GetLatestNodeSnapshots } from '../../../network-scan/use-cases/get-latest-node-snapshots/GetLatestNodeSnapshots';
 import { GetLatestOrganizationSnapshots } from '../../../network-scan/use-cases/get-latest-organization-snapshots/GetLatestOrganizationSnapshots';
 import { nodeRouter } from '../../../network-scan/infrastructure/http/NodeRouter';
@@ -31,8 +31,8 @@ import { GetOrganizations } from '../../../network-scan/use-cases/get-organizati
 import { GetMeasurementsFactory } from '../../../network-scan/use-cases/get-measurements/GetMeasurementsFactory';
 import { GetMeasurementAggregations } from '../../../network-scan/use-cases/get-measurement-aggregations/GetMeasurementAggregations';
 import { RequestUnsubscribeLink } from '../../../notifications/use-cases/request-unsubscribe-link/RequestUnsubscribeLink';
-import { RegisterScan } from '../../../history-scan/use-cases/register-scan/RegisterScan';
-import { historyScanRouter } from '../../../history-scan/infrastructure/http/HistoryScanRouter';
+import { RegisterScan } from '../../../history-scan-coordinator/use-cases/register-scan/RegisterScan';
+import { historyScanRouter } from '../../../history-scan-coordinator/infrastructure/http/HistoryScanRouter';
 
 let server: Server;
 const api = express();

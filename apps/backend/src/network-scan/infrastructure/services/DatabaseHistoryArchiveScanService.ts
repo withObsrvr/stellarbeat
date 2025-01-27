@@ -1,11 +1,11 @@
 import { HistoryArchiveScanService } from '../../domain/node/scan/history/HistoryArchiveScanService';
-import { ScanRepository } from '../../../history-scan/domain/scan/ScanRepository';
+import { ScanRepository } from '../../../history-scan-coordinator/domain/scan/ScanRepository';
 import { err, ok, Result } from 'neverthrow';
 import { mapUnknownToError } from '../../../core/utilities/mapUnknownToError';
 import { inject, injectable } from 'inversify';
 import { HistoryArchiveScan } from 'shared';
-import { TYPES } from '../../../history-scan/infrastructure/di/di-types';
-import { ScanErrorType } from '../../../history-scan/domain/scan/ScanError';
+import { TYPES } from '../../../history-scan-coordinator/infrastructure/di/di-types';
+import { ScanErrorType } from '../../../history-scan-coordinator/domain/scan/ScanError';
 
 //only dependency with history-archive package.
 @injectable()

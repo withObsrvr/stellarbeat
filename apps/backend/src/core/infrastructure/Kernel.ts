@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { Container, decorate, injectable } from 'inversify';
 import { DataSource, Repository } from 'typeorm';
 import { Config, getConfigFromEnv } from '../config/Config';
-import { load as loadHistory } from '../../history-scan/infrastructure/di/container';
+import { load as loadHistory } from '../../history-scan-coordinator/infrastructure/di/container';
 import { load as loadNetworkScan } from '../../network-scan/infrastructure/di/container';
 import { load as loadNetworkEventNotifications } from '../../notifications/infrastructure/di/container';
 import { load as loadCore } from '../infrastructure/di/container';
