@@ -15,7 +15,7 @@ import { ScanSettingsFactory } from '../../domain/scan/ScanSettingsFactory';
 import { CategoryVerificationService } from '../../domain/scanner/CategoryVerificationService';
 import { Config } from '../config/Config';
 import { AxiosHttpService, HttpQueue, HttpService } from 'http-helper';
-import { ScanCoordinatorService } from 'src/domain/scan/ScanCoordinatorService';
+import { ScanCoordinatorService } from '../../domain/scan/ScanCoordinatorService';
 import { RESTScanCoordinatorService } from '../services/RESTScanCoordinatorService';
 import { JobMonitor, LoggerJobMonitor, SentryJobMonitor } from 'job-monitor';
 import {
@@ -24,7 +24,7 @@ import {
 	SentryExceptionLogger
 } from 'exception-logger';
 import { Logger, PinoLogger } from 'logger';
-import { VerifySingleArchive } from 'src/use-cases/verify-single-archive/VerifySingleArchive';
+import { VerifySingleArchive } from '../../use-cases/verify-single-archive/VerifySingleArchive';
 
 export function load(container: Container, config: Config) {
 	container.bind(CategoryScanner).toSelf();
