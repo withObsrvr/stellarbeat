@@ -8,6 +8,12 @@ export {
 	RequestMethod,
 	RetryableQueueError
 } from './HttpQueue';
-export { HttpService } from './HttpService';
+export {
+	isHttpError,
+	HttpService,
+	HttpError,
+	HttpResponse
+} from './HttpService';
 export { AxiosHttpService } from './AxiosHttpService';
 export { Url } from './Url';
+export { retryHttpRequestIfNeeded } from './HttpRequestRetry';

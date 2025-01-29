@@ -1,5 +1,5 @@
 import { UserService } from '../UserService';
-import { HttpError, HttpService } from '../HttpService';
+import { HttpError, HttpService } from 'http-helper';
 import { UserId } from '../../../notifications/domain/subscription/UserId';
 import { err, ok } from 'neverthrow';
 import { randomUUID } from 'crypto';

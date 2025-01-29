@@ -1,8 +1,7 @@
 import { inject, injectable } from 'inversify';
-import { HttpService } from '../../../core/services/HttpService';
-import { Url } from '../../../core/domain/Url';
+import { Url, HttpService } from 'http-helper';
 import { err, ok, Result } from 'neverthrow';
-import { CustomError } from '../../../core/errors/CustomError';
+import { CustomError } from 'custom-error';
 import { HeartBeater } from '../../../core/services/HeartBeater';
 
 @injectable()

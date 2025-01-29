@@ -2,10 +2,7 @@ import 'reflect-metadata';
 import { err, ok, Result } from 'neverthrow';
 import { inject, injectable } from 'inversify';
 import { Url } from '../../../../core/domain/Url';
-import {
-	HttpService,
-	isHttpError
-} from '../../../../core/services/HttpService';
+import { HttpService, isHttpError } from 'http-helper';
 import { isObject } from '../../../../core/utilities/TypeGuards';
 import { CustomError } from '../../../../core/errors/CustomError';
 

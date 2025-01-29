@@ -2,9 +2,9 @@ import { ok } from 'neverthrow';
 import { HistoryService } from '../HistoryService';
 import { LoggerMock } from '../../../../../../core/services/__mocks__/LoggerMock';
 import { mock } from 'jest-mock-extended';
-import { HttpService } from '../../../../../../core/services/HttpService';
+import { HttpService } from 'http-helper';
 import { HistoryArchiveScanService } from '../HistoryArchiveScanService';
-import { HistoryArchiveScan, Node } from 'shared';
+import { HistoryArchiveScan } from 'shared';
 
 const httpService = mock<HttpService>();
 const historyArchiveScanService = mock<HistoryArchiveScanService>();

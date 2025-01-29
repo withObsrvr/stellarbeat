@@ -1,4 +1,4 @@
-import { asyncSleep } from '../../utilities/asyncSleep';
+import { asyncSleep } from 'http-helper';
 import { LoopTimer } from '../LoopTimer';
 
 describe('LoopTimer', () => {

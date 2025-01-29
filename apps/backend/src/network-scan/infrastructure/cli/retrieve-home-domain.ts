@@ -3,7 +3,7 @@ import { HorizonService } from '../../domain/network/scan/HorizonService';
 // noinspection JSIgnoredPromiseFromCall
 import { getConfigFromEnv } from '../../../core/config/Config';
 import { PinoLogger } from 'logger';
-import { AxiosHttpService } from '../../../core/infrastructure/http/AxiosHttpService';
+import { AxiosHttpService } from 'http-helper';
 
 main();
 

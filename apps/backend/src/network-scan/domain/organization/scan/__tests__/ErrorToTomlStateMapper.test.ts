@@ -1,10 +1,7 @@
 import { ErrorToTomlStateMapper } from '../ErrorToTomlStateMapper';
 import { TomlParseError } from '../../../network/scan/TomlService';
 import { TomlState } from '../TomlState';
-import {
-	HttpError,
-	HttpResponse
-} from '../../../../../core/services/HttpService';
+import { HttpError, HttpResponse } from 'http-helper';
 
 describe('ErrorToTomlStateMapper', () => {
 	it('should map TomlParseError to ParsingError', () => {

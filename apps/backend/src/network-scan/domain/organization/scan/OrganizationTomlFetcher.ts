@@ -1,17 +1,13 @@
 import { inject, injectable } from 'inversify';
 import { TomlFetchError, TomlService } from '../../network/scan/TomlService';
-import {
-	isArray,
-	isObject,
-	isString
-} from '../../../../core/utilities/TypeGuards';
+import { isArray, isObject, isString } from 'shared';
 import valueValidator from 'validator';
 import { OrganizationTomlInfo } from './OrganizationTomlInfo';
 import { TomlState } from './TomlState';
 import { ErrorToTomlStateMapper } from './ErrorToTomlStateMapper';
 import { TomlVersionChecker } from '../../network/scan/TomlVersionChecker';
-import { Logger } from '../../../../core/services/Logger';
-import { HttpError } from '../../../../core/services/HttpService';
+import { Logger } from 'logger';
+import { HttpError } from 'http-helper';
 
 type homeDomain = string;
 

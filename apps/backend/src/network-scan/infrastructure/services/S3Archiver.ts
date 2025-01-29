@@ -1,8 +1,8 @@
 import { inject, injectable } from 'inversify';
 import * as AWS from '@aws-sdk/client-s3';
 import { err, ok, Result } from 'neverthrow';
-import { CustomError } from '../../../core/errors/CustomError';
-import { Logger } from '../../../core/services/Logger';
+import { CustomError } from 'custom-error';
+import { Logger } from 'logger';
 import { Archiver } from '../../domain/network/scan/archiver/Archiver';
 import { NetworkDTOService } from '../../services/NetworkDTOService';
 import { PutObjectCommand } from '@aws-sdk/client-s3';

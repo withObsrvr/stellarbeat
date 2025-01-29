@@ -30,11 +30,36 @@ export class ScanJob {
 				dto.latestScannedLedger,
 				dto.latestScannedLedgerHeaderHash,
 				dto.chainInitDate,
-				dto.latestScannedLedger + 1,
+				dto.latestScannedLedger > 0 ? dto.latestScannedLedger + 1 : 0,
 				null,
 				0
 			)
 		);
+	}
+
+	static continueScanChain(
+		previousScan: Scan,
+		toLedger: number | null = null,
+		concurrency = 0
+	) {
+		return new ScanJob(
+			previousScan.baseUrl,
+			previousScan.latestScannedLedger,
+			previousScan.latestScannedLedgerHeaderHash,
+			previousScan.scanChainInitDate,
+			previousScan.latestScannedLedger + 1,
+			toLedger,
+			concurrency
+		);
+	}
+
+	static newScanChain(
+		url: Url,
+		fromLedger = 0,
+		toLedger: number | null = null,
+		concurrency = 0
+	) {
+		return new ScanJob(url, 0, null, null, fromLedger, toLedger, concurrency);
 	}
 
 	isNewScanChainJob() {

@@ -19,7 +19,7 @@ import { OrganizationScan } from '../../../domain/organization/scan/Organization
 import { NodeScan } from '../../../domain/node/scan/NodeScan';
 import NetworkScan from '../../../domain/network/scan/NetworkScan';
 import { NotifyError } from '../../../../notifications/use-cases/determine-events-and-notify-subscribers/NotifyError';
-import { asyncSleep } from '../../../../core/utilities/asyncSleep';
+import { asyncSleep } from 'http-helper';
 import { JobMonitor } from 'job-monitor';
 
 describe('ScanNetwork', () => {

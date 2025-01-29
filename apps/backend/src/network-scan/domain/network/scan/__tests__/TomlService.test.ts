@@ -2,10 +2,7 @@ import valueValidator from 'validator';
 
 import { TomlFetchError, TomlService } from '../TomlService';
 import * as toml from 'toml';
-import {
-	HttpError,
-	HttpService
-} from '../../../../../core/services/HttpService';
+import { HttpError, HttpService } from 'http-helper';
 import { err, ok } from 'neverthrow';
 import { LoggerMock } from '../../../../../core/services/__mocks__/LoggerMock';
 import { mock } from 'jest-mock-extended';

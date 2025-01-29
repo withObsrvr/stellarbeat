@@ -3,10 +3,9 @@ import { UserId } from '../../notifications/domain/subscription/UserId';
 import { err, ok, Result } from 'neverthrow';
 import { inject, injectable } from 'inversify';
 import { IUserService } from '../domain/IUserService';
-import { HttpService } from './HttpService';
+import { HttpService, Url } from 'http-helper';
 import { CustomError } from '../errors/CustomError';
 import { isObject, isString } from '../utilities/TypeGuards';
-import { Url } from '../domain/Url';
 
 export class UserServiceError extends CustomError {
 	constructor(message: string, name: string, cause?: Error) {

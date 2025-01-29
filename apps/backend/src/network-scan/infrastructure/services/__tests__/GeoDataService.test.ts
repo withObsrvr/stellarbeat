@@ -1,7 +1,7 @@
 import { ok } from 'neverthrow';
 import { LoggerMock } from '../../../../core/services/__mocks__/LoggerMock';
 import { mock } from 'jest-mock-extended';
-import { HttpService } from '../../../../core/services/HttpService';
+import { HttpService } from 'http-helper';
 import { IpStackGeoDataService } from '../IpStackGeoDataService';
 
 const httpService = mock<HttpService>();

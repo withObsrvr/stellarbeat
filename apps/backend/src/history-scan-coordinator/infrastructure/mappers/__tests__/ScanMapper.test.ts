@@ -1,8 +1,5 @@
 import { ScanMapper } from '../ScanMapper';
-import {
-	ScanDTO,
-	ScanErrorDTO
-} from '../../../use-cases/register-scan/ScanDTO';
+import { ScanDTO, ScanErrorDTO } from 'history-scanner-dto';
 import { ScanError, ScanErrorType } from '../../../domain/scan/ScanError';
 
 describe('ScanMapper', () => {

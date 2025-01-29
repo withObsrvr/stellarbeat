@@ -14,23 +14,23 @@ describe('Config', () => {
 			expect(result.error.message).toContain('Missing required env vars');
 		});
 
-		test('should validate BACKEND_API_BASE_URL', () => {
-			process.env.BACKEND_API_USERNAME = 'user';
-			process.env.BACKEND_API_PASSWORD = 'pass';
+		test('should validate coordinator settings', () => {
+			process.env.COORDINATOR_API_USERNAME = 'user';
+			process.env.COORDINATOR_API_PASSWORD = 'pass';
 
 			const result = getConfigFromEnv();
 			expect(result.isErr()).toBe(true);
 			if (!result.isErr()) throw new Error('Expected error');
-			expect(result.error.message).toContain('BACKEND_API_BASE_URL');
+			expect(result.error.message).toContain('COORDINATOR_API_BASE_URL');
 		});
 	});
 
 	describe('Optional Variables', () => {
 		beforeEach(() => {
 			// Set required vars for all optional var tests
-			process.env.BACKEND_API_BASE_URL = 'http://api';
-			process.env.BACKEND_API_USERNAME = 'user';
-			process.env.BACKEND_API_PASSWORD = 'pass';
+			process.env.COORDINATOR_API_BASE_URL = 'http://api';
+			process.env.COORDINATOR_API_USERNAME = 'user';
+			process.env.COORDINATOR_API_PASSWORD = 'pass';
 		});
 
 		test('should use defaults for optional vars', () => {

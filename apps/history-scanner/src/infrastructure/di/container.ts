@@ -24,6 +24,7 @@ import {
 	SentryExceptionLogger
 } from 'exception-logger';
 import { Logger, PinoLogger } from 'logger';
+import { VerifySingleArchive } from 'src/use-cases/verify-single-archive/VerifySingleArchive';
 
 export function load(container: Container, config: Config) {
 	container.bind(CategoryScanner).toSelf();
@@ -32,6 +33,7 @@ export function load(container: Container, config: Config) {
 	container.bind(Scanner).toSelf();
 	container.bind(RangeScanner).toSelf();
 	container.bind(VerifyArchives).toSelf();
+	container.bind(VerifySingleArchive).toSelf();
 	container.bind(CheckPointGenerator).toSelf();
 	container.bind(CategoryVerificationService).toSelf();
 	container.bind(ScanSettingsFactory).toDynamicValue(() => {

@@ -1,6 +1,6 @@
 import { TomlParseError } from '../../network/scan/TomlService';
 import { TomlState } from './TomlState';
-import { HttpError } from '../../../../core/services/HttpService';
+import { HttpError } from 'http-helper';
 
 export class ErrorToTomlStateMapper {
 	static map(error: TomlParseError | HttpError): TomlState {

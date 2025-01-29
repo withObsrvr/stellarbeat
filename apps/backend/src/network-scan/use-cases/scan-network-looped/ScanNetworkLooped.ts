@@ -3,8 +3,8 @@ import { Logger } from '../../../core/services/Logger';
 import { ScanNetworkLoopedDTO } from './ScanNetworkLoopedDTO';
 import { ScanNetwork } from '../scan-network/ScanNetwork';
 import { ExceptionLogger } from '../../../core/services/ExceptionLogger';
-import { asyncSleep } from '../../../core/utilities/asyncSleep';
 import { LoopTimer } from '../../../core/services/LoopTimer';
+import { asyncSleep } from 'http-helper';
 import { err, ok, Result } from 'neverthrow';
 
 @injectable()

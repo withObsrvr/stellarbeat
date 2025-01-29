@@ -1,5 +1,5 @@
 import { err } from 'neverthrow';
-import { HttpError } from '../../services/HttpService';
+import { HttpError } from '../HttpService';
 import { retryHttpRequestIfNeeded } from '../HttpRequestRetry';
 
 it('should retry the correct amount of times', async function () {
@@ -34,7 +34,7 @@ function createErrorAction(code: string, status?: number) {
 							status: status,
 							headers: [],
 							statusText: 'text'
-					  }
+						}
 			)
 		);
 	};

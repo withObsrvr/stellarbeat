@@ -4,13 +4,12 @@ import { Url } from 'http-helper';
 import 'reflect-metadata';
 import { Scan } from '../../domain/scan/Scan';
 import { ScanError, ScanErrorType } from '../../domain/scan/ScanError';
-import { ScanDTO, ScanErrorDTO } from '../../use-cases/register-scan/ScanDTO';
+import { ScanDTO, ScanErrorDTO } from 'history-scanner-dto';
 
 @injectable()
 export class ScanMapper {
 	public toDomain(dto: ScanDTO): Result<Scan, Error> {
 		try {
-			// Validate dates
 			if (!(dto.startDate instanceof Date) || isNaN(dto.startDate.getTime())) {
 				return err(new Error('Invalid startDate'));
 			}
@@ -25,7 +24,6 @@ export class ScanMapper {
 				return err(new Error('Invalid scanChainInitDate'));
 			}
 
-			// Validate numbers
 			if (
 				!Number.isInteger(dto.latestVerifiedLedger) ||
 				dto.latestVerifiedLedger < 0
@@ -44,18 +42,15 @@ export class ScanMapper {
 				return err(new Error('concurrency must be a positive integer'));
 			}
 
-			// Map error if present
 			const error = dto.error ? this.mapToScanError(dto.error) : null;
 			if (error && error.isErr()) return err(error.error);
 
-			// Convert baseUrl string to Url instance
 			const baseUrlResult = Url.create(dto.baseUrl);
 			if (baseUrlResult.isErr()) {
 				return err(new Error('Invalid baseUrl format'));
 			}
 			const baseUrl = baseUrlResult.value;
 
-			// Validate headerHash if present
 			if (
 				dto.latestScannedLedgerHeaderHash !== null &&
 				typeof dto.latestScannedLedgerHeaderHash !== 'string'
@@ -90,7 +85,6 @@ export class ScanMapper {
 	}
 
 	private mapToScanError(errorDTO: ScanErrorDTO): Result<ScanError, Error> {
-		// Validate required fields
 		if (!errorDTO.url || typeof errorDTO.url !== 'string') {
 			return err(new Error('Error URL must be a string'));
 		}
@@ -98,7 +92,6 @@ export class ScanMapper {
 			return err(new Error('Error message must be a string'));
 		}
 
-		// Map error type string to enum
 		const errorType = this.mapErrorType(errorDTO.type);
 		if (errorType === undefined) {
 			return err(new Error(`Invalid error type: ${errorDTO.type}`));
@@ -116,14 +109,5 @@ export class ScanMapper {
 			default:
 				return undefined;
 		}
-	}
-
-	private isValidScanErrorDTO(error: ScanErrorDTO): boolean {
-		return (
-			typeof error.type === 'string' &&
-			typeof error.url === 'string' &&
-			typeof error.message === 'string' &&
-			Object.values(ScanErrorType).includes(error.type)
-		);
 	}
 }

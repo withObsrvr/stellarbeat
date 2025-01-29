@@ -1,4 +1,3 @@
-import * as asyncSleep from '../../../../core/utilities/asyncSleep';
 import { ScanNetworkLooped } from '../ScanNetworkLooped';
 import { mock } from 'jest-mock-extended';
 import { ScanNetwork } from '../../scan-network/ScanNetwork';
@@ -6,6 +5,7 @@ import { LoopTimer } from '../../../../core/services/LoopTimer';
 import { ExceptionLogger } from '../../../../core/services/ExceptionLogger';
 import { Logger } from 'logger';
 import { err, ok } from 'neverthrow';
+import * as httpHelper from 'http-helper';
 
 describe('ScanNetworkLooped', () => {
 	it('should loop network scans and only request to update the network config the first time', function (done) {
@@ -69,7 +69,9 @@ describe('ScanNetworkLooped', () => {
 	});
 
 	it('should sleep when network update is less then expected run time', async function () {
-		const spy = jest.spyOn(asyncSleep, 'asyncSleep').mockReturnThis();
+		const spy = jest
+			.spyOn(httpHelper, 'asyncSleep')
+			.mockResolvedValue(undefined);
 		const SUT = setupSUT();
 		SUT.loopTimer.loopExceededMaxTime.mockReturnValue(false);
 		SUT.loopTimer.getRemainingTime.mockReturnValue(100);

@@ -1,4 +1,4 @@
-import { HttpError, HttpResponse } from '../services/HttpService';
+import { HttpError, HttpResponse } from './HttpService';
 import { Result } from 'neverthrow';
 import { asyncSleep } from './asyncSleep';
 

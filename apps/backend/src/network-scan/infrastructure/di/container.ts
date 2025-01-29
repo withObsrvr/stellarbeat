@@ -52,7 +52,7 @@ import { Archiver } from '../../domain/network/scan/archiver/Archiver';
 import { Logger } from '../../../core/services/Logger';
 import { HistoryService } from '../../domain/node/scan/history/HistoryService';
 import { IpStackGeoDataService } from '../services/IpStackGeoDataService';
-import { HttpService } from '../../../core/services/HttpService';
+import { HttpService } from 'http-helper';
 import { NetworkScanner } from '../../domain/network/scan/NetworkScanner';
 import { CrawlerService } from '../../domain/node/scan/node-crawl/CrawlerService';
 import { createCrawler, createCrawlFactory } from 'crawler';

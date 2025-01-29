@@ -1,13 +1,8 @@
 import { inject, injectable } from 'inversify';
 import { Logger } from '../../../core/services/Logger';
-import { HttpService } from '../../../core/services/HttpService';
+import { Url, HttpService } from 'http-helper';
 import { err, ok, Result } from 'neverthrow';
-import { Url } from '../../../core/domain/Url';
-import {
-	isNumber,
-	isObject,
-	isString
-} from '../../../core/utilities/TypeGuards';
+import { isNumber, isObject, isString } from 'shared';
 import {
 	GeoData,
 	GeoDataService,
