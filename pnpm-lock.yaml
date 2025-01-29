@@ -141,6 +141,9 @@ importers:
       helmet:
         specifier: ^4.6.0
         version: 4.6.0
+      history-scanner-dto:
+        specifier: workspace:*
+        version: link:../../packages/history-scanner-dto
       http-helper:
         specifier: workspace:*
         version: link:../../packages/http-helper
@@ -434,6 +437,9 @@ importers:
       exception-logger:
         specifier: workspace:*
         version: link:../../packages/exception-logger
+      history-scanner-dto:
+        specifier: workspace:*
+        version: link:../../packages/history-scanner-dto
       http-helper:
         specifier: workspace:*
         version: link:../../packages/http-helper
@@ -471,6 +477,9 @@ importers:
       express:
         specifier: ^4.21.0
         version: 4.21.2
+      supertest:
+        specifier: ^7.0.0
+        version: 7.0.0
 
   apps/users:
     dependencies:
@@ -550,6 +559,12 @@ importers:
       shared:
         specifier: workspace:*
         version: link:../shared
+
+  packages/history-scanner-dto:
+    dependencies:
+      neverthrow:
+        specifier: ^6.2.2
+        version: 6.2.2
 
   packages/http-helper:
     dependencies:

@@ -1,0 +1,93 @@
+import { RESTScanCoordinatorService } from '../RESTScanCoordinatorService';
+import { HttpService, Url } from 'http-helper';
+import { mock } from 'jest-mock-extended';
+import { ok, err } from 'neverthrow';
+import { Scan } from '../../../domain/scan/Scan';
+import { ScanDTO } from 'history-scanner-dto';
+
+describe('RESTScanCoordinatorService Integration Tests', () => {
+	let httpService: jest.Mocked<HttpService>;
+	let service: RESTScanCoordinatorService;
+	const baseUrl = 'http://home.com';
+	const username = 'admin';
+	const secret = 'test-secret';
+
+	beforeEach(() => {
+		httpService = mock<HttpService>();
+		service = new RESTScanCoordinatorService(
+			httpService,
+			baseUrl,
+			username,
+			secret
+		);
+	});
+
+	describe('registerScan', () => {
+		const url = Url.create('https://history.stellar.org');
+		it('should successfully register scan result', async () => {
+			const scan = new Scan(
+				new Date(),
+				new Date(),
+				new Date(),
+				url._unsafeUnwrap(),
+				1,
+				100,
+				90,
+				'hash123',
+				5,
+				false,
+				null
+			);
+
+			httpService.post.mockResolvedValue(
+				ok({
+					status: 201,
+					statusText: 'Created',
+					headers: {},
+					data: { message: 'Scan created successfully' }
+				})
+			);
+
+			const result = await service.registerScan(scan);
+			expect(result.isOk()).toBe(true);
+
+			expect(httpService.post).toBeCalledTimes(1);
+		});
+	});
+
+	describe('getScanJobs', () => {
+		it('should successfully get pending scan jobs', async () => {
+			const initDate = new Date();
+			const mockJobs = [
+				{
+					url: 'https://history.stellar.org',
+					latestScannedLedger: 100,
+					latestScannedLedgerHeaderHash: 'hash123',
+					chainInitDate: initDate.toISOString()
+				}
+			];
+
+			httpService.get.mockResolvedValue(
+				ok({
+					status: 200,
+					data: mockJobs,
+					headers: {},
+					statusText: 'OK'
+				})
+			);
+
+			const result = await service.getScanJobs();
+			expect(result.isOk()).toBe(true);
+			if (result.isOk()) {
+				expect(result.value).toEqual([
+					{
+						url: 'https://history.stellar.org',
+						latestScannedLedger: 100,
+						latestScannedLedgerHeaderHash: 'hash123',
+						chainInitDate: initDate
+					}
+				]);
+			}
+		});
+	});
+});

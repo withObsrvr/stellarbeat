@@ -10,6 +10,7 @@
 	"references": [
 		{ "path": "./packages/custom-error" },
 		{ "path": "./packages/logger" },
+		{ "path": "./packages/history-scanner-dto" },
 		{ "path": "./packages/shared" },
 		{ "path": "./packages/http-helper" },
 		{ "path": "./packages/job-monitor" },

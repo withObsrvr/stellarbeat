@@ -1,12 +1,11 @@
+import 'reflect-metadata';
 import { CustomError } from 'custom-error';
 import { HttpService, Url } from 'http-helper';
 import { injectable } from 'inversify';
 import { err, ok, Result } from 'neverthrow';
 import { Scan } from 'src/domain/scan/Scan';
-import {
-	PendingScanJob,
-	ScanCoordinatorService
-} from 'src/domain/scan/ScanCoordinatorService';
+import { ScanDTO, ScanJobDTO } from 'history-scanner-dto';
+import { ScanCoordinatorService } from 'src/domain/scan/ScanCoordinatorService';
 
 export class CoordinatorServiceError extends CustomError {
 	constructor(message: string, cause?: Error) {
@@ -23,16 +22,17 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 		private readonly coordinatorAPIPassword: string
 	) {}
 
-	async saveScanResult(scan: Scan): Promise<Result<void, Error>> {
-		console.log(this.coordinatorAPIBaseUrl);
+	async registerScan(scan: Scan): Promise<Result<void, Error>> {
 		const urlResult = Url.create(`${this.coordinatorAPIBaseUrl}/history-scan`);
 		if (urlResult.isErr()) {
 			return err(new CoordinatorServiceError('Invalid URL', urlResult.error));
 		}
 
+		const scanDTO = this.convertScanToDTO(scan);
+
 		const response = await this.httpService.post(
 			urlResult.value,
-			{ ...scan },
+			scanDTO as unknown as Record<string, unknown>,
 			{
 				auth: {
 					username: this.coordinatorAPIUsername,
@@ -53,7 +53,30 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 		return ok(undefined);
 	}
 
-	async getPendingScanJobs(): Promise<Result<PendingScanJob[], Error>> {
+	private convertScanToDTO(scan: Scan): ScanDTO {
+		return {
+			baseUrl: scan.baseUrl.value,
+			startDate: scan.startDate,
+			endDate: scan.endDate,
+			scanChainInitDate: scan.scanChainInitDate,
+			fromLedger: scan.fromLedger,
+			toLedger: scan.toLedger,
+			latestVerifiedLedger: scan.latestVerifiedLedger,
+			latestScannedLedger: scan.latestScannedLedger,
+			latestScannedLedgerHeaderHash: scan.latestScannedLedgerHeaderHash,
+			concurrency: scan.concurrency,
+			isSlowArchive: scan.isSlowArchive,
+			error: scan.error
+				? {
+						message: scan.error.message,
+						type: scan.error.type,
+						url: scan.error.url
+					}
+				: null
+		};
+	}
+
+	async getScanJobs(): Promise<Result<ScanJobDTO[], Error>> {
 		const urlResult = Url.create(
 			`${this.coordinatorAPIBaseUrl}/history-scan/jobs`
 		);
@@ -65,7 +88,8 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 			auth: {
 				username: this.coordinatorAPIUsername,
 				password: this.coordinatorAPIPassword
-			}
+			},
+			responseType: 'json'
 		});
 
 		if (response.isErr()) {
@@ -77,10 +101,37 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 			);
 		}
 
-		if (!Array.isArray(response.value.data)) {
+		if (response.value.status !== 200) {
+			return err(new CoordinatorServiceError('Failed to get pending jobs'));
+		}
+
+		if (!response.value.data || !Array.isArray(response.value.data)) {
 			return err(new CoordinatorServiceError('Invalid response format'));
 		}
 
-		return ok(response.value.data as PendingScanJob[]);
+		const scanJobDTOsResult = this.convertResponseToScanJobDTOs(
+			response.value.data
+		);
+		if (scanJobDTOsResult.isErr()) {
+			return err(scanJobDTOsResult.error);
+		}
+
+		return ok(scanJobDTOsResult.value);
+	}
+
+	private convertResponseToScanJobDTOs(
+		response: Record<string, unknown>[]
+	): Result<ScanJobDTO[], Error> {
+		const scanJobsDTOS: ScanJobDTO[] = [];
+		for (const scanJob of response) {
+			const scanJobDTO = ScanJobDTO.fromJSON(scanJob);
+			if (scanJobDTO.isErr()) {
+				return err(new CoordinatorServiceError('Invalid response format'));
+			}
+
+			scanJobsDTOS.push(scanJobDTO.value);
+		}
+
+		return ok(scanJobsDTOS);
 	}
 }

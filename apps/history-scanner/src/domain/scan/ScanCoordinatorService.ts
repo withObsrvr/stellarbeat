@@ -1,14 +1,8 @@
 import { Result } from 'neverthrow';
 import { Scan } from './Scan';
-
-export interface PendingScanJob {
-	url: string;
-	latestScannedLedger: number;
-	latestScannedLedgerHeaderHash: string | null;
-	chainInitDate: Date | null;
-}
+import { ScanJobDTO } from 'history-scanner-dto';
 
 export interface ScanCoordinatorService {
-	saveScanResult(scan: Scan): Promise<Result<void, Error>>;
-	getPendingScanJobs(): Promise<Result<PendingScanJob[], Error>>;
+	registerScan(scan: Scan): Promise<Result<void, Error>>;
+	getScanJobs(): Promise<Result<ScanJobDTO[], Error>>;
 }

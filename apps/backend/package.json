@@ -59,7 +59,8 @@
 		"winston": "^3.15.0",
 		"workerpool": "^6.5.1",
 		"http-helper": "workspace:*",
-		"custom-error": "workspace:*"
+		"custom-error": "workspace:*",
+		"history-scanner-dto": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/async": "^3.2.24",

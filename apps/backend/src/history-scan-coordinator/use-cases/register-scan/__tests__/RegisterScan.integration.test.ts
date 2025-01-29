@@ -4,7 +4,7 @@ import { TYPES } from '../../../infrastructure/di/di-types';
 import { RegisterScan } from '../../../use-cases/register-scan/RegisterScan';
 import { ScanRepository } from '../../../domain/scan/ScanRepository';
 import { Url } from 'http-helper';
-import { ScanDTO } from '../ScanDTO';
+import { ScanDTO } from 'history-scanner-dto';
 
 describe('RegisterScan.integration', () => {
 	let kernel: Kernel;

@@ -4,7 +4,7 @@ import basicAuth from 'express-basic-auth';
 import { GetLatestScan } from '../../use-cases/get-latest-scan/GetLatestScan';
 import { InvalidUrlError } from '../../use-cases/get-latest-scan/InvalidUrlError';
 import { RegisterScan } from '../../use-cases/register-scan/RegisterScan';
-import { ScanDTO } from '../../use-cases/register-scan/ScanDTO';
+import { ScanDTO } from 'history-scanner-dto';
 import { GetScanJobs } from '../../use-cases/get-scan-jobs/GetScanJobs';
 
 export interface HistoryScanRouterConfig {
@@ -21,19 +21,36 @@ export const HistoryScanRouterWrapper = (
 
 	if (!config.secret) return historyScanRouter;
 
+	const isValidRequestBody = (
+		body: unknown
+	): body is Record<string, unknown> => {
+		return typeof body === 'object' && body !== null;
+	};
+
 	historyScanRouter.post(
 		'/',
 		basicAuth({
 			users: { admin: config.secret },
 			challenge: true
 		}),
+		(
+			req: express.Request,
+			res: express.Response,
+			next: express.NextFunction
+		) => {
+			if (!isValidRequestBody(req.body)) {
+				return res
+					.status(400)
+					.json({ error: 'Request body must be an object' });
+			}
+			next();
+		},
 		[
-			body('startDate').isISO8601().withMessage('Invalid startDate').toDate(),
-			body('endDate').isISO8601().withMessage('Invalid endDate').toDate(),
+			body('startDate').isISO8601().withMessage('Invalid startDate'),
+			body('endDate').isISO8601().withMessage('Invalid endDate'),
 			body('scanChainInitDate')
 				.isISO8601()
-				.withMessage('Invalid scanChainInitDate')
-				.toDate(),
+				.withMessage('Invalid scanChainInitDate'),
 			body('baseUrl').isURL().withMessage('Invalid baseUrl'),
 			body('latestVerifiedLedger')
 				.isInt({ min: 0 })
@@ -73,28 +90,15 @@ export const HistoryScanRouterWrapper = (
 		async (req: express.Request, res: express.Response) => {
 			const errors = validationResult(req);
 			if (!errors.isEmpty()) {
-				console.log(errors);
 				return res.status(400).json({ errors: errors.array() });
 			}
 
-			const dto: ScanDTO = {
-				startDate: req.body.startDate,
-				endDate: req.body.endDate,
-				scanChainInitDate: req.body.scanChainInitDate ?? null,
-				baseUrl: req.body.baseUrl,
-				latestVerifiedLedger: req.body.latestVerifiedLedger,
-				latestScannedLedger: req.body.latestScannedLedger,
-				latestScannedLedgerHeaderHash:
-					req.body.latestScannedLedgerHeaderHash ?? null,
-				concurrency: req.body.concurrency,
-				isSlowArchive:
-					req.body.isSlowArchive !== undefined ? req.body.isSlowArchive : null,
-				fromLedger: req.body.fromLedger,
-				toLedger: req.body.toLedger ?? null,
-				error: req.body.error
-			};
-
-			const result = await config.registerScan.execute(dto);
+			console.log(req.body);
+			const dto = ScanDTO.fromJSON(req.body);
+			if (dto.isErr()) {
+				return res.status(400).json({ error: 'Invalid request body' });
+			}
+			const result = await config.registerScan.execute(dto.value);
 
 			if (result.isErr()) {
 				return res.status(500).json({ error: result.error.message });

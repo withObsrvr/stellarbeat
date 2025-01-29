@@ -7,7 +7,7 @@ import { Url } from 'http-helper';
 import { GetLatestScan } from '../../../use-cases/get-latest-scan/GetLatestScan';
 import { RegisterScan } from '../../../use-cases/register-scan/RegisterScan';
 import { InvalidUrlError } from '../../../use-cases/get-latest-scan/InvalidUrlError';
-import { ScanDTO } from '../../../use-cases/register-scan/ScanDTO';
+import { ScanDTO } from 'history-scanner-dto';
 import { GetScanJobs } from '../../../use-cases/get-scan-jobs/GetScanJobs';
 import { ScanJob } from '../../../domain/ScanJob';
 
@@ -94,13 +94,14 @@ describe('HistoryScanRouter.integration', () => {
 				toLedger: null,
 				error: null
 			};
+			console.log(JSON.parse(JSON.stringify(validBody)));
 
 			registerScan.execute.mockResolvedValue(ok(undefined));
 
 			await request(app)
 				.post('/history-scan')
 				.auth('admin', 'secret')
-				.send(validBody)
+				.send(JSON.parse(JSON.stringify(validBody)))
 				.expect(201)
 				.expect((response) => {
 					expect(response.body.message).toBe('Scan created successfully');

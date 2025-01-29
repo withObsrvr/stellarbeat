@@ -9,7 +9,6 @@ import { StandardCheckPointFrequency } from '../../domain/check-point/StandardCh
 import { CategoryScanner } from '../../domain/scanner/CategoryScanner';
 import { BucketScanner } from '../../domain/scanner/BucketScanner';
 import { RangeScanner } from '../../domain/scanner/RangeScanner';
-import { VerifySingleArchive } from '../../use-cases/verify-single-archive/VerifySingleArchive';
 import { VerifyArchives } from '../../use-cases/verify-archives/VerifyArchives';
 import { ArchivePerformanceTester } from '../../domain/scanner/ArchivePerformanceTester';
 import { ScanSettingsFactory } from '../../domain/scan/ScanSettingsFactory';
@@ -32,7 +31,6 @@ export function load(container: Container, config: Config) {
 	container.bind(HASValidator).toSelf();
 	container.bind(Scanner).toSelf();
 	container.bind(RangeScanner).toSelf();
-	container.bind(VerifySingleArchive).toSelf();
 	container.bind(VerifyArchives).toSelf();
 	container.bind(CheckPointGenerator).toSelf();
 	container.bind(CategoryVerificationService).toSelf();

@@ -3,8 +3,8 @@ import { Scan } from './Scan';
 import { ScanSettings } from './ScanSettings';
 import { ScanError } from './ScanError';
 import { ScanResult } from './ScanResult';
-import { PendingScanJob } from './ScanCoordinatorService';
 import { err, ok, Result } from 'neverthrow';
+import { ScanJobDTO } from 'history-scanner-dto';
 
 //a scheduled scan with optional settings. Has no start and end time yet.
 export class ScanJob {
@@ -18,10 +18,8 @@ export class ScanJob {
 		public readonly concurrency = 0
 	) {}
 
-	static fromPendingScanJob(
-		pendingScanJob: PendingScanJob
-	): Result<ScanJob, Error> {
-		const urlResult = Url.create(pendingScanJob.url);
+	static fromScanJobDTO(dto: ScanJobDTO): Result<ScanJob, Error> {
+		const urlResult = Url.create(dto.url);
 		if (urlResult.isErr()) {
 			return err(urlResult.error);
 		}
@@ -29,39 +27,14 @@ export class ScanJob {
 		return ok(
 			new ScanJob(
 				urlResult.value,
-				pendingScanJob.latestScannedLedger,
-				pendingScanJob.latestScannedLedgerHeaderHash,
-				pendingScanJob.chainInitDate,
-				pendingScanJob.latestScannedLedger + 1,
+				dto.latestScannedLedger,
+				dto.latestScannedLedgerHeaderHash,
+				dto.chainInitDate,
+				dto.latestScannedLedger + 1,
 				null,
 				0
 			)
 		);
-	}
-
-	static continueScanChain(
-		previousScan: Scan,
-		toLedger: number | null = null,
-		concurrency = 0
-	) {
-		return new ScanJob(
-			previousScan.baseUrl,
-			previousScan.latestScannedLedger,
-			previousScan.latestScannedLedgerHeaderHash,
-			previousScan.scanChainInitDate,
-			previousScan.latestScannedLedger + 1,
-			toLedger,
-			concurrency
-		);
-	}
-
-	static newScanChain(
-		url: Url,
-		fromLedger = 0,
-		toLedger: number | null = null,
-		concurrency = 0
-	) {
-		return new ScanJob(url, 0, null, null, fromLedger, toLedger, concurrency);
 	}
 
 	isNewScanChainJob() {

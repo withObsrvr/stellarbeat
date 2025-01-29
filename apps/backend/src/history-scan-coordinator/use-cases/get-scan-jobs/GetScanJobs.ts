@@ -6,7 +6,7 @@ import { TYPES } from '../../infrastructure/di/di-types';
 import { HistoryArchiveRepository } from '../../domain/HistoryArchiveRepository';
 import { err, ok, Result } from 'neverthrow';
 import { ScanScheduler } from '../../domain/ScanScheduler';
-import { ScanJob } from '../../domain/ScanJob';
+import { ScanJobDTO } from 'history-scanner-dto';
 
 /**
  * Schedules new scan jobs for history archives based on a configured scheduling strategy.
@@ -27,7 +27,7 @@ export class GetScanJobs {
 		@inject('ExceptionLogger') private exceptionLogger: ExceptionLogger
 	) {}
 
-	public async execute(): Promise<Result<ScanJob[], Error>> {
+	public async execute(): Promise<Result<ScanJobDTO[], Error>> {
 		const historyArchiveUrlsResult =
 			await this.historyArchiveRepository.getHistoryArchiveUrls();
 		if (historyArchiveUrlsResult.isErr()) {
