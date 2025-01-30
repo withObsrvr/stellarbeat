@@ -25,7 +25,7 @@
 		"start:frontend": "pnpm --filter frontend run start",
 		"start:api": "pnpm --filter backend run start-api",
 		"start:scan-network": "pnpm --filter backend run scan-network",
-		"start:scan-history": "pnpm --filter backend run scan-history"
+		"start:scan-history": "pnpm --filter history-scanner run scan-history"
 	},
 	"keywords": [],
 	"author": "pieterjan84",

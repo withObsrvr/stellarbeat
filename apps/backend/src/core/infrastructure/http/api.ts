@@ -33,7 +33,7 @@ import { GetMeasurementAggregations } from '../../../network-scan/use-cases/get-
 import { RequestUnsubscribeLink } from '../../../notifications/use-cases/request-unsubscribe-link/RequestUnsubscribeLink';
 import { RegisterScan } from '../../../history-scan-coordinator/use-cases/register-scan/RegisterScan';
 import { historyScanRouter } from '../../../history-scan-coordinator/infrastructure/http/HistoryScanRouter';
-import { GetScanJobs } from '../../../history-scan-coordinator/use-cases/get-scan-jobs/GetScanJobs';
+import { GetScanJob } from '../../../history-scan-coordinator/use-cases/get-scan-job/GetScanJob';
 
 let server: Server;
 const api = express();
@@ -115,8 +115,9 @@ const listen = async () => {
 		historyScanRouter({
 			getLatestScan: kernel.container.get(GetLatestScan),
 			registerScan: kernel.container.get(RegisterScan),
-			secret: config.historyScanSecretKey,
-			getScanJobs: kernel.container.get(GetScanJobs)
+			userName: config.historyScanAPIUsername,
+			password: config.historyScanAPIPassword,
+			getScanJob: kernel.container.get(GetScanJob)
 		})
 	);
 
@@ -168,9 +169,9 @@ const listen = async () => {
 		})
 	);
 
-	server = api.listen(config.apiPort, () =>
-		console.log('api listening on port: ' + config.apiPort)
-	);
+	server = api.listen(config.apiPort, () => {
+		console.log('api listening on port: ' + config.apiPort);
+	});
 
 	process.on('SIGTERM', async () => {
 		console.log('SIGTERM signal received: closing HTTP server');

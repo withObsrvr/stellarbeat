@@ -6,6 +6,8 @@ import { err, ok, Result } from 'neverthrow';
 import { Scan } from 'src/domain/scan/Scan';
 import { ScanDTO, ScanJobDTO } from 'history-scanner-dto';
 import { ScanCoordinatorService } from 'src/domain/scan/ScanCoordinatorService';
+import { isObject } from 'shared';
+import { url } from 'inspector';
 
 export class CoordinatorServiceError extends CustomError {
 	constructor(message: string, cause?: Error) {
@@ -23,7 +25,9 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 	) {}
 
 	async registerScan(scan: Scan): Promise<Result<void, Error>> {
-		const urlResult = Url.create(`${this.coordinatorAPIBaseUrl}/history-scan`);
+		const urlResult = Url.create(
+			`${this.coordinatorAPIBaseUrl}/v1/history-scan`
+		);
 		if (urlResult.isErr()) {
 			return err(new CoordinatorServiceError('Invalid URL', urlResult.error));
 		}
@@ -76,13 +80,15 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 		};
 	}
 
-	async getScanJobs(): Promise<Result<ScanJobDTO[], Error>> {
+	async getScanJob(): Promise<Result<ScanJobDTO, Error>> {
 		const urlResult = Url.create(
-			`${this.coordinatorAPIBaseUrl}/history-scan/jobs`
+			`${this.coordinatorAPIBaseUrl}/v1/history-scan/job`
 		);
 		if (urlResult.isErr()) {
 			return err(new CoordinatorServiceError('Invalid URL', urlResult.error));
 		}
+
+		console.log(urlResult.value);
 
 		const response = await this.httpService.get(urlResult.value, {
 			auth: {
@@ -105,13 +111,15 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 			return err(new CoordinatorServiceError('Failed to get pending jobs'));
 		}
 
-		if (!response.value.data || !Array.isArray(response.value.data)) {
-			return err(new CoordinatorServiceError('Invalid response format'));
+		const scanJobJSON = response.value.data;
+
+		if (!isObject(scanJobJSON)) {
+			return err(
+				new CoordinatorServiceError('Scan Job JSON must be an object')
+			);
 		}
 
-		const scanJobDTOsResult = this.convertResponseToScanJobDTOs(
-			response.value.data
-		);
+		const scanJobDTOsResult = this.convertResponseToScanJobDTO(scanJobJSON);
 		if (scanJobDTOsResult.isErr()) {
 			return err(scanJobDTOsResult.error);
 		}
@@ -119,19 +127,14 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 		return ok(scanJobDTOsResult.value);
 	}
 
-	private convertResponseToScanJobDTOs(
-		response: Record<string, unknown>[]
-	): Result<ScanJobDTO[], Error> {
-		const scanJobsDTOS: ScanJobDTO[] = [];
-		for (const scanJob of response) {
-			const scanJobDTO = ScanJobDTO.fromJSON(scanJob);
-			if (scanJobDTO.isErr()) {
-				return err(new CoordinatorServiceError('Invalid response format'));
-			}
-
-			scanJobsDTOS.push(scanJobDTO.value);
+	private convertResponseToScanJobDTO(
+		response: Record<string, unknown>
+	): Result<ScanJobDTO, Error> {
+		const scanJobDTO = ScanJobDTO.fromJSON(response);
+		if (scanJobDTO.isErr()) {
+			return err(new CoordinatorServiceError('Invalid response format'));
 		}
 
-		return ok(scanJobsDTOS);
+		return ok(scanJobDTO.value);
 	}
 }

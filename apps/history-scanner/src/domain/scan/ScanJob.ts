@@ -18,7 +18,7 @@ export class ScanJob {
 		public readonly concurrency = 0
 	) {}
 
-	static fromScanJobDTO(dto: ScanJobDTO): Result<ScanJob, Error> {
+	static fromScanJobCoordinatorDTO(dto: ScanJobDTO): Result<ScanJob, Error> {
 		const urlResult = Url.create(dto.url);
 		if (urlResult.isErr()) {
 			return err(urlResult.error);

@@ -7,16 +7,15 @@ import { HistoryArchiveRepository } from '../../domain/HistoryArchiveRepository'
 import { err, ok, Result } from 'neverthrow';
 import { ScanScheduler } from '../../domain/ScanScheduler';
 import { ScanJobDTO } from 'history-scanner-dto';
+import { Logger } from 'logger';
 
 /**
  * Schedules new scan jobs for history archives based on a configured scheduling strategy.
- * At the moment the strategy is basic, but could be expanded to support multiple scanners.
- * TODO: it would be even simpler to just return one 'next' scanJob to worker. This would allow easy scaling.
- * If a scan would fail, it would be picked up by another worker after all other urls are scanned (round robin like)
- *
  * */
 @injectable()
-export class GetScanJobs {
+export class GetScanJob {
+	private scanJobQueue: ScanJobDTO[] = []; //Optimization: could be stored in a database or queue
+
 	constructor(
 		@inject(TYPES.HistoryArchiveScanRepository)
 		private scanRepository: ScanRepository,
@@ -24,10 +23,34 @@ export class GetScanJobs {
 		private historyArchiveRepository: HistoryArchiveRepository,
 		@inject(TYPES.ScanScheduler)
 		private scanScheduler: ScanScheduler,
-		@inject('ExceptionLogger') private exceptionLogger: ExceptionLogger
+		@inject('ExceptionLogger') private exceptionLogger: ExceptionLogger,
+		@inject('Logger') private logger: Logger
 	) {}
 
-	public async execute(): Promise<Result<ScanJobDTO[], Error>> {
+	public async execute(): Promise<Result<ScanJobDTO | null, Error>> {
+		if (this.scanJobQueue.length === 0) {
+			await this.scheduleScanJobs();
+		}
+
+		const nextScanJob = this.scanJobQueue.shift();
+
+		if (nextScanJob === undefined) {
+			this.logger.warn('No scan jobs could be scheduled', {
+				app: 'history-scan-coordinator'
+			});
+			return ok(null);
+		}
+
+		this.logger.info('Returning next scan job', {
+			app: 'history-scan-coordinator',
+			url: nextScanJob.url,
+			chainInitDate: nextScanJob.chainInitDate
+		});
+
+		return ok(nextScanJob);
+	}
+
+	private async scheduleScanJobs() {
 		const historyArchiveUrlsResult =
 			await this.historyArchiveRepository.getHistoryArchiveUrls();
 		if (historyArchiveUrlsResult.isErr()) {
@@ -36,11 +59,19 @@ export class GetScanJobs {
 		}
 
 		const previousScans = await this.scanRepository.findLatest();
-		const scanJobs = this.scanScheduler.schedule(
-			historyArchiveUrlsResult.value,
-			previousScans
+		this.scanJobQueue.push(
+			...this.scanScheduler.schedule(
+				historyArchiveUrlsResult.value,
+				previousScans
+			)
 		);
 
-		return ok(scanJobs);
+		this.logger.info('Scheduling new scan jobs', {
+			app: 'history-scan-coordinator',
+			historyArchiveUrls: historyArchiveUrlsResult.value,
+			fullScans: this.scanJobQueue
+				.filter((job) => job.chainInitDate === null)
+				.map((job) => job.url)
+		});
 	}
 }

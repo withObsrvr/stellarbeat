@@ -4,7 +4,9 @@
 	"scripts": {
 		"build": "tsc --declaration",
 		"build-and-start": "pnpm build; node lib/index.js",
-		"start": "node lib/index.js"
+		"start": "node lib/index.js",
+		"build-and-scan-history": "pnpm run build; node lib/infrastructure/cli/verify-archives.js",
+		"scan-history": "node lib/infrastructure/cli/verify-archives.js 1 1"
 	},
 	"types": "lib/index.d.ts",
 	"main": "index.js",

@@ -58,35 +58,31 @@ describe('RESTScanCoordinatorService Integration Tests', () => {
 	describe('getScanJobs', () => {
 		it('should successfully get pending scan jobs', async () => {
 			const initDate = new Date();
-			const mockJobs = [
-				{
-					url: 'https://history.stellar.org',
-					latestScannedLedger: 100,
-					latestScannedLedgerHeaderHash: 'hash123',
-					chainInitDate: initDate.toISOString()
-				}
-			];
+			const mockJob = {
+				url: 'https://history.stellar.org',
+				latestScannedLedger: 100,
+				latestScannedLedgerHeaderHash: 'hash123',
+				chainInitDate: initDate.toISOString()
+			};
 
 			httpService.get.mockResolvedValue(
 				ok({
 					status: 200,
-					data: mockJobs,
+					data: mockJob,
 					headers: {},
 					statusText: 'OK'
 				})
 			);
 
-			const result = await service.getScanJobs();
+			const result = await service.getScanJob();
 			expect(result.isOk()).toBe(true);
 			if (result.isOk()) {
-				expect(result.value).toEqual([
-					{
-						url: 'https://history.stellar.org',
-						latestScannedLedger: 100,
-						latestScannedLedgerHeaderHash: 'hash123',
-						chainInitDate: initDate
-					}
-				]);
+				expect(result.value).toEqual({
+					url: 'https://history.stellar.org',
+					latestScannedLedger: 100,
+					latestScannedLedgerHeaderHash: 'hash123',
+					chainInitDate: initDate
+				});
 			}
 		});
 	});

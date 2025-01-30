@@ -27,15 +27,15 @@ export class VerifyArchives {
 		const shutDown = false; //todo: implement graceful shutdown
 		do {
 			try {
-				const pendingScanJobsResult = await this.scanCoordinator.getScanJobs();
-				if (pendingScanJobsResult.isErr()) {
-					this.exceptionLogger.captureException(pendingScanJobsResult.error);
+				const scanJobDTOResult = await this.scanCoordinator.getScanJob();
+				if (scanJobDTOResult.isErr()) {
+					this.exceptionLogger.captureException(scanJobDTOResult.error);
 					await asyncSleep(60 * 1000); //maybe temporary db connection error
 					continue;
 				}
 
-				await this.performPendingScanJobs(
-					pendingScanJobsResult.value,
+				await this.performScanJob(
+					scanJobDTOResult.value,
 					verifyArchivesDTO.persist
 				);
 			} catch (e) {
@@ -46,20 +46,15 @@ export class VerifyArchives {
 		} while (!shutDown && verifyArchivesDTO.loop);
 	}
 
-	private async performPendingScanJobs(
-		pendingScanJobs: ScanJobDTO[],
-		persist = false
-	) {
-		for (const pendingScanJob of pendingScanJobs) {
-			const scanJobResult = ScanJob.fromScanJobDTO(pendingScanJob);
-			if (scanJobResult.isErr()) {
-				this.exceptionLogger.captureException(scanJobResult.error);
-				continue;
-			}
-			await this.checkIn('in_progress');
-			await this.perform(scanJobResult.value, persist);
-			await this.checkIn('ok');
+	private async performScanJob(dto: ScanJobDTO, persist = false) {
+		const scanJobResult = ScanJob.fromScanJobCoordinatorDTO(dto);
+		if (scanJobResult.isErr()) {
+			this.exceptionLogger.captureException(scanJobResult.error);
+			return;
 		}
+		await this.checkIn('in_progress');
+		await this.perform(scanJobResult.value, persist);
+		await this.checkIn('ok');
 	}
 
 	private async perform(scanJob: ScanJob, persist = false) {

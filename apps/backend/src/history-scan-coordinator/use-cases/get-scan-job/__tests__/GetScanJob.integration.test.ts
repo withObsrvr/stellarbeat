@@ -1,6 +1,6 @@
 import { mock } from 'jest-mock-extended';
 import { ok } from 'neverthrow';
-import { GetScanJobs } from '../GetScanJobs';
+import { GetScanJob } from '../GetScanJob';
 import { HistoryArchiveRepository } from '../../../domain/HistoryArchiveRepository';
 import Kernel from '../../../../core/infrastructure/Kernel';
 import { ConfigMock } from '../../../../core/config/__mocks__/configMock';
@@ -11,7 +11,7 @@ import { ScanRepository } from '../../../domain/scan/ScanRepository';
 
 describe('GetScanJobs.integration', () => {
 	let kernel: Kernel;
-	let getScanJobs: GetScanJobs;
+	let getScanJob: GetScanJob;
 	let historyArchiveRepository: jest.Mocked<HistoryArchiveRepository>;
 	let scanRepository: ScanRepository;
 
@@ -33,7 +33,7 @@ describe('GetScanJobs.integration', () => {
 			.rebind(TYPES.HistoryArchiveRepository)
 			.toConstantValue(historyArchiveRepository);
 
-		getScanJobs = kernel.container.get<GetScanJobs>(GetScanJobs);
+		getScanJob = kernel.container.get<GetScanJob>(GetScanJob);
 		scanRepository = kernel.container.get<ScanRepository>(
 			TYPES.HistoryArchiveScanRepository
 		);
@@ -64,20 +64,28 @@ describe('GetScanJobs.integration', () => {
 		);
 		await scanRepository.save([previousScan]);
 
-		const result = await getScanJobs.execute();
+		const nextScanJobResult = await getScanJob.execute();
 
-		expect(result.isOk()).toBe(true);
-		if (!result.isOk()) throw result.error;
+		expect(nextScanJobResult.isOk()).toBe(true);
+		const nextScan = nextScanJobResult._unsafeUnwrap();
 
-		expect(result.value.length).toBe(2);
-		expect(result.value[0].url).toBe(url2.value.value);
-		expect(result.value[0].chainInitDate).toBe(null);
-		expect(result.value[0].latestScannedLedger).toBe(0);
-		expect(result.value[0].latestScannedLedgerHeaderHash).toBe(null);
-		expect(result.value[1].url).toBe(url1.value.value);
-		expect(result.value[1].chainInitDate).toEqual(new Date('2021-01-01'));
-		expect(result.value[1].latestScannedLedger).toBe(100);
-		expect(result.value[1].latestScannedLedgerHeaderHash).toBe('hash');
+		expect(nextScan).toBeDefined();
+
+		expect(nextScan?.url).toBe(url2.value.value);
+		expect(nextScan?.chainInitDate).toBe(null);
+		expect(nextScan?.latestScannedLedger).toBe(0);
+		expect(nextScan?.latestScannedLedgerHeaderHash).toBe(null);
+
+		const nextNextScanJobResult = await getScanJob.execute();
+		expect(nextNextScanJobResult.isOk()).toBe(true);
+		const nextNextScan = nextNextScanJobResult._unsafeUnwrap();
+
+		expect(nextNextScan).toBeDefined();
+		expect(nextNextScan?.url).toBe(url1.value.value);
+		expect(nextNextScan?.chainInitDate).toEqual(new Date('2021-01-01'));
+		expect(nextNextScan?.latestScannedLedger).toBe(100);
+		expect(nextNextScan?.latestScannedLedgerHeaderHash).toBe('hash');
+
 		expect(
 			historyArchiveRepository.getHistoryArchiveUrls
 		).toHaveBeenCalledTimes(1);
@@ -86,10 +94,10 @@ describe('GetScanJobs.integration', () => {
 	it('should handle empty history archive list', async () => {
 		historyArchiveRepository.getHistoryArchiveUrls.mockResolvedValue(ok([]));
 
-		const result = await getScanJobs.execute();
+		const result = await getScanJob.execute();
 
 		expect(result.isOk()).toBe(true);
 		if (!result.isOk()) throw result.error;
-		expect(result.value).toEqual([]);
+		expect(result.value).toBeNull();
 	});
 });

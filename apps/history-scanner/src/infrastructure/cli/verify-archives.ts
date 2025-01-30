@@ -28,8 +28,6 @@ async function main() {
 		loop = false;
 	}
 
-	console.log('EXEC');
-
 	await verifyArchives.execute({
 		persist: persist,
 		loop: loop

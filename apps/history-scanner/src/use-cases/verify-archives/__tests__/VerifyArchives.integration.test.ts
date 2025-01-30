@@ -32,16 +32,14 @@ describe('VerifyArchives Integration Tests', () => {
 
 	it('should scan all known archives', async () => {
 		// Setup mock scan jobs
-		const mockScanJobs = [
-			{
-				url: 'http://127.0.0.1:3333',
-				latestScannedLedger: 0,
-				latestScannedLedgerHeaderHash: null,
-				chainInitDate: new Date()
-			}
-		];
+		const mockScanJob = {
+			url: 'http://127.0.0.1:3333',
+			latestScannedLedger: 0,
+			latestScannedLedgerHeaderHash: null,
+			chainInitDate: new Date()
+		};
 
-		coordinatorServiceMock.getScanJobs.mockResolvedValue(ok(mockScanJobs));
+		coordinatorServiceMock.getScanJob.mockResolvedValue(ok(mockScanJob));
 		coordinatorServiceMock.registerScan.mockResolvedValue(ok(undefined));
 
 		await verifyArchives.execute({
@@ -49,7 +47,7 @@ describe('VerifyArchives Integration Tests', () => {
 			loop: false
 		});
 
-		expect(coordinatorServiceMock.getScanJobs).toHaveBeenCalled();
+		expect(coordinatorServiceMock.getScanJob).toHaveBeenCalled();
 		expect(coordinatorServiceMock.registerScan).toHaveBeenCalled();
 
 		const registeredScan = coordinatorServiceMock.registerScan.mock.calls[0][0];

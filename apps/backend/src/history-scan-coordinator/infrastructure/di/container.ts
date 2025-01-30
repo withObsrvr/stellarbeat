@@ -12,7 +12,7 @@ import { ScanMapper } from '../mappers/ScanMapper';
 import { HistoryArchiveRepository } from '../../domain/HistoryArchiveRepository';
 import { NetworkScanHistoryArchiveRepository } from '../repositories/NetworkScanHistoryArchiveRepository';
 import { NetworkDTOService } from '../../../network-scan/services/NetworkDTOService';
-import { GetScanJobs } from '../../use-cases/get-scan-jobs/GetScanJobs';
+import { GetScanJob } from '../../use-cases/get-scan-job/GetScanJob';
 import {
 	RestartAtLeastOneScan,
 	ScanScheduler
@@ -21,7 +21,7 @@ import {
 export function load(container: Container, config: Config) {
 	const dataSource = container.get(DataSource);
 	container.bind(GetLatestScan).toSelf();
-	container.bind(GetScanJobs).toSelf();
+	container.bind(GetScanJob).toSelf();
 	container.bind(RegisterScan).toSelf();
 	container.bind<ScanScheduler>(TYPES.ScanScheduler).toDynamicValue(() => {
 		return new RestartAtLeastOneScan();
