@@ -11,7 +11,6 @@ export interface Config {
 	nodeEnv: string;
 	enableSentry: boolean;
 	sentryDSN?: string;
-	environment?: string;
 	userAgent: string;
 	coordinatorAPIBaseUrl: string;
 	coordinatorAPIPassword: string;
@@ -72,7 +71,6 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		nodeEnv: process.env.NODE_ENV ?? defaultConfig.nodeEnv,
 		enableSentry,
 		sentryDSN: enableSentry ? process.env.SENTRY_DSN : undefined,
-		environment: process.env.ENVIRONMENT,
 		userAgent: process.env.USER_AGENT ?? defaultConfig.userAgent,
 		coordinatorAPIBaseUrl: process.env.COORDINATOR_API_BASE_URL!,
 		coordinatorAPIPassword: process.env.COORDINATOR_API_PASSWORD!,
