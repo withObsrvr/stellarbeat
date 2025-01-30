@@ -12,7 +12,7 @@
 	"main": "index.js",
 	"license": "MIT",
 	"private": true,
-	"dependencie'7XqhM1busGfKYJi/v/lHL/IDp/h/6TMLTDxYwKu88QA='s": {
+	"dependencies": {
 		"dotenv": "^10.0.0",
 		"validator": "^13.12.0",
 		"inversify": "^6.0.2",

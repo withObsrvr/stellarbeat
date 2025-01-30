@@ -421,6 +421,52 @@ importers:
         version: 2.1.6(typescript@5.6.2)
 
   apps/history-scanner:
+    dependencies:
+      '@stellarbeat/stellar-history-archive-hasher':
+        specifier: 0.7.0
+        version: 0.7.0
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
+      custom-error:
+        specifier: workspace:*
+        version: link:../../packages/custom-error
+      dotenv:
+        specifier: ^10.0.0
+        version: 10.0.0
+      exception-logger:
+        specifier: workspace:*
+        version: link:../../packages/exception-logger
+      history-scanner-dto:
+        specifier: workspace:*
+        version: link:../../packages/history-scanner-dto
+      http-helper:
+        specifier: workspace:*
+        version: link:../../packages/http-helper
+      inversify:
+        specifier: ^6.0.2
+        version: 6.0.2
+      job-monitor:
+        specifier: workspace:*
+        version: link:../../packages/job-monitor
+      logger:
+        specifier: workspace:*
+        version: link:../../packages/logger
+      neverthrow:
+        specifier: ^6.2.2
+        version: 6.2.2
+      shared:
+        specifier: workspace:*
+        version: link:../../packages/shared
+      validator:
+        specifier: ^13.12.0
+        version: 13.12.0
+      workerpool:
+        specifier: ^6.5.1
+        version: 6.5.1
+      yn:
+        specifier: ^3.1.1
+        version: 3.1.1
     devDependencies:
       '@types/express':
         specifier: ^4.17.21
