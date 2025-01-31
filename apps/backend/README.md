@@ -1,29 +1,36 @@
 # Stellarbeat Backend
 
-Core service for the Stellarbeat platform that monitors and analyzes the Stellar network. Built with Nodejs/TypeScript and follows Clean Architecture principles.
+Core service for the Stellarbeat platform that monitors and analyzes the Stellar
+network. Built with Nodejs/TypeScript and follows Clean Architecture principles.
 
 ## Modules
 
-The backend follows clean architecture and is divided into modules that are loosely coupled. 
-Every module has a domain folder for domain code. And interface folder for the database, cli scripts, ... and use-cases that describe and execute the available functionality. 
+The backend follows clean architecture and is divided into modules that are
+loosely coupled. Every module has a domain folder for domain code. And interface
+folder for the database, cli scripts, ... and use-cases that describe and
+execute the available functionality.
 
 ### Network Scanner
+
 - Crawls and monitors the Stellar network using the crawler package
 - Collects node and organization data through TOML files and direct connections
 - Tracks network health, node versions, and quorum set configurations
 - Provides network metrics via REST APIs
 
 ### Notifications
+
 - Manages user subscriptions for network events
 - Sends email notifications through the users microservice
 - Alerts on network outages, validator failures, and quorum set changes
 
 ### History Archive Scanner
+
 - Verifies integrity of validator history archives
 - Detects missing or corrupted history records
 - Reports archive availability issues
 
 ### Core
+
 The core module contains app wide functionality like logging, configuration,
 database, etc.
 
@@ -103,9 +110,11 @@ src/core/infrastructure/database/migrations/{{MIGRATION_DESCRIPTION}} -d
 lib/core/infrastructure/database/AppDataSource.js
 
 ```
+
 ## API Documentation
-OpenAPI spec available at openapi.json
-Swagger UI available at /api-docs when running in development
+
+OpenAPI spec available at openapi.json Swagger UI available at /api-docs when
+running in development
 
 ## history
 
