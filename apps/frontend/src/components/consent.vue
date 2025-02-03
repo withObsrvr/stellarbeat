@@ -9,20 +9,26 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 id="modal-1Label" class="modal-title">Welcome to Stellarbeat!</h5>
+          <h5 id="modal-1Label" class="modal-title">
+            Welcome to Stellarbeat.io!
+          </h5>
         </div>
         <div class="modal-body">
           <p>
             By clicking "I Agree", you acknowledge that you have read,
             understood, and agree to be bound by the
-            <router-link
-              :to="{ name: 'terms-and-conditions', query: queryForRouter }"
-              exact
-              >Terms and Conditions</router-link
+            <a
+              :href="process.env.VUE_APP_TERMS_LINK"
+              target="_blank"
+              rel="noopener"
+              >Terms and Conditions</a
             >
             and our
-            <router-link :to="{ name: 'privacy', query: queryForRouter }" exact
-              >Privacy Policy</router-link
+            <a
+              :href="process.env.VUE_APP_PRIVACY_LINK"
+              target="_blank"
+              rel="noopener"
+              >Privacy Policy</a
             >. If you do not agree to these terms, please do not use this
             service.
           </p>
@@ -79,6 +85,9 @@ const checkConsent = () => {
     $(consentModal.value).modal("show");
   }
 };
+
+const termsLink = import.meta.env.VUE_APP_TERMS_LINK;
+const privacyLink = import.meta.env.VUE_APP_PRIVACY_LINK;
 
 onMounted(() => {
   checkConsent();

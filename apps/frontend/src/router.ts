@@ -135,22 +135,6 @@ export function createRouter() {
           },
         ],
       },
-      {
-        name: "terms-and-conditions",
-        path: "/terms-and-conditions",
-        component: () =>
-          import(
-            /* webpackChunkName: "tac" */ "@/views/TermsAndConditions.vue"
-          ),
-      },
-      {
-        name: "privacy",
-        path: "/privacy",
-        component: () =>
-          import(
-            /* webpackChunkName: "notify-subscription-unsubscribe" */ "@/views/privacy-policy.vue"
-          ),
-      },
     ],
 
     scrollBehavior(to, from, savedPosition) {

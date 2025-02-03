@@ -13,19 +13,14 @@
         class="card-footer"
       >
         <div class="d-flex privacy-link">
-          <router-link
+          <a
+            :href="privacyLink"
             class="nav-link"
-            :to="{
-              name: 'privacy',
-              query: {
-                view: $route.query.view,
-                network: $route.query.network,
-                at: $route.query.at,
-              },
-            }"
+            target="_blank"
+            rel="noopener"
           >
             Privacy policy
-          </router-link>
+          </a>
         </div>
       </div>
     </div>
@@ -35,6 +30,7 @@
 <script setup lang="ts">
 import useMetaTags from "@/composables/useMetaTags";
 
+const privacyLink = import.meta.env.VUE_APP_PRIVACY_LINK;
 useMetaTags("Notify", "Get notified on network, node or organization events");
 </script>
 <style scoped>

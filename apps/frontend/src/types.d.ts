@@ -21,7 +21,8 @@ interface ImportMetaEnv {
   readonly VUE_APP_SENTRY_DSN: string;
   readonly VUE_APP_ENABLE_NOTIFY: string;
   readonly PRERENDER_TOKEN: string;
-  readonly VUE_APP_OWNER: string;
+  readonly VUE_APP_TERMS_LINK: string;
+  readonly VUE_APP_PRIVACY_LINK: string;
   readonly NODE_ENV: string;
   readonly VUE_APP_BLOG_URL: string;
   readonly VUE_APP_API_DOC_URL: string;

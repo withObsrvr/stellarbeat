@@ -94,31 +94,9 @@
             unchecked-value="not_accepted"
           >
             I have read, understood, and agree to be bound by the
-            <router-link
-              :to="{
-                name: 'terms-and-conditions',
-                query: {
-                  view: $route.query.view,
-                  network: $route.query.network,
-                  at: $route.query.at,
-                },
-              }"
-              exact
-              >Terms and Conditions</router-link
-            >
+            <a :href="termsLink" target="_blank">Terms and Conditions</a>
             and our
-            <router-link
-              :to="{
-                name: 'privacy',
-                query: {
-                  view: $route.query.view,
-                  network: $route.query.network,
-                  at: $route.query.at,
-                },
-              }"
-              exact
-              >Privacy Policy</router-link
-            >
+            <a :href="privacyLink" target="_blank">Privacy Policy</a>
           </b-form-checkbox>
         </b-form-group>
         <button
@@ -227,6 +205,9 @@ const selectedNodes: Ref<SelectNode[] | null> = ref(null);
 const nodes: Ref<SelectNode[]> = ref([]);
 const selectedOrganizations: Ref<SelectedOrganization[] | null> = ref(null);
 const validated = ref(false);
+
+const privacyLink = import.meta.env.VUE_APP_PRIVACY_LINK;
+const termsLink = import.meta.env.VUE_APP_TERMS_LINK;
 
 const organizations: ComputedRef<SelectedOrganization[]> = computed(() => {
   return network.organizations.map((org) => {

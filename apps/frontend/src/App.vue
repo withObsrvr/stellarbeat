@@ -49,36 +49,22 @@
       <div class="container-fluid" style="max-width: 1360px">
         <div class="d-flex justify-content-between mx-4">
           <div class="">
-            <router-link
-              active-class="active"
+            <a
               class="nav-link"
-              :to="{
-                name: 'terms-and-conditions',
-                query: {
-                  view: $route.query.view,
-                  network: $route.query.network,
-                  at: $route.query.at,
-                },
-              }"
-              exact
+              :href="termsLink"
+              target="_blank"
+              rel="noopener"
             >
               Terms and Conditions
-            </router-link>
-            <router-link
-              active-class="active"
+            </a>
+            <a
               class="nav-link"
-              :to="{
-                name: 'privacy',
-                query: {
-                  view: $route.query.view,
-                  network: $route.query.network,
-                  at: $route.query.at,
-                },
-              }"
-              exact
+              :href="privacyLink"
+              target="_blank"
+              rel="noopener"
             >
               Privacy Policy
-            </router-link>
+            </a>
           </div>
           <div class="nav-item d-lg-flex pr-0">
             <div class="d-flex">
@@ -144,6 +130,9 @@ const networkId = computed(() => {
 const timeTravelDate = computed(() => {
   return store.getDateFromParam(route.query.at);
 });
+
+const privacyLink = import.meta.env.VUE_APP_PRIVACY_LINK;
+const termsLink = import.meta.env.VUE_APP_TERMS_LINK;
 
 onBeforeMount(async () => {
   await store.updateNetwork(networkId.value, timeTravelDate.value);
