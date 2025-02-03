@@ -18,14 +18,14 @@
             By clicking "I Agree", you acknowledge that you have read,
             understood, and agree to be bound by the
             <a
-              :href="process.env.VUE_APP_TERMS_LINK"
+              :href="import.meta.env.VUE_APP_TERMS_LINK"
               target="_blank"
               rel="noopener"
               >Terms and Conditions</a
             >
             and our
             <a
-              :href="process.env.VUE_APP_PRIVACY_LINK"
+              :href="import.meta.env.VUE_APP_PRIVACY_LINK"
               target="_blank"
               rel="noopener"
               >Privacy Policy</a
