@@ -7,7 +7,7 @@ import { Scan } from 'src/domain/scan/Scan';
 import { ScanDTO, ScanJobDTO } from 'history-scanner-dto';
 import { ScanCoordinatorService } from 'src/domain/scan/ScanCoordinatorService';
 import { isObject } from 'shared';
-import { url } from 'inspector';
+import { ScanErrorType } from '../../domain/scan/ScanError';
 
 export class CoordinatorServiceError extends CustomError {
 	constructor(message: string, cause?: Error) {
@@ -54,6 +54,10 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 			);
 		}
 
+		if (response.value.status !== 201) {
+			return err(new CoordinatorServiceError('Failed to save scan result'));
+		}
+
 		return ok(undefined);
 	}
 
@@ -73,7 +77,7 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 			error: scan.error
 				? {
 						message: scan.error.message,
-						type: scan.error.type,
+						type: ScanErrorType[scan.error.type],
 						url: scan.error.url
 					}
 				: null

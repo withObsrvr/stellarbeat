@@ -52,6 +52,7 @@ export class VerifyArchives {
 			this.exceptionLogger.captureException(scanJobResult.error);
 			return;
 		}
+
 		await this.checkIn('in_progress');
 		await this.perform(scanJobResult.value, persist);
 		await this.checkIn('ok');
@@ -65,10 +66,9 @@ export class VerifyArchives {
 	}
 
 	private async persist(scan: Scan) {
-		try {
-			await this.scanCoordinator.registerScan(scan);
-		} catch (e: unknown) {
-			this.exceptionLogger.captureException(mapUnknownToError(e));
+		const result = await this.scanCoordinator.registerScan(scan);
+		if (result.isErr()) {
+			this.exceptionLogger.captureException(result.error);
 		}
 	}
 

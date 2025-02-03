@@ -110,7 +110,7 @@ export default class DatabaseMeasurementsRollupService
 				name: name
 			}
 		});
-		if (measurementRollup === undefined) {
+		if (measurementRollup === null) {
 			await this.initializeRollups();
 			measurementRollup = await this.measurementRollupRepository.findOne({
 				where: {

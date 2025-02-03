@@ -6,16 +6,27 @@ import { inject, injectable } from 'inversify';
 import { HistoryArchiveScan } from 'shared';
 import { TYPES } from '../../../history-scan-coordinator/infrastructure/di/di-types';
 import { ScanErrorType } from '../../../history-scan-coordinator/domain/scan/ScanError';
+import { ScheduleScanJobs } from '../../../history-scan-coordinator/use-cases/schedule-scan-jobs/ScheduleScanJobs';
 
-//only dependency with history-archive package.
+//Connects with the HistoryScanCoordinator module
 @injectable()
-export class DatabaseHistoryArchiveScanService
+export class HistoryScanCoordinatorScanService
 	implements HistoryArchiveScanService
 {
+	//TODO: should not call repository directly, should call use case
 	constructor(
 		@inject(TYPES.HistoryArchiveScanRepository)
-		private historyArchiveScanRepository: ScanRepository
+		private historyArchiveScanRepository: ScanRepository,
+		private scheduleScansUseCase: ScheduleScanJobs
 	) {}
+
+	async scheduleScans(
+		historyArchiveUrls: string[]
+	): Promise<Result<void, Error>> {
+		return this.scheduleScansUseCase.execute({
+			historyArchiveUrls
+		});
+	}
 
 	async findLatestScans(): Promise<Result<HistoryArchiveScan[], Error>> {
 		try {

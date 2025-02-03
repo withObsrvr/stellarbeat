@@ -1,14 +1,19 @@
 # Stellarbeat Backend
 
-Core service for the Stellarbeat platform that monitors and analyzes the Stellar
-network. Built with Nodejs/TypeScript and follows Clean Architecture principles.
+Backend for the Stellarbeat platform that monitors and analyzes the Stellar
+network validators and organizations. It uses a database (pgsql recomended) for
+storage. And it exposes a REST API for all the necessary functions.
+
+Built with Nodejs/TypeScript and follows Clean Architecture principles.
+
+Follows 12 factor app and can be easily run on heroku hosting.
 
 ## Modules
 
 The backend follows clean architecture and is divided into modules that are
-loosely coupled. Every module has a domain folder for domain code. And interface
-folder for the database, cli scripts, ... and use-cases that describe and
-execute the available functionality.
+loosely coupled. Every module has a domain folder for domain code. An
+infrastructure folder for the database, cli scripts, ... and use-cases that
+describe and execute the available functionality.
 
 ### Network Scanner
 
@@ -23,18 +28,20 @@ execute the available functionality.
 - Sends email notifications through the users microservice
 - Alerts on network outages, validator failures, and quorum set changes
 
-### History Archive Scanner
+### History Archive Scan coordinator
 
-- Verifies integrity of validator history archives
-- Detects missing or corrupted history records
-- Reports archive availability issues
+- Schedules ScanJobs to scan history archives
+- Workers can fetch ScanJobs to execute.
+- Allows parallel executing of History Archive Scans
 
 ### Core
 
-The core module contains app wide functionality like logging, configuration,
-database, etc.
+The core module contains app wide functionality like kernel initiation,
+configuration, database, etc.
 
 ## install
+
+Should be executed from the root of the monorepo
 
 ```
 > pnpm install # install dependencies
@@ -49,6 +56,8 @@ Copy env.dist to .env and configure the environment variables.
 Every module has a README.md file with more detailed information.
 
 ### Run dev environment
+
+Note: these commands are also exposed in the monorepo root.
 
 1. Provide the necessary environment variables. (todo: automate)
 2. Start a network scan to get some data into the system
@@ -105,9 +114,8 @@ pnpm test pnpm test:unit pnpm test:integration
 
 ```
 
-pnpm build pnpm typeorm migration:generate
-src/core/infrastructure/database/migrations/{{MIGRATION_DESCRIPTION}} -d
-lib/core/infrastructure/database/AppDataSource.js
+pnpm build
+pnpm typeorm migration:generate src/core/infrastructure/database/migrations/{{MIGRATION_DESCRIPTION}} -d lib/core/infrastructure/database/AppDataSource.js
 
 ```
 

@@ -93,7 +93,6 @@ export const HistoryScanRouterWrapper = (
 					return res.status(400).json({ errors: errors.array() });
 				}
 
-				console.log(req.body);
 				const dto = ScanDTO.fromJSON(req.body);
 				if (dto.isErr()) {
 					return res.status(400).json({ error: 'Invalid request body' });

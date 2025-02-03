@@ -111,4 +111,8 @@ export class HistoryService {
 
 		return ok(historyUrlsWithErrors);
 	}
+
+	async scheduleScans(historyUrls: string[]): Promise<void> {
+		this.historyArchiveScanService.scheduleScans(historyUrls);
+	}
 }

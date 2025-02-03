@@ -12,7 +12,7 @@ import { GetOrganizationSnapshots } from '../../use-cases/get-organization-snaps
 import { GetMeasurements } from '../../use-cases/get-measurements/GetMeasurements';
 import { GetMeasurementsFactory } from '../../use-cases/get-measurements/GetMeasurementsFactory';
 import { DataSource, Repository } from 'typeorm';
-import { DatabaseHistoryArchiveScanService } from '../services/DatabaseHistoryArchiveScanService';
+import { HistoryScanCoordinatorScanService } from '../services/HistoryScanCoordinatorScanService';
 import { HistoryArchiveScanService } from '../../domain/node/scan/history/HistoryArchiveScanService';
 import { NETWORK_TYPES } from './di-types';
 import { NodeMeasurementRepository } from '../../domain/node/NodeMeasurementRepository';
@@ -298,7 +298,7 @@ function loadDomain(container: Container, config: Config) {
 		.inRequestScope();
 	container
 		.bind<HistoryArchiveScanService>(NETWORK_TYPES.HistoryArchiveScanService)
-		.to(DatabaseHistoryArchiveScanService);
+		.to(HistoryScanCoordinatorScanService);
 	container
 		.bind<NetworkRepository>(NETWORK_TYPES.NetworkRepository)
 		.toDynamicValue(() => {

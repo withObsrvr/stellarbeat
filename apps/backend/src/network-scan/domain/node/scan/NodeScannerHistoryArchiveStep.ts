@@ -1,10 +1,16 @@
 import { HistoryArchiveStatusFinder } from './HistoryArchiveStatusFinder';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { NodeScan } from './NodeScan';
+import { HistoryArchiveScanService } from './history/HistoryArchiveScanService';
+import { NETWORK_TYPES } from '../../../infrastructure/di/di-types';
 
 @injectable()
 export class NodeScannerHistoryArchiveStep {
-	constructor(private historyArchiveStatusFinder: HistoryArchiveStatusFinder) {}
+	constructor(
+		private historyArchiveStatusFinder: HistoryArchiveStatusFinder,
+		@inject(NETWORK_TYPES.HistoryArchiveScanService)
+		private historyArchiveScanService: HistoryArchiveScanService
+	) {}
 
 	public async execute(nodeScan: NodeScan): Promise<void> {
 		nodeScan.updateHistoryArchiveUpToDateStatus(
@@ -17,6 +23,10 @@ export class NodeScannerHistoryArchiveStep {
 			await this.historyArchiveStatusFinder.getNodesWithHistoryArchiveVerificationErrors(
 				nodeScan.getHistoryArchiveUrls()
 			)
+		);
+
+		this.historyArchiveScanService.scheduleScans(
+			Array.from(nodeScan.getHistoryArchiveUrls().values())
 		);
 	}
 }

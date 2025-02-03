@@ -19,8 +19,10 @@ export class RegisterScan {
 	) {}
 
 	async execute(dto: ScanDTO): Promise<Result<void, Error>> {
+		this.logger.info(`Registering scan: ${dto.baseUrl}`);
 		const scanResult = this.mapper.toDomain(dto);
 		if (scanResult.isErr()) {
+			this.exceptionLogger.captureException(scanResult.error);
 			return err(scanResult.error);
 		}
 

@@ -8,11 +8,11 @@ import { Url } from 'http-helper';
 
 let kernel: Kernel;
 jest.setTimeout(60000); //slow integration tests
-beforeAll(async () => {
+beforeEach(async () => {
 	kernel = await Kernel.getInstance(new ConfigMock());
 });
 
-afterAll(async () => {
+afterEach(async () => {
 	await kernel.close();
 });
 

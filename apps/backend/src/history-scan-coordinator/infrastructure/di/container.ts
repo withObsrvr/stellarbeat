@@ -9,29 +9,30 @@ import { GetLatestScan } from '../../use-cases/get-latest-scan/GetLatestScan';
 import { Scan } from '../../domain/scan/Scan';
 import { RegisterScan } from '../../use-cases/register-scan/RegisterScan';
 import { ScanMapper } from '../mappers/ScanMapper';
-import { HistoryArchiveRepository } from '../../domain/HistoryArchiveRepository';
-import { NetworkScanHistoryArchiveRepository } from '../repositories/NetworkScanHistoryArchiveRepository';
-import { NetworkDTOService } from '../../../network-scan/services/NetworkDTOService';
 import { GetScanJob } from '../../use-cases/get-scan-job/GetScanJob';
 import {
 	RestartAtLeastOneScan,
 	ScanScheduler
 } from '../../domain/ScanScheduler';
+import { ScheduleScanJobs } from '../../use-cases/schedule-scan-jobs/ScheduleScanJobs';
+import { ScanJobRepository } from '../../domain/ScanJobRepository';
+import { TypeOrmScanJobRepository } from '../repositories/database/TypeOrmScanJobRepository';
+import { ScanJob } from '../../domain/ScanJob';
 
 export function load(container: Container, config: Config) {
 	const dataSource = container.get(DataSource);
 	container.bind(GetLatestScan).toSelf();
 	container.bind(GetScanJob).toSelf();
 	container.bind(RegisterScan).toSelf();
+	container.bind(ScheduleScanJobs).toSelf();
 	container.bind<ScanScheduler>(TYPES.ScanScheduler).toDynamicValue(() => {
 		return new RestartAtLeastOneScan();
 	});
 	container.bind(ScanMapper).toSelf();
 	container
-		.bind<HistoryArchiveRepository>(TYPES.HistoryArchiveRepository)
+		.bind<ScanJobRepository>(TYPES.ScanJobRepository)
 		.toDynamicValue(() => {
-			const service = container.get(NetworkDTOService);
-			return new NetworkScanHistoryArchiveRepository(service);
+			return new TypeOrmScanJobRepository(dataSource.getRepository(ScanJob));
 		})
 		.inRequestScope();
 
