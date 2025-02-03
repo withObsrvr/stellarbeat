@@ -41,7 +41,12 @@ export class GetScanJob {
 			nextScanJob.status = 'TAKEN';
 			await this.scanJobRepository.save([nextScanJob]);
 
-			return ok(nextScanJob);
+			return ok({
+				chainInitDate: nextScanJob.chainInitDate,
+				url: nextScanJob.url,
+				latestScannedLedger: nextScanJob.latestScannedLedger,
+				latestScannedLedgerHeaderHash: nextScanJob.latestScannedLedgerHeaderHash
+			});
 		} catch (e) {
 			const error = mapUnknownToError(e);
 			this.exceptionLogger.captureException(error);
