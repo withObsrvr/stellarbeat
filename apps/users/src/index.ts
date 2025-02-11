@@ -199,9 +199,9 @@ api.post(
 
 			if (result instanceof HttpError) {
 				console.error(
+					'Error: %s %s',
 					result.message,
-					result.response?.statusText,
-					result.response?.data
+					result.response?.statusText
 				);
 				Sentry.captureException(result, {
 					extra: {
