@@ -31,7 +31,7 @@
 	},
 	"devDependencies": {
 		"@types/workerpool": "^6.4.7",
-		"express": "^4.21.0",
+		"express": "^4.21.2",
 		"@types/express": "^4.17.21",
 		"supertest": "^7.0.0"
 	}
