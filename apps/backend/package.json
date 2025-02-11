@@ -28,7 +28,7 @@
 		"ajv": "^8.17.1",
 		"async": "^3.2.6",
 		"await-fs": "^1.0.0",
-		"axios": "1.7.7",
+		"axios": "1.7.9",
 		"blocked-at": "^1.2.0",
 		"body-parser": "^1.20.3",
 		"class-transformer": "^0.5.1",
