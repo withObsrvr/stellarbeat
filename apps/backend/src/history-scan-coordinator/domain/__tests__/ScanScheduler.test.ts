@@ -75,3 +75,26 @@ it('should restart at least one scan, the oldest chain', async function () {
 	expect(newChainJob.latestScannedLedger).toEqual(0);
 	expect(newChainJob.latestScannedLedgerHeaderHash).toBeNull();
 });
+
+it('should only schedule valid history urls', () => {
+	const scheduler = new RestartAtLeastOneScan();
+
+	// Include a valid URL with trailing slash, another valid URL, and an invalid URL
+	const validWithSlash = 'https://history.stellar.org/test/';
+	const validNoSlash = 'https://history.stellar.org/test2';
+	const invalidUrl = 'htp:://wrong';
+
+	const jobs = scheduler.schedule(
+		[validWithSlash, validNoSlash, invalidUrl],
+		[]
+	);
+
+	// Only the valid URLs should be scheduled
+	expect(jobs).toHaveLength(2);
+
+	// Confirm trailing slash is removed
+	const scheduledUrls = jobs.map((job) => job.url);
+	expect(scheduledUrls).toContain('https://history.stellar.org/test');
+	expect(scheduledUrls).toContain(validNoSlash);
+	expect(scheduledUrls).not.toContain(invalidUrl);
+});

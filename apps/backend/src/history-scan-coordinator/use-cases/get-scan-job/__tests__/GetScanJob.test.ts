@@ -41,7 +41,14 @@ describe('GetScanJob', () => {
 
 		const result = await getScanJob.execute();
 
-		expect(result).toEqual(ok(mockJob));
+		expect(result).toEqual(
+			ok({
+				chainInitDate: mockJob.chainInitDate,
+				url: mockJob.url,
+				latestScannedLedger: mockJob.latestScannedLedger,
+				latestScannedLedgerHeaderHash: mockJob.latestScannedLedgerHeaderHash
+			})
+		);
 		expect(loggerMock.info).toHaveBeenCalledWith('Returning next scan job', {
 			app: 'history-scan-coordinator',
 			url: 'http://test.com',

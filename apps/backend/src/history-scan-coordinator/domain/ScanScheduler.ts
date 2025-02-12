@@ -1,6 +1,7 @@
 import { sortHistoryUrls } from './sortHistoryUrls';
 import { Scan } from './scan/Scan';
 import { ScanJob } from './ScanJob';
+import { Url } from 'http-helper';
 
 export interface ScanScheduler {
 	schedule(archives: string[], previousScans: Scan[]): ScanJob[];
@@ -9,7 +10,9 @@ export interface ScanScheduler {
 export class RestartAtLeastOneScan implements ScanScheduler {
 	schedule(archives: string[], previousScans: Scan[]): ScanJob[] {
 		const scanJobs: ScanJob[] = [];
-		const uniqueArchives = this.removeDuplicates(archives);
+
+		const validArchiveUrls = this.mapToValidUrls(archives);
+		const uniqueArchives = this.removeDuplicates(validArchiveUrls);
 		const previousScansMap = new Map(
 			previousScans.map((scan) => {
 				return [scan.baseUrl.value, scan];
@@ -56,5 +59,12 @@ export class RestartAtLeastOneScan implements ScanScheduler {
 
 	private removeDuplicates(urls: string[]): string[] {
 		return Array.from(new Set(urls));
+	}
+
+	private mapToValidUrls(archives: string[]): string[] {
+		return archives
+			.map((archive) => Url.create(archive))
+			.filter((result) => result.isOk())
+			.map((result) => result.value.value);
 	}
 }
