@@ -17,7 +17,8 @@ export class ScanDTO {
 		public readonly latestScannedLedgerHeaderHash: string | null,
 		public readonly concurrency: number,
 		public readonly isSlowArchive: boolean | null,
-		public readonly error: ScanErrorDTO | null
+		public readonly error: ScanErrorDTO | null,
+		public readonly scanJobRemoteId: string
 	) {}
 
 	static fromJSON(json: Record<string, unknown>): Result<ScanDTO, Error> {
@@ -38,7 +39,8 @@ export class ScanDTO {
 				json.latestScannedLedgerHeaderHash as string | null,
 				json.concurrency as number,
 				json.isSlowArchive as boolean | null,
-				json.error as ScanErrorDTO | null
+				json.error as ScanErrorDTO | null,
+				json.scanJobRemoteId as string
 			)
 		);
 	}
@@ -67,7 +69,8 @@ export class ScanDTO {
 			Number.isInteger(json.concurrency) &&
 			(json.isSlowArchive === null ||
 				typeof json.isSlowArchive === 'boolean') &&
-			(json.error === null || this.isValidScanErrorDTO(json.error))
+			(json.error === null || this.isValidScanErrorDTO(json.error)) &&
+			typeof json.scanJobRemoteId === 'string'
 		);
 	}
 

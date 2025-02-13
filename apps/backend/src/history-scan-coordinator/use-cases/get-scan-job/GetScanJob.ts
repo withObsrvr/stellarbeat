@@ -45,7 +45,9 @@ export class GetScanJob {
 				chainInitDate: nextScanJob.chainInitDate,
 				url: nextScanJob.url,
 				latestScannedLedger: nextScanJob.latestScannedLedger,
-				latestScannedLedgerHeaderHash: nextScanJob.latestScannedLedgerHeaderHash
+				latestScannedLedgerHeaderHash:
+					nextScanJob.latestScannedLedgerHeaderHash,
+				remoteId: nextScanJob.remoteId
 			});
 		} catch (e) {
 			const error = mapUnknownToError(e);

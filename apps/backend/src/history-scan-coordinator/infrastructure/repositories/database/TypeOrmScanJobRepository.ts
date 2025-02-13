@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { ScanJobRepository } from '../../../domain/ScanJobRepository';
 import { ScanJob } from '../../../domain/ScanJob';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 
 @injectable()
 export class TypeOrmScanJobRepository implements ScanJobRepository {
@@ -26,5 +26,18 @@ export class TypeOrmScanJobRepository implements ScanJobRepository {
 		return (
 			(await this.baseRepository.count({ where: { status: 'PENDING' } })) > 0
 		);
+	}
+
+	findByRemoteId(remoteId: string): Promise<ScanJob | null> {
+		return this.baseRepository.findOne({ where: { remoteId } });
+	}
+
+	findUnfinishedJobs(afterUpdatedAt: Date): Promise<ScanJob[]> {
+		return this.baseRepository.find({
+			where: [
+				{ status: 'TAKEN', updatedAt: MoreThan(afterUpdatedAt) },
+				{ status: 'PENDING', updatedAt: MoreThan(afterUpdatedAt) }
+			]
+		});
 	}
 }

@@ -7,6 +7,7 @@ import { ScanRepository } from '../../domain/scan/ScanRepository';
 import { mapUnknownToError } from '../../../core/utilities/mapUnknownToError';
 import { ScanDTO } from 'history-scanner-dto';
 import { Logger } from 'logger';
+import { ScanJobRepository } from '../../domain/ScanJobRepository';
 
 @injectable()
 export class RegisterScan {
@@ -14,6 +15,8 @@ export class RegisterScan {
 		private mapper: ScanMapper,
 		@inject(TYPES.HistoryArchiveScanRepository)
 		private scanRepository: ScanRepository,
+		@inject(TYPES.ScanJobRepository)
+		private scanJobRepository: ScanJobRepository,
 		@inject('ExceptionLogger') private exceptionLogger: ExceptionLogger,
 		@inject('Logger') private logger: Logger
 	) {}
@@ -28,6 +31,18 @@ export class RegisterScan {
 
 		try {
 			await this.scanRepository.save([scanResult.value]);
+			const scanJob = await this.scanJobRepository.findByRemoteId(
+				dto.scanJobRemoteId
+			);
+			if (scanJob === null) {
+				this.logger.info(
+					`No scan job found for remoteId: ${dto.scanJobRemoteId}`
+				);
+			} else {
+				scanJob.status = 'DONE';
+				await this.scanJobRepository.save([scanJob]);
+			}
+
 			this.logger.info(`Scan registered: ${scanResult.value.baseUrl.value}`);
 		} catch (e) {
 			const error = mapUnknownToError(e);

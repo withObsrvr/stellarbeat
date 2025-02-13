@@ -44,9 +44,15 @@ export class ScheduleScanJobs {
 
 	private async scheduleScanJobs(dto: ScheduleScanJobsDTO): Promise<void> {
 		const previousScans = await this.scanRepository.findLatest();
+		//jobs that are running for over 4 days are considered failed
+		const unfinishedScanJobs = await this.scanJobRepository.findUnfinishedJobs(
+			new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
+		); //todo: this should be configurable
+
 		const scanJobs = this.scanScheduler.schedule(
 			dto.historyArchiveUrls,
-			previousScans
+			previousScans,
+			unfinishedScanJobs
 		);
 
 		this.logger.info('Scheduling new scan jobs', {

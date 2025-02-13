@@ -1,9 +1,8 @@
 import { RESTScanCoordinatorService } from '../RESTScanCoordinatorService';
 import { HttpService, Url } from 'http-helper';
 import { mock } from 'jest-mock-extended';
-import { ok, err } from 'neverthrow';
+import { ok } from 'neverthrow';
 import { Scan } from '../../../domain/scan/Scan';
-import { ScanDTO } from 'history-scanner-dto';
 
 describe('RESTScanCoordinatorService Integration Tests', () => {
 	let httpService: jest.Mocked<HttpService>;
@@ -36,7 +35,8 @@ describe('RESTScanCoordinatorService Integration Tests', () => {
 				'hash123',
 				5,
 				false,
-				null
+				null,
+				'remote-id'
 			);
 
 			httpService.post.mockResolvedValue(
@@ -62,7 +62,8 @@ describe('RESTScanCoordinatorService Integration Tests', () => {
 				url: 'https://history.stellar.org',
 				latestScannedLedger: 100,
 				latestScannedLedgerHeaderHash: 'hash123',
-				chainInitDate: initDate.toISOString()
+				chainInitDate: initDate.toISOString(),
+				remoteId: 'remote-id'
 			};
 
 			httpService.get.mockResolvedValue(
@@ -81,7 +82,8 @@ describe('RESTScanCoordinatorService Integration Tests', () => {
 					url: 'https://history.stellar.org',
 					latestScannedLedger: 100,
 					latestScannedLedgerHeaderHash: 'hash123',
-					chainInitDate: initDate
+					chainInitDate: initDate,
+					remoteId: 'remote-id'
 				});
 			}
 		});

@@ -5,17 +5,24 @@ import { RegisterScan } from '../../../use-cases/register-scan/RegisterScan';
 import { ScanRepository } from '../../../domain/scan/ScanRepository';
 import { Url } from 'http-helper';
 import { ScanDTO } from 'history-scanner-dto';
+import { ScanJobRepository } from '../../../domain/ScanJobRepository';
+import { ScanJob } from '../../../domain/ScanJob';
+import { url } from 'inspector';
 
 describe('RegisterScan.integration', () => {
 	let kernel: Kernel;
 	let registerScan: RegisterScan;
 	let scanRepository: ScanRepository;
+	let scanJobRepository: ScanJobRepository;
 
 	beforeAll(async () => {
 		kernel = await Kernel.getInstance(new ConfigMock());
 		registerScan = kernel.container.get(RegisterScan);
 		scanRepository = kernel.container.get<ScanRepository>(
 			TYPES.HistoryArchiveScanRepository
+		);
+		scanJobRepository = kernel.container.get<ScanJobRepository>(
+			TYPES.ScanJobRepository
 		);
 	});
 
@@ -25,6 +32,9 @@ describe('RegisterScan.integration', () => {
 
 	it('should register a new scan successfully', async () => {
 		const urlResult = Url.create('http://example.com');
+		const scanJob = new ScanJob(urlResult._unsafeUnwrap().value);
+		await scanJobRepository.save([scanJob]);
+
 		if (urlResult.isErr()) throw urlResult.error;
 
 		const dto: ScanDTO = {
@@ -43,7 +53,8 @@ describe('RegisterScan.integration', () => {
 			latestScannedLedger: 100,
 			latestScannedLedgerHeaderHash: null,
 			concurrency: 5,
-			isSlowArchive: false
+			isSlowArchive: false,
+			scanJobRemoteId: scanJob.remoteId
 		};
 
 		const result = await registerScan.execute(dto);
@@ -55,6 +66,10 @@ describe('RegisterScan.integration', () => {
 				await scanRepository.findLatestByUrl('http://example.com');
 			expect(scanInDb).toBeDefined();
 			expect(scanInDb?.baseUrl.value).toBe('http://example.com');
+
+			const job = await scanJobRepository.findByRemoteId(scanJob.remoteId);
+			expect(job).toBeDefined();
+			expect(job?.status).toBe('DONE');
 		}
 	});
 });

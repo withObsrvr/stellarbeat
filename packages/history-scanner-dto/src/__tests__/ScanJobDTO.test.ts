@@ -7,7 +7,8 @@ describe('ScanJobDTO', () => {
 				'https://history.stellar.org',
 				100,
 				'hash123',
-				new Date('2024-01-01T00:00:00.000Z')
+				new Date('2024-01-01T00:00:00.000Z'),
+				'test'
 			);
 			const json = JSON.parse(JSON.stringify(job));
 			console.log(json);
@@ -27,7 +28,8 @@ describe('ScanJobDTO', () => {
 				url: 'https://history.stellar.org',
 				latestScannedLedger: 100,
 				latestScannedLedgerHeaderHash: null,
-				chainInitDate: null
+				chainInitDate: null,
+				remoteId: 'test'
 			};
 
 			const result = ScanJobDTO.fromJSON(json);
@@ -45,7 +47,8 @@ describe('ScanJobDTO', () => {
 				url: 'https://history.stellar.org',
 				latestScannedLedger: 100,
 				latestScannedLedgerHeaderHash: 'hash123',
-				chainInitDate: '2024-01-01T00:00:00.000Z'
+				chainInitDate: '2024-01-01T00:00:00.000Z',
+				remoteId: 'test'
 			};
 
 			const fromString = ScanJobDTO.fromJSON(obj);

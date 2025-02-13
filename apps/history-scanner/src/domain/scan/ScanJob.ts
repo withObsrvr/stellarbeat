@@ -15,7 +15,8 @@ export class ScanJob {
 		public readonly chainInitDate: Date | null = null,
 		public readonly fromLedger = 0,
 		public readonly toLedger: number | null = null,
-		public readonly concurrency = 0
+		public readonly concurrency = 0,
+		public readonly remoteId: string | null = null
 	) {}
 
 	static fromScanJobCoordinatorDTO(dto: ScanJobDTO): Result<ScanJob, Error> {
@@ -32,7 +33,8 @@ export class ScanJob {
 				dto.chainInitDate,
 				dto.latestScannedLedger > 0 ? dto.latestScannedLedger + 1 : 0,
 				null,
-				0
+				0,
+				dto.remoteId
 			)
 		);
 	}
@@ -82,7 +84,8 @@ export class ScanJob {
 			this.latestScannedLedgerHeaderHash,
 			this.concurrency,
 			null,
-			error
+			error,
+			this.remoteId
 		);
 	}
 
@@ -103,7 +106,8 @@ export class ScanJob {
 			scanResult.latestLedgerHeader.hash,
 			settings.concurrency,
 			settings.isSlowArchive,
-			scanResult.error
+			scanResult.error,
+			this.remoteId
 		);
 	}
 }

@@ -40,6 +40,7 @@ describe('ScheduleScanJobs', () => {
 
 	it('should schedule jobs if queue is empty', async () => {
 		scanJobRepositoryMock.hasPendingJobs.mockResolvedValue(false);
+		scanJobRepositoryMock.findUnfinishedJobs.mockResolvedValue([]);
 		scanRepositoryMock.findLatest.mockResolvedValue([]);
 		scanSchedulerMock.schedule.mockReturnValue([
 			new ScanJob('https://example.com')
@@ -53,6 +54,7 @@ describe('ScheduleScanJobs', () => {
 		expect(scanRepositoryMock.findLatest).toHaveBeenCalledTimes(1);
 		expect(scanSchedulerMock.schedule).toHaveBeenCalledWith(
 			['https://example.com'],
+			[],
 			[]
 		);
 		expect(scanJobRepositoryMock.save).toHaveBeenCalledTimes(1);

@@ -19,6 +19,7 @@ export class Scan {
 	public readonly concurrency: number = 0;
 	public readonly isSlowArchive: boolean | null = null;
 	public readonly error: ScanError | null = null;
+	public readonly scanJobRemoteId: string | null = null;
 
 	constructor(
 		scanChainInitDate: Date,
@@ -31,7 +32,8 @@ export class Scan {
 		latestScannedLedgerHeaderHash: string | null = null,
 		concurrency = 0,
 		archiveIsSlow: boolean | null = null,
-		error: ScanError | null = null
+		error: ScanError | null = null,
+		scanJobRemoteId: string | null = null
 	) {
 		this.baseUrl = url;
 		this.scanChainInitDate = scanChainInitDate;
@@ -44,6 +46,7 @@ export class Scan {
 		this.error = error;
 		this.latestScannedLedger = latestScannedLedger;
 		this.latestScannedLedgerHeaderHash = latestScannedLedgerHeaderHash;
+		this.scanJobRemoteId = scanJobRemoteId;
 	}
 
 	private get url(): string {

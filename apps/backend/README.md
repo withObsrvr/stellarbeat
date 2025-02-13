@@ -115,8 +115,15 @@ pnpm test pnpm test:unit pnpm test:integration
 ```
 
 pnpm build
+cd apps/backend
 pnpm typeorm migration:generate src/core/infrastructure/database/migrations/{{MIGRATION_DESCRIPTION}} -d lib/core/infrastructure/database/AppDataSource.js
 
+```
+
+### Revert latest migration
+
+```
+pnpm typeorm migration:revert -d lib/core/infrastructure/database/AppDataSource.js
 ```
 
 ## API Documentation

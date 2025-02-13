@@ -82,6 +82,9 @@ export const HistoryScanRouterWrapper = (
 						return false;
 					})
 					.withMessage('toLedger must be null or a positive integer'),
+				body('scanJobRemoteId')
+					.isString()
+					.withMessage('Invalid scan job remoteId'),
 				body('error').custom((value) => {
 					if (value === null) return true;
 					return typeof value === 'object';

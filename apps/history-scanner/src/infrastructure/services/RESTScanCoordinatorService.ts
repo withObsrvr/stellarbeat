@@ -32,6 +32,10 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 			return err(new CoordinatorServiceError('Invalid URL', urlResult.error));
 		}
 
+		if (scan.scanJobRemoteId === null) {
+			return err(new CoordinatorServiceError('Scan job remote ID is null'));
+		}
+
 		const scanDTO = this.convertScanToDTO(scan);
 
 		const response = await this.httpService.post(
@@ -80,7 +84,8 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 						type: ScanErrorType[scan.error.type],
 						url: scan.error.url
 					}
-				: null
+				: null,
+			scanJobRemoteId: scan.scanJobRemoteId!
 		};
 	}
 
@@ -91,8 +96,6 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 		if (urlResult.isErr()) {
 			return err(new CoordinatorServiceError('Invalid URL', urlResult.error));
 		}
-
-		console.log(urlResult.value);
 
 		const response = await this.httpService.get(urlResult.value, {
 			auth: {

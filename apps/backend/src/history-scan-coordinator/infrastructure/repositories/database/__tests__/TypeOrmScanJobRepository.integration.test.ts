@@ -1,9 +1,9 @@
 import Kernel from '../../../../../core/infrastructure/Kernel';
 import { ConfigMock } from '../../../../../core/config/__mocks__/configMock';
-import { DataSource } from 'typeorm';
 import { TypeOrmScanJobRepository } from '../TypeOrmScanJobRepository';
 import { ScanJob } from '../../../../domain/ScanJob';
 import { TYPES } from '../../../di/di-types';
+import { v4 } from 'uuid';
 
 describe('TypeOrmScanJobRepository.integration', () => {
 	let kernel: Kernel;
@@ -59,6 +59,57 @@ describe('TypeOrmScanJobRepository.integration', () => {
 			await typeOrmScanJobRepository.save([scanJob]);
 			const hasPending = await typeOrmScanJobRepository.hasPendingJobs();
 			expect(hasPending).toBe(true);
+		});
+	});
+
+	describe('findByRemoteId', () => {
+		it('should return null if no job with matching remoteId exists', async () => {
+			const uuid = v4();
+			const job = await typeOrmScanJobRepository.findByRemoteId(uuid);
+			expect(job).toBeNull();
+		});
+
+		it('should return the job if found by remoteId', async () => {
+			const scanJob = new ScanJob('test-url');
+			await typeOrmScanJobRepository.save([scanJob]);
+
+			const threeDaysAgo = new Date();
+			threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+			const jobs =
+				await typeOrmScanJobRepository.findUnfinishedJobs(threeDaysAgo);
+			if (jobs.length !== 1) {
+				throw new Error('Expected one job to be found');
+			}
+
+			const job = await typeOrmScanJobRepository.findByRemoteId(
+				jobs[0].remoteId
+			);
+			expect(job).toBeDefined();
+			expect(job?.url).toBe('test-url');
+		});
+	});
+
+	describe('findUnfinishedJobs', () => {
+		it('should find unfinished jobs after the given date', async () => {
+			const scanJob = new ScanJob('test-url');
+			const finishedJob = new ScanJob('test-url2');
+			finishedJob.status = 'DONE';
+
+			await typeOrmScanJobRepository.save([scanJob, finishedJob]);
+
+			const threeDaysAgo = new Date();
+			threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+			const jobs =
+				await typeOrmScanJobRepository.findUnfinishedJobs(threeDaysAgo);
+			expect(jobs).toHaveLength(1);
+			expect(jobs[0].url).toBe('test-url');
+
+			const noJobs = await typeOrmScanJobRepository.findUnfinishedJobs(
+				new Date()
+			);
+			expect(noJobs).toHaveLength(0);
 		});
 	});
 });

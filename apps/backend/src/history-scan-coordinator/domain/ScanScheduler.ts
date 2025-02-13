@@ -4,11 +4,19 @@ import { ScanJob } from './ScanJob';
 import { Url } from 'http-helper';
 
 export interface ScanScheduler {
-	schedule(archives: string[], previousScans: Scan[]): ScanJob[];
+	schedule(
+		archives: string[],
+		previousScans: Scan[],
+		unfinishedScanJobs: ScanJob[]
+	): ScanJob[];
 }
 
 export class RestartAtLeastOneScan implements ScanScheduler {
-	schedule(archives: string[], previousScans: Scan[]): ScanJob[] {
+	schedule(
+		archives: string[],
+		previousScans: Scan[],
+		unfinishedScanJobs: ScanJob[] = []
+	): ScanJob[] {
 		const scanJobs: ScanJob[] = [];
 
 		const validArchiveUrls = this.mapToValidUrls(archives);
@@ -30,9 +38,13 @@ export class RestartAtLeastOneScan implements ScanScheduler {
 			)
 		);
 
+		const archivesSortedByInitDateToScan = archivesSortedByInitDate.filter(
+			(archive) => !unfinishedScanJobs.map((job) => job.url).includes(archive)
+		);
+
 		//we want to start at least one scan from the very beginning
 		let hasAtLeastOneInitScan = false;
-		archivesSortedByInitDate.forEach((archive) => {
+		archivesSortedByInitDateToScan.forEach((archive) => {
 			if (!hasAtLeastOneInitScan) {
 				hasAtLeastOneInitScan = true;
 				scanJobs.push(new ScanJob(archive));

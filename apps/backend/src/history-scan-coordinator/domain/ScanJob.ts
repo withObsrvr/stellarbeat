@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import {
 	Entity,
 	PrimaryGeneratedColumn,
@@ -10,9 +11,13 @@ import {
 @Entity({ name: 'history_archive_scan_job_queue' })
 @Index('idx_scanjob_status', ['status'])
 @Index('idx_scanjob_url', ['url'])
+@Index('idx_scanjob_remote_id', ['remoteId'], { unique: true })
 export class ScanJob {
 	@PrimaryGeneratedColumn()
 	public id!: number;
+
+	@Column({ type: 'uuid', nullable: false })
+	public readonly remoteId: string = uuidv4();
 
 	@Column()
 	public url: string;
@@ -27,7 +32,7 @@ export class ScanJob {
 	public chainInitDate: Date | null;
 
 	@Column({ type: 'varchar', default: 'PENDING' })
-	public status: 'PENDING' | 'TAKEN';
+	public status: 'PENDING' | 'TAKEN' | 'DONE';
 
 	@CreateDateColumn()
 	public createdAt?: Date;

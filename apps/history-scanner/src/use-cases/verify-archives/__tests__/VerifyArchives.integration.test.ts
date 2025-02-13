@@ -36,7 +36,8 @@ describe('VerifyArchives Integration Tests', () => {
 			url: 'http://127.0.0.1:3333',
 			latestScannedLedger: 0,
 			latestScannedLedgerHeaderHash: null,
-			chainInitDate: new Date()
+			chainInitDate: new Date(),
+			remoteId: 'test'
 		};
 
 		coordinatorServiceMock.getScanJob.mockResolvedValue(ok(mockScanJob));

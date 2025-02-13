@@ -26,7 +26,8 @@ describe('VerifyArchives', () => {
 		'https://example.com',
 		0,
 		null,
-		null
+		null,
+		'test'
 	);
 
 	beforeEach(() => {

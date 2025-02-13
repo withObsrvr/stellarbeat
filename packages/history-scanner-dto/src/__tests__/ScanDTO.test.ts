@@ -15,7 +15,8 @@ describe('ScanDTO', () => {
 				latestScannedLedgerHeaderHash: 'hash123',
 				concurrency: 5,
 				isSlowArchive: false,
-				error: null
+				error: null,
+				scanJobRemoteId: 'test'
 			};
 
 			const result = ScanDTO.fromJSON(json);
@@ -37,6 +38,7 @@ describe('ScanDTO', () => {
 			expect(dto.concurrency).toBe(5);
 			expect(dto.isSlowArchive).toBe(false);
 			expect(dto.error).toBeNull();
+			expect(dto.scanJobRemoteId).toBe('test');
 		});
 
 		it('should parse JSON with null optional fields', () => {
@@ -52,7 +54,8 @@ describe('ScanDTO', () => {
 				latestScannedLedgerHeaderHash: null,
 				concurrency: 5,
 				isSlowArchive: null,
-				error: null
+				error: null,
+				scanJobRemoteId: 'test'
 			};
 
 			const result = ScanDTO.fromJSON(json);
@@ -82,7 +85,8 @@ describe('ScanDTO', () => {
 					type: 'validation',
 					url: 'https://history.stellar.org',
 					message: 'Invalid checksum'
-				}
+				},
+				scanJobRemoteId: 'test'
 			};
 
 			const result = ScanDTO.fromJSON(json);

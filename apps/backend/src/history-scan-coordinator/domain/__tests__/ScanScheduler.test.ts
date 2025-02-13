@@ -98,3 +98,14 @@ it('should only schedule valid history urls', () => {
 	expect(scheduledUrls).toContain(validNoSlash);
 	expect(scheduledUrls).not.toContain(invalidUrl);
 });
+
+it('should only schedule finished scan jobs', () => {
+	const scheduler = new RestartAtLeastOneScan();
+
+	const url = 'https://history.stellar.org/test';
+	const unfinishedJob = new ScanJob(url);
+
+	const jobs = scheduler.schedule([url], [], [unfinishedJob]);
+
+	expect(jobs).toHaveLength(0);
+});

@@ -9,7 +9,8 @@ export class ScanJobDTO {
 		public readonly url: string,
 		public readonly latestScannedLedger: number,
 		public readonly latestScannedLedgerHeaderHash: string | null,
-		public readonly chainInitDate: Date | null
+		public readonly chainInitDate: Date | null,
+		public readonly remoteId: string
 	) {}
 
 	static fromJSON(json: Record<string, unknown>): Result<ScanJobDTO, Error> {
@@ -22,7 +23,8 @@ export class ScanJobDTO {
 				json.url,
 				json.latestScannedLedger,
 				json.latestScannedLedgerHeaderHash,
-				json.chainInitDate ? new Date(json.chainInitDate) : null
+				json.chainInitDate ? new Date(json.chainInitDate) : null,
+				json.remoteId
 			)
 		);
 	}
@@ -40,7 +42,8 @@ export class ScanJobDTO {
 				typeof json.latestScannedLedgerHeaderHash === 'string') &&
 			(json.chainInitDate === null ||
 				(typeof json.chainInitDate === 'string' &&
-					!isNaN(new Date(json.chainInitDate).getTime())))
+					!isNaN(new Date(json.chainInitDate).getTime()))) &&
+			typeof json.remoteId === 'string'
 		);
 	}
 }
@@ -50,4 +53,5 @@ interface ScanJobJSON extends Record<string, unknown> {
 	latestScannedLedger: number;
 	latestScannedLedgerHeaderHash: string | null;
 	chainInitDate: string | null;
+	remoteId: string;
 }
