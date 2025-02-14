@@ -1,4 +1,4 @@
-@startuml Stellarbeat
+@startuml Stellarbeat C4 Container model
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
 skinparam ranksep 100
@@ -18,20 +18,20 @@ System_Boundary(s1, "Stellarbeat") {
 
   ' Backend group
   Boundary(backendBoundary, "Backend App") {
-    Container(backendAPI, "Backend API", "REST API (gateway)", "Node.js/TypeScript")
-    Container(backendNetworkScan, "Backend Network Scan «worker»", "Continuously scans the Stellar network for nodes, organizations, stats, etc.", "Node.js/TypeScript/Wasm")
-    ContainerDb(database_backend, "Database Backend", "Stores publicly available data", "PostgreSQL")
+    Container(backendAPI, "REST API", "Exposes public data and provides secure endpoints for system integration", "Node.js/TypeScript")
+    Container(backendNetworkScan, "Network Scanner", "Continuously scans the Stellar network for nodes, organizations, stats, etc.", "Node.js/TypeScript/Wasm")
+    ContainerDb(database_backend, "Database", "Stores publicly available data", "PostgreSQL")
   }
 
   ' Users group
   Boundary(usersBoundary, "Users App") {
     Container(users, "Users", "Stores encrypted user emails and sends emails", "Node.js/TypeScript")
-    ContainerDb(database_users, "Database Users", "Stores encrypted users", "PostgreSQL")
+    ContainerDb(database_users, "Users", "Stores encrypted users", "PostgreSQL")
   }
 
   ' History Scanner group
   Boundary(historyBoundary, "History Scanner App") {
-    Container(historyScanner, "History Archive Scanner", "CLI tool that scans history archives. Multiple instances are possible to increase performance.", "Node.js/Rust (basics)")
+    Container(historyScanner, "History Archive Scanner", "CLI tool that scans history archives. Multiple instances are possible to increase performance.", "Node.js/Typescript/Rust")
   }
 }
 
