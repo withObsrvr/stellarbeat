@@ -1,0 +1,68 @@
+@startuml Stellarbeat
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+skinparam ranksep 100
+
+title Stellarbeat - Container Diagram
+
+' People
+Person(user, "User", "A user interacting with the Stellarbeat Dashboard")
+Person(developer, "3rd Party Developer", "A developer integrating with the Stellarbeat API")
+
+System_Boundary(s1, "Stellarbeat") {
+
+  ' Frontend group
+  Boundary(frontendBoundary, "Frontend App") {
+    Container(frontend, "Frontend", "Browser dashboard", "Vue.js/TypeScript/Wasm/Vite")
+  }
+
+  ' Backend group
+  Boundary(backendBoundary, "Backend App") {
+    Container(backendAPI, "Backend API", "REST API (gateway)", "Node.js/TypeScript")
+    Container(backendNetworkScan, "Backend Network Scan «worker»", "Continuously scans the Stellar network for nodes, organizations, stats, etc.", "Node.js/TypeScript/Wasm")
+    ContainerDb(database_backend, "Database Backend", "Stores publicly available data", "PostgreSQL")
+  }
+
+  ' Users group
+  Boundary(usersBoundary, "Users App") {
+    Container(users, "Users", "Stores encrypted user emails and sends emails", "Node.js/TypeScript")
+    ContainerDb(database_users, "Database Users", "Stores encrypted users", "PostgreSQL")
+  }
+
+  ' History Scanner group
+  Boundary(historyBoundary, "History Scanner App") {
+    Container(historyScanner, "History Archive Scanner", "CLI tool that scans history archives. Multiple instances are possible to increase performance.", "Node.js/Rust (basics)")
+  }
+}
+
+
+  System_Ext(email_system, "E-Mail System", "mailgun.com", "envelope")
+  System_Ext(json_archiver, "JSON Archiver", "amazon.com", "archive")
+  System_Ext(heartbeat_monitor, "Heartbeat Monitor <deprecated>", "deadmanssnitch.com", "heart")
+  System_Ext(job_monitor, "(CRON) Job Monitor", "sentry.io", "job")
+  System_Ext(exception_logger, "Exception (trace) Logger", "sentry.io", "exception")
+  System_Ext(geo_service, "IP Geodata & ISP Service", "ipstack.com")
+  System_Ext(horizon, "Horizon provides an HTTP API to data in the Stellar network", "horizon.stellar.org")
+
+
+' Internal Relationships
+Rel_Down(user, frontend, "Interacts with", "HTTPS")
+Rel_Right(developer, backendAPI, "Integrates with", "REST/JSON")
+Rel(frontend, backendAPI, "Fetch network data & register user subscriptions", "REST/JSON")
+Rel(backendAPI, database_backend, "Reads/Writes data", "SQL")
+Rel(backendNetworkScan, database_backend, "Writes scan results", "SQL")
+Rel(backendNetworkScan, users, "Send notifications to subscribers", "REST/JSON")
+Rel(users, database_users, "Persist and fetch email addresses", "SQL")
+Rel(backendAPI, users, "Register users and send notifications", "REST/JSON")
+Rel(historyScanner, backendAPI, "Fetch scan jobs, save scan results", "REST/JSON")
+Rel(backendNetworkScan, geo_service, "Fetch location & ISP of nodes", "REST/JSON")
+Rel_Down(backendNetworkScan, horizon, "Fetch Stellar account home domains", "REST/JSON")
+
+' External Relationships
+Rel(backendNetworkScan, json_archiver, "Backup nodes & organizations", "REST/JSON")
+Rel(backendNetworkScan, heartbeat_monitor, "Ensuring service is up", "REST/JSON")
+Rel(backendNetworkScan, job_monitor, "Ensuring network scan is running", "REST/JSON")
+Rel(historyScanner, job_monitor, "Ensuring scan is running", "REST/JSON")
+Rel(users, email_system, "Deliver notifications", "REST/JSON")
+Rel_Right(s1, exception_logger, "Capture error traces", "REST/JSON")
+@enduml
