@@ -26,7 +26,7 @@ System_Boundary(s1, "Stellarbeat") {
   ' Users group
   Boundary(usersBoundary, "Users App") {
     Container(users, "Users", "Stores encrypted user emails and sends emails", "Node.js/TypeScript")
-    ContainerDb(database_users, "Users", "Stores encrypted users", "PostgreSQL")
+    ContainerDb(database_users, "Database", "Stores encrypted users", "PostgreSQL")
   }
 
   ' History Scanner group
