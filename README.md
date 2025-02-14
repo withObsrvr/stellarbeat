@@ -74,6 +74,8 @@ The project uses:
 
 ### Deployment
 
+![C4 Containers Model](architecture-c4-containers.png)
+
 Adheres to
 [twelve factor app methodology](https://en.wikipedia.org/wiki/Twelve-Factor_App_methodology)
 for easy deployment on Heroku.
