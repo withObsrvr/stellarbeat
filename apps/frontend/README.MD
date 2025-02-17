@@ -40,10 +40,6 @@ Copy .env.dist to .env and fill in the values.
 
 production build: `pnpm build`
 
-## Pre-rendering
-
-Pre-rendering is handled by https://prerender.io/ TODO: make optional
-
 ## history
 
 You can find the package original history on

@@ -20,7 +20,6 @@ interface ImportMetaEnv {
   readonly VUE_APP_TEST_ENABLE_HISTORY: string;
   readonly VUE_APP_SENTRY_DSN: string;
   readonly VUE_APP_ENABLE_NOTIFY: string;
-  readonly PRERENDER_TOKEN: string;
   readonly VUE_APP_TERMS_LINK: string;
   readonly VUE_APP_PRIVACY_LINK: string;
   readonly NODE_ENV: string;

@@ -5,11 +5,6 @@ const history = require("connect-history-api-fallback");
 
 let port = process.env.PORT || 3000;
 
-const prerenderToken = process.env.VUE_PRERENDER_TOKEN;
-if (prerenderToken) {
-  app.use(require("prerender-node").set("prerenderToken", prerenderToken));
-}
-
 app.use(history());
 app.set("x-powered-by", false);
 
