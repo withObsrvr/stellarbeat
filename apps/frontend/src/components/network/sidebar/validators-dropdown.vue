@@ -5,7 +5,7 @@
       :show-dropdown-toggle="true"
       :drop-down-showing="showing"
       :show-sub-title="true"
-      :sub-title="'Top Tier'"
+      :sub-title="'Network transitive quorumset'"
       :has-warnings="hasGeneralValidatorsWarning"
       :warnings="generalValidatorsWarning"
       @click="toggleShow"

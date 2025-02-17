@@ -7,7 +7,7 @@
       :drop-down-showing="showing"
       :show-icon="true"
       :show-sub-title="true"
-      :sub-title="'Top Tier'"
+      :sub-title="'network transitive quorumset'"
       @click="toggleShow"
     >
       <template #action-dropdown> </template>
