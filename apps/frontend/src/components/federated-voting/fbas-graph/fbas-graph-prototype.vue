@@ -134,7 +134,7 @@ const nodes = ref<Node[]>([]);
 const links = ref<Link[]>([]);
 
 const topTierNodeIds = computed(() => {
-  return Array.from(federatedVotingStore.trustGraph.networkTransitiveQuorumSet);
+  return Array.from(federatedVotingStore.networkAnalysis.topTierNodes);
 });
 
 function animateMessage(source: Node, target: Node) {
@@ -264,7 +264,7 @@ onMounted(() => {
         .id((node: Node) => node.id)
         .distance(150),
     )
-    .force("charge", forceManyBody().strength(-2000))
+    .force("charge", forceManyBody().strength(-1000))
     .force("center", forceCenter(width.value / 2, height / 2))
     .force(
       "topTierX",

@@ -78,7 +78,7 @@ import BreadCrumbs from "./bread-crumbs.vue";
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
 const detectedDSets = computed(() => {
-  return federatedVotingStore.dSets
+  return federatedVotingStore.networkAnalysis.dSets
     .filter((dset) =>
       selectedNodeId.value ? dset.has(selectedNodeId.value) : true,
     )
@@ -96,7 +96,11 @@ const statusClass = (nodeId: string) => {
 const intactNodes = computed(() => federatedVotingStore.intactNodes());
 const illBehavedNodes = computed(() => federatedVotingStore.illBehavedNodes());
 const befouledNodes = computed(() => {
-  const allNodes = Array.from(federatedVotingStore.trustGraph.vertices.keys());
+  const allNodes = Array.from(
+    federatedVotingStore.protocolContextState.initialNodes.map(
+      (node) => node.publicKey,
+    ),
+  );
   return allNodes.filter(
     (node) =>
       !intactNodes.value.includes(node) &&

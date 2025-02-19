@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="card mb-3">
-      <div class="card-header d-flex justify-content-around">
+      <div class="card-header d-flex justify-content-between">
         <nav class="navbar p-0">
           <div class="btn-group" role="group">
             <button
@@ -41,6 +41,7 @@
             </button>
           </div>
         </nav>
+        <ScenarioSelector />
       </div>
       <!-- Tick Time Animation -->
       <div v-show="playing" class="tick-animation">
@@ -60,6 +61,7 @@ import {
 } from "bootstrap-vue";
 import { ref } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import ScenarioSelector from "./scenario-selector.vue";
 
 const playing = ref(false);
 const progressBar = ref<HTMLElement | null>(null);

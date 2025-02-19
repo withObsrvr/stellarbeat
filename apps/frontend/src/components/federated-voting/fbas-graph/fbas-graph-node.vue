@@ -244,7 +244,6 @@ const selectedNodeId = computed(() => {
 });
 
 const isSelected = computed(() => {
-  console.log(selectedNodeId.value === props.node.id);
   return selectedNodeId.value === props.node.id;
 });
 

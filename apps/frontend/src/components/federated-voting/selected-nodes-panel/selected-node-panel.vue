@@ -77,7 +77,7 @@ const isBefouled = computed(() => {
 
 const isTopTierNode = computed(() => {
   if (!props.selectedNodeId) return false;
-  return federatedVotingStore.trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(
+  return federatedVotingStore.networkAnalysis.topTierNodes.has(
     props.selectedNodeId,
   );
 });

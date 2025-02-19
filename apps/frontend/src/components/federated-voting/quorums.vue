@@ -78,11 +78,13 @@ import BreadCrumbs from "./bread-crumbs.vue";
 const selectedNodId = computed(() => federatedVotingStore.selectedNodeId);
 
 const quorums = computed(() =>
-  federatedVotingStore.quorums.filter((q) =>
+  federatedVotingStore.networkAnalysis.quorums.filter((q) =>
     selectedNodId.value ? q.has(selectedNodId.value) : true,
   ),
 );
-const quorumSlices = computed(() => federatedVotingStore.quorumSlices);
+const quorumSlices = computed(
+  () => federatedVotingStore.networkAnalysis.quorumSlices,
+);
 
 const hoveredNode = ref<string | null>(null);
 const highlightedSlice = ref<string[]>([]);
@@ -118,12 +120,14 @@ function isInHighlightedSlice(node: string, index: number) {
 
 function isMinimal(quorum: Set<string>) {
   return (
-    federatedVotingStore.minimalQuorums.filter((minimalQuorum) => {
-      return (
-        minimalQuorum.size === quorum.size &&
-        Array.from(minimalQuorum).every((node) => quorum.has(node))
-      );
-    }).length > 0
+    federatedVotingStore.networkAnalysis.minimalQuorums.filter(
+      (minimalQuorum) => {
+        return (
+          minimalQuorum.size === quorum.size &&
+          Array.from(minimalQuorum).every((node) => quorum.has(node))
+        );
+      },
+    ).length > 0
   );
 }
 
