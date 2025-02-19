@@ -96,10 +96,9 @@ const nodes = computed(() => {
       confirmedValue: protocolState.confirmed,
       illBehaved: illBehavedNodes.value.includes(protocolState.node.publicKey),
       befouled: !intactNodes.value.includes(protocolState.node.publicKey),
-      topTierNode:
-        federatedVotingStore.trustGraph.isVertexPartOfNetworkTransitiveQuorumSet(
-          protocolState.node.publicKey,
-        ),
+      topTierNode: federatedVotingStore.networkAnalysis.topTierNodes.has(
+        protocolState.node.publicKey,
+      ),
     }),
   );
 });
