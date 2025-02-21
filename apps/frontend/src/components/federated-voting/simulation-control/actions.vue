@@ -31,15 +31,17 @@
         <span>{{ action.description }}</span>
         <button
           v-if="action.actionRef instanceof ProtocolAction"
-          class="btn btn-sm"
-          :class="
-            action.actionRef instanceof UserAction
-              ? 'btn-primary'
-              : 'btn-danger'
-          "
+          class="btn btn-sm btn-danger"
           @click="handleEventAction(action.actionRef)"
         >
           {{ isActionDisrupted(action.actionRef) ? "Undisrupt" : "Disrupt" }}
+        </button>
+        <button
+          v-if="action.actionRef instanceof UserAction"
+          class="btn btn-sm btn-warning"
+          @click="cancelUserAction(action.actionRef)"
+        >
+          {{ "Cancel" }}
         </button>
       </div>
       <div v-if="filteredActions.length === 0 && actionsFilter === ''">
@@ -85,6 +87,10 @@ function handleEventAction(action: ProtocolAction) {
   }
 }
 
+function cancelUserAction(action: UserAction) {
+  federatedVotingStore.simulation.cancelPendingUserAction(action);
+}
+
 const isActionDisrupted = (action: ProtocolAction | UserAction) => {
   if (!(action instanceof ProtocolAction)) {
     return false;
@@ -123,8 +129,10 @@ const filteredActions = computed(() => {
     };
   });
 
+  let result = mappedActions;
+
   if (actionsFilter.value) {
-    return mappedActions.filter(
+    result = mappedActions.filter(
       (action) =>
         action.description
           .toLowerCase()
@@ -136,9 +144,9 @@ const filteredActions = computed(() => {
           .toLowerCase()
           .includes(actionsFilter.value.toLowerCase()),
     );
-  } else {
-    return mappedActions;
   }
+
+  return result.sort((a, b) => a.publicKey.localeCompare(b.publicKey));
 });
 
 watch(filteredActions, () => {

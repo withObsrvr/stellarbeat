@@ -69,12 +69,24 @@ export class Simulation {
 	}
 
 	public addUserAction(action: UserAction): void {
-		//this.isScenario = false; //enable once we allow user modification of the scenario
+		this.isScenario = false;
 		this.currentStep.userActions.push(action);
+	}
+
+	public markScenarioStart(): void {
+		this.isScenario = true;
 	}
 
 	public pendingUserActions(): UserAction[] {
 		return this.currentStep.userActions;
+	}
+
+	public cancelPendingUserAction(userAction: UserAction) {
+		this.isScenario = false;
+		const index = this.currentStep.userActions.indexOf(userAction);
+		if (index > -1) {
+			this.currentStep.userActions.splice(index, 1);
+		}
 	}
 
 	public pendingProtocolActions(): ProtocolAction[] {

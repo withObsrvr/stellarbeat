@@ -1,4 +1,3 @@
-import { setFlagsFromString } from 'v8';
 import { Node, QuorumSet } from '../core';
 import { VoteOnStatement } from '../federated-voting';
 import { Simulation } from './Simulation';
@@ -25,6 +24,8 @@ export class BasicFederatedVotingScenario {
 		simulation.addUserAction(new VoteOnStatement('Chad', 'burger'));
 		simulation.addUserAction(new VoteOnStatement('Steve', 'burger'));
 		simulation.addUserAction(new VoteOnStatement('Daisy', 'burger'));
+
+		simulation.markScenarioStart();
 	}
 
 	static loadConsensusReached(simulation: Simulation): void {
@@ -51,5 +52,7 @@ export class BasicFederatedVotingScenario {
 		simulation.addUserAction(new VoteOnStatement('Chad', 'burger'));
 		simulation.addUserAction(new VoteOnStatement('Steve', 'burger'));
 		simulation.addUserAction(new VoteOnStatement('Daisy', 'burger'));
+
+		simulation.markScenarioStart();
 	}
 }

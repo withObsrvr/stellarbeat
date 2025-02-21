@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <BreadCrumbs root="Processed Votes"></BreadCrumbs>
+      <BreadCrumbs root="Processed Votes" />
     </div>
     <div class="card-body processed-votes">
       <div v-if="processedVotesByStatement.length === 0">
@@ -49,10 +49,11 @@
     </div>
   </div>
 </template>
+
 <script lang="ts" setup>
 import { computed } from "vue";
-import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import BreadCrumbs from "../bread-crumbs.vue";
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
@@ -67,7 +68,6 @@ function clickableClass(nodeId: string) {
   if (nodeId !== selectedNodeId.value) {
     return "clickable";
   }
-
   return "";
 }
 
@@ -78,8 +78,7 @@ const processedVotesByStatement = computed(() => {
         ? state.node.publicKey === selectedNodeId.value
         : true,
     )
-    .map((state) => state.processedVotes)
-    .flat();
+    .flatMap((state) => state.processedVotes);
 
   const grouped = votes.reduce(
     (acc, vote) => {
@@ -87,8 +86,8 @@ const processedVotesByStatement = computed(() => {
       if (!group) {
         group = {
           statement: vote.statement.toString(),
-          votesToAccept: new Set(),
-          votes: new Set(),
+          votesToAccept: new Set<string>(),
+          votes: new Set<string>(),
         };
         acc.push(group);
       }
@@ -106,7 +105,6 @@ const processedVotesByStatement = computed(() => {
     }>,
   );
 
-  //sort to avoid gui jumps when selecting a node
   return grouped
     .map((group) => ({
       statement: group.statement,
@@ -116,45 +114,39 @@ const processedVotesByStatement = computed(() => {
     .sort((a, b) => a.statement.localeCompare(b.statement));
 });
 </script>
+
 <style scoped>
 .processed-votes {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
-
 .statement-group {
   margin-bottom: 16px;
 }
-
 .statement-title {
   font-size: 1.2em;
   font-weight: bold;
   margin-bottom: 8px;
 }
-
 .voter-groups {
   display: flex;
   gap: 24px;
 }
-
 .voter-group {
   flex: 1;
 }
-
 .voter-group strong {
   display: block;
   margin-bottom: 6px;
   font-size: 1em;
   font-weight: bold;
 }
-
 .voter-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-
 .voter-list span {
   display: inline-block;
   padding: 4px 8px;
@@ -163,17 +155,14 @@ const processedVotesByStatement = computed(() => {
   background-color: #f9f9f9;
   font-size: 0.9em;
 }
-
 .clickable:hover {
   background-color: #e9f5fb;
   color: #0056b3;
 }
-
 .clickable {
   color: #1888b2;
   cursor: pointer;
 }
-
 .clickable.active {
   font-weight: bold;
   text-decoration: underline;

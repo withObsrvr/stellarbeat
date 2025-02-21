@@ -11,6 +11,12 @@
         <Controller></Controller>
       </div>
     </div>
+    <div class="row mb-4">
+      <div class="col-lg-12">
+        <VotesSelector />
+      </div>
+    </div>
+
     <div class="row">
       <div class="col-md-6">
         <FbasGraphPrototype />
@@ -46,6 +52,7 @@ import ProcessedVotes from "@/components/federated-voting/selected-nodes-panel/p
 import FederatedVotingStatus from "@/components/federated-voting/federated-voting-status.vue";
 import DSets from "@/components/federated-voting/intactness.vue";
 import Quorums from "@/components/federated-voting/quorums.vue";
+import VotesSelector from "@/components/federated-voting/votes-selector.vue";
 </script>
 
 <style scoped></style>
