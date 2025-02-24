@@ -18,15 +18,5 @@ defineEmits(["click"]);
 <style scoped>
 .info {
   align-self: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  min-height: 32px;
-}
-
-.text-muted {
-  width: 16px;
-  height: 16px;
 }
 </style>

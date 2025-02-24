@@ -1,47 +1,50 @@
 <template>
   <div>
     <div class="card mb-3">
-      <div class="card-header d-flex justify-content-between">
-        <nav class="navbar p-0">
-          <div class="btn-group" role="group">
-            <button
-              class="btn btn-secondary btn-sm"
-              :disabled="
-                !federatedVotingStore.simulation.hasPreviousStep() || playing
-              "
-              @click="goBackOneStep"
-            >
-              <BIconSkipBackwardFill class="icon-color" />
-            </button>
-            <button
-              class="btn btn-success btn-sm"
-              :disabled="
-                !federatedVotingStore.simulation.hasNextStep() || playing
-              "
-              @click="play"
-            >
-              <BIconPlayFill class="icon-color" />
-            </button>
-            <button
-              :disabled="
-                !federatedVotingStore.simulation.hasNextStep() || playing
-              "
-              class="btn btn-primary btn-sm"
-              @click="executeNextStep"
-            >
-              <BIconSkipForwardFill class="icon-color" />
-            </button>
-            <button
-              class="btn btn-secondary btn-sm"
-              :disabled="!federatedVotingStore.simulation.hasPreviousStep()"
-              @click="stop"
-            >
-              <BIconStopFill v-if="!playing" class="icon-color" />
-              <BIconPauseFill v-else class="icon-color" />
-            </button>
+      <div class="card-header">
+        <div class="controls-container">
+          <div class="controls-main">
+            <div class="btn-group" role="group">
+              <button
+                class="btn btn-secondary btn-sm"
+                :disabled="
+                  !federatedVotingStore.simulation.hasPreviousStep() || playing
+                "
+                @click="goBackOneStep"
+              >
+                <BIconSkipBackwardFill class="icon-color" />
+              </button>
+              <button
+                class="btn btn-success btn-sm"
+                :disabled="
+                  !federatedVotingStore.simulation.hasNextStep() || playing
+                "
+                @click="play"
+              >
+                <BIconPlayFill class="icon-color" />
+              </button>
+              <button
+                :disabled="
+                  !federatedVotingStore.simulation.hasNextStep() || playing
+                "
+                class="btn btn-primary btn-sm"
+                @click="executeNextStep"
+              >
+                <BIconSkipForwardFill class="icon-color" />
+              </button>
+              <button
+                class="btn btn-secondary btn-sm"
+                :disabled="!federatedVotingStore.simulation.hasPreviousStep()"
+                @click="stop"
+              >
+                <BIconStopFill v-if="!playing" class="icon-color" />
+                <BIconPauseFill v-else class="icon-color" />
+              </button>
+            </div>
+            <ScenarioSelector />
           </div>
-        </nav>
-        <ScenarioSelector />
+          <InfoButton @click="showInfo" />
+        </div>
       </div>
       <!-- Tick Time Animation -->
       <div v-show="playing" class="tick-animation">
@@ -62,6 +65,9 @@ import {
 import { ref } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import ScenarioSelector from "./scenario-selector.vue";
+import InfoButton from "../info-box/info-button.vue";
+import { infoBoxStore } from "../info-box/useInfoBoxStore";
+import ControllerInfo from "./controller-info.vue";
 
 const playing = ref(false);
 const progressBar = ref<HTMLElement | null>(null);
@@ -143,6 +149,10 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 };
 
+function showInfo() {
+  infoBoxStore.show(ControllerInfo);
+}
+
 onMounted(() => {
   document.addEventListener("keydown", handleKeydown, { capture: true });
 });
@@ -204,6 +214,26 @@ onBeforeUnmount(() => {
   height: 100%;
   background-color: #28a745;
   animation: tickAnimation linear infinite;
+}
+
+.controls-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+.controls-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  gap: 1rem;
+}
+
+.btn-group {
+  display: flex;
 }
 </style>
 <style>
