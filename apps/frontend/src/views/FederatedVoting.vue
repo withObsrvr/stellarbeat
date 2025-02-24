@@ -42,6 +42,11 @@
         <OverlayGraphBase />
       </div>
     </div>
+    <div class="row">
+      <div class="col-12 pb-5">
+        <NodeTrustConfig />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -55,6 +60,7 @@ import DSets from "@/components/federated-voting/intactness.vue";
 import Quorums from "@/components/federated-voting/quorums.vue";
 import VotesSelector from "@/components/federated-voting/votes-selector/votes-selector.vue";
 import InfoBox from "@/components/federated-voting/info-box/info-box.vue";
+import NodeTrustConfig from "@/components/federated-voting/node-trust-config/node-trust-config.vue";
 </script>
 
 <style scoped></style>

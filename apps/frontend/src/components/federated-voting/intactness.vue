@@ -96,11 +96,7 @@ const statusClass = (nodeId: string) => {
 const intactNodes = computed(() => federatedVotingStore.intactNodes());
 const illBehavedNodes = computed(() => federatedVotingStore.illBehavedNodes());
 const befouledNodes = computed(() => {
-  const allNodes = Array.from(
-    federatedVotingStore.protocolContextState.initialNodes.map(
-      (node) => node.publicKey,
-    ),
-  );
+  const allNodes = federatedVotingStore.nodes.map((node) => node.publicKey);
   return allNodes.filter(
     (node) =>
       !intactNodes.value.includes(node) &&

@@ -4,6 +4,7 @@ import {
   FederatedVotingContext,
   FederatedVotingContextFactory,
   Simulation,
+  Node,
 } from "scp-simulation";
 import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
 import { findAllIntactNodes } from "@/components/federated-voting/analysis/DSetAnalysis";
@@ -41,9 +42,7 @@ class FederatedVotingStore {
     this.protocolContextState = this.protocolContext.getState();
     this.simulation = new Simulation(this.protocolContext);
     scenario.loader(this.simulation);
-    this.networkAnalysis = NetworkAnalysis.analyze(
-      this.protocolContextState.initialNodes,
-    );
+    this.networkAnalysis = NetworkAnalysis.analyze(this.nodes);
   }
 
   public selectScenario(scenarioId: string): void {
@@ -57,9 +56,7 @@ class FederatedVotingStore {
     this.protocolContextState = this.protocolContext.getState();
     this.simulation = new Simulation(this.protocolContext);
     scenario.loader(this.simulation);
-    this.networkAnalysis = NetworkAnalysis.analyze(
-      this.protocolContextState.initialNodes,
-    );
+    this.networkAnalysis = NetworkAnalysis.analyze(this.nodes);
   }
 
   public illBehavedNodes = () => {
@@ -68,11 +65,15 @@ class FederatedVotingStore {
 
   public intactNodes = () => {
     return findAllIntactNodes(
-      this.protocolContextState.initialNodes.map((node) => node.publicKey),
+      this.nodes.map((node) => node.publicKey),
       new Set(this.illBehavedNodes()),
       this.networkAnalysis.dSets,
     );
   };
+
+  get nodes(): Node[] {
+    return this.protocolContextState.protocolStates.map((state) => state.node);
+  }
 }
 
 export const federatedVotingStore = reactive<FederatedVotingStore>(

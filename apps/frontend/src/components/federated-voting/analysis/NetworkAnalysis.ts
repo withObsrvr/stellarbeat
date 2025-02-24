@@ -55,7 +55,7 @@ export class NetworkAnalysis {
   public static analyze(nodes: Node[]): NetworkAnalysis {
     const quorumSlices = new Map<PublicKey, Set<PublicKey>[]>(
       nodes.map((node) => [
-        node.publicKey,
+        node.publicKey, //always include self
         Array.from(
           findSubSetsOfSize(
             new Set(node.quorumSet.validators),
