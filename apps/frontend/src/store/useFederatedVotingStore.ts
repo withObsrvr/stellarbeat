@@ -13,7 +13,7 @@ class FederatedVotingStore {
   readonly scenarios = [
     {
       id: "consensus-reached",
-      label: "Consensus Reached",
+      label: "Consensus Scenario",
       loader: BasicFederatedVotingScenario.loadConsensusReached,
     },
     {

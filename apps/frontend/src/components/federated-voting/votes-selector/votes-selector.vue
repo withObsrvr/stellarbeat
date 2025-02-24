@@ -1,24 +1,36 @@
 <template>
   <div class="card voting-controls mb-3">
     <div class="card-body mb-0 py-3">
-      <div class="votes-grid">
-        <div v-for="node in allNodes" :key="node.publicKey" class="vote-cell">
-          <label :for="`voteSelection-${node.publicKey}`" class="vote-label">
-            {{ node.publicKey }}:
-          </label>
-          <select
-            :id="`voteSelection-${node.publicKey}`"
-            v-model="selectedVotes[node.publicKey]"
-            :disabled="processedVotesByNode[node.publicKey]"
-            class="vote-select"
-            @change="onVoteSelectionChange(node.publicKey)"
-          >
-            <option value="">No vote</option>
-            <option value="burger">Vote Burger</option>
-            <option value="salad">Vote Salad</option>
-            <option value="pizza">Vote Pizza</option>
-          </select>
+      <div class="content-wrapper">
+        <div class="main-content">
+          <div class="votes-grid">
+            <div
+              v-for="node in allNodes"
+              :key="node.publicKey"
+              class="vote-cell"
+            >
+              <label
+                :for="`voteSelection-${node.publicKey}`"
+                class="vote-label"
+              >
+                {{ node.publicKey }}:
+              </label>
+              <select
+                :id="`voteSelection-${node.publicKey}`"
+                v-model="selectedVotes[node.publicKey]"
+                :disabled="processedVotesByNode[node.publicKey]"
+                class="vote-select"
+                @change="onVoteSelectionChange(node.publicKey)"
+              >
+                <option value="">No vote</option>
+                <option value="burger">Vote Burger</option>
+                <option value="salad">Vote Salad</option>
+                <option value="pizza">Vote Pizza</option>
+              </select>
+            </div>
+          </div>
         </div>
+        <InfoButton @click="showInfo" />
       </div>
     </div>
   </div>
@@ -28,6 +40,14 @@
 import { ref, computed, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { VoteOnStatement } from "scp-simulation";
+import { BIconInfoCircle } from "bootstrap-vue";
+import { infoBoxStore } from "../info-box/useInfoBoxStore";
+import VotesSelectorInfo from "./votes-selector-info.vue";
+import InfoButton from "../info-box/info-button.vue";
+
+function showInfo() {
+  infoBoxStore.show(VotesSelectorInfo);
+}
 
 const allNodes = computed(() =>
   federatedVotingStore.protocolContextState.protocolStates.map((ps) => ps.node),
@@ -141,5 +161,17 @@ watch(
 .vote-select:disabled {
   background-color: #e9ecef;
   cursor: not-allowed;
+}
+
+.content-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.main-content {
+  flex: 1;
 }
 </style>

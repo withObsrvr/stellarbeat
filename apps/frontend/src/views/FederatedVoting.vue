@@ -1,5 +1,6 @@
 <template>
   <div class="h-100">
+    <InfoBox />
     <!-- Page Header -->
     <div class="page-header d-flex justify-content-between py-3">
       <div class="d-flex align-items-center">
@@ -52,7 +53,8 @@ import ProcessedVotes from "@/components/federated-voting/selected-nodes-panel/p
 import FederatedVotingStatus from "@/components/federated-voting/federated-voting-status.vue";
 import DSets from "@/components/federated-voting/intactness.vue";
 import Quorums from "@/components/federated-voting/quorums.vue";
-import VotesSelector from "@/components/federated-voting/votes-selector.vue";
+import VotesSelector from "@/components/federated-voting/votes-selector/votes-selector.vue";
+import InfoBox from "@/components/federated-voting/info-box/info-box.vue";
 </script>
 
 <style scoped></style>
