@@ -8,6 +8,7 @@ import { BroadcastVoteRequested } from './../protocol/event/BroadcastVoteRequest
 import { Vote, Voted } from '../protocol';
 import { SendMessage } from '../action/protocol/SendMessage';
 import { ReceiveMessage } from '../action/protocol/ReceiveMessage';
+import { UpdateQuorumSet } from '../action/user/UpdateQuorumSet';
 
 describe('FederatedVotingContext', () => {
 	let mockFederatedVotingProtocol: MockProxy<FederatedVotingProtocol>;
@@ -77,6 +78,31 @@ describe('FederatedVotingContext', () => {
 
 			expect(context.nodes).toHaveLength(1);
 			expect(context.nodes[0]).toEqual(node);
+		});
+	});
+
+	describe('updateQuorumSet', () => {
+		it('should execute UpdateQuorumSetAction', () => {
+			context.addNode(node);
+			const action = new UpdateQuorumSet(
+				node.publicKey,
+				new QuorumSet(1, ['Q'], [])
+			);
+
+			const actions = context.executeActions([], [action]);
+
+			expect(actions).toHaveLength(0);
+			expect(context.getEvents()).toHaveLength(1);
+		});
+		it('should update the quorum set of a node', () => {
+			context.addNode(node);
+			const newQuorumSet = new QuorumSet(1, ['Q'], []);
+
+			const actions = context.updateQuorumSet(node.publicKey, newQuorumSet);
+
+			expect(actions).toHaveLength(0);
+			expect(node.quorumSet).toEqual(newQuorumSet);
+			expect(context.getEvents()).toHaveLength(1);
 		});
 	});
 

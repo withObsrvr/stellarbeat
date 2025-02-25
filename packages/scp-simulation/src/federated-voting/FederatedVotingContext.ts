@@ -18,6 +18,7 @@ import { MessageSent } from './event/MessageSent';
 import { MessageReceived } from './event/MessageReceived';
 import { BroadcastVoteRequested } from './protocol/event/BroadcastVoteRequested';
 import { ReceiveMessage } from './action/protocol/ReceiveMessage';
+import { NodeUpdatedQuorumSet } from './protocol/event/NodeUpdatedQuorumSet';
 
 export interface FederatedVotingContextState {
 	initialNodes: Node[];
@@ -75,6 +76,26 @@ export class FederatedVotingContext
 			return;
 		}
 		this.state.protocolStates.push(new FederatedVotingProtocolState(node));
+	}
+
+	updateQuorumSet(
+		publicKey: PublicKey,
+		quorumSet: QuorumSet
+	): ProtocolAction[] {
+		const node = this.state.protocolStates
+			.map((state) => state.node)
+			.find((node) => node.publicKey === publicKey);
+		if (!node) {
+			console.log('Node not found', publicKey);
+			return [];
+		}
+
+		//todo: should be handled in the protocol and event should be created there
+		//but has no sideeffects at the moment so we can do it here for now
+		node.updateQuorumSet(quorumSet);
+		this.registerEvent(new NodeUpdatedQuorumSet(publicKey, quorumSet));
+
+		return [];
 	}
 
 	getProtocolState(publicKey: PublicKey): FederatedVotingProtocolState | null {
