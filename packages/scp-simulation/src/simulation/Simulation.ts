@@ -68,9 +68,27 @@ export class Simulation {
 		this.context.loadInitialNodes(nodes);
 	}
 
+	//in every step you can only add a specific action only once for a node
 	public addUserAction(action: UserAction): void {
 		this.isScenario = false;
-		this.currentStep.userActions.push(action);
+
+		const existingAction = this.currentStep.userActions.find(
+			(a) => a.subType === action.subType && a.publicKey === action.publicKey
+		);
+		if (existingAction) {
+			const index = this.currentStep.userActions.indexOf(existingAction);
+			this.currentStep.userActions[index] = action;
+			return;
+		}
+
+		// If action requires immediate execution, add to front of array
+		// these actions are previewed by the GUI
+		if (action.immediateExecution) {
+			this.currentStep.userActions.unshift(action);
+		} else {
+			// Otherwise add to end as before
+			this.currentStep.userActions.push(action);
+		}
 	}
 
 	public markScenarioStart(): void {
@@ -82,6 +100,8 @@ export class Simulation {
 	}
 
 	public cancelPendingUserAction(userAction: UserAction) {
+		console.log(userAction);
+		console.log(this.currentStep.userActions.map((a) => a.toString()));
 		this.isScenario = false;
 		const index = this.currentStep.userActions.indexOf(userAction);
 		if (index > -1) {
@@ -110,7 +130,7 @@ export class Simulation {
 		return this.currentStep.disruptedProtocolActions.includes(action);
 	}
 
-	//Executes the pending actions. ProtocolActions are always first, then UserActions
+	//Executes the pending actions. UserActions are always first, then protocol actions
 	public executeStep() {
 		const newActions = this.context.executeActions(
 			this.currentStep.protocolActions.filter(

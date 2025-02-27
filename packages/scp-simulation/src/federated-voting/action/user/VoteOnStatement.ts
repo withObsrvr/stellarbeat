@@ -4,6 +4,8 @@ import { FederatedVotingContext } from '../../FederatedVotingContext';
 
 export class VoteOnStatement extends UserAction {
 	subType = 'VoteOnStatement';
+	immediateExecution = false;
+
 	constructor(
 		public readonly publicKey: string,
 		public readonly statement: Statement

@@ -2,6 +2,12 @@
   <div class="card h-100">
     <div class="card-header">
       <BreadCrumbs root="Quorums"></BreadCrumbs>
+      <span
+        v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
+        class="badge badge-success ms-2"
+        >Quorum Intersection</span
+      >
+      <span v-else class="badge badge-danger ms-2">No Quorum Intersection</span>
     </div>
     <div class="card-body content h-100">
       <table class="quorum-table">
@@ -77,11 +83,12 @@ import BreadCrumbs from "./bread-crumbs.vue";
 
 const selectedNodId = computed(() => federatedVotingStore.selectedNodeId);
 
-const quorums = computed(() =>
-  federatedVotingStore.networkAnalysis.quorums.filter((q) =>
+const quorums = computed(() => {
+  return federatedVotingStore.networkAnalysis.quorums.filter((q) =>
     selectedNodId.value ? q.has(selectedNodId.value) : true,
-  ),
-);
+  );
+});
+
 const quorumSlices = computed(
   () => federatedVotingStore.networkAnalysis.quorumSlices,
 );
@@ -245,5 +252,9 @@ function previousPage() {
 .clickable {
   color: #1888b2;
   cursor: pointer;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
 }
 </style>

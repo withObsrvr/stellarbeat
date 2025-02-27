@@ -6,6 +6,7 @@ export { Message } from './Message';
 export { SendMessage } from './action/protocol/SendMessage';
 export { AddNode } from './action/user/AddNode';
 export { VoteOnStatement } from './action/user/VoteOnStatement';
+export { UpdateQuorumSet } from './action/user/UpdateQuorumSet';
 
 //export events
 export { MessageSent } from './event/MessageSent';

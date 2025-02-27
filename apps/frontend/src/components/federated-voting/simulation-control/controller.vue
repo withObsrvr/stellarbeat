@@ -72,6 +72,8 @@ import ControllerInfo from "./controller-info.vue";
 const playing = ref(false);
 const progressBar = ref<HTMLElement | null>(null);
 let playInterval: NodeJS.Timeout | null = null;
+let delayImmediateUserActionsInterval: NodeJS.Timeout | null = null;
+
 const tickTime = computed(
   () => federatedVotingStore.simulationStepDurationInSeconds * 1000,
 );
@@ -122,7 +124,17 @@ function stop() {
 }
 
 function executeNextStep() {
+  federatedVotingStore.delayImmediateUserActions = true;
   federatedVotingStore.simulation.executeStep();
+
+  if (delayImmediateUserActionsInterval) {
+    clearTimeout(delayImmediateUserActionsInterval);
+    delayImmediateUserActionsInterval = null;
+  }
+
+  delayImmediateUserActionsInterval = setTimeout(() => {
+    federatedVotingStore.delayImmediateUserActions = false;
+  }, tickTime.value);
 }
 
 function reset() {

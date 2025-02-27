@@ -4,6 +4,7 @@ import { FederatedVotingProtocolState } from '../../protocol';
 
 export class AddNode extends UserAction {
 	subType = 'AddNode';
+	immediateExecution = true;
 	constructor(
 		public readonly publicKey: string,
 		public readonly quorumSet: QuorumSet

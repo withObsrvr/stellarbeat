@@ -1,6 +1,11 @@
 import { Node } from "scp-simulation";
 import { findSubSetsOfSize } from "./Sets";
-import { findAllDSets, findMinimalQuorums, findQuorums } from "./DSetAnalysis";
+import {
+  findAllDSets,
+  findMinimalQuorums,
+  findQuorums,
+  hasQuorumIntersection,
+} from "./DSetAnalysis";
 
 type PublicKey = string;
 
@@ -35,18 +40,25 @@ export class NetworkAnalysis {
    */
   public readonly topTierNodes: Set<PublicKey>;
 
+  /**
+   *  Whether the network has quorum intersection. Every quorum overlaps with any other other quorum.
+   */
+  public readonly hasQuorumIntersection: boolean;
+
   private constructor(
     dSets: Set<PublicKey>[],
     quorumSlices: Map<PublicKey, Set<PublicKey>[]>,
     quorums: Set<PublicKey>[],
     minimalQuorums: Set<PublicKey>[],
     topTierNodes: Set<PublicKey>,
+    hasQuorumIntersection: boolean,
   ) {
     this.dSets = dSets;
     this.quorumSlices = quorumSlices;
     this.quorums = quorums;
     this.minimalQuorums = minimalQuorums;
     this.topTierNodes = topTierNodes;
+    this.hasQuorumIntersection = hasQuorumIntersection;
   }
 
   /**
@@ -88,6 +100,7 @@ export class NetworkAnalysis {
       quorums,
       minimalQuorums,
       topTierNodes,
+      hasQuorumIntersection(minimalQuorums),
     );
   }
 }

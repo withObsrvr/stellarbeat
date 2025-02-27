@@ -3,6 +3,7 @@ import { FederatedVotingContext } from '../../FederatedVotingContext';
 
 export class UpdateQuorumSet extends UserAction {
 	subType = 'UpdateQuorumSet';
+	immediateExecution = true;
 	constructor(
 		public readonly publicKey: string,
 		public readonly quorumSet: QuorumSet

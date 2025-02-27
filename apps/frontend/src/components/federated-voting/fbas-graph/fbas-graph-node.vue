@@ -222,9 +222,9 @@ const transform = computed(() => {
 });
 
 const strokeColor = computed(() => {
-  if (federatedVotingStore.illBehavedNodes().includes(props.node.id)) {
+  if (federatedVotingStore.illBehavedNodes.includes(props.node.id)) {
     return "#ff0000";
-  } else if (!federatedVotingStore.intactNodes().includes(props.node.id)) {
+  } else if (!federatedVotingStore.intactNodes.includes(props.node.id)) {
     return "orange";
   }
   return "#2ca02c";

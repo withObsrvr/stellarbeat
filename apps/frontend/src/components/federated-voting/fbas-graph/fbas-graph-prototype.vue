@@ -2,7 +2,12 @@
   <div class="card">
     <div class="card-header">
       <BreadCrumbs />
-      <span class="badge ms-2">Quorum Intersection</span>
+      <span
+        v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
+        class="badge badge-success ms-2"
+        >Quorum Intersection</span
+      >
+      <span v-else class="badge badge-danger ms-2">No Quorum Intersection</span>
     </div>
     <div class="card-body graph pt-4 pb-0" style="height: 500px">
       <svg
@@ -104,11 +109,17 @@ import { ref, onMounted, watch, computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasGraphNode, { Node } from "./fbas-graph-node.vue";
 import FbasGraphLink, { Link } from "./fbas-graph-link.vue";
-import { MessageSent, OverlayEvent, ProtocolEvent } from "scp-simulation";
+import {
+  FederatedVotingProtocolState,
+  MessageSent,
+  OverlayEvent,
+  ProtocolEvent,
+} from "scp-simulation";
 import AnimatedMessage from "./animated-message.vue";
 import { usePanning } from "./usePanning";
 import BreadCrumbs from "../bread-crumbs.vue";
 import { curveCatmullRomClosed, line } from "d3-shape";
+import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
 
 const { translateX, translateY, scale, startPan, pan, endPan, zoom } =
   usePanning();
@@ -246,6 +257,126 @@ watch(events, (newEvents) => {
   });
 });
 
+watch(
+  () => federatedVotingStore.nodes,
+  () => {
+    console.log("UPDATE GRAPH");
+    // Store current positions before updating
+    const nodePositions = new Map<string, { x: number; y: number }>();
+    nodes.value.forEach((node) => {
+      if (node.x !== undefined && node.y !== undefined) {
+        nodePositions.set(node.id, { x: node.x, y: node.y });
+      }
+    });
+
+    const protocolStates = new Map<string, FederatedVotingProtocolState>();
+    federatedVotingStore.protocolContextState.protocolStates.forEach(
+      (state) => {
+        protocolStates.set(state.node.publicKey, state);
+      },
+    );
+
+    // Create new nodes and links
+    nodes.value = federatedVotingStore.nodes.map((node) => {
+      const state = protocolStates.get(node.publicKey);
+      // Check if this node already exists and has a position
+      const position = nodePositions.get(node.publicKey);
+
+      return {
+        id: node.publicKey,
+        validators: node.quorumSet.validators,
+        threshold: node.quorumSet.threshold,
+        vote: state && state.voted ? state.voted.toString() : null,
+        accept: state && state.accepted ? state.accepted.toString() : null,
+        confirm: state && state.confirmed ? state.confirmed.toString() : null,
+        // Preserve position if available
+        x: position ? position.x : 0,
+        y: position ? position.y : 0,
+        // Preserve velocity if possible to maintain animation
+        vx: 0,
+        vy: 0,
+        events: [],
+      };
+    });
+
+    // Recreate links based on new node structure
+    links.value = (() => {
+      const constructedLinks: Link[] = [];
+      nodes.value.forEach((node) => {
+        node.validators?.forEach((validator) => {
+          constructedLinks.push({
+            source: node.id,
+            target: validator,
+            selfLoop: validator === node.id,
+            hovered: false,
+          });
+        });
+      });
+
+      // Identify bidirectional links
+      const linkMap = new Map<string, Link>();
+      const linkKey = (link: Link) => {
+        const sourceId =
+          typeof link.source === "string"
+            ? link.source
+            : typeof link.source === "number"
+              ? link.source.toString()
+              : link.source.id;
+        const targetId =
+          typeof link.target === "string"
+            ? link.target
+            : typeof link.target === "number"
+              ? link.target.toString()
+              : link.target.id;
+        return `${sourceId}-${targetId}`;
+      };
+
+      constructedLinks.forEach((link) => linkMap.set(linkKey(link), link));
+      constructedLinks.forEach((link) => {
+        const reverseKey = linkKey({
+          source: link.target,
+          target: link.source,
+        } as Link);
+        if (linkMap.has(reverseKey)) {
+          if (link.source !== link.target) {
+            link.bidirectional = true;
+            linkMap.get(reverseKey)!.bidirectional = true;
+          }
+        } else {
+          link.bidirectional = false;
+        }
+      });
+
+      return constructedLinks;
+    })();
+
+    // Reinitialize the force simulation with preserved positions
+    forceSimulation<Node>(nodes.value)
+      .force(
+        "link",
+        forceLink<Node, Link>(links.value)
+          .id((node: Node) => node.id)
+          .distance(150),
+      )
+      .force("charge", forceManyBody().strength(-1000))
+      .force("center", forceCenter(width.value / 2, height / 2))
+      .force(
+        "topTierX",
+        forceX<Node>(width.value / 2).strength((node) =>
+          topTierNodeIds.value.includes(node.id) ? 0.2 : 0,
+        ),
+      )
+      .force(
+        "topTierY",
+        forceY<Node>(height / 2).strength((node) =>
+          topTierNodeIds.value.includes(node.id) ? 0.2 : 0,
+        ),
+      );
+  },
+  { deep: true },
+);
+
+// Keep the existing protocol context watcher for state updates
 watch(
   () => federatedVotingStore.protocolContext,
   () => {

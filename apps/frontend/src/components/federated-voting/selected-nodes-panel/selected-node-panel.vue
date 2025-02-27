@@ -66,13 +66,13 @@ const protocolState = computed(() => {
 
 const isIllBehaved = computed(() => {
   return federatedVotingStore
-    .illBehavedNodes()
+    .illBehavedNodes
     .some((node) => node === props.selectedNodeId);
 });
 
 const isBefouled = computed(() => {
   if (!props.selectedNodeId) return false;
-  return !federatedVotingStore.intactNodes().includes(props.selectedNodeId);
+  return !federatedVotingStore.intactNodes.includes(props.selectedNodeId);
 });
 
 const isTopTierNode = computed(() => {

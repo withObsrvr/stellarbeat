@@ -40,14 +40,32 @@ export class FederatedVotingContext
 
 	loadInitialNodes(nodes: Node[]): void {
 		this.state.initialNodes = nodes;
-		nodes.forEach((node) => this.addNode(node));
+		this.addInitialNodesToContext();
+	}
+
+	addInitialNodesToContext() {
+		//we have to make copies in case the nodes are updated
+		//to make this cleaner we should make nodes and quorumsets immutable
+		//because an UpdateQuorumSet action is at the moment modifying the existing node
+		this.state.initialNodes.forEach((node) =>
+			this.addNode(
+				new Node(
+					node.publicKey,
+					new QuorumSet(
+						node.quorumSet.threshold,
+						node.quorumSet.validators.slice(),
+						node.quorumSet.innerQuorumSets.slice()
+					)
+				)
+			)
+		);
 	}
 
 	reset(): void {
 		//todo: could we make this class purer?
 		this.state.protocolStates = [];
 		this.drainEvents(); // Clear the collected events
-		this.state.initialNodes.forEach((node) => this.addNode(node));
+		this.addInitialNodesToContext();
 	}
 
 	//for exposing the state in GUI. Should not be altered directly
@@ -60,11 +78,12 @@ export class FederatedVotingContext
 		userActions: UserAction[]
 	): ProtocolAction[] {
 		const newProtocolActions: ProtocolAction[] = [];
-		protocolActions.forEach((action) => {
+
+		userActions.forEach((action) => {
 			newProtocolActions.push(...action.execute(this));
 		});
 
-		userActions.forEach((action) => {
+		protocolActions.forEach((action) => {
 			newProtocolActions.push(...action.execute(this));
 		});
 

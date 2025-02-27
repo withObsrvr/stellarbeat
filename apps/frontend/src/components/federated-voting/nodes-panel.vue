@@ -104,11 +104,11 @@ const nodes = computed(() => {
 });
 
 const illBehavedNodes = computed(() => {
-  return federatedVotingStore.illBehavedNodes();
+  return federatedVotingStore.illBehavedNodes;
 });
 
 const intactNodes = computed(() => {
-  return federatedVotingStore.intactNodes();
+  return federatedVotingStore.intactNodes;
 });
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);

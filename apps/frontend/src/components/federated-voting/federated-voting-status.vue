@@ -9,7 +9,12 @@
           <span v-if="consensusReached" class="badge consensus ms-2">
             Consensus Reached
           </span>
-          <span v-else-if="isStuck" class="badge stuck ms-2"> Vote Stuck </span>
+          <span v-if="isNetworkSplit" class="badge badge-danger ms-2">
+            Network Split
+          </span>
+          <span v-else-if="isStuck" class="badge badge-danger ms-2">
+            Vote Stuck
+          </span>
         </div>
       </div>
       <div class="card-body p-0">
@@ -46,10 +51,36 @@ import BreadCrumbs from "./bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 const consensusReached = computed(() => {
-  console.log("COMPUTE");
-  return federatedVotingStore.protocolContextState.protocolStates.every(
-    (state) => state.confirmed,
+  const protocolStates =
+    federatedVotingStore.protocolContextState.protocolStates;
+
+  if (!protocolStates.every((state) => state.confirmed)) {
+    return false;
+  }
+
+  const confirmedValues = protocolStates
+    .filter((state) => state.confirmed)
+    .map((state) => state.confirmed);
+
+  console.log(confirmedValues);
+  const firstConfirmedValue = confirmedValues[0];
+  return confirmedValues.every((value) => value === firstConfirmedValue);
+});
+
+const isNetworkSplit = computed(() => {
+  const protocolStates =
+    federatedVotingStore.protocolContextState.protocolStates;
+
+  const confirmedStates = protocolStates.filter(
+    (state) => state.confirmed !== null,
   );
+
+  const confirmedValues = new Set(
+    confirmedStates.map((state) => state.confirmed),
+  );
+
+  // If there's more than one unique value, the network is split
+  return confirmedValues.size > 1;
 });
 
 const hasNoNextMoves = computed(() => {

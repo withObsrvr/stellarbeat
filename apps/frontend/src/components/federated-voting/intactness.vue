@@ -93,9 +93,10 @@ const statusClass = (nodeId: string) => {
   };
 };
 
-const intactNodes = computed(() => federatedVotingStore.intactNodes());
-const illBehavedNodes = computed(() => federatedVotingStore.illBehavedNodes());
+const intactNodes = computed(() => federatedVotingStore.intactNodes);
+const illBehavedNodes = computed(() => federatedVotingStore.illBehavedNodes);
 const befouledNodes = computed(() => {
+  console.log("BEFOULED RECALC");
   const allNodes = federatedVotingStore.nodes.map((node) => node.publicKey);
   return allNodes.filter(
     (node) =>
