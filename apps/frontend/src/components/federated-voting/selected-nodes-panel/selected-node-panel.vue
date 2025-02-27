@@ -3,7 +3,12 @@
     <div class="card-header header">
       <BreadCrumbs root="Federated Voting Status" />
       <div class="labels">
-        <span v-if="isStuck" class="badge badge-danger ms-2"> Stuck </span>
+        <span
+          v-if="federatedVotingStore.isStuck"
+          class="badge badge-danger ms-2"
+        >
+          Stuck
+        </span>
         <span v-if="isIllBehaved" class="badge badge-danger ms-2">
           Ill-behaved
         </span>
@@ -54,20 +59,10 @@ const props = defineProps({
   },
 });
 
-const contextState = computed(() => {
-  return federatedVotingStore.protocolContextState;
-});
-
-const protocolState = computed(() => {
-  return contextState.value.protocolStates.find(
-    (state) => state.node.publicKey === props.selectedNodeId,
-  );
-});
-
 const isIllBehaved = computed(() => {
-  return federatedVotingStore
-    .illBehavedNodes
-    .some((node) => node === props.selectedNodeId);
+  return federatedVotingStore.illBehavedNodes.some(
+    (node) => node === props.selectedNodeId,
+  );
 });
 
 const isBefouled = computed(() => {
@@ -79,13 +74,6 @@ const isTopTierNode = computed(() => {
   if (!props.selectedNodeId) return false;
   return federatedVotingStore.networkAnalysis.topTierNodes.has(
     props.selectedNodeId,
-  );
-});
-
-const isStuck = computed(() => {
-  return (
-    !federatedVotingStore.simulation.hasNextStep() &&
-    !protocolState.value?.confirmed
   );
 });
 </script>

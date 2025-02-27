@@ -72,13 +72,11 @@ function clickableClass(nodeId: string) {
 }
 
 const processedVotesByStatement = computed(() => {
-  const votes = federatedVotingStore.protocolContextState.protocolStates
-    .filter((state) =>
-      selectedNodeId.value
-        ? state.node.publicKey === selectedNodeId.value
-        : true,
+  const votes = federatedVotingStore.nodes
+    .filter((node) =>
+      selectedNodeId.value ? node.publicKey === selectedNodeId.value : true,
     )
-    .flatMap((state) => state.processedVotes);
+    .flatMap((node) => node.processedVotes);
 
   const grouped = votes.reduce(
     (acc, vote) => {

@@ -1,4 +1,4 @@
-import { computed, reactive, watch } from "vue";
+import { computed, reactive } from "vue";
 import {
   BasicFederatedVotingScenario,
   FederatedVotingContext,
@@ -7,29 +7,46 @@ import {
   Node,
   AddNode,
   UpdateQuorumSet,
+  UserAction,
+  FederatedVotingProtocolState,
   QuorumSet,
+  Vote,
+  VoteOnStatement,
 } from "scp-simulation";
 import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
 import { findAllIntactNodes } from "@/components/federated-voting/analysis/DSetAnalysis";
 import { NetworkAnalysis } from "@/components/federated-voting/analysis/NetworkAnalysis";
 
+export interface FederatedNode {
+  publicKey: string;
+  trustedNodes: string[];
+  trustThreshold: number;
+  voted: string | null;
+  accepted: string | null;
+  confirmed: string | null;
+  phase: string;
+  processedVotes: Vote[];
+}
+
 class FederatedVotingStore {
   private readonly _state = reactive<{
-    delayImmediateUserActions: boolean; //give the simulation time to animate before we preview changes
+    simulationUpdate: number;
     selectedScenarioId: string;
     selectedNodeId: string | null;
     protocolContext: FederatedVotingContext;
     protocolContextState: FederatedVotingContextState;
     simulation: Simulation;
     networkAnalysis: NetworkAnalysis;
+    nodes: FederatedNode[];
   }>({
-    delayImmediateUserActions: false,
+    simulationUpdate: 0,
     selectedScenarioId: "consensus-reached",
     selectedNodeId: null,
     protocolContext: FederatedVotingContextFactory.create(),
     protocolContextState: {} as FederatedVotingContextState, // temporary placeholder until constructor load
     simulation: {} as Simulation,
     networkAnalysis: {} as NetworkAnalysis,
+    nodes: [] as FederatedNode[],
   });
 
   readonly scenarios = [
@@ -55,27 +72,12 @@ class FederatedVotingStore {
     this._state.protocolContextState = this._state.protocolContext.getState();
     this._state.simulation = new Simulation(this._state.protocolContext);
     scenario.loader(this._state.simulation as Simulation);
-    this._state.networkAnalysis = NetworkAnalysis.analyze(this.nodes as Node[]);
-    this.setupNetworkWatcher();
-  }
-
-  /**
-   * Sets up a watcher to detect changes in the network configuration
-   */
-  private setupNetworkWatcher() {
-    watch(
-      [() => this.nodes, () => this.quorumSets],
-      () => {
-        console.log("Network configuration changed, recalculating analysis");
-        this.recalculateNetworkAnalysis();
-      },
-      { deep: true },
-    );
+    this.updateNodes();
+    this.recalculateNetworkAnalysis();
   }
 
   private recalculateNetworkAnalysis(): void {
-    console.log("Recalculating network analysis");
-    this._state.networkAnalysis = NetworkAnalysis.analyze(this.nodes as Node[]);
+    this._state.networkAnalysis = NetworkAnalysis.analyze(this.nodes);
   }
 
   get simulationStepDurationInSeconds(): number {
@@ -90,18 +92,6 @@ class FederatedVotingStore {
     return this._state.selectedNodeId;
   }
 
-  get protocolContext() {
-    return this._state.protocolContext;
-  }
-
-  get protocolContextState(): FederatedVotingContextState {
-    return this._state.protocolContextState as FederatedVotingContextState;
-  }
-
-  get simulation() {
-    return this._state.simulation;
-  }
-
   get networkAnalysis(): NetworkAnalysis {
     return this._state.networkAnalysis;
   }
@@ -114,43 +104,30 @@ class FederatedVotingStore {
     this._state.selectedNodeId = value;
   }
 
-  set delayImmediateUserActions(value: boolean) {
-    this._state.delayImmediateUserActions = value;
-    console.log("MEH", this._state.delayImmediateUserActions);
-  }
+  public updateNodes() {
+    const nodes: FederatedNode[] =
+      this._state.protocolContextState.protocolStates.map((state) =>
+        this.mapStateToFederatedNode(state as FederatedVotingProtocolState),
+      );
 
-  /*
-   * caches the nodes in the simulation. Takes into account UserActions that will
-   * be applied to the simulation in the next step.
-   */
-  private _nodes = computed(() => {
-    const nodes = this._state.protocolContextState.protocolStates.map(
-      (state) => {
-        return new Node(
-          state.node.publicKey,
-          new QuorumSet(
-            state.node.quorumSet.threshold,
-            state.node.quorumSet.validators,
-            [],
-          ),
-        );
-      },
-    );
-
-    //Give the animations time to complete
-    if (this._state.delayImmediateUserActions) return nodes;
-    //add any pending nodes for live preview of immediate AddNode UserAction
-    console.log("ADDING USER ACTIONS");
     nodes.concat(
       this._state.simulation
         .pendingUserActions()
         .filter((action) => action instanceof AddNode)
         .map((action) => {
-          return new Node(action.publicKey, action.quorumSet);
+          return {
+            publicKey: action.publicKey,
+            trustedNodes: action.quorumSet.validators.slice(),
+            trustThreshold: action.quorumSet.threshold,
+            voted: null,
+            accepted: null,
+            confirmed: null,
+            phase: "unknown",
+            processedVotes: [],
+          };
         }),
     );
 
-    //update quorumSets with any pending UpdateQuorumSet actions
     this._state.simulation
       .pendingUserActions()
       .filter((action) => action instanceof UpdateQuorumSet)
@@ -159,18 +136,43 @@ class FederatedVotingStore {
         if (!node) {
           return;
         }
-        node.updateQuorumSet(action.quorumSet);
+        node.trustedNodes = action.quorumSet.validators.slice();
+        node.trustThreshold = action.quorumSet.threshold;
       });
 
-    return nodes;
-  });
-
-  get nodes() {
-    return this._nodes.value;
+    this._state.nodes = nodes;
   }
 
-  get quorumSets() {
-    return this.nodes.map((node) => node.quorumSet);
+  get nodes() {
+    return this._state.nodes;
+  }
+
+  public getNodeWithoutPreviewChanges(publicKey: string): FederatedNode | null {
+    const state = this._state.protocolContextState.protocolStates.find(
+      (state) => state.node.publicKey === publicKey,
+    );
+
+    if (!state) {
+      return null;
+    }
+
+    //todo: why do we loose the type info?
+    return this.mapStateToFederatedNode(state as FederatedVotingProtocolState);
+  }
+
+  private mapStateToFederatedNode(
+    state: FederatedVotingProtocolState,
+  ): FederatedNode {
+    return {
+      publicKey: state.node.publicKey,
+      trustedNodes: state.node.quorumSet.validators.slice(),
+      trustThreshold: state.node.quorumSet.threshold,
+      voted: state.voted ? state.voted.toString() : null,
+      accepted: state.accepted ? state.accepted.toString() : null,
+      confirmed: state.confirmed ? state.confirmed.toString() : null,
+      phase: state.phase,
+      processedVotes: state.processedVotes,
+    };
   }
 
   get illBehavedNodes() {
@@ -194,7 +196,167 @@ class FederatedVotingStore {
     this._state.protocolContextState = this._state.protocolContext.getState();
     this._state.simulation = new Simulation(this._state.protocolContext);
     scenario.loader(this._state.simulation as Simulation);
+    this.updateNodes();
     this.recalculateNetworkAnalysis();
+  }
+
+  //SIMULATION ACTIONS
+  public getLatestEvents() {
+    return this._state.simulation.getLatestEvents();
+  }
+
+  public updateNodeTrust(
+    publicKey: string,
+    trustedNodes: string[],
+    threshold: number,
+  ) {
+    const pendingUpdate = this._state.simulation
+      .pendingUserActions()
+      .find(
+        (action) =>
+          action instanceof UpdateQuorumSet && action.publicKey === publicKey,
+      );
+
+    if (pendingUpdate) {
+      this._state.simulation.cancelPendingUserAction(pendingUpdate);
+    }
+
+    this._state.simulation.addUserAction(
+      new UpdateQuorumSet(
+        publicKey,
+        new QuorumSet(threshold, trustedNodes, []),
+      ),
+    );
+
+    this.updateNodes(); //preview the change
+    this.recalculateNetworkAnalysis();
+  }
+
+  public cancelNodeTrustUpdate(publicKey: string) {
+    const pendingUpdate = this._state.simulation
+      .pendingUserActions()
+      .find(
+        (action) =>
+          action instanceof UpdateQuorumSet && action.publicKey === publicKey,
+      );
+
+    if (pendingUpdate) {
+      this._state.simulation.cancelPendingUserAction(pendingUpdate);
+      this.updateNodes();
+      this.recalculateNetworkAnalysis();
+    }
+  }
+
+  public cancelPendingUserAction(action: UserAction) {
+    this._state.simulation.cancelPendingUserAction(action);
+    if (action instanceof UpdateQuorumSet) {
+      console.log("CANCEL");
+      this.updateNodes();
+      this.recalculateNetworkAnalysis();
+    }
+  }
+
+  public executeStep() {
+    this._state.simulation.executeStep();
+    this.updateNodes();
+    this.recalculateNetworkAnalysis();
+    this._state.simulationUpdate++;
+  }
+
+  public reset() {
+    this._state.simulation.goToFirstStep();
+    this.updateNodes();
+    this.recalculateNetworkAnalysis();
+    this._state.simulationUpdate++;
+  }
+
+  public goBackOneStep() {
+    this._state.simulation.goBackOneStep();
+    this.updateNodes();
+    this.recalculateNetworkAnalysis();
+    this._state.simulationUpdate++;
+  }
+
+  public hasNextStep() {
+    return this._state.simulation.hasNextStep();
+  }
+
+  public hasPreviousStep() {
+    return this._state.simulation.hasPreviousStep();
+  }
+
+  //todo: mapping?
+  public getFullEventLog() {
+    return this._state.simulation.getFullEventLog();
+  }
+
+  consensusReached = computed(() => {
+    const nodes = this.nodes;
+    if (!nodes.every((node) => node.confirmed)) {
+      return false;
+    }
+
+    const confirmedValues = nodes
+      .filter((state) => state.confirmed)
+      .map((state) => state.confirmed);
+
+    const firstConfirmedValue = confirmedValues[0];
+    return confirmedValues.every((value) => value === firstConfirmedValue);
+  });
+
+  public isNetworkSplit = computed(() => {
+    const confirmedStates = this.nodes.filter(
+      (state) => state.confirmed !== null,
+    );
+
+    const confirmedValues = new Set(
+      confirmedStates.map((state) => state.confirmed),
+    );
+
+    // If there's more than one unique value, the network is split
+    return confirmedValues.size > 1;
+  });
+
+  public isStuck = computed(() => {
+    return (
+      !this._state.simulation.hasNextStep() && !this.consensusReached.value
+    );
+  });
+
+  public vote(publicKey: string, vote: string) {
+    this.cancelPendingVote(publicKey);
+    const action = new VoteOnStatement(publicKey, vote);
+    this._state.simulation.addUserAction(action);
+  }
+
+  private cancelPendingVote(publicKey: string) {
+    const vote = this._state.simulation
+      .pendingUserActions()
+      .find(
+        (action) =>
+          action instanceof VoteOnStatement && action.publicKey === publicKey,
+      );
+
+    if (vote) {
+      this._state.simulation.cancelPendingUserAction(vote);
+    }
+  }
+
+  public getPendingVotes() {
+    return this._state.simulation
+      .pendingUserActions()
+      .filter(
+        (action) => action instanceof VoteOnStatement,
+      ) as VoteOnStatement[];
+  }
+
+  //@deprecated
+  get simulation(): Simulation {
+    return this._state.simulation as Simulation;
+  }
+
+  get simulationUpdate(): number {
+    return this._state.simulationUpdate;
   }
 }
 

@@ -1,4 +1,3 @@
-import { Node } from "scp-simulation";
 import { findSubSetsOfSize } from "./Sets";
 import {
   findAllDSets,
@@ -6,6 +5,7 @@ import {
   findQuorums,
   hasQuorumIntersection,
 } from "./DSetAnalysis";
+import { FederatedNode } from "@/store/useFederatedVotingStore";
 
 type PublicKey = string;
 
@@ -64,14 +64,14 @@ export class NetworkAnalysis {
   /**
    * Analyze an array of Nodes to produce a NetworkAnalysis snapshot.
    */
-  public static analyze(nodes: Node[]): NetworkAnalysis {
+  public static analyze(nodes: FederatedNode[]): NetworkAnalysis {
     const quorumSlices = new Map<PublicKey, Set<PublicKey>[]>(
       nodes.map((node) => [
         node.publicKey, //always include self
         Array.from(
           findSubSetsOfSize(
-            new Set(node.quorumSet.validators),
-            node.quorumSet.threshold,
+            new Set(node.trustedNodes),
+            node.trustThreshold,
           ).map((subset) => subset.add(node.publicKey)),
         ),
       ]),

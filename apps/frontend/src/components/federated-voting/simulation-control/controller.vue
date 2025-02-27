@@ -7,26 +7,20 @@
             <div class="btn-group" role="group">
               <button
                 class="btn btn-secondary btn-sm"
-                :disabled="
-                  !federatedVotingStore.simulation.hasPreviousStep() || playing
-                "
+                :disabled="!federatedVotingStore.hasPreviousStep() || playing"
                 @click="goBackOneStep"
               >
                 <BIconSkipBackwardFill class="icon-color" />
               </button>
               <button
                 class="btn btn-success btn-sm"
-                :disabled="
-                  !federatedVotingStore.simulation.hasNextStep() || playing
-                "
+                :disabled="!federatedVotingStore.hasNextStep() || playing"
                 @click="play"
               >
                 <BIconPlayFill class="icon-color" />
               </button>
               <button
-                :disabled="
-                  !federatedVotingStore.simulation.hasNextStep() || playing
-                "
+                :disabled="!federatedVotingStore.hasNextStep() || playing"
                 class="btn btn-primary btn-sm"
                 @click="executeNextStep"
               >
@@ -34,7 +28,7 @@
               </button>
               <button
                 class="btn btn-secondary btn-sm"
-                :disabled="!federatedVotingStore.simulation.hasPreviousStep()"
+                :disabled="!federatedVotingStore.hasPreviousStep()"
                 @click="stop"
               >
                 <BIconStopFill v-if="!playing" class="icon-color" />
@@ -72,7 +66,7 @@ import ControllerInfo from "./controller-info.vue";
 const playing = ref(false);
 const progressBar = ref<HTMLElement | null>(null);
 let playInterval: NodeJS.Timeout | null = null;
-let delayImmediateUserActionsInterval: NodeJS.Timeout | null = null;
+const delayImmediateUserActionsInterval: NodeJS.Timeout | null = null;
 
 const tickTime = computed(
   () => federatedVotingStore.simulationStepDurationInSeconds * 1000,
@@ -81,11 +75,11 @@ const tickTime = computed(
 function play() {
   playing.value = true;
   resetAnimation();
-  if (federatedVotingStore.simulation.hasNextStep()) {
+  if (federatedVotingStore.hasNextStep()) {
     executeNextStep();
   }
   playInterval = setInterval(() => {
-    if (federatedVotingStore.simulation.hasNextStep()) {
+    if (federatedVotingStore.hasNextStep()) {
       resetAnimation();
       executeNextStep();
     } else {
@@ -124,37 +118,27 @@ function stop() {
 }
 
 function executeNextStep() {
-  federatedVotingStore.delayImmediateUserActions = true;
-  federatedVotingStore.simulation.executeStep();
-
-  if (delayImmediateUserActionsInterval) {
-    clearTimeout(delayImmediateUserActionsInterval);
-    delayImmediateUserActionsInterval = null;
-  }
-
-  delayImmediateUserActionsInterval = setTimeout(() => {
-    federatedVotingStore.delayImmediateUserActions = false;
-  }, tickTime.value);
+  federatedVotingStore.executeStep();
 }
 
 function reset() {
-  federatedVotingStore.simulation.goToFirstStep();
+  federatedVotingStore.reset();
 }
 
 function goBackOneStep() {
-  federatedVotingStore.simulation.goBackOneStep();
+  federatedVotingStore.goBackOneStep();
 }
 
 // Keydown event handler
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === "n") {
-    if (federatedVotingStore.simulation.hasNextStep()) {
+    if (federatedVotingStore.hasNextStep()) {
       executeNextStep();
       event.preventDefault();
     }
   }
   if (event.key === "N") {
-    if (federatedVotingStore.simulation.hasPreviousStep()) {
+    if (federatedVotingStore.hasPreviousStep()) {
       goBackOneStep();
     }
     event.preventDefault();

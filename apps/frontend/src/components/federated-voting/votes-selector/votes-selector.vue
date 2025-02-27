@@ -4,11 +4,7 @@
       <div class="content-wrapper">
         <div class="main-content">
           <div class="votes-grid">
-            <div
-              v-for="node in allNodes"
-              :key="node.publicKey"
-              class="vote-cell"
-            >
+            <div v-for="node in nodes" :key="node.publicKey" class="vote-cell">
               <label
                 :for="`voteSelection-${node.publicKey}`"
                 class="vote-label"
@@ -39,8 +35,6 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import { VoteOnStatement } from "scp-simulation";
-import { BIconInfoCircle } from "bootstrap-vue";
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import VotesSelectorInfo from "./votes-selector-info.vue";
 import InfoButton from "../info-box/info-button.vue";
@@ -49,14 +43,12 @@ function showInfo() {
   infoBoxStore.show(VotesSelectorInfo);
 }
 
-const allNodes = computed(() =>
-  federatedVotingStore.protocolContextState.protocolStates.map((ps) => ps.node),
-);
+const nodes = federatedVotingStore.nodes;
 
 const processedVotesByNode = computed(() => {
   const map: Record<string, boolean> = {};
-  federatedVotingStore.protocolContextState.protocolStates
-    .flatMap((state) => state.processedVotes)
+  federatedVotingStore.nodes
+    .flatMap((node) => node.processedVotes)
     .forEach((vote) => {
       map[vote.publicKey] = true;
     });
@@ -66,54 +58,30 @@ const processedVotesByNode = computed(() => {
 const selectedVotes = ref<Record<string, string>>({});
 
 function onVoteSelectionChange(publicKey: string) {
-  removeExistingVoteActionForNode(publicKey);
   const voteValue = selectedVotes.value[publicKey];
   if (voteValue) {
-    const action = new VoteOnStatement(publicKey, voteValue);
-    federatedVotingStore.simulation.addUserAction(action);
-  }
-}
-
-function removeExistingVoteActionForNode(publicKey: string) {
-  const simulation = federatedVotingStore.simulation;
-  const actions = simulation.pendingUserActions();
-  for (let i = actions.length - 1; i >= 0; i--) {
-    const ua = actions[i];
-    if (ua.subType === "VoteOnStatement" && ua.publicKey === publicKey) {
-      actions.splice(i, 1);
-    }
+    federatedVotingStore.vote(publicKey, voteValue);
   }
 }
 
 function syncSelectedVotes() {
   const newSelectedVotes: Record<string, string> = {};
 
-  // Initialize all votes to empty
-  allNodes.value.forEach((node) => {
-    newSelectedVotes[node.publicKey] = "";
+  // Set processed votes
+  federatedVotingStore.nodes.forEach((node) => {
+    newSelectedVotes[node.publicKey] = node.voted ?? "";
   });
 
-  // Set processed votes
-  federatedVotingStore.protocolContextState.protocolStates
-    .flatMap((state) => state.processedVotes)
-    .forEach((vote) => {
-      newSelectedVotes[vote.publicKey] = vote.statement.toString();
-    });
-
-  // Override with pending user actions
-  federatedVotingStore.simulation
-    .pendingUserActions()
-    .forEach((action: any) => {
-      if (action.subType === "VoteOnStatement") {
-        newSelectedVotes[action.publicKey] = action.statement;
-      }
-    });
+  //override with pending votes
+  federatedVotingStore.getPendingVotes().forEach((vote) => {
+    newSelectedVotes[vote.publicKey] = vote.statement.toString();
+  });
 
   selectedVotes.value = newSelectedVotes;
 }
 
 watch(
-  () => federatedVotingStore.simulation.pendingUserActions(),
+  () => federatedVotingStore.getPendingVotes(),
   () => syncSelectedVotes(),
   { deep: true, immediate: true },
 );

@@ -86,21 +86,19 @@ import {
 } from "bootstrap-vue";
 
 const nodes = computed(() => {
-  return federatedVotingStore.protocolContextState.protocolStates.map(
-    (protocolState) => ({
-      node: protocolState.node,
-      voted: protocolState.voted,
-      phase: protocolState.phase,
-      voteValue: protocolState.voted,
-      acceptedValue: protocolState.accepted,
-      confirmedValue: protocolState.confirmed,
-      illBehaved: illBehavedNodes.value.includes(protocolState.node.publicKey),
-      befouled: !intactNodes.value.includes(protocolState.node.publicKey),
-      topTierNode: federatedVotingStore.networkAnalysis.topTierNodes.has(
-        protocolState.node.publicKey,
-      ),
-    }),
-  );
+  return federatedVotingStore.nodes.map((node) => ({
+    node: node,
+    voted: node.voted,
+    phase: node.phase,
+    voteValue: node.voted,
+    acceptedValue: node.accepted,
+    confirmedValue: node.confirmed,
+    illBehaved: illBehavedNodes.value.includes(node.publicKey),
+    befouled: !intactNodes.value.includes(node.publicKey),
+    topTierNode: federatedVotingStore.networkAnalysis.topTierNodes.has(
+      node.publicKey,
+    ),
+  }));
 });
 
 const illBehavedNodes = computed(() => {

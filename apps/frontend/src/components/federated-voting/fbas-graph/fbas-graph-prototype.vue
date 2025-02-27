@@ -43,6 +43,7 @@
               :end-x="message.endX"
               :end-y="message.endY"
               :duration="message.duration"
+              @animation-end="handleAnimationEnd(message.id)"
             />
           </g>
 
@@ -96,320 +97,101 @@
 </template>
 
 <script setup lang="ts">
-import {
-  forceCenter,
-  forceLink,
-  forceManyBody,
-  forceSimulation,
-  forceX,
-  forceY,
-} from "d3-force";
-import { polygonHull } from "d3-polygon"; // Import the polygonHull function
 import { ref, onMounted, watch, computed } from "vue";
+import { polygonHull } from "d3-polygon";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasGraphNode, { Node } from "./fbas-graph-node.vue";
 import FbasGraphLink, { Link } from "./fbas-graph-link.vue";
-import {
-  FederatedVotingProtocolState,
-  MessageSent,
-  OverlayEvent,
-  ProtocolEvent,
-} from "scp-simulation";
+import { MessageSent } from "scp-simulation";
 import AnimatedMessage from "./animated-message.vue";
 import { usePanning } from "./usePanning";
 import BreadCrumbs from "../bread-crumbs.vue";
 import { curveCatmullRomClosed, line } from "d3-shape";
-import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
+import fbasGraphService from "./FbasGraphService";
+import messageService from "./MessageService";
 
 const { translateX, translateY, scale, startPan, pan, endPan, zoom } =
   usePanning();
-
 const height = 500;
 const svgRef = ref<SVGSVGElement | null>(null);
-
 const hoveredNode = ref<Node | null>(null);
-
-const messages = ref<
-  Array<{
-    id: number;
-    startX: number;
-    startY: number;
-    endX: number;
-    endY: number;
-    duration: number;
-  }>
->([]);
-let messageCounter = 0;
+const updatingGraph = ref(false);
+let currentSimulationUpdate = federatedVotingStore.simulationUpdate;
+const messageDuration = computed(
+  () => federatedVotingStore.simulationStepDurationInSeconds * 0.8,
+);
+const width = ref(800);
+const heightRef = ref(500);
 
 const nodes = ref<Node[]>([]);
 const links = ref<Link[]>([]);
+
+const messages = computed(() => messageService.getMessages());
 
 const topTierNodeIds = computed(() => {
   return Array.from(federatedVotingStore.networkAnalysis.topTierNodes);
 });
 
-function animateMessage(source: Node, target: Node) {
-  messages.value.push({
-    id: messageCounter++,
-    startX: source.x ?? 0,
-    startY: source.y ?? 0,
-    endX: target.x ?? 0,
-    endY: target.y ?? 0,
-    duration: federatedVotingStore.simulationStepDurationInSeconds,
-  });
+function updateNodesAndLinks() {
+  fbasGraphService.updateNodesState(nodes.value, federatedVotingStore.nodes);
 }
 
-const updateNodesAndLinks = () => {
-  nodes.value.forEach((node) => {
-    const state = federatedVotingStore.protocolContextState.protocolStates.find(
-      (state) => state.node.publicKey === node.id,
-    );
-    if (state) {
-      node.vote = state.voted ? state.voted.toString() : null;
-      node.accept = state.accepted ? state.accepted.toString() : null;
-      node.confirm = state.confirmed ? state.confirmed.toString() : null;
-      node.events = federatedVotingStore.simulation
-        .getLatestEvents()
-        .filter((event) => {
-          return (
-            (event instanceof ProtocolEvent || event instanceof OverlayEvent) &&
-            event.publicKey === node.id
-          );
-        }) as (ProtocolEvent | OverlayEvent)[];
-    }
-  });
-};
+function updateOrCreateGraph() {
+  updatingGraph.value = true;
 
-const createNodesAndLinks = () => {
-  nodes.value = federatedVotingStore.protocolContextState.protocolStates.map(
-    (state) => {
-      return {
-        id: state.node.publicKey,
-        validators: state.node.quorumSet.validators,
-        threshold: state.node.quorumSet.threshold,
-        vote: state.voted ? state.voted.toString() : null,
-        accept: state.accepted ? state.accepted.toString() : null,
-        confirm: state.confirmed ? state.confirmed.toString() : null,
-        x: 0,
-        y: 0,
-        events: [],
-      };
-    },
+  nodes.value = fbasGraphService.createNodes(
+    federatedVotingStore.nodes,
+    nodes.value,
   );
 
-  links.value = (() => {
-    const constructedLinks: Link[] = [];
-    nodes.value.forEach((node) => {
-      node.validators?.forEach((validator) => {
-        constructedLinks.push({
-          source: node.id,
-          target: validator,
-          selfLoop: validator === node.id,
-          hovered: false,
-        });
-      });
-    });
+  links.value = fbasGraphService.createLinksFromNodes(nodes.value);
 
-    // Identify bidirectional links
-    const linkMap = new Map<string, Link>();
-    const linkKey = (link: Link) => {
-      const sourceId = (link.source as Node).id;
-      const targetId = (link.target as Node).id;
-      return `${sourceId}-${targetId}`;
-    };
+  fbasGraphService.updateForceSimulation(
+    nodes.value,
+    links.value,
+    width.value,
+    height,
+    topTierNodeIds.value,
+  );
 
-    constructedLinks.forEach((link) => linkMap.set(linkKey(link), link));
-    constructedLinks.forEach((link) => {
-      const reverseKey = linkKey({
-        source: link.target,
-        target: link.source,
-      } as Link);
-      if (linkMap.has(reverseKey)) {
-        if (link.source !== link.target) {
-          link.bidirectional = true;
-          linkMap.get(reverseKey)!.bidirectional = true;
+  const updateDelay =
+    federatedVotingStore.simulationStepDurationInSeconds * 0.2 * 1000;
+  setTimeout(() => {
+    updatingGraph.value = false;
+
+    messageService.processMessageQueue(nodes.value, messageDuration.value);
+  }, updateDelay);
+}
+
+function handleAnimationEnd(id: number) {
+  messageService.removeMessage(id);
+}
+
+watch(
+  [
+    () => federatedVotingStore.simulationUpdate,
+    () => federatedVotingStore.nodes,
+  ],
+  () => {
+    const hasStructuralChange = true;
+
+    if (currentSimulationUpdate !== federatedVotingStore.simulationUpdate) {
+      currentSimulationUpdate = federatedVotingStore.simulationUpdate;
+      federatedVotingStore.getLatestEvents().forEach((event) => {
+        if (event instanceof MessageSent) {
+          messageService.handleMessageEvent(event);
         }
-      } else {
-        link.bidirectional = false;
-      }
-    });
-
-    return constructedLinks;
-  })();
-};
-
-const events = computed(() => {
-  return federatedVotingStore.simulation.getLatestEvents();
-});
-
-watch(events, (newEvents) => {
-  messages.value = [];
-  newEvents.forEach((event) => {
-    if (event instanceof MessageSent) {
-      const sourceNode = nodes.value.find((n) => n.id === event.message.sender);
-      const targetNode = nodes.value.find(
-        (n) => n.id === event.message.receiver,
-      );
-      if (sourceNode && targetNode) {
-        animateMessage(sourceNode, targetNode);
-      }
+      });
     }
-  });
-});
 
-watch(
-  () => federatedVotingStore.nodes,
-  () => {
-    console.log("UPDATE GRAPH");
-    // Store current positions before updating
-    const nodePositions = new Map<string, { x: number; y: number }>();
-    nodes.value.forEach((node) => {
-      if (node.x !== undefined && node.y !== undefined) {
-        nodePositions.set(node.id, { x: node.x, y: node.y });
-      }
-    });
-
-    const protocolStates = new Map<string, FederatedVotingProtocolState>();
-    federatedVotingStore.protocolContextState.protocolStates.forEach(
-      (state) => {
-        protocolStates.set(state.node.publicKey, state);
-      },
-    );
-
-    // Create new nodes and links
-    nodes.value = federatedVotingStore.nodes.map((node) => {
-      const state = protocolStates.get(node.publicKey);
-      // Check if this node already exists and has a position
-      const position = nodePositions.get(node.publicKey);
-
-      return {
-        id: node.publicKey,
-        validators: node.quorumSet.validators,
-        threshold: node.quorumSet.threshold,
-        vote: state && state.voted ? state.voted.toString() : null,
-        accept: state && state.accepted ? state.accepted.toString() : null,
-        confirm: state && state.confirmed ? state.confirmed.toString() : null,
-        // Preserve position if available
-        x: position ? position.x : 0,
-        y: position ? position.y : 0,
-        // Preserve velocity if possible to maintain animation
-        vx: 0,
-        vy: 0,
-        events: [],
-      };
-    });
-
-    // Recreate links based on new node structure
-    links.value = (() => {
-      const constructedLinks: Link[] = [];
-      nodes.value.forEach((node) => {
-        node.validators?.forEach((validator) => {
-          constructedLinks.push({
-            source: node.id,
-            target: validator,
-            selfLoop: validator === node.id,
-            hovered: false,
-          });
-        });
-      });
-
-      // Identify bidirectional links
-      const linkMap = new Map<string, Link>();
-      const linkKey = (link: Link) => {
-        const sourceId =
-          typeof link.source === "string"
-            ? link.source
-            : typeof link.source === "number"
-              ? link.source.toString()
-              : link.source.id;
-        const targetId =
-          typeof link.target === "string"
-            ? link.target
-            : typeof link.target === "number"
-              ? link.target.toString()
-              : link.target.id;
-        return `${sourceId}-${targetId}`;
-      };
-
-      constructedLinks.forEach((link) => linkMap.set(linkKey(link), link));
-      constructedLinks.forEach((link) => {
-        const reverseKey = linkKey({
-          source: link.target,
-          target: link.source,
-        } as Link);
-        if (linkMap.has(reverseKey)) {
-          if (link.source !== link.target) {
-            link.bidirectional = true;
-            linkMap.get(reverseKey)!.bidirectional = true;
-          }
-        } else {
-          link.bidirectional = false;
-        }
-      });
-
-      return constructedLinks;
-    })();
-
-    // Reinitialize the force simulation with preserved positions
-    forceSimulation<Node>(nodes.value)
-      .force(
-        "link",
-        forceLink<Node, Link>(links.value)
-          .id((node: Node) => node.id)
-          .distance(150),
-      )
-      .force("charge", forceManyBody().strength(-1000))
-      .force("center", forceCenter(width.value / 2, height / 2))
-      .force(
-        "topTierX",
-        forceX<Node>(width.value / 2).strength((node) =>
-          topTierNodeIds.value.includes(node.id) ? 0.2 : 0,
-        ),
-      )
-      .force(
-        "topTierY",
-        forceY<Node>(height / 2).strength((node) =>
-          topTierNodeIds.value.includes(node.id) ? 0.2 : 0,
-        ),
-      );
+    if (hasStructuralChange) {
+      updateOrCreateGraph();
+    } else {
+      updateNodesAndLinks();
+    }
   },
   { deep: true },
 );
-
-// Keep the existing protocol context watcher for state updates
-watch(
-  () => federatedVotingStore.protocolContext,
-  () => {
-    updateNodesAndLinks();
-  },
-  { deep: true },
-);
-
-onMounted(() => {
-  updateDimensions();
-  createNodesAndLinks();
-  forceSimulation<Node>(nodes.value)
-    .force(
-      "link",
-      forceLink<Node, Link>(links.value)
-        .id((node: Node) => node.id)
-        .distance(150),
-    )
-    .force("charge", forceManyBody().strength(-1000))
-    .force("center", forceCenter(width.value / 2, height / 2))
-    .force(
-      "topTierX",
-      forceX<Node>(width.value / 2).strength((node) =>
-        topTierNodeIds.value.includes(node.id) ? 0.2 : 0,
-      ),
-    )
-    .force(
-      "topTierY",
-      forceY<Node>(height / 2).strength((node) =>
-        topTierNodeIds.value.includes(node.id) ? 0.2 : 0,
-      ),
-    );
-});
 
 function handleMouseOver(node: Node) {
   hoveredNode.value = node;
@@ -427,35 +209,25 @@ function handleMouseOut(node: Node) {
   });
 }
 
-// Compute hull path for top-tier nodes
 const topTierHullPath = computed(() => {
   const topTierNodes = nodes.value.filter((node) =>
     topTierNodeIds.value.includes(node.id),
   );
-  // We need at least 3 points to form a hull
   if (topTierNodes.length < 3) return null;
 
-  const points: [number, number][] = topTierNodes.map(
+  const points = topTierNodes.map(
     (d) => [d.x ?? 0, d.y ?? 0] as [number, number],
   );
   const hull = polygonHull(points);
   if (!hull) return null;
 
   const valueLine = line()
-    .x(function (d) {
-      return d[0];
-    })
-    .y(function (d) {
-      return d[1];
-    })
-    .curve(curveCatmullRomClosed); //we want a smooth line
+    .x((d) => d[0])
+    .y((d) => d[1])
+    .curve(curveCatmullRomClosed);
 
   return valueLine(hull);
 });
-
-// Helper function to get SVG width and height
-const width = ref(800); // Set initial width
-const heightRef = ref(500); // Set initial height
 
 function updateDimensions() {
   if (svgRef.value) {
@@ -463,6 +235,11 @@ function updateDimensions() {
     heightRef.value = svgRef.value.clientHeight;
   }
 }
+
+onMounted(() => {
+  updateDimensions();
+  updateOrCreateGraph();
+});
 </script>
 
 <style scoped>
@@ -517,12 +294,14 @@ function updateDimensions() {
 .graph {
   cursor: grab;
   background: white;
+  position: relative;
 }
 
-/* Optional styling adjustments for hull */
+/* Hull layer */
 .hull-layer path {
-  pointer-events: none; /* Hull should not interfere with node interactions */
+  pointer-events: none;
 }
+
 .badge {
   background-color: #28a745;
   color: white;

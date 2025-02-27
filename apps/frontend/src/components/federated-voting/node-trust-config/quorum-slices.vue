@@ -15,25 +15,27 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { Node } from "scp-simulation";
 import { findSubSetsOfSize } from "@/components/federated-voting/analysis/Sets";
+import { FederatedNode } from "@/store/useFederatedVotingStore";
 
 const props = defineProps<{
-  node: Node;
+  publicKey: string;
+  trustedNodes: string[];
+  trustThreshold: number;
 }>();
 const quorumSlices = computed(() => {
-  const validators = props.node.quorumSet.validators;
-  const threshold = props.node.quorumSet.threshold;
+  const trustedNodes = props.trustedNodes;
+  const threshold = props.trustThreshold;
 
-  return Array.from(findSubSetsOfSize(new Set(validators), threshold)).map(
+  return Array.from(findSubSetsOfSize(new Set(trustedNodes), threshold)).map(
     (slice) => {
-      slice.add(props.node.publicKey);
+      slice.add(props.publicKey);
       const sliceArray = Array.from(slice);
-      const nodeIndex = sliceArray.indexOf(props.node.publicKey);
+      const nodeIndex = sliceArray.indexOf(props.publicKey);
       if (nodeIndex > 0) {
         // Move node's key to front
         sliceArray.splice(nodeIndex, 1);
-        sliceArray.unshift(props.node.publicKey);
+        sliceArray.unshift(props.publicKey);
       }
       return sliceArray;
     },

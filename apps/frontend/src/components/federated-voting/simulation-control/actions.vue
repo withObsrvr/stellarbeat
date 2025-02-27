@@ -88,7 +88,7 @@ function handleEventAction(action: ProtocolAction) {
 }
 
 function cancelUserAction(action: UserAction) {
-  federatedVotingStore.simulation.cancelPendingUserAction(action);
+  federatedVotingStore.cancelPendingUserAction(action);
 }
 
 const isActionDisrupted = (action: ProtocolAction | UserAction) => {

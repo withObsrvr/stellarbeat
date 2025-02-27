@@ -60,7 +60,7 @@ const filterQuery = ref("");
 const logContainer = ref<HTMLElement | null>(null);
 
 const filteredConsoleLogs = computed(() => {
-  const eventLogs = federatedVotingStore.simulation.getFullEventLog(); // Returns Event[][]
+  const eventLogs = federatedVotingStore.getFullEventLog(); // Returns Event[][]
   const logsWithLineNumbers = eventLogs.flatMap((events, stepIndex) => {
     return events
       .filter(

@@ -6,13 +6,22 @@
       >
         <BreadCrumbs root="Federated Voting Status" />
         <div class="d-flex align-items-center">
-          <span v-if="consensusReached" class="badge consensus ms-2">
+          <span
+            v-if="federatedVotingStore.consensusReached"
+            class="badge consensus ms-2"
+          >
             Consensus Reached
           </span>
-          <span v-if="isNetworkSplit" class="badge badge-danger ms-2">
+          <span
+            v-if="federatedVotingStore.isNetworkSplit"
+            class="badge badge-danger ms-2"
+          >
             Network Split
           </span>
-          <span v-else-if="isStuck" class="badge badge-danger ms-2">
+          <span
+            v-else-if="federatedVotingStore.isStuck"
+            class="badge badge-danger ms-2"
+          >
             Vote Stuck
           </span>
         </div>
@@ -43,53 +52,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import SelectedNodePanel from "./selected-nodes-panel/selected-node-panel.vue";
 import EventLog from "./simulation-control/event-log.vue";
 import Actions from "./simulation-control/actions.vue";
 import BreadCrumbs from "./bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-
-const consensusReached = computed(() => {
-  const protocolStates =
-    federatedVotingStore.protocolContextState.protocolStates;
-
-  if (!protocolStates.every((state) => state.confirmed)) {
-    return false;
-  }
-
-  const confirmedValues = protocolStates
-    .filter((state) => state.confirmed)
-    .map((state) => state.confirmed);
-
-  console.log(confirmedValues);
-  const firstConfirmedValue = confirmedValues[0];
-  return confirmedValues.every((value) => value === firstConfirmedValue);
-});
-
-const isNetworkSplit = computed(() => {
-  const protocolStates =
-    federatedVotingStore.protocolContextState.protocolStates;
-
-  const confirmedStates = protocolStates.filter(
-    (state) => state.confirmed !== null,
-  );
-
-  const confirmedValues = new Set(
-    confirmedStates.map((state) => state.confirmed),
-  );
-
-  // If there's more than one unique value, the network is split
-  return confirmedValues.size > 1;
-});
-
-const hasNoNextMoves = computed(() => {
-  return !federatedVotingStore.simulation.hasNextStep();
-});
-
-const isStuck = computed(() => {
-  return hasNoNextMoves.value && !consensusReached.value;
-});
 </script>
 
 <style scoped>

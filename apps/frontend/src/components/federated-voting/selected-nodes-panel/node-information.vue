@@ -28,15 +28,15 @@
       </div>
       <div class="info-item">
         <span class="label">Voted:</span>
-        <span class="value">{{ protocolState?.voted || "N/A" }}</span>
+        <span class="value">{{ selectedNode?.voted || "N/A" }}</span>
       </div>
       <div class="info-item">
         <span class="label">Accepted:</span>
-        <span class="value">{{ protocolState?.accepted || "N/A" }}</span>
+        <span class="value">{{ selectedNode?.accepted || "N/A" }}</span>
       </div>
       <div class="info-item">
         <span class="label">Confirmed:</span>
-        <span class="value">{{ protocolState?.confirmed || "N/A" }}</span>
+        <span class="value">{{ selectedNode?.confirmed || "N/A" }}</span>
       </div>
     </div>
   </div>
@@ -59,14 +59,14 @@ const props = defineProps({
 });
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
+const selectedNode = computed(() =>
+  federatedVotingStore.nodes.find(
+    (node) => node.publicKey === selectedNodeId.value,
+  ),
+);
 
-const protocolState = computed(() => {
-  return federatedVotingStore.protocolContextState.protocolStates.find(
-    (state) => state.node.publicKey === selectedNodeId.value,
-  );
-});
 const selectedNodePhase = computed(() => {
-  return protocolState.value ? protocolState.value.phase : "unknown";
+  return selectedNode.value?.phase || "unknown";
 });
 </script>
 

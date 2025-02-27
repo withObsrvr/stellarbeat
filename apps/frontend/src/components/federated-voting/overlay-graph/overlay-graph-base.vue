@@ -115,14 +115,12 @@ const updateLinks = () => {
 import "d3-transition";
 
 onMounted(() => {
-  nodes.value = federatedVotingStore.protocolContextState.protocolStates.map(
-    (protocolState) => ({
-      id: protocolState.node.publicKey,
-      name: protocolState.node.publicKey,
-      x: 0,
-      y: 0,
-    }),
-  );
+  nodes.value = federatedVotingStore.nodes.map((node) => ({
+    id: node.publicKey,
+    name: node.publicKey,
+    x: 0,
+    y: 0,
+  }));
 
   updateLinks();
 

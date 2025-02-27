@@ -43,7 +43,7 @@
                 <select
                   class="form-select form-select-sm"
                   :class="{ modified: isThresholdModified(node) }"
-                  :value="node.quorumSet.threshold"
+                  :value="node.trustThreshold"
                   @change="updateThreshold(node, $event)"
                 >
                   <option
@@ -131,29 +131,42 @@
       size="lg"
       ok-only
     >
-      <QuorumSlices v-if="selectedNode" :node="selectedNode" />
+      <QuorumSlices
+        v-if="selectedNode"
+        :public-key="selectedNode.publicKey"
+        :trusted-nodes="selectedNode.trustedNodes"
+        :trust-threshold="selectedNode.trustThreshold"
+      />
     </BModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, Ref, ComputedRef, onBeforeMount, watch } from "vue";
-import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import {
+  FederatedNode,
+  federatedVotingStore,
+} from "@/store/useFederatedVotingStore";
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import InfoButton from "../info-box/info-button.vue";
 import NodeTrustConfigInfo from "./node-trust-config-info.vue";
 import QuorumSlices from "./quorum-slices.vue";
 import { BModal } from "bootstrap-vue";
-import { Node, QuorumSet, UpdateQuorumSet } from "scp-simulation";
 
-const nodes: ComputedRef<Node[]> = computed(
-  () => federatedVotingStore.nodes as Node[],
+interface TrustConfig {
+  publicKey: string;
+  trustedNodes: string[];
+  trustThreshold: number;
+}
+
+const nodes: ComputedRef<FederatedNode[]> = computed(
+  () => federatedVotingStore.nodes,
 );
-const nodesCache = ref<Node[]>();
+const nodesCache = ref<TrustConfig[]>();
 const hasLocalChanges = ref(false);
 
 watch(
-  () => federatedVotingStore.quorumSets,
+  () => federatedVotingStore.nodes,
   () => {
     initializeNodeCache();
   },
@@ -164,46 +177,44 @@ onBeforeMount(() => {
   initializeNodeCache();
 });
 
-function isTrusted(node: Node, otherNode: Node): boolean {
-  return node.quorumSet.validators.includes(otherNode.publicKey);
+function isTrusted(node: TrustConfig, otherNode: TrustConfig): boolean {
+  return node.trustedNodes.includes(otherNode.publicKey);
 }
 
-function toggleTrust(node: Node, otherNode: Node): void {
-  const index = node.quorumSet.validators.indexOf(otherNode.publicKey);
-  const newValidators = [...node.quorumSet.validators];
+function toggleTrust(node: TrustConfig, otherNode: TrustConfig): void {
+  const index = node.trustedNodes.indexOf(otherNode.publicKey);
+  const newValidators = [...node.trustedNodes];
   if (index === -1) {
     newValidators.push(otherNode.publicKey);
-  } else {
+  } else if (newValidators.length > 1) {
     newValidators.splice(index, 1);
   }
 
-  node.updateQuorumSet(
-    new QuorumSet(node.quorumSet.threshold, newValidators, []),
-  );
+  node.trustedNodes = newValidators;
+  node.trustThreshold = Math.min(node.trustThreshold, newValidators.length);
+  console.log(node.trustThreshold);
 
   hasLocalChanges.value = true;
 }
 
-function getOriginalNode(publicKey: string): Node | undefined {
-  return federatedVotingStore.protocolContextState.protocolStates
-    .map((protocolState) => protocolState.node)
-    .find((node) => node.publicKey === publicKey);
+function getOriginalNode(publicKey: string): FederatedNode | null {
+  return federatedVotingStore.getNodeWithoutPreviewChanges(publicKey);
 }
 
-function compareQuorumSets(qs1: QuorumSet, qs2: QuorumSet): boolean {
-  if (qs1.threshold !== qs2.threshold) {
+function compareTrust(node1: FederatedNode, node2: TrustConfig): boolean {
+  if (node1.trustThreshold !== node2.trustThreshold) {
     return false;
   }
 
-  const validators1 = [...qs1.validators].sort();
-  const validators2 = [...qs2.validators].sort();
+  const trustedNodes1 = [...node1.trustedNodes].sort();
+  const trustedNodes2 = [...node2.trustedNodes].sort();
 
-  if (validators1.length !== validators2.length) {
+  if (trustedNodes1.length !== trustedNodes2.length) {
     return false;
   }
 
-  for (let i = 0; i < validators1.length; i++) {
-    if (validators1[i] !== validators2[i]) {
+  for (let i = 0; i < trustedNodes1.length; i++) {
+    if (trustedNodes1[i] !== trustedNodes2[i]) {
       return false;
     }
   }
@@ -212,21 +223,16 @@ function compareQuorumSets(qs1: QuorumSet, qs2: QuorumSet): boolean {
 }
 
 function initializeNodeCache() {
-  console.log("INIT CACHE");
   hasLocalChanges.value = false;
-  const newNodesCache: Node[] = [];
-  nodes.value.forEach((element) => {
-    newNodesCache.push(
-      new Node(
-        element.publicKey,
-        new QuorumSet(
-          element.quorumSet.threshold,
-          element.quorumSet.validators,
-          [],
-        ),
-      ),
-    );
+  const newNodesCache: TrustConfig[] = [];
+  nodes.value.forEach((node) => {
+    newNodesCache.push({
+      publicKey: node.publicKey,
+      trustedNodes: node.trustedNodes.slice(),
+      trustThreshold: node.trustThreshold,
+    });
   });
+
   nodesCache.value = newNodesCache;
 }
 
@@ -236,23 +242,14 @@ function applyChanges() {
   }
   nodesCache.value.forEach((node) => {
     const originalNode = getOriginalNode(node.publicKey);
-    if (
-      originalNode &&
-      !compareQuorumSets(originalNode.quorumSet, node.quorumSet)
-    ) {
-      // Add the new action
-      const action = new UpdateQuorumSet(node.publicKey, node.quorumSet);
-      federatedVotingStore.simulation.addUserAction(action);
+    if (originalNode && !compareTrust(originalNode, node)) {
+      federatedVotingStore.updateNodeTrust(
+        node.publicKey,
+        node.trustedNodes,
+        node.trustThreshold,
+      );
     } else {
-      // Remove the action if it was previously added
-      federatedVotingStore.simulation.pendingUserActions().forEach((action) => {
-        if (
-          action instanceof UpdateQuorumSet &&
-          action.publicKey === node.publicKey
-        ) {
-          federatedVotingStore.simulation.cancelPendingUserAction(action);
-        }
-      });
+      federatedVotingStore.cancelNodeTrustUpdate(node.publicKey);
     }
   });
 
@@ -270,9 +267,9 @@ const totalPages = computed(() =>
   Math.ceil(nodesCache.value!.length / itemsPerPage),
 );
 
-const paginatedNodes: ComputedRef<Node[]> = computed(() => {
+const paginatedNodes: ComputedRef<TrustConfig[]> = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
-  return nodesCache.value!.slice(start, start + itemsPerPage) as Node[];
+  return nodesCache.value!.slice(start, start + itemsPerPage);
 });
 
 function nextPage() {
@@ -292,53 +289,46 @@ function showInfo() {
 }
 
 const showingSlices = ref(false);
-const selectedNode: Ref<Node | null> = ref(null);
+const selectedNode: Ref<TrustConfig | null> = ref(null);
 
-function showSlices(node: Node | null) {
+function showSlices(node: TrustConfig | null) {
   selectedNode.value = node;
   showingSlices.value = true;
 }
 
-function getTrustedCount(node: Node): number {
-  return node.quorumSet.validators.length;
+function getTrustedCount(node: TrustConfig): number {
+  return node.trustedNodes.length;
 }
 
-function getThresholdOptions(node: Node): number[] {
+function getThresholdOptions(node: TrustConfig): number[] {
   const validatorCount = getTrustedCount(node);
   if (validatorCount === 0) return [0];
   return Array.from({ length: validatorCount }, (_, i) => i + 1);
 }
 
-function updateThreshold(node: Node, event: Event): void {
+function updateThreshold(node: TrustConfig, event: Event): void {
   const newThreshold = parseInt((event.target as HTMLSelectElement).value);
-  if (newThreshold !== node.quorumSet.threshold) {
-    node.updateQuorumSet(
-      new QuorumSet(newThreshold, node.quorumSet.validators, []),
-    );
+  if (newThreshold !== node.trustThreshold) {
+    node.trustThreshold = newThreshold;
     hasLocalChanges.value = true;
   }
 }
 
-function isThresholdModified(node: Node): boolean {
+function isThresholdModified(node: TrustConfig): boolean {
   const originalNode = getOriginalNode(node.publicKey);
-  return (
-    !!originalNode &&
-    originalNode.quorumSet.threshold !== node.quorumSet.threshold
-  );
+  return !!originalNode && originalNode.trustThreshold !== node.trustThreshold;
 }
 
 // Add this function to determine if trust has been modified compared to original node
-function isTrustModified(node: Node, otherNode: Node): boolean {
+function isTrustModified(node: TrustConfig, otherNode: TrustConfig): boolean {
   const originalNode = getOriginalNode(node.publicKey);
   if (!originalNode) return false;
 
   // Check if the trust relationship is different between original and current
-  const originallyTrusted = originalNode.quorumSet.validators.includes(
+  const originallyTrusted = originalNode.trustedNodes.includes(
     otherNode.publicKey,
   );
-  const currentlyTrusted = node.quorumSet.validators.includes(
-    otherNode.publicKey,
-  );
+  const currentlyTrusted = node.trustedNodes.includes(otherNode.publicKey);
 
   return originallyTrusted !== currentlyTrusted;
 }
