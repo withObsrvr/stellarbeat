@@ -9,8 +9,11 @@
         selected: isSelected,
         main: isMain,
       },
+      $attrs.class,
     ]"
     @click="handleClick"
+    @mouseover="$emit('mouseover', $event)"
+    @mouseleave="$emit('mouseleave', $event)"
   >
     {{ nodeId }}
   </span>
@@ -22,10 +25,10 @@ import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 const props = defineProps<{
   nodeId: string;
-  isMain?: boolean; // Only keeping this prop for main intact nodes highlighting
+  isMain?: boolean;
 }>();
 
-const emit = defineEmits(["select"]);
+const emit = defineEmits(["select", "mouseover", "mouseleave"]);
 
 const intactNodes = computed(() => federatedVotingStore.intactNodes);
 const illBehavedNodes = computed(() => federatedVotingStore.illBehavedNodes);
@@ -55,10 +58,11 @@ function handleClick() {
 <style scoped>
 .node {
   display: inline-block;
+  padding: 3px 6px;
   padding: 4px 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 0.9em;
+  font-size: 0.85em;
   background-color: #f9f9f9;
   color: #212529;
   cursor: pointer;
@@ -76,6 +80,6 @@ function handleClick() {
 
 .befouled {
   background-color: #ffc107;
-  color: #212529;
+  color: #fff;
 }
 </style>

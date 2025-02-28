@@ -21,25 +21,19 @@
           <tr v-for="(quorum, index) in paginatedQuorums" :key="index">
             <td>
               <div class="node-list">
-                <span
+                <FbasNodeBadge
                   v-for="node in quorum"
                   :key="node"
-                  class="node"
+                  :node-id="node"
                   :class="{
                     highlight: isInHighlightedSlice(node, index),
-                    clickable: selectedNodId !== node,
                     'hovered-node':
                       hoveredNode === node && hoveredQuorumIndex === index,
                   }"
                   @mouseover="setHoveredNode(node, quorum, index)"
                   @mouseleave="clearHoveredNode"
-                  @click="
-                    federatedVotingStore.selectedNodeId = node;
-                    currentPage = 1;
-                  "
-                >
-                  {{ node }}
-                </span>
+                  @select="handleNodeSelect(node)"
+                />
               </div>
             </td>
             <td>
@@ -80,6 +74,7 @@
 import { ref, computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import BreadCrumbs from "./bread-crumbs.vue";
+import FbasNodeBadge from "./fbas-node-badge.vue";
 
 const selectedNodId = computed(() => federatedVotingStore.selectedNodeId);
 
@@ -123,6 +118,11 @@ function isInHighlightedSlice(node: string, index: number) {
   return (
     index === hoveredQuorumIndex.value && highlightedSlice.value.includes(node)
   );
+}
+
+function handleNodeSelect(node: string) {
+  federatedVotingStore.selectedNodeId = node;
+  currentPage.value = 1;
 }
 
 function isMinimal(quorum: Set<string>) {
@@ -194,33 +194,16 @@ function previousPage() {
   gap: 6px;
 }
 
-.node {
-  display: inline-block;
-  padding: 3px 6px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.85em;
-  background-color: #f9f9f9;
-  color: #212529;
-  box-sizing: border-box;
-}
-
-.node:hover {
-  cursor: pointer;
-}
-
 .node.highlight {
-  background-color: #007bff; /* Bright blue background */
-  border: 1px solid #007bff; /* Bright blue background */
-  color: white;
-  font-style: italic;
+  background-color: #007bff !important;
+  border: 1px solid #007bff !important;
+  color: white !important;
 }
 
 .node.hovered-node {
-  background-color: #007bff; /* Bright blue background */
-  color: #fff;
-  border: 1px solid #004085; /* Thicker, darker border */
-  font-style: normal;
+  background-color: #007bff !important;
+  color: #fff !important;
+  border: 1px solid #004085 !important;
 }
 
 .minimal-badge {
@@ -249,10 +232,7 @@ function previousPage() {
 .pagination button {
   padding: 4px 8px;
 }
-.clickable {
-  color: #1888b2;
-  cursor: pointer;
-}
+
 .card-header {
   display: flex;
   justify-content: space-between;
