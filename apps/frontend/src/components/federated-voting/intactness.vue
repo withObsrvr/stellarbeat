@@ -195,8 +195,13 @@ const befouledNodes = computed(() => {
   padding: 8px 10px;
   margin-bottom: 6px;
   border-radius: 6px;
-  background-color: #f8f9fa;
+  background-color: #e9ecef;
   border: 2px solid transparent;
+}
+
+.dset-item-selected {
+  border-color: #007bff;
+  background-color: rgba(0, 123, 255, 0.05);
 }
 
 .empty-message {

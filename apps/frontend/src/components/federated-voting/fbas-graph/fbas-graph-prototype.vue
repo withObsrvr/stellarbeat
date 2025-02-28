@@ -101,10 +101,6 @@
           <span>Confirmed</span>
         </div>
         <div class="legend-item">
-          <span class="legend-color intact-node"></span>
-          <span>Intact</span>
-        </div>
-        <div class="legend-item">
           <span class="legend-color ill-behaved-node"></span>
           <span>Ill-Behaved</span>
         </div>
@@ -277,11 +273,6 @@ onMounted(() => {
   border-radius: 50%;
   margin-right: 8px;
   border: 2px solid;
-}
-
-.legend-color.intact-node {
-  background-color: white;
-  border-color: #28a745;
 }
 
 .legend-color.ill-behaved-node {

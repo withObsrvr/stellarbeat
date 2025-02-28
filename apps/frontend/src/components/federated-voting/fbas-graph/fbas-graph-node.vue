@@ -227,7 +227,7 @@ const strokeColor = computed(() => {
   } else if (!federatedVotingStore.intactNodes.includes(props.node.id)) {
     return "orange";
   }
-  return "#2ca02c";
+  return nodeFillColor.value;
 });
 const nodeFillColor = computed(() => {
   if (props.node.confirm) {

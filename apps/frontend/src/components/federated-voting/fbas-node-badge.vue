@@ -1,6 +1,7 @@
 <template>
   <span
     class="node clickable"
+    role="link"
     :class="[
       {
         intact: isIntact,
@@ -51,7 +52,9 @@ const isSelected = computed(
 );
 
 function handleClick() {
-  emit("select", props.nodeId);
+  if (!isSelected.value) {
+    emit("select", props.nodeId);
+  }
 }
 </script>
 
@@ -59,18 +62,22 @@ function handleClick() {
 .node {
   display: inline-block;
   padding: 3px 6px;
-  padding: 4px 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 0.85em;
   background-color: #f9f9f9;
   color: #212529;
   cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
 }
 
-.intact {
-  background-color: #28a745;
-  color: #fff;
+.node:hover {
+  background-color: #e9e9e9;
+}
+
+.node.selected {
+  background-color: #e9e9e9;
+  cursor: default;
 }
 
 .ill-behaved {
@@ -78,8 +85,18 @@ function handleClick() {
   color: #fff;
 }
 
+.ill-behaved:hover,
+.ill-behaved.selected {
+  background-color: #c82333;
+}
+
 .befouled {
-  background-color: #ffc107;
+  background-color: #ffa500;
   color: #fff;
+}
+
+.befouled:hover,
+.befouled.selected {
+  background-color: #e69400;
 }
 </style>
