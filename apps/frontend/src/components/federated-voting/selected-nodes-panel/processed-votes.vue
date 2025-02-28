@@ -19,29 +19,23 @@
           <div class="voter-group">
             <strong>Votes:</strong>
             <div class="voter-list">
-              <span
+              <FbasNodeBadge
                 v-for="(publicKey, idx) in statementGroup.votes"
                 :key="`vote-${idx}`"
-                :class="clickableClass(publicKey)"
-                role="link"
-                @click="selectNodeId(publicKey)"
-              >
-                {{ publicKey }}
-              </span>
+                :node-id="publicKey"
+                @select="selectNodeId"
+              />
             </div>
           </div>
           <div class="voter-group">
             <strong>Votes to Accept:</strong>
             <div class="voter-list">
-              <span
+              <FbasNodeBadge
                 v-for="(publicKey, idx) in statementGroup.votesToAccept"
                 :key="`accept-${idx}`"
-                :class="clickableClass(publicKey)"
-                role="link"
-                @click="selectNodeId(publicKey)"
-              >
-                {{ publicKey }}
-              </span>
+                :node-id="publicKey"
+                @select="selectNodeId"
+              />
             </div>
           </div>
         </div>
@@ -54,21 +48,12 @@
 import { computed } from "vue";
 import BreadCrumbs from "../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import FbasNodeBadge from "../fbas-node-badge.vue";
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
 function selectNodeId(nodeId: string) {
   federatedVotingStore.selectedNodeId = nodeId;
-}
-
-function clickableClass(nodeId: string) {
-  if (!selectedNodeId.value) {
-    return "clickable";
-  }
-  if (nodeId !== selectedNodeId.value) {
-    return "clickable";
-  }
-  return "";
 }
 
 const processedVotesByStatement = computed(() => {
@@ -144,25 +129,5 @@ const processedVotesByStatement = computed(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-.voter-list span {
-  display: inline-block;
-  padding: 4px 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  font-size: 0.9em;
-}
-.clickable:hover {
-  background-color: #e9f5fb;
-  color: #0056b3;
-}
-.clickable {
-  color: #1888b2;
-  cursor: pointer;
-}
-.clickable.active {
-  font-weight: bold;
-  text-decoration: underline;
 }
 </style>
