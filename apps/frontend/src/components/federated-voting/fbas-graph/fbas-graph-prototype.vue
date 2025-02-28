@@ -2,12 +2,34 @@
   <div class="card">
     <div class="card-header">
       <BreadCrumbs />
-      <span
-        v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
-        class="badge badge-success ms-2"
-        >Quorum Intersection</span
-      >
-      <span v-else class="badge badge-danger ms-2">No Quorum Intersection</span>
+      <div>
+        <span
+          v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
+          class="badge badge-success ms-2 mr-2"
+          >Quorum Intersection</span
+        >
+        <span v-else class="badge badge-danger ms-2 mr-2"
+          >No Quorum Intersection</span
+        >
+        <span
+          v-if="federatedVotingStore.consensusReached.value"
+          class="badge badge-success ms-2"
+        >
+          Consensus Reached
+        </span>
+        <span
+          v-if="federatedVotingStore.isNetworkSplit.value"
+          class="badge badge-danger ms-2"
+        >
+          Network Split
+        </span>
+        <span
+          v-else-if="federatedVotingStore.isStuck.value"
+          class="badge badge-danger ms-2"
+        >
+          Vote Stuck
+        </span>
+      </div>
     </div>
     <div class="card-body graph pt-4 pb-0" style="height: 500px">
       <svg
@@ -295,11 +317,6 @@ onMounted(() => {
 /* Hull layer */
 .hull-layer path {
   pointer-events: none;
-}
-
-.badge {
-  background-color: #28a745;
-  color: white;
 }
 
 .card-header {

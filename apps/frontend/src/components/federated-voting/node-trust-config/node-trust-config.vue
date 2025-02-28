@@ -192,7 +192,6 @@ function toggleTrust(node: TrustConfig, otherNode: TrustConfig): void {
 
   node.trustedNodes = newValidators;
   node.trustThreshold = Math.min(node.trustThreshold, newValidators.length);
-  console.log(node.trustThreshold);
 
   hasLocalChanges.value = true;
 }

@@ -63,4 +63,9 @@ import InfoBox from "@/components/federated-voting/info-box/info-box.vue";
 import NodeTrustConfig from "@/components/federated-voting/node-trust-config/node-trust-config.vue";
 </script>
 
-<style scoped></style>
+<style>
+.badge-success {
+  background-color: #28a745;
+  color: white;
+}
+</style>

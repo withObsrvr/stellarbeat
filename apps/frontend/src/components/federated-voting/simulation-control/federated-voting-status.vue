@@ -7,19 +7,19 @@
         <BreadCrumbs root="Federated Voting Status" />
         <div class="d-flex align-items-center">
           <span
-            v-if="federatedVotingStore.consensusReached"
+            v-if="federatedVotingStore.consensusReached.value"
             class="badge consensus ms-2"
           >
             Consensus Reached
           </span>
           <span
-            v-if="federatedVotingStore.isNetworkSplit"
+            v-if="federatedVotingStore.isNetworkSplit.value"
             class="badge badge-danger ms-2"
           >
             Network Split
           </span>
           <span
-            v-else-if="federatedVotingStore.isStuck"
+            v-else-if="federatedVotingStore.isStuck.value"
             class="badge badge-danger ms-2"
           >
             Vote Stuck
@@ -44,7 +44,9 @@
         </div>
         <div class="legend-item">
           <span class="legend-bold">Action:</span>
-          <span class="legend-description">Will be executed next </span>
+          <span class="legend-description"
+            >Will be executed next (in order)</span
+          >
         </div>
       </div>
     </div>

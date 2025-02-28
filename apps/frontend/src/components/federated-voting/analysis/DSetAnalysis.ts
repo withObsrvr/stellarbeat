@@ -118,7 +118,6 @@ export function isDSet(fbas: FBAS, B: Set<NodeID>): boolean {
 }
 
 export function findAllDSets(fbas: FBAS): Set<NodeID>[] {
-  //todo: DSETS could be cached to avoid having to compute at page load.
   //They are determined a priori by the FBAS structure
   const subsets = findAllSubSets(new Set(fbas.nodes));
 

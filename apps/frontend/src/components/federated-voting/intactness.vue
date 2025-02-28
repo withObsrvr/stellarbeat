@@ -7,9 +7,23 @@
       <div class="section">
         <div class="voter-groups">
           <div class="node-group">
-            <strong class="node-title">Intact Nodes</strong>
+            <div class="title-with-tooltip">
+              <strong class="node-title">Intact Nodes</strong>
+              <BIconInfoCircle
+                v-tooltip.top="
+                  'There exists a DSET containing all ill-behaved nodes that does not contain the (intact) node'
+                "
+                class="text-secondary"
+              />
+            </div>
             <div v-if="intactNodes.length > 0" class="node-list">
-              <span v-for="node in intactNodes" :key="node" class="node intact">
+              <span
+                v-for="node in intactNodes"
+                :key="node"
+                class="node intact main clickable"
+                :class="{ selected: selectedNodeId === node }"
+                @click="selectNode(node)"
+              >
                 {{ node }}
               </span>
             </div>
@@ -17,12 +31,22 @@
           </div>
 
           <div class="node-group">
-            <strong class="node-title">Ill-Behaved Nodes</strong>
+            <div class="title-with-tooltip">
+              <strong class="node-title">Ill-Behaved Nodes</strong>
+              <BIconInfoCircle
+                v-tooltip.top="
+                  'Nodes that have crashed or are acting byzantine and are not following the protocol rules'
+                "
+                class="text-secondary"
+              />
+            </div>
             <div v-if="illBehavedNodes.length > 0" class="node-list">
               <span
                 v-for="node in illBehavedNodes"
                 :key="node"
-                class="node ill-behaved"
+                class="node ill-behaved clickable"
+                :class="{ selected: selectedNodeId === node }"
+                @click="selectNode(node)"
               >
                 {{ node }}
               </span>
@@ -32,11 +56,18 @@
 
           <div class="node-group">
             <strong class="node-title">Befouled Nodes</strong>
+            <BIconInfoCircle
+              v-tooltip.top="'Nodes that are not Intact'"
+              class="text-secondary"
+            />
+
             <div v-if="befouledNodes.length > 0" class="node-list">
               <span
                 v-for="node in befouledNodes"
                 :key="node"
-                class="node befouled"
+                class="node befouled clickable"
+                :class="{ selected: selectedNodeId === node }"
+                @click="selectNode(node)"
               >
                 {{ node }}
               </span>
@@ -47,40 +78,77 @@
       </div>
 
       <div class="section">
-        <div
-          v-for="(dsetNodes, index) in detectedDSets"
-          :key="index"
-          class="dset-group"
-        >
-          <strong class="dset-label">DSet {{ index + 1 }}:</strong>
-          <div v-if="dsetNodes.length > 0" class="node-list">
-            <span
-              v-for="node in dsetNodes"
-              :key="node"
-              class="node"
-              :class="statusClass(node)"
-            >
-              {{ node }}
-            </span>
-          </div>
-          <div v-else class="empty-message">Empty DSet</div>
+        <div class="title-with-tooltip">
+          <strong class="node-title">
+            Dispensable Sets
+            <template v-if="selectedNodeId">
+              for {{ selectedNodeId }}
+            </template>
+            <template v-else> for FBAS </template>
+          </strong>
+          <BIconInfoCircle
+            v-tooltip.top="
+              'Other nodes can function correctly after removing the DSET from the FBAS'
+            "
+            class="text-secondary"
+          />
         </div>
+
+        <!-- List view for DSets -->
+        <ul class="dsets-list">
+          <li
+            v-for="(dsetNodes, index) in detectedDSets"
+            :key="index"
+            class="dset-item"
+          >
+            <div v-if="dsetNodes.length > 0" class="node-list">
+              <span
+                v-for="node in dsetNodes"
+                :key="node"
+                class="node clickable"
+                :class="[
+                  statusClass(node),
+                  { selected: selectedNodeId === node },
+                ]"
+                @click="selectNode(node)"
+              >
+                {{ node }}
+              </span>
+            </div>
+            <div v-else class="empty-message">Empty DSet</div>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import BreadCrumbs from "./bread-crumbs.vue";
+import { BIconInfoCircle } from "bootstrap-vue";
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
+// Add function to select a node
+function selectNode(nodeId: string) {
+  federatedVotingStore.selectedNodeId = nodeId;
+}
+
 const detectedDSets = computed(() => {
+  // If no node is selected, show all DSets
+  if (!selectedNodeId.value) {
+    return federatedVotingStore.networkAnalysis.dSets.map((dset) =>
+      Array.from(dset),
+    );
+  }
+
   return federatedVotingStore.networkAnalysis.dSets
-    .filter((dset) =>
-      selectedNodeId.value ? dset.has(selectedNodeId.value) : true,
+    .filter(
+      (dset) =>
+        !dset.has(selectedNodeId.value as string) && // DSet doesn't contain selected node
+        illBehavedNodes.value.every((illNode) => dset.has(illNode)), // DSet contains all ill-behaved nodes
     )
     .map((dset) => Array.from(dset));
 });
@@ -111,12 +179,10 @@ const befouledNodes = computed(() => {
   padding: 1rem;
 }
 
-/* Sections */
 .section {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
-/* Node Groups */
 .voter-groups {
   display: flex;
   flex-wrap: wrap;
@@ -131,10 +197,9 @@ const befouledNodes = computed(() => {
 .node-title {
   font-size: 1em;
   font-weight: bold;
-  margin-bottom: 4px;
+  margin-right: 4px;
 }
 
-/* Node List */
 .node-list {
   display: flex;
   flex-wrap: wrap;
@@ -156,6 +221,11 @@ const befouledNodes = computed(() => {
   color: #fff;
 }
 
+.node.intact.main {
+  background-color: #28a745;
+  color: #fff;
+}
+
 .node.ill-behaved {
   background-color: #dc3545;
   color: #fff;
@@ -166,17 +236,18 @@ const befouledNodes = computed(() => {
   color: #212529;
 }
 
-.dset-group {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 8px;
+.dsets-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }
 
-.dset-label {
-  font-weight: bold;
-  white-space: nowrap;
-  margin-right: 8px;
+.dset-item {
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  background-color: #f8f9fa;
+  border: 2px solid transparent;
 }
 
 .empty-message {
@@ -184,5 +255,15 @@ const befouledNodes = computed(() => {
   font-style: italic;
   margin-top: 4px;
   font-size: 0.9em;
+}
+
+.title-with-tooltip {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.clickable {
+  cursor: pointer;
 }
 </style>

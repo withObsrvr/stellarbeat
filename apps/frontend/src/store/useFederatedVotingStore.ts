@@ -96,7 +96,6 @@ class FederatedVotingStore {
   private checkAndRecalculateNetworkAnalysis(): void {
     const newHash = this.calculateNetworkStructureHash();
     if (newHash !== this._networkStructureHash) {
-      console.log("Network structure changed, recalculating analysis");
       this._networkStructureHash = newHash;
       this._state.networkStructureUpdate++;
       this._state.networkAnalysis = NetworkAnalysis.analyze(this.nodes);
@@ -276,7 +275,6 @@ class FederatedVotingStore {
   public cancelPendingUserAction(action: UserAction) {
     this._state.simulation.cancelPendingUserAction(action);
     if (action instanceof UpdateQuorumSet) {
-      console.log("CANCEL");
       this.updateNodes();
     }
   }
@@ -315,7 +313,7 @@ class FederatedVotingStore {
     return this._state.simulation.getFullEventLog();
   }
 
-  consensusReached = computed(() => {
+  public consensusReached = computed(() => {
     const nodes = this.nodes;
     if (!nodes.every((node) => node.confirmed)) {
       return false;
