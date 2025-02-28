@@ -10,72 +10,43 @@ export interface MessageAnimation {
   duration: number;
 }
 
-export interface QueuedMessage {
-  source: string;
-  target: string;
-}
-
 export class MessageService {
-  private messageCounter: number = 0;
-  private messageQueue: QueuedMessage[] = [];
-  private messages: MessageAnimation[] = [];
-
-  public handleMessageEvent(event: MessageSent): void {
-    this.messageQueue.push({
-      source: event.message.sender,
-      target: event.message.receiver,
-    });
+  private messageCounter = 0;
+  public createMessageAnimations(
+    events: Event[],
+    nodes: Node[],
+    animationDuration: number,
+  ): MessageAnimation[] {
+    return events
+      .map((event) => {
+        if (event instanceof MessageSent) {
+          return this.createMessageAnimation(event, nodes, animationDuration);
+        } else return null;
+      })
+      .filter((animation) => animation !== null);
   }
 
-  public processMessageQueue(nodes: Node[], animationDuration: number): void {
-    if (this.messageQueue.length > 0) {
-      console.log(`Processing ${this.messageQueue.length} queued messages`);
+  public createMessageAnimation(
+    event: MessageSent,
+    nodes: Node[],
+    animationDuration: number,
+  ): MessageAnimation | null {
+    const source = event.message.sender;
+    const target = event.message.receiver;
+    const sourceNode = nodes.find((n) => n.id === source);
+    const targetNode = nodes.find((n) => n.id === target);
 
-      this.messageQueue.forEach((queuedMsg) => {
-        const sourceNode = nodes.find((n) => n.id === queuedMsg.source);
-        const targetNode = nodes.find((n) => n.id === queuedMsg.target);
-
-        // Only create actual animations when positions are stable
-        if (sourceNode && targetNode) {
-          this.messages.push({
-            id: this.messageCounter++,
-            startX: sourceNode.x ?? 0,
-            startY: sourceNode.y ?? 0,
-            endX: targetNode.x ?? 0,
-            endY: targetNode.y ?? 0,
-            duration: animationDuration,
-          });
-        }
-      });
-
-      this.messageQueue = [];
+    if (sourceNode && targetNode) {
+      return {
+        id: this.messageCounter++,
+        startX: sourceNode.x ?? 0,
+        startY: sourceNode.y ?? 0,
+        endX: targetNode.x ?? 0,
+        endY: targetNode.y ?? 0,
+        duration: animationDuration / 1000,
+      };
     }
-  }
-
-  /**
-   * Remove a message that has finished animating
-   */
-  public removeMessage(id: number): void {
-    const index = this.messages.findIndex((msg) => msg.id === id);
-    if (index !== -1) {
-      this.messages.splice(index, 1);
-    }
-  }
-
-  public clearMessages(): void {
-    this.messages = [];
-  }
-
-  public getMessages(): MessageAnimation[] {
-    return this.messages;
-  }
-
-  public handleEvents(events: Event[]): void {
-    events.forEach((event) => {
-      if (event instanceof MessageSent) {
-        this.handleMessageEvent(event);
-      }
-    });
+    return null;
   }
 }
 

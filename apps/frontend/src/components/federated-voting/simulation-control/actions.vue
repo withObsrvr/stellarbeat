@@ -113,8 +113,8 @@ function mapSubType(subType: string) {
 const actionsFilter = ref("");
 const actions = computed(() => {
   return [
-    ...federatedVotingStore.simulation.pendingProtocolActions(),
     ...federatedVotingStore.simulation.pendingUserActions(),
+    ...federatedVotingStore.simulation.pendingProtocolActions(),
   ].filter((action) =>
     props.publicKey !== null ? action.publicKey === props.publicKey : true,
   );

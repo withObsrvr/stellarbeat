@@ -73,11 +73,23 @@ export class FederatedVotingContext
 		return this.state;
 	}
 
+	//userActions are always executed first
 	executeActions(
 		protocolActions: ProtocolAction[],
 		userActions: UserAction[]
 	): ProtocolAction[] {
 		const newProtocolActions: ProtocolAction[] = [];
+
+		//sort userActions such that userActions with boolean immediateExecution set to true runs first
+		userActions.sort((a, b) => {
+			if (a.immediateExecution && !b.immediateExecution) {
+				return -1;
+			}
+			if (!a.immediateExecution && b.immediateExecution) {
+				return 1;
+			}
+			return 0;
+		});
 
 		userActions.forEach((action) => {
 			newProtocolActions.push(...action.execute(this));

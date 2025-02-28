@@ -103,10 +103,10 @@ export class FbasGraphService {
     });
   }
 
-  updateNodesState(nodes: Node[], sourceNodes: FederatedNode[]): void {
+  updateNodeStates(nodes: Node[], sourceNodes: FederatedNode[]): void {
     nodes.forEach((node) => {
       const sourceNode = sourceNodes.find(
-        (state) => sourceNode.publicKey === node.id,
+        (sNode) => sNode.publicKey === node.id,
       );
       if (sourceNode) {
         node.vote = sourceNode.voted;

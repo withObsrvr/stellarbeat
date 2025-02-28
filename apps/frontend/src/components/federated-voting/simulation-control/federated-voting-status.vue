@@ -44,7 +44,7 @@
         </div>
         <div class="legend-item">
           <span class="legend-bold">Action:</span>
-          <span class="legend-description">Will be executed next</span>
+          <span class="legend-description">Will be executed next </span>
         </div>
       </div>
     </div>
@@ -52,10 +52,10 @@
 </template>
 
 <script setup lang="ts">
-import SelectedNodePanel from "./selected-nodes-panel/selected-node-panel.vue";
-import EventLog from "./simulation-control/event-log.vue";
-import Actions from "./simulation-control/actions.vue";
-import BreadCrumbs from "./bread-crumbs.vue";
+import SelectedNodePanel from "../selected-nodes-panel/selected-node-panel.vue";
+import EventLog from "./event-log.vue";
+import Actions from "./actions.vue";
+import BreadCrumbs from "./../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 </script>
 

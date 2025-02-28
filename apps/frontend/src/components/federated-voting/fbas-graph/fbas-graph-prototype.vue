@@ -36,14 +36,13 @@
           </g>
           <g class="animation-layer">
             <AnimatedMessage
-              v-for="message in messages"
+              v-for="message in messageAnimations"
               :key="message.id"
               :start-x="message.startX"
               :start-y="message.startY"
               :end-x="message.endX"
               :end-y="message.endY"
               :duration="message.duration"
-              @animation-end="handleAnimationEnd(message.id)"
             />
           </g>
 
@@ -102,23 +101,22 @@ import { polygonHull } from "d3-polygon";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasGraphNode, { Node } from "./fbas-graph-node.vue";
 import FbasGraphLink, { Link } from "./fbas-graph-link.vue";
-import { MessageSent } from "scp-simulation";
 import AnimatedMessage from "./animated-message.vue";
 import { usePanning } from "./usePanning";
 import BreadCrumbs from "../bread-crumbs.vue";
 import { curveCatmullRomClosed, line } from "d3-shape";
 import fbasGraphService from "./FbasGraphService";
-import messageService from "./MessageService";
+import messageService, { MessageAnimation } from "./MessageService";
 
 const { translateX, translateY, scale, startPan, pan, endPan, zoom } =
   usePanning();
 const height = 500;
 const svgRef = ref<SVGSVGElement | null>(null);
 const hoveredNode = ref<Node | null>(null);
-const updatingGraph = ref(false);
 let currentSimulationUpdate = federatedVotingStore.simulationUpdate;
-const messageDuration = computed(
-  () => federatedVotingStore.simulationStepDurationInSeconds * 0.8,
+let currentNetworkStructureUpdate = federatedVotingStore.networkStructureUpdate;
+const messageSendDuration = computed(
+  () => federatedVotingStore.simulationStepDurationInSeconds * 0.8 * 1000,
 );
 const width = ref(800);
 const heightRef = ref(500);
@@ -126,19 +124,54 @@ const heightRef = ref(500);
 const nodes = ref<Node[]>([]);
 const links = ref<Link[]>([]);
 
-const messages = computed(() => messageService.getMessages());
+const messageAnimations = ref<MessageAnimation[]>([]);
 
 const topTierNodeIds = computed(() => {
   return Array.from(federatedVotingStore.networkAnalysis.topTierNodes);
 });
 
-function updateNodesAndLinks() {
-  fbasGraphService.updateNodesState(nodes.value, federatedVotingStore.nodes);
+watch(
+  [
+    () => federatedVotingStore.simulationUpdate,
+    () => federatedVotingStore.networkStructureUpdate,
+  ],
+  () => {
+    messageAnimations.value = [];
+    if (currentSimulationUpdate !== federatedVotingStore.simulationUpdate) {
+      currentSimulationUpdate = federatedVotingStore.simulationUpdate;
+      if (federatedVotingStore.latestSimulationStepWentForwards) {
+        messageAnimations.value = messageService.createMessageAnimations(
+          federatedVotingStore.getLatestEvents(),
+          nodes.value,
+          messageSendDuration.value,
+        );
+      }
+    }
+
+    if (
+      currentNetworkStructureUpdate !==
+      federatedVotingStore.networkStructureUpdate
+    ) {
+      currentNetworkStructureUpdate =
+        federatedVotingStore.networkStructureUpdate;
+      setTimeout(
+        () => {
+          messageAnimations.value = [];
+          updateOrCreateGraph();
+        },
+        messageAnimations.value.length > 0 ? messageSendDuration.value : 0,
+      );
+    } else {
+      updateNodeStates(); //node states are not previewed and thus do not need a delay
+    }
+  },
+);
+
+function updateNodeStates() {
+  fbasGraphService.updateNodeStates(nodes.value, federatedVotingStore.nodes);
 }
 
 function updateOrCreateGraph() {
-  updatingGraph.value = true;
-
   nodes.value = fbasGraphService.createNodes(
     federatedVotingStore.nodes,
     nodes.value,
@@ -153,45 +186,7 @@ function updateOrCreateGraph() {
     height,
     topTierNodeIds.value,
   );
-
-  const updateDelay =
-    federatedVotingStore.simulationStepDurationInSeconds * 0.2 * 1000;
-  setTimeout(() => {
-    updatingGraph.value = false;
-
-    messageService.processMessageQueue(nodes.value, messageDuration.value);
-  }, updateDelay);
 }
-
-function handleAnimationEnd(id: number) {
-  messageService.removeMessage(id);
-}
-
-watch(
-  [
-    () => federatedVotingStore.simulationUpdate,
-    () => federatedVotingStore.nodes,
-  ],
-  () => {
-    const hasStructuralChange = true;
-
-    if (currentSimulationUpdate !== federatedVotingStore.simulationUpdate) {
-      currentSimulationUpdate = federatedVotingStore.simulationUpdate;
-      federatedVotingStore.getLatestEvents().forEach((event) => {
-        if (event instanceof MessageSent) {
-          messageService.handleMessageEvent(event);
-        }
-      });
-    }
-
-    if (hasStructuralChange) {
-      updateOrCreateGraph();
-    } else {
-      updateNodesAndLinks();
-    }
-  },
-  { deep: true },
-);
 
 function handleMouseOver(node: Node) {
   hoveredNode.value = node;

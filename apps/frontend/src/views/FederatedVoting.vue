@@ -55,7 +55,7 @@ import FbasGraphPrototype from "@/components/federated-voting/fbas-graph/fbas-gr
 import Controller from "@/components/federated-voting/simulation-control/controller.vue";
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
 import ProcessedVotes from "@/components/federated-voting/selected-nodes-panel/processed-votes.vue";
-import FederatedVotingStatus from "@/components/federated-voting/federated-voting-status.vue";
+import FederatedVotingStatus from "@/components/federated-voting/simulation-control/federated-voting-status.vue";
 import DSets from "@/components/federated-voting/intactness.vue";
 import Quorums from "@/components/federated-voting/quorums.vue";
 import VotesSelector from "@/components/federated-voting/votes-selector/votes-selector.vue";

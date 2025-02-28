@@ -4,7 +4,6 @@ import {
   FederatedVotingContext,
   FederatedVotingContextFactory,
   Simulation,
-  Node,
   AddNode,
   UpdateQuorumSet,
   UserAction,
@@ -31,6 +30,7 @@ export interface FederatedNode {
 class FederatedVotingStore {
   private readonly _state = reactive<{
     simulationUpdate: number;
+    networkStructureUpdate: number;
     selectedScenarioId: string;
     selectedNodeId: string | null;
     protocolContext: FederatedVotingContext;
@@ -38,8 +38,11 @@ class FederatedVotingStore {
     simulation: Simulation;
     networkAnalysis: NetworkAnalysis;
     nodes: FederatedNode[];
+    latestSimulationStepWentForwards: boolean;
   }>({
     simulationUpdate: 0,
+    networkStructureUpdate: 0,
+    latestSimulationStepWentForwards: false,
     selectedScenarioId: "consensus-reached",
     selectedNodeId: null,
     protocolContext: FederatedVotingContextFactory.create(),
@@ -48,6 +51,9 @@ class FederatedVotingStore {
     networkAnalysis: {} as NetworkAnalysis,
     nodes: [] as FederatedNode[],
   });
+
+  // Add this property to track network structure
+  private _networkStructureHash: string = "";
 
   readonly scenarios = [
     {
@@ -73,15 +79,36 @@ class FederatedVotingStore {
     this._state.simulation = new Simulation(this._state.protocolContext);
     scenario.loader(this._state.simulation as Simulation);
     this.updateNodes();
-    this.recalculateNetworkAnalysis();
   }
 
-  private recalculateNetworkAnalysis(): void {
-    this._state.networkAnalysis = NetworkAnalysis.analyze(this.nodes);
+  private calculateNetworkStructureHash(): string {
+    const sortedNodes = [...this.nodes].sort((a, b) =>
+      a.publicKey.localeCompare(b.publicKey),
+    );
+    return sortedNodes
+      .map((node) => {
+        const trustedNodesSorted = [...node.trustedNodes].sort().join(",");
+        return `${node.publicKey}:${node.trustThreshold}:[${trustedNodesSorted}]`;
+      })
+      .join("|");
+  }
+
+  private checkAndRecalculateNetworkAnalysis(): void {
+    const newHash = this.calculateNetworkStructureHash();
+    if (newHash !== this._networkStructureHash) {
+      console.log("Network structure changed, recalculating analysis");
+      this._networkStructureHash = newHash;
+      this._state.networkStructureUpdate++;
+      this._state.networkAnalysis = NetworkAnalysis.analyze(this.nodes);
+    }
   }
 
   get simulationStepDurationInSeconds(): number {
     return 2;
+  }
+
+  get networkStructureUpdate(): number {
+    return this._state.networkStructureUpdate;
   }
 
   get selectedScenarioId(): string {
@@ -141,6 +168,8 @@ class FederatedVotingStore {
       });
 
     this._state.nodes = nodes;
+
+    this.checkAndRecalculateNetworkAnalysis();
   }
 
   get nodes() {
@@ -197,7 +226,6 @@ class FederatedVotingStore {
     this._state.simulation = new Simulation(this._state.protocolContext);
     scenario.loader(this._state.simulation as Simulation);
     this.updateNodes();
-    this.recalculateNetworkAnalysis();
   }
 
   //SIMULATION ACTIONS
@@ -228,8 +256,7 @@ class FederatedVotingStore {
       ),
     );
 
-    this.updateNodes(); //preview the change
-    this.recalculateNetworkAnalysis();
+    this.updateNodes();
   }
 
   public cancelNodeTrustUpdate(publicKey: string) {
@@ -243,7 +270,6 @@ class FederatedVotingStore {
     if (pendingUpdate) {
       this._state.simulation.cancelPendingUserAction(pendingUpdate);
       this.updateNodes();
-      this.recalculateNetworkAnalysis();
     }
   }
 
@@ -252,28 +278,27 @@ class FederatedVotingStore {
     if (action instanceof UpdateQuorumSet) {
       console.log("CANCEL");
       this.updateNodes();
-      this.recalculateNetworkAnalysis();
     }
   }
 
   public executeStep() {
     this._state.simulation.executeStep();
+    this._state.latestSimulationStepWentForwards = true;
     this.updateNodes();
-    this.recalculateNetworkAnalysis();
     this._state.simulationUpdate++;
   }
 
   public reset() {
     this._state.simulation.goToFirstStep();
+    this._state.latestSimulationStepWentForwards = false;
     this.updateNodes();
-    this.recalculateNetworkAnalysis();
     this._state.simulationUpdate++;
   }
 
   public goBackOneStep() {
     this._state.simulation.goBackOneStep();
+    this._state.latestSimulationStepWentForwards = false;
     this.updateNodes();
-    this.recalculateNetworkAnalysis();
     this._state.simulationUpdate++;
   }
 
@@ -357,6 +382,10 @@ class FederatedVotingStore {
 
   get simulationUpdate(): number {
     return this._state.simulationUpdate;
+  }
+
+  get latestSimulationStepWentForwards(): boolean {
+    return this._state.latestSimulationStepWentForwards;
   }
 }
 
