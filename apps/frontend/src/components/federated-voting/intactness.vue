@@ -17,15 +17,13 @@
               />
             </div>
             <div v-if="intactNodes.length > 0" class="node-list">
-              <span
+              <FbasNodeBadge
                 v-for="node in intactNodes"
                 :key="node"
-                class="node intact main clickable"
-                :class="{ selected: selectedNodeId === node }"
-                @click="selectNode(node)"
-              >
-                {{ node }}
-              </span>
+                :node-id="node"
+                is-main
+                @select="selectNode"
+              />
             </div>
             <div v-else class="empty-message">No intact nodes</div>
           </div>
@@ -41,15 +39,12 @@
               />
             </div>
             <div v-if="illBehavedNodes.length > 0" class="node-list">
-              <span
+              <FbasNodeBadge
                 v-for="node in illBehavedNodes"
                 :key="node"
-                class="node ill-behaved clickable"
-                :class="{ selected: selectedNodeId === node }"
-                @click="selectNode(node)"
-              >
-                {{ node }}
-              </span>
+                :node-id="node"
+                @select="selectNode"
+              />
             </div>
             <div v-else class="empty-message">No ill-behaved nodes</div>
           </div>
@@ -62,15 +57,12 @@
             />
 
             <div v-if="befouledNodes.length > 0" class="node-list">
-              <span
+              <FbasNodeBadge
                 v-for="node in befouledNodes"
                 :key="node"
-                class="node befouled clickable"
-                :class="{ selected: selectedNodeId === node }"
-                @click="selectNode(node)"
-              >
-                {{ node }}
-              </span>
+                :node-id="node"
+                @select="selectNode"
+              />
             </div>
             <div v-else class="empty-message">No befouled nodes</div>
           </div>
@@ -102,18 +94,12 @@
             class="dset-item"
           >
             <div v-if="dsetNodes.length > 0" class="node-list">
-              <span
+              <FbasNodeBadge
                 v-for="node in dsetNodes"
                 :key="node"
-                class="node clickable"
-                :class="[
-                  statusClass(node),
-                  { selected: selectedNodeId === node },
-                ]"
-                @click="selectNode(node)"
-              >
-                {{ node }}
-              </span>
+                :node-id="node"
+                @select="selectNode"
+              />
             </div>
             <div v-else class="empty-message">Empty DSet</div>
           </li>
@@ -128,10 +114,10 @@ import { computed, ref } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import BreadCrumbs from "./bread-crumbs.vue";
 import { BIconInfoCircle } from "bootstrap-vue";
+import FbasNodeBadge from "./fbas-node-badge.vue";
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
-// Add function to select a node
 function selectNode(nodeId: string) {
   federatedVotingStore.selectedNodeId = nodeId;
 }
@@ -153,14 +139,6 @@ const detectedDSets = computed(() => {
     .map((dset) => Array.from(dset));
 });
 
-const statusClass = (nodeId: string) => {
-  return {
-    intact: intactNodes.value.includes(nodeId),
-    "ill-behaved": illBehavedNodes.value.includes(nodeId),
-    befouled: befouledNodes.value.includes(nodeId),
-  };
-};
-
 const intactNodes = computed(() => federatedVotingStore.intactNodes);
 const illBehavedNodes = computed(() => federatedVotingStore.illBehavedNodes);
 const befouledNodes = computed(() => {
@@ -172,6 +150,7 @@ const befouledNodes = computed(() => {
   );
 });
 </script>
+
 <style scoped>
 .content {
   overflow-y: auto;
@@ -206,36 +185,6 @@ const befouledNodes = computed(() => {
   gap: 8px;
 }
 
-.node {
-  display: inline-block;
-  padding: 4px 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.9em;
-  background-color: #f9f9f9;
-  color: #212529;
-}
-
-.node.intact {
-  background-color: #28a745;
-  color: #fff;
-}
-
-.node.intact.main {
-  background-color: #28a745;
-  color: #fff;
-}
-
-.node.ill-behaved {
-  background-color: #dc3545;
-  color: #fff;
-}
-
-.node.befouled {
-  background-color: #ffc107;
-  color: #212529;
-}
-
 .dsets-list {
   list-style-type: none;
   padding: 0;
@@ -261,9 +210,5 @@ const befouledNodes = computed(() => {
   display: flex;
   align-items: center;
   margin-bottom: 6px;
-}
-
-.clickable {
-  cursor: pointer;
 }
 </style>
