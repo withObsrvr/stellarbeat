@@ -196,14 +196,12 @@ function previousPage() {
 
 .node.highlight {
   background-color: #007bff !important;
-  border: 1px solid #007bff !important;
   color: white !important;
 }
 
 .node.hovered-node {
   background-color: #007bff !important;
   color: #fff !important;
-  border: 1px solid #004085 !important;
 }
 
 .minimal-badge {

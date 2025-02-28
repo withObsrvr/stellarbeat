@@ -9,6 +9,8 @@
         befouled: isBefouled,
         selected: isSelected,
         main: isMain,
+        accepted: hasAccepted,
+        confirmed: hasConfirmed,
       },
       $attrs.class,
     ]"
@@ -37,6 +39,10 @@ const allNodes = computed(() =>
   federatedVotingStore.nodes.map((node) => node.publicKey),
 );
 
+const nodeObject = computed(() =>
+  federatedVotingStore.nodes.find((node) => node.publicKey === props.nodeId),
+);
+
 const isIntact = computed(() => intactNodes.value.includes(props.nodeId));
 const isIllBehaved = computed(() =>
   illBehavedNodes.value.includes(props.nodeId),
@@ -51,6 +57,11 @@ const isSelected = computed(
   () => federatedVotingStore.selectedNodeId === props.nodeId,
 );
 
+const hasConfirmed = computed(() => !!nodeObject.value?.confirmed);
+const hasAccepted = computed(
+  () => !!nodeObject.value?.accepted && !hasConfirmed.value,
+);
+
 function handleClick() {
   if (!isSelected.value) {
     emit("select", props.nodeId);
@@ -61,42 +72,41 @@ function handleClick() {
 <style scoped>
 .node {
   display: inline-block;
-  padding: 3px 6px;
-  border: 1px solid #ddd;
+  padding: 2px 4px;
+  border: 3px solid #a9a9a9;
   border-radius: 4px;
   font-size: 0.85em;
-  background-color: #f9f9f9;
-  color: #212529;
+  background-color: #a9a9a9; /* Changed to dark gray */
+  color: #ffffff; /* Changed to white */
   cursor: pointer;
-  transition: background-color 0.15s ease-in-out;
+  transition: all 0.15s ease-in-out;
 }
 
 .node:hover {
-  background-color: #e9e9e9;
+  background-color: #888888; /* Darker gray on hover */
 }
 
 .node.selected {
-  background-color: #e9e9e9;
   cursor: default;
 }
 
-.ill-behaved {
-  background-color: #dc3545;
-  color: #fff;
+.node.accepted {
+  background-color: #1f77b4;
+  border-color: #1f77b4;
+  color: white;
 }
 
-.ill-behaved:hover,
-.ill-behaved.selected {
-  background-color: #c82333;
+.node.confirmed {
+  background-color: #2ca02c;
+  border-color: #2ca02c;
+  color: white;
+}
+
+.ill-behaved {
+  border-color: #ff0000 !important;
 }
 
 .befouled {
-  background-color: #ffa500;
-  color: #fff;
-}
-
-.befouled:hover,
-.befouled.selected {
-  background-color: #e69400;
+  border-color: #ffa500 !important; /* Use important to ensure this takes priority */
 }
 </style>
