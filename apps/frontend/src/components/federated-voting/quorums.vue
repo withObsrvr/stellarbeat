@@ -30,6 +30,7 @@
                     'hovered-node':
                       hoveredNode === node && hoveredQuorumIndex === index,
                   }"
+                  :show-vote="true"
                   @mouseover="setHoveredNode(node, quorum, index)"
                   @mouseleave="clearHoveredNode"
                   @select="handleNodeSelect(node)"

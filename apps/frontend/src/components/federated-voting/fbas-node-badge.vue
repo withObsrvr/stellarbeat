@@ -19,6 +19,7 @@
     @mouseleave="$emit('mouseleave', $event)"
   >
     {{ nodeId }}
+    <span v-if="showVote && voteLabel" class="vote-label">{{ voteLabel }}</span>
   </span>
 </template>
 
@@ -29,15 +30,15 @@ import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 const props = defineProps<{
   nodeId: string;
   isMain?: boolean;
+  showVote?: boolean;
 }>();
+
+const showVote = computed(() => props.showVote ?? false);
 
 const emit = defineEmits(["select", "mouseover", "mouseleave"]);
 
 const intactNodes = computed(() => federatedVotingStore.intactNodes);
 const illBehavedNodes = computed(() => federatedVotingStore.illBehavedNodes);
-const allNodes = computed(() =>
-  federatedVotingStore.nodes.map((node) => node.publicKey),
-);
 
 const nodeObject = computed(() =>
   federatedVotingStore.nodes.find((node) => node.publicKey === props.nodeId),
@@ -47,20 +48,22 @@ const isIntact = computed(() => intactNodes.value.includes(props.nodeId));
 const isIllBehaved = computed(() =>
   illBehavedNodes.value.includes(props.nodeId),
 );
-const isBefouled = computed(
-  () =>
-    allNodes.value.includes(props.nodeId) &&
-    !isIntact.value &&
-    !isIllBehaved.value,
-);
+const isBefouled = computed(() => !isIntact.value);
 const isSelected = computed(
   () => federatedVotingStore.selectedNodeId === props.nodeId,
 );
-
 const hasConfirmed = computed(() => !!nodeObject.value?.confirmed);
 const hasAccepted = computed(
   () => !!nodeObject.value?.accepted && !hasConfirmed.value,
 );
+
+const voteLabel = computed(() => {
+  if (!nodeObject.value) return "";
+  if (nodeObject.value.confirmed) return nodeObject.value.confirmed;
+  if (nodeObject.value.accepted) return nodeObject.value.accepted;
+  if (nodeObject.value.voted) return nodeObject.value.voted;
+  return "";
+});
 
 function handleClick() {
   if (!isSelected.value) {
@@ -76,14 +79,14 @@ function handleClick() {
   border: 3px solid #a9a9a9;
   border-radius: 4px;
   font-size: 0.85em;
-  background-color: #a9a9a9; /* Changed to dark gray */
-  color: #ffffff; /* Changed to white */
+  background-color: #a9a9a9;
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.15s ease-in-out;
 }
 
 .node:hover {
-  background-color: #888888; /* Darker gray on hover */
+  background-color: #888888;
 }
 
 .node.selected {
@@ -107,6 +110,16 @@ function handleClick() {
 }
 
 .befouled {
-  border-color: #ffa500 !important; /* Use important to ensure this takes priority */
+  border-color: #ffa500 !important;
+}
+
+.vote-label {
+  margin-left: 6px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.2);
+  font-size: 0.7em;
+  color: #fff;
+  vertical-align: middle;
 }
 </style>
