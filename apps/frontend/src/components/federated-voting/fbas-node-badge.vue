@@ -31,8 +31,6 @@ const props = defineProps<{
   nodeId: string;
   isMain?: boolean;
   showVote?: boolean;
-  accepted?: boolean;
-  confirmed?: boolean;
 }>();
 
 const showVote = computed(() => props.showVote ?? false);
@@ -70,9 +68,6 @@ const isBefouled = computed(() => !isIntact.value);
 const isSelected = computed(() => selectedNodeId.value === props.nodeId);
 
 const hasConfirmed = computed(() => {
-  if (props.confirmed !== undefined) {
-    return props.confirmed;
-  }
   // If no node is selected, show system/fbas state
   if (!selectedNodeId.value) {
     return currentNode.value.confirmed;
@@ -88,10 +83,6 @@ const hasConfirmed = computed(() => {
 });
 
 const hasAccepted = computed(() => {
-  if (props.accepted !== undefined) {
-    return props.accepted;
-  }
-
   // If no node is selected, show global state
   if (!selectedNodeId.value) {
     return currentNode.value.accepted;

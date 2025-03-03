@@ -7,62 +7,52 @@
       <div v-if="processedVotesByStatement.length === 0">
         <p>No votes processed yet</p>
       </div>
-      <div
-        v-for="(statementGroup, index) in processedVotesByStatement"
-        :key="index"
-        class="statement-group"
-      >
-        <h5 class="statement-title">
-          Statement: {{ statementGroup.statement }}
-        </h5>
-        <div class="voter-groups">
-          <div class="voter-group">
-            <strong>Votes</strong>
-            <div class="voter-list">
-              <FbasNodeBadge
-                v-for="(publicKey, idx) in statementGroup.votes"
-                :key="`vote-${idx}`"
-                :node-id="publicKey"
-                @select="selectNodeId"
-              />
-            </div>
-          </div>
-          <div class="voter-group">
-            <strong>Votes to Accept</strong>
-            <div class="voter-list">
-              <FbasNodeBadge
-                v-for="(publicKey, idx) in statementGroup.votesToAccept"
-                :key="`accept-${idx}`"
-                :node-id="publicKey"
-                :accepted="true"
-                @select="selectNodeId"
-              />
-            </div>
-          </div>
-          <div class="voter-group">
-            <ProcessedVotesNodeEvents
-              v-if="selectedNodeId"
-              :selected-node-id="selectedNodeId"
-              :statement="statementGroup.statement"
-            />
-
-            <div v-else class="potential-vblocking">
-              <strong>Potential v-blocked nodes</strong>
-              <div
-                v-if="getVBlockedNodes(statementGroup.votesToAccept).length > 0"
-                class="voter-list"
-              >
-                <FbasNodeBadge
-                  v-for="(publicKey, idx) in getVBlockedNodes(
-                    statementGroup.votesToAccept,
-                  )"
-                  :key="`vblocked-${idx}`"
-                  :node-id="publicKey"
-                  @select="selectNodeId"
-                />
+      <div v-else class="content-container">
+        <div class="statements-section">
+          <div
+            v-for="(statementGroup, index) in processedVotesByStatement"
+            :key="index"
+            class="statement-group"
+          >
+            <h5 class="statement-title">
+              Statement: {{ statementGroup.statement }}
+            </h5>
+            <div class="voter-groups">
+              <!-- Regular votes column -->
+              <div class="voter-group">
+                <strong>Votes</strong>
+                <div class="voter-list">
+                  <FbasNodeBadge
+                    v-for="(publicKey, idx) in statementGroup.votes"
+                    :key="`vote-${idx}`"
+                    :node-id="publicKey"
+                    @select="selectNodeId"
+                  />
+                </div>
               </div>
-              <div v-else class="empty-message">None detected</div>
+
+              <div class="voter-group">
+                <strong>Votes to Accept</strong>
+                <div class="voter-list">
+                  <FbasNodeBadge
+                    v-for="(publicKey, idx) in statementGroup.votesToAccept"
+                    :key="`accept-${idx}`"
+                    :node-id="publicKey"
+                    @select="selectNodeId"
+                  />
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+
+        <div class="events-divider-vertical"></div>
+
+        <div class="events-section">
+          <div class="events-container">
+            <ProcessedVotesNodeEvents
+              :selected-node-id="selectedNodeId ?? undefined"
+            />
           </div>
         </div>
       </div>
@@ -147,11 +137,37 @@ const processedVotesByStatement = computed(() => {
   flex-direction: column;
 }
 
+.content-container {
+  display: flex;
+  align-items: stretch;
+}
+
+.statements-section {
+  flex: 4; /* Changed from flex: 1 to flex: 3 */
+  overflow-y: auto;
+  max-width: none; /* Removed max-width restriction */
+}
+
+.events-section {
+  flex: 3; /* Changed from flex: 1 to flex: 2 */
+  overflow-y: auto;
+}
+
+/* Vertical divider styling */
+.events-divider-vertical {
+  width: 1px;
+  background-color: #dee2e6;
+  margin: 0 5px;
+}
+
 .statement-group {
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
 }
 
 .statement-group:last-child {
+  border-bottom: none;
   padding-bottom: 0;
 }
 
@@ -168,6 +184,7 @@ const processedVotesByStatement = computed(() => {
 .voter-group {
   flex: 1;
   position: relative;
+  padding-right: 15px;
 }
 
 .voter-group strong {
@@ -183,13 +200,33 @@ const processedVotesByStatement = computed(() => {
   gap: 6px;
 }
 
-.empty-message {
+/* Events section styling */
+.section-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.event-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.events-container {
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.empty-events {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
   color: #6c757d;
   font-style: italic;
   font-size: 0.9em;
-}
-
-.potential-vblocking {
-  margin-top: 4px;
 }
 </style>
