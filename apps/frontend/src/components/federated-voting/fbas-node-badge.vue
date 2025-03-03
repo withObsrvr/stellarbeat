@@ -31,37 +31,102 @@ const props = defineProps<{
   nodeId: string;
   isMain?: boolean;
   showVote?: boolean;
+  accepted?: boolean;
+  confirmed?: boolean;
 }>();
 
 const showVote = computed(() => props.showVote ?? false);
-
 const emit = defineEmits(["select", "mouseover", "mouseleave"]);
 
+const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 const intactNodes = computed(() => federatedVotingStore.intactNodes);
 const illBehavedNodes = computed(() => federatedVotingStore.illBehavedNodes);
 
-const nodeObject = computed(() =>
-  federatedVotingStore.nodes.find((node) => node.publicKey === props.nodeId),
-);
+const currentNode = computed(() => {
+  const node = federatedVotingStore.nodes.find(
+    (node) => node.publicKey === props.nodeId,
+  );
+  if (!node) throw new Error(`Node with public key ${props.nodeId} not found`);
+  return node;
+});
+
+const selectedNode = federatedVotingStore.selectedNode;
+
+const processedVotesOfSelectedNode = computed(() => {
+  // No node selected - no processed votes to consider
+  if (!selectedNode.value) return [];
+
+  // Find votes related to this badge's node
+  return selectedNode.value.processedVotes.filter(
+    (vote) => vote.publicKey === props.nodeId,
+  );
+});
 
 const isIntact = computed(() => intactNodes.value.includes(props.nodeId));
 const isIllBehaved = computed(() =>
   illBehavedNodes.value.includes(props.nodeId),
 );
 const isBefouled = computed(() => !isIntact.value);
-const isSelected = computed(
-  () => federatedVotingStore.selectedNodeId === props.nodeId,
-);
-const hasConfirmed = computed(() => !!nodeObject.value?.confirmed);
-const hasAccepted = computed(
-  () => !!nodeObject.value?.accepted && !hasConfirmed.value,
-);
+const isSelected = computed(() => selectedNodeId.value === props.nodeId);
+
+const hasConfirmed = computed(() => {
+  if (props.confirmed !== undefined) {
+    return props.confirmed;
+  }
+  // If no node is selected, show system/fbas state
+  if (!selectedNodeId.value) {
+    return currentNode.value.confirmed;
+  }
+
+  if (selectedNodeId.value === props.nodeId) {
+    return selectedNode.value?.confirmed;
+  }
+
+  // A node can never know if another node has confirmed a vote because there is no final
+  // confirmation message.
+  return false;
+});
+
+const hasAccepted = computed(() => {
+  if (props.accepted !== undefined) {
+    return props.accepted;
+  }
+
+  // If no node is selected, show global state
+  if (!selectedNodeId.value) {
+    return currentNode.value.accepted;
+  }
+
+  // For any node (including the selected node itself),
+  // use the selected node's processed votes
+  const hasAcceptVote = processedVotesOfSelectedNode.value.some(
+    (vote) => vote.isVoteToAccept,
+  );
+  return hasAcceptVote;
+});
 
 const voteLabel = computed(() => {
-  if (!nodeObject.value) return "";
-  if (nodeObject.value.confirmed) return nodeObject.value.confirmed;
-  if (nodeObject.value.accepted) return nodeObject.value.accepted;
-  if (nodeObject.value.voted) return nodeObject.value.voted;
+  // If no node is selected, show global state
+  if (!currentNode.value) return "";
+
+  if (!selectedNodeId.value) {
+    if (currentNode.value.confirmed) return currentNode.value.confirmed;
+    if (currentNode.value.accepted) return currentNode.value.accepted;
+    if (currentNode.value.voted) return currentNode.value.voted;
+    return "";
+  }
+
+  // For any node (including the selected node itself),
+  // use the selected node's processed votes
+  const acceptVotes = processedVotesOfSelectedNode.value.filter(
+    (vote) => vote.isVoteToAccept,
+  );
+  const regularVotes = processedVotesOfSelectedNode.value.filter(
+    (vote) => !vote.isVoteToAccept,
+  );
+
+  if (acceptVotes.length > 0) return acceptVotes[0].statement.toString();
+  if (regularVotes.length > 0) return regularVotes[0].statement.toString();
   return "";
 });
 

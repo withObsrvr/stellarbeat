@@ -35,10 +35,10 @@ class FederatedVotingStore {
     selectedNodeId: string | null;
     protocolContext: FederatedVotingContext;
     protocolContextState: FederatedVotingContextState;
-    simulation: Simulation;
     networkAnalysis: NetworkAnalysis;
     nodes: FederatedNode[];
     latestSimulationStepWentForwards: boolean;
+    fullEventLog: Event[][];
   }>({
     simulationUpdate: 0,
     networkStructureUpdate: 0,
@@ -47,9 +47,9 @@ class FederatedVotingStore {
     selectedNodeId: null,
     protocolContext: FederatedVotingContextFactory.create(),
     protocolContextState: {} as FederatedVotingContextState, // temporary placeholder until constructor load
-    simulation: {} as Simulation,
     networkAnalysis: {} as NetworkAnalysis,
     nodes: [] as FederatedNode[],
+    fullEventLog: [],
   });
 
   // Add this property to track network structure
@@ -68,6 +68,8 @@ class FederatedVotingStore {
     },
   ];
 
+  private _simulation: Simulation;
+
   constructor() {
     const scenario = this.scenarios.find(
       (s) => s.id === this._state.selectedScenarioId,
@@ -76,8 +78,8 @@ class FederatedVotingStore {
 
     this._state.protocolContext = FederatedVotingContextFactory.create();
     this._state.protocolContextState = this._state.protocolContext.getState();
-    this._state.simulation = new Simulation(this._state.protocolContext);
-    scenario.loader(this._state.simulation as Simulation);
+    this._simulation = new Simulation(this._state.protocolContext);
+    scenario.loader(this._simulation as Simulation);
     this.updateNodes();
   }
 
@@ -130,6 +132,10 @@ class FederatedVotingStore {
     this._state.selectedNodeId = value;
   }
 
+  public selectedNode = computed(() => {
+    return this.nodes.find((node) => node.publicKey === this.selectedNodeId);
+  });
+
   public updateNodes() {
     const nodes: FederatedNode[] =
       this._state.protocolContextState.protocolStates.map((state) =>
@@ -137,7 +143,7 @@ class FederatedVotingStore {
       );
 
     nodes.concat(
-      this._state.simulation
+      this._simulation
         .pendingUserActions()
         .filter((action) => action instanceof AddNode)
         .map((action) => {
@@ -154,7 +160,7 @@ class FederatedVotingStore {
         }),
     );
 
-    this._state.simulation
+    this._simulation
       .pendingUserActions()
       .filter((action) => action instanceof UpdateQuorumSet)
       .forEach((action) => {
@@ -204,7 +210,7 @@ class FederatedVotingStore {
   }
 
   get illBehavedNodes() {
-    return this._state.simulation.getDisruptedNodes();
+    return this._simulation.getDisruptedNodes();
   }
 
   get intactNodes() {
@@ -222,14 +228,14 @@ class FederatedVotingStore {
 
     this._state.protocolContext = FederatedVotingContextFactory.create();
     this._state.protocolContextState = this._state.protocolContext.getState();
-    this._state.simulation = new Simulation(this._state.protocolContext);
-    scenario.loader(this._state.simulation as Simulation);
+    this._simulation = new Simulation(this._state.protocolContext);
+    scenario.loader(this._simulation as Simulation);
     this.updateNodes();
   }
 
   //SIMULATION ACTIONS
   public getLatestEvents() {
-    return this._state.simulation.getLatestEvents();
+    return this._simulation.getLatestEvents();
   }
 
   public updateNodeTrust(
@@ -237,7 +243,7 @@ class FederatedVotingStore {
     trustedNodes: string[],
     threshold: number,
   ) {
-    const pendingUpdate = this._state.simulation
+    const pendingUpdate = this._simulation
       .pendingUserActions()
       .find(
         (action) =>
@@ -245,10 +251,10 @@ class FederatedVotingStore {
       );
 
     if (pendingUpdate) {
-      this._state.simulation.cancelPendingUserAction(pendingUpdate);
+      this._simulation.cancelPendingUserAction(pendingUpdate);
     }
 
-    this._state.simulation.addUserAction(
+    this._simulation.addUserAction(
       new UpdateQuorumSet(
         publicKey,
         new QuorumSet(threshold, trustedNodes, []),
@@ -259,7 +265,7 @@ class FederatedVotingStore {
   }
 
   public cancelNodeTrustUpdate(publicKey: string) {
-    const pendingUpdate = this._state.simulation
+    const pendingUpdate = this._simulation
       .pendingUserActions()
       .find(
         (action) =>
@@ -267,50 +273,50 @@ class FederatedVotingStore {
       );
 
     if (pendingUpdate) {
-      this._state.simulation.cancelPendingUserAction(pendingUpdate);
+      this._simulation.cancelPendingUserAction(pendingUpdate);
       this.updateNodes();
     }
   }
 
   public cancelPendingUserAction(action: UserAction) {
-    this._state.simulation.cancelPendingUserAction(action);
+    this._simulation.cancelPendingUserAction(action);
     if (action instanceof UpdateQuorumSet) {
       this.updateNodes();
     }
   }
 
-  public executeStep() {
-    this._state.simulation.executeStep();
-    this._state.latestSimulationStepWentForwards = true;
+  private simulationUpdated(forwardDirection: boolean = true) {
+    this._state.latestSimulationStepWentForwards = forwardDirection;
     this.updateNodes();
+    this._state.fullEventLog = this._simulation.getFullEventLog() as Event[][];
     this._state.simulationUpdate++;
+  }
+
+  public executeStep() {
+    this._simulation.executeStep();
+    this.simulationUpdated(true);
   }
 
   public reset() {
-    this._state.simulation.goToFirstStep();
-    this._state.latestSimulationStepWentForwards = false;
-    this.updateNodes();
-    this._state.simulationUpdate++;
+    this._simulation.goToFirstStep();
+    this.simulationUpdated(false);
   }
 
   public goBackOneStep() {
-    this._state.simulation.goBackOneStep();
-    this._state.latestSimulationStepWentForwards = false;
-    this.updateNodes();
-    this._state.simulationUpdate++;
+    this._simulation.goBackOneStep();
+    this.simulationUpdated(false);
   }
 
   public hasNextStep() {
-    return this._state.simulation.hasNextStep();
+    return this._simulation.hasNextStep();
   }
 
   public hasPreviousStep() {
-    return this._state.simulation.hasPreviousStep();
+    return this._simulation.hasPreviousStep();
   }
 
-  //todo: mapping?
-  public getFullEventLog() {
-    return this._state.simulation.getFullEventLog();
+  get fullEventLog() {
+    return this._state.fullEventLog;
   }
 
   public consensusReached = computed(() => {
@@ -341,19 +347,17 @@ class FederatedVotingStore {
   });
 
   public isStuck = computed(() => {
-    return (
-      !this._state.simulation.hasNextStep() && !this.consensusReached.value
-    );
+    return !this._simulation.hasNextStep() && !this.consensusReached.value;
   });
 
   public vote(publicKey: string, vote: string) {
     this.cancelPendingVote(publicKey);
     const action = new VoteOnStatement(publicKey, vote);
-    this._state.simulation.addUserAction(action);
+    this._simulation.addUserAction(action);
   }
 
   private cancelPendingVote(publicKey: string) {
-    const vote = this._state.simulation
+    const vote = this._simulation
       .pendingUserActions()
       .find(
         (action) =>
@@ -361,12 +365,12 @@ class FederatedVotingStore {
       );
 
     if (vote) {
-      this._state.simulation.cancelPendingUserAction(vote);
+      this._simulation.cancelPendingUserAction(vote);
     }
   }
 
   public getPendingVotes() {
-    return this._state.simulation
+    return this._simulation
       .pendingUserActions()
       .filter(
         (action) => action instanceof VoteOnStatement,
@@ -375,7 +379,7 @@ class FederatedVotingStore {
 
   //@deprecated
   get simulation(): Simulation {
-    return this._state.simulation as Simulation;
+    return this._simulation as Simulation;
   }
 
   get simulationUpdate(): number {

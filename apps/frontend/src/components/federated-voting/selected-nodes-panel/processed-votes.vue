@@ -17,7 +17,7 @@
         </h5>
         <div class="voter-groups">
           <div class="voter-group">
-            <strong>Votes:</strong>
+            <strong>Votes</strong>
             <div class="voter-list">
               <FbasNodeBadge
                 v-for="(publicKey, idx) in statementGroup.votes"
@@ -28,14 +28,40 @@
             </div>
           </div>
           <div class="voter-group">
-            <strong>Votes to Accept:</strong>
+            <strong>Votes to Accept</strong>
             <div class="voter-list">
               <FbasNodeBadge
                 v-for="(publicKey, idx) in statementGroup.votesToAccept"
                 :key="`accept-${idx}`"
                 :node-id="publicKey"
+                :accepted="true"
                 @select="selectNodeId"
               />
+            </div>
+          </div>
+          <div class="voter-group">
+            <ProcessedVotesNodeEvents
+              v-if="selectedNodeId"
+              :selected-node-id="selectedNodeId"
+              :statement="statementGroup.statement"
+            />
+
+            <div v-else class="potential-vblocking">
+              <strong>Potential v-blocked nodes</strong>
+              <div
+                v-if="getVBlockedNodes(statementGroup.votesToAccept).length > 0"
+                class="voter-list"
+              >
+                <FbasNodeBadge
+                  v-for="(publicKey, idx) in getVBlockedNodes(
+                    statementGroup.votesToAccept,
+                  )"
+                  :key="`vblocked-${idx}`"
+                  :node-id="publicKey"
+                  @select="selectNodeId"
+                />
+              </div>
+              <div v-else class="empty-message">None detected</div>
             </div>
           </div>
         </div>
@@ -49,11 +75,28 @@ import { computed } from "vue";
 import BreadCrumbs from "../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasNodeBadge from "../fbas-node-badge.vue";
+import ProcessedVotesNodeEvents from "./processed-votes-node-events.vue";
+import { QuorumSet, QuorumSetService } from "scp-simulation";
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
 function selectNodeId(nodeId: string) {
   federatedVotingStore.selectedNodeId = nodeId;
+}
+
+function getVBlockedNodes(acceptVotes: string[]): string[] {
+  if (!acceptVotes.length) return [];
+
+  return federatedVotingStore.nodes
+    .filter(
+      (node) =>
+        !acceptVotes.includes(node.publicKey) &&
+        QuorumSetService.isSetVBlocking(
+          acceptVotes,
+          new QuorumSet(node.trustThreshold, node.trustedNodes, []),
+        ),
+    )
+    .map((node) => node.publicKey);
 }
 
 const processedVotesByStatement = computed(() => {
@@ -102,32 +145,51 @@ const processedVotesByStatement = computed(() => {
 .processed-votes {
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
+
 .statement-group {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
+
+.statement-group:last-child {
+  padding-bottom: 0;
+}
+
 .statement-title {
   font-size: 1.2em;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
+
 .voter-groups {
   display: flex;
-  gap: 24px;
 }
+
 .voter-group {
   flex: 1;
+  position: relative;
 }
+
 .voter-group strong {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   font-size: 1em;
   font-weight: bold;
 }
+
 .voter-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+}
+
+.empty-message {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+.potential-vblocking {
+  margin-top: 4px;
 }
 </style>
