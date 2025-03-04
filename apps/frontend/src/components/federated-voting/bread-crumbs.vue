@@ -9,16 +9,16 @@
         class="breadcrumb-item active"
         aria-current="page"
       >
-        State of {{ selectedNodeId }}
+        View of {{ selectedNodeId }}
         <span
-          v-tooltip="'Return to System State'"
+          v-tooltip="'Return to System view'"
           class="btn btn-sm btn-secondary"
         >
           <BIconArrowCounterclockwise @click="unselectNode" />
         </span>
       </li>
       <li v-else class="breadcrumb-item active" aria-current="page">
-        State of System
+        View of System
       </li>
     </ol>
   </nav>

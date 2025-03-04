@@ -11,13 +11,12 @@
           <tr>
             <th>Node</th>
             <th>Trusts</th>
-            <th>With Threshold</th>
-            <th>Quorum Slices</th>
+            <th>Threshold</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="node in paginatedNodes" :key="node.publicKey">
-            <td>
+            <td class="node-td">
               <span class="node">
                 {{ node.publicKey.substring(0, 8) }}
               </span>
@@ -38,7 +37,7 @@
                 </span>
               </div>
             </td>
-            <td>
+            <td class="threshold-td">
               <div class="threshold-selector">
                 <select
                   class="form-select form-select-sm"
@@ -55,14 +54,6 @@
                   </option>
                 </select>
               </div>
-            </td>
-            <td>
-              <button
-                class="btn btn-sm btn-secondary"
-                @click="showSlices(node)"
-              >
-                Show Slices
-              </button>
             </td>
           </tr>
         </tbody>
@@ -124,20 +115,6 @@
         </button>
       </div>
     </div>
-
-    <BModal
-      v-model="showingSlices"
-      :title="`Quorum Slices of ${selectedNode ? selectedNode.publicKey : ''}`"
-      size="lg"
-      ok-only
-    >
-      <QuorumSlices
-        v-if="selectedNode"
-        :public-key="selectedNode.publicKey"
-        :trusted-nodes="selectedNode.trustedNodes"
-        :trust-threshold="selectedNode.trustThreshold"
-      />
-    </BModal>
   </div>
 </template>
 
@@ -150,8 +127,6 @@ import {
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import InfoButton from "../info-box/info-button.vue";
 import NodeTrustConfigInfo from "./node-trust-config-info.vue";
-import QuorumSlices from "./quorum-slices.vue";
-import { BModal } from "bootstrap-vue";
 
 interface TrustConfig {
   publicKey: string;
@@ -398,30 +373,21 @@ select.modified {
   padding: 4px 8px;
 }
 
-.threshold-selector {
-  width: 80px;
-  margin: 0 auto;
-}
-
-/* Add a style for pending changes */
 .alert-info {
   color: #0c5460;
   background-color: #d1ecf1;
   border-color: #bee5eb;
 }
 
-/* Add or update the threshold selector styles */
 .threshold-selector {
-  width: 80px;
+  width: 50px;
   margin: 0 auto;
 }
 
-/* Make sure the modified style applies to form-select */
 .form-select.modified {
   border: 2px solid #ffc107;
 }
 
-/* Add Bootstrap-like form-select styles if not already available */
 .form-select {
   display: block;
   width: 100%;
@@ -437,5 +403,11 @@ select.modified {
   transition:
     border-color 0.15s ease-in-out,
     box-shadow 0.15s ease-in-out;
+}
+.node-td {
+  width: 30px;
+}
+.threshold-td {
+  width: 30px;
 }
 </style>

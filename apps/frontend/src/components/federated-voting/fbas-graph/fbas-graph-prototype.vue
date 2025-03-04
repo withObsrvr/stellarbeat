@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <BreadCrumbs />
+      <BreadCrumbs :root="'Trust Graph'" />
       <div>
         <span
           v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"

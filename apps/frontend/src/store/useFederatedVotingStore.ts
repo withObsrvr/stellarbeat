@@ -38,7 +38,7 @@ class FederatedVotingStore {
     networkAnalysis: NetworkAnalysis;
     nodes: FederatedNode[];
     latestSimulationStepWentForwards: boolean;
-    fullEventLog: Event[][];
+    simulation: Simulation;
   }>({
     simulationUpdate: 0,
     networkStructureUpdate: 0,
@@ -49,10 +49,9 @@ class FederatedVotingStore {
     protocolContextState: {} as FederatedVotingContextState, // temporary placeholder until constructor load
     networkAnalysis: {} as NetworkAnalysis,
     nodes: [] as FederatedNode[],
-    fullEventLog: [],
+    simulation: {} as Simulation, // temporary placeholder until constructor load
   });
 
-  // Add this property to track network structure
   private _networkStructureHash: string = "";
 
   readonly scenarios = [
@@ -68,8 +67,6 @@ class FederatedVotingStore {
     },
   ];
 
-  private _simulation: Simulation;
-
   constructor() {
     const scenario = this.scenarios.find(
       (s) => s.id === this._state.selectedScenarioId,
@@ -78,8 +75,8 @@ class FederatedVotingStore {
 
     this._state.protocolContext = FederatedVotingContextFactory.create();
     this._state.protocolContextState = this._state.protocolContext.getState();
-    this._simulation = new Simulation(this._state.protocolContext);
-    scenario.loader(this._simulation as Simulation);
+    this._state.simulation = new Simulation(this._state.protocolContext);
+    scenario.loader(this.simulation as Simulation);
     this.updateNodes();
   }
 
@@ -143,7 +140,7 @@ class FederatedVotingStore {
       );
 
     nodes.concat(
-      this._simulation
+      this.simulation
         .pendingUserActions()
         .filter((action) => action instanceof AddNode)
         .map((action) => {
@@ -160,7 +157,7 @@ class FederatedVotingStore {
         }),
     );
 
-    this._simulation
+    this.simulation
       .pendingUserActions()
       .filter((action) => action instanceof UpdateQuorumSet)
       .forEach((action) => {
@@ -210,7 +207,7 @@ class FederatedVotingStore {
   }
 
   get illBehavedNodes() {
-    return this._simulation.getDisruptedNodes();
+    return this.simulation.getDisruptedNodes();
   }
 
   get intactNodes() {
@@ -228,14 +225,14 @@ class FederatedVotingStore {
 
     this._state.protocolContext = FederatedVotingContextFactory.create();
     this._state.protocolContextState = this._state.protocolContext.getState();
-    this._simulation = new Simulation(this._state.protocolContext);
-    scenario.loader(this._simulation as Simulation);
+    this._state.simulation = new Simulation(this._state.protocolContext);
+    scenario.loader(this.simulation as Simulation);
     this.updateNodes();
   }
 
   //SIMULATION ACTIONS
   public getLatestEvents() {
-    return this._simulation.getLatestEvents();
+    return this.simulation.getLatestEvents();
   }
 
   public updateNodeTrust(
@@ -243,7 +240,7 @@ class FederatedVotingStore {
     trustedNodes: string[],
     threshold: number,
   ) {
-    const pendingUpdate = this._simulation
+    const pendingUpdate = this.simulation
       .pendingUserActions()
       .find(
         (action) =>
@@ -251,10 +248,10 @@ class FederatedVotingStore {
       );
 
     if (pendingUpdate) {
-      this._simulation.cancelPendingUserAction(pendingUpdate);
+      this.simulation.cancelPendingUserAction(pendingUpdate);
     }
 
-    this._simulation.addUserAction(
+    this.simulation.addUserAction(
       new UpdateQuorumSet(
         publicKey,
         new QuorumSet(threshold, trustedNodes, []),
@@ -265,7 +262,7 @@ class FederatedVotingStore {
   }
 
   public cancelNodeTrustUpdate(publicKey: string) {
-    const pendingUpdate = this._simulation
+    const pendingUpdate = this.simulation
       .pendingUserActions()
       .find(
         (action) =>
@@ -273,13 +270,13 @@ class FederatedVotingStore {
       );
 
     if (pendingUpdate) {
-      this._simulation.cancelPendingUserAction(pendingUpdate);
+      this.simulation.cancelPendingUserAction(pendingUpdate);
       this.updateNodes();
     }
   }
 
   public cancelPendingUserAction(action: UserAction) {
-    this._simulation.cancelPendingUserAction(action);
+    this.simulation.cancelPendingUserAction(action);
     if (action instanceof UpdateQuorumSet) {
       this.updateNodes();
     }
@@ -288,35 +285,34 @@ class FederatedVotingStore {
   private simulationUpdated(forwardDirection: boolean = true) {
     this._state.latestSimulationStepWentForwards = forwardDirection;
     this.updateNodes();
-    this._state.fullEventLog = this._simulation.getFullEventLog() as Event[][];
     this._state.simulationUpdate++;
   }
 
   public executeStep() {
-    this._simulation.executeStep();
+    this.simulation.executeStep();
     this.simulationUpdated(true);
   }
 
   public reset() {
-    this._simulation.goToFirstStep();
+    this.simulation.goToFirstStep();
     this.simulationUpdated(false);
   }
 
   public goBackOneStep() {
-    this._simulation.goBackOneStep();
+    this.simulation.goBackOneStep();
     this.simulationUpdated(false);
   }
 
   public hasNextStep() {
-    return this._simulation.hasNextStep();
+    return this.simulation.hasNextStep();
   }
 
   public hasPreviousStep() {
-    return this._simulation.hasPreviousStep();
+    return this.simulation.hasPreviousStep();
   }
 
   get fullEventLog() {
-    return this._state.fullEventLog;
+    return this._state.simulation.getFullEventLog();
   }
 
   public consensusReached = computed(() => {
@@ -347,17 +343,17 @@ class FederatedVotingStore {
   });
 
   public isStuck = computed(() => {
-    return !this._simulation.hasNextStep() && !this.consensusReached.value;
+    return !this.simulation.hasNextStep() && !this.consensusReached.value;
   });
 
   public vote(publicKey: string, vote: string) {
     this.cancelPendingVote(publicKey);
     const action = new VoteOnStatement(publicKey, vote);
-    this._simulation.addUserAction(action);
+    this.simulation.addUserAction(action);
   }
 
   private cancelPendingVote(publicKey: string) {
-    const vote = this._simulation
+    const vote = this.simulation
       .pendingUserActions()
       .find(
         (action) =>
@@ -365,21 +361,20 @@ class FederatedVotingStore {
       );
 
     if (vote) {
-      this._simulation.cancelPendingUserAction(vote);
+      this.simulation.cancelPendingUserAction(vote);
     }
   }
 
   public getPendingVotes() {
-    return this._simulation
+    return this.simulation
       .pendingUserActions()
       .filter(
         (action) => action instanceof VoteOnStatement,
       ) as VoteOnStatement[];
   }
 
-  //@deprecated
   get simulation(): Simulation {
-    return this._simulation as Simulation;
+    return this._state.simulation as Simulation;
   }
 
   get simulationUpdate(): number {

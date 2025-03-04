@@ -31,12 +31,12 @@
         <ProcessedVotes class="h-100" />
       </div>
       <div class="col-md-6 col-sm-12 h-100">
-        <DSets />
+        <ConsensusTopology />
       </div>
     </div>
     <div class="row pb-5" style="height: 500px">
       <div class="col-6">
-        <Quorums />
+        <DSets />
       </div>
       <div class="col-6">
         <OverlayGraphBase />
@@ -57,10 +57,10 @@ import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overla
 import ProcessedVotes from "@/components/federated-voting/selected-nodes-panel/processed-votes.vue";
 import FederatedVotingStatus from "@/components/federated-voting/simulation-control/federated-voting-status.vue";
 import DSets from "@/components/federated-voting/intactness.vue";
-import Quorums from "@/components/federated-voting/quorums.vue";
 import VotesSelector from "@/components/federated-voting/votes-selector/votes-selector.vue";
 import InfoBox from "@/components/federated-voting/info-box/info-box.vue";
 import NodeTrustConfig from "@/components/federated-voting/node-trust-config/node-trust-config.vue";
+import ConsensusTopology from "@/components/federated-voting/consensus-topology/consensus-topology.vue";
 </script>
 
 <style>

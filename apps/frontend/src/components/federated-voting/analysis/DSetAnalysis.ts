@@ -43,6 +43,27 @@ export function findQuorums(nodes: NodeID[], Q: QuorumFunction): Set<NodeID>[] {
   return quorums;
 }
 
+export function findTransitivelyTrustedNodes(
+  node: NodeID,
+  Q: QuorumFunction,
+): Set<NodeID> {
+  const trustedNodes = new Set<NodeID>();
+  const queue = [node];
+  while (queue.length > 0) {
+    const current = queue.pop() as NodeID;
+    if (trustedNodes.has(current)) continue;
+    trustedNodes.add(current);
+    const slices = Q.get(current);
+    if (!slices) continue;
+    for (const slice of slices) {
+      for (const trustedNode of slice) {
+        queue.push(trustedNode);
+      }
+    }
+  }
+  return trustedNodes;
+}
+
 export function findMinimalQuorums(quorums: Set<NodeID>[]): Set<NodeID>[] {
   // A minimal quorum is one that has no quorum as a strict subset.
   quorums.sort((a, b) => a.size - b.size);

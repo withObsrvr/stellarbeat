@@ -4,7 +4,7 @@
       <div
         class="pt-3 px-3 card-header d-flex justify-content-between align-items-center"
       >
-        <BreadCrumbs root="Federated Voting Status" />
+        <BreadCrumbs root="Events & Actions" />
         <div class="d-flex align-items-center">
           <span
             v-if="federatedVotingStore.consensusReached.value"
