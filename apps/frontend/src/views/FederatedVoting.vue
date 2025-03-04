@@ -34,7 +34,7 @@
         <ConsensusTopology />
       </div>
     </div>
-    <div class="row pb-5" style="height: 500px">
+    <div class="row pb-5" style="height: 550px">
       <div class="col-6">
         <DSets />
       </div>

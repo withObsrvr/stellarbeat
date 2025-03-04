@@ -17,12 +17,7 @@
           />
         </div>
         <div class="quorum-badge">
-          <span
-            class="minimal-badge"
-            :class="{ yes: isMinimal(quorum), no: !isMinimal(quorum) }"
-          >
-            {{ isMinimal(quorum) ? "Minimal" : "Not Minimal" }}
-          </span>
+          <span v-if="isMinimal(quorum)" class="minimal-badge"> Minimal </span>
         </div>
       </li>
     </ul>
@@ -167,16 +162,8 @@ function previousPage(): void {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.85em;
-}
-
-.minimal-badge.yes {
   background-color: #28a745;
   color: #fff;
-}
-
-.minimal-badge.no {
-  background-color: #f2f2f2;
-  color: #6c757d;
 }
 
 .pagination {

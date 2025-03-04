@@ -69,7 +69,7 @@
         </div>
       </div>
 
-      <div class="section">
+      <div class="section last">
         <div class="title-with-tooltip">
           <strong class="node-title">
             Dispensable Sets
@@ -86,10 +86,9 @@
           />
         </div>
 
-        <!-- List view for DSets -->
         <ul class="dsets-list">
           <li
-            v-for="(dsetNodes, index) in detectedDSets"
+            v-for="(dsetNodes, index) in paginatedDSets"
             :key="index"
             class="dset-item"
           >
@@ -104,13 +103,32 @@
             <div v-else class="empty-message">Empty DSet</div>
           </li>
         </ul>
+
+        <!-- Pagination Controls -->
+        <div v-if="detectedDSets.length > 0" class="pagination">
+          <button
+            class="btn btn-sm btn-secondary"
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
+            Previous
+          </button>
+          <span>Page {{ currentPage }} of {{ totalPages }}</span>
+          <button
+            class="btn btn-sm btn-secondary"
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import BreadCrumbs from "./bread-crumbs.vue";
 import { BIconInfoCircle } from "bootstrap-vue";
@@ -121,6 +139,10 @@ const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 function selectNode(nodeId: string) {
   federatedVotingStore.selectedNodeId = nodeId;
 }
+
+// Pagination for DSETs
+const currentPage = ref(1);
+const itemsPerPage = 5;
 
 const detectedDSets = computed(() => {
   // If no node is selected, show all DSets
@@ -137,6 +159,35 @@ const detectedDSets = computed(() => {
         illBehavedNodes.value.every((illNode) => dset.has(illNode)), // DSet contains all ill-behaved nodes
     )
     .map((dset) => Array.from(dset));
+});
+
+// Calculate total pages based on number of DSets
+const totalPages = computed(() =>
+  Math.ceil(detectedDSets.value.length / itemsPerPage),
+);
+
+// Get only the DSets for the current page
+const paginatedDSets = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return detectedDSets.value.slice(start, start + itemsPerPage);
+});
+
+// Navigation functions
+function nextPage(): void {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+}
+
+function previousPage(): void {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+}
+
+// Reset to page 1 when selected node changes
+watch(selectedNodeId, () => {
+  currentPage.value = 1;
 });
 
 const intactNodes = computed(() => federatedVotingStore.intactNodes);
@@ -161,7 +212,9 @@ const befouledNodes = computed(() => {
 .section {
   margin-bottom: 1rem;
 }
-
+.section.last {
+  margin-bottom: 0rem;
+}
 .voter-groups {
   display: flex;
   flex-wrap: wrap;
@@ -192,16 +245,15 @@ const befouledNodes = computed(() => {
 }
 
 .dset-item {
-  padding: 8px 10px;
-  margin-bottom: 6px;
-  border-radius: 6px;
-  background-color: #e9ecef;
-  border: 2px solid transparent;
+  display: flex;
+  padding: 6px 0;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  gap: 6px;
 }
 
-.dset-item-selected {
-  border-color: #007bff;
-  background-color: rgba(0, 123, 255, 0.05);
+.dset-item:last-child {
+  border-bottom: none;
 }
 
 .empty-message {
@@ -215,5 +267,16 @@ const befouledNodes = computed(() => {
   display: flex;
   align-items: center;
   margin-bottom: 6px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.3rem;
+}
+
+.pagination button {
+  padding: 4px 8px;
 }
 </style>

@@ -15,16 +15,21 @@ export class FbasGraphService {
   private simulation: Simulation<Node, undefined> | null = null;
 
   createLinksFromNodes(nodes: Node[]): Link[] {
+    const knownNodes: Set<string> = new Set();
+    nodes.forEach((node) => knownNodes.add(node.id));
+
     const constructedLinks: Link[] = [];
 
     nodes.forEach((node) => {
       node.validators?.forEach((validator) => {
-        constructedLinks.push({
-          source: node.id,
-          target: validator,
-          selfLoop: validator === node.id,
-          hovered: false,
-        });
+        if (knownNodes.has(validator)) {
+          constructedLinks.push({
+            source: node.id,
+            target: validator,
+            selfLoop: validator === node.id,
+            hovered: false,
+          });
+        }
       });
     });
 
@@ -206,7 +211,7 @@ export class FbasGraphService {
             .id((node: Node) => node.id)
             .distance(150),
         )
-        .force("charge", forceManyBody().strength(-1000))
+        .force("charge", forceManyBody().strength(-1500))
         .force("center", forceCenter(width / 2, height / 2))
         .force(
           "topTierX",

@@ -63,6 +63,21 @@ describe('FederatedVotingContext', () => {
 		});
 	});
 
+	describe('removeNode', () => {
+		it('should remove a node', () => {
+			context.addNode(node);
+			context.removeNode(node.publicKey);
+
+			expect(context.nodes).toHaveLength(0);
+		});
+
+		it('should not remove a node if it does not exist', () => {
+			context.removeNode(node.publicKey);
+
+			expect(context.nodes).toHaveLength(0);
+		});
+	});
+
 	describe('addNode', () => {
 		it('should add a node', () => {
 			context.addNode(node);

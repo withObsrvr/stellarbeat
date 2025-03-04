@@ -11,6 +11,7 @@ import {
   QuorumSet,
   Vote,
   VoteOnStatement,
+  RemoveNode,
 } from "scp-simulation";
 import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
 import { findAllIntactNodes } from "@/components/federated-voting/analysis/DSetAnalysis";
@@ -134,12 +135,12 @@ class FederatedVotingStore {
   });
 
   public updateNodes() {
-    const nodes: FederatedNode[] =
+    let nodes: FederatedNode[] =
       this._state.protocolContextState.protocolStates.map((state) =>
         this.mapStateToFederatedNode(state as FederatedVotingProtocolState),
       );
 
-    nodes.concat(
+    nodes = nodes.concat(
       this.simulation
         .pendingUserActions()
         .filter((action) => action instanceof AddNode)
@@ -156,6 +157,13 @@ class FederatedVotingStore {
           };
         }),
     );
+
+    const nodesToRemove = this.simulation
+      .pendingUserActions()
+      .filter((action) => action instanceof RemoveNode)
+      .map((action) => action.publicKey);
+
+    nodes = nodes.filter((node) => !nodesToRemove.includes(node.publicKey));
 
     this.simulation
       .pendingUserActions()
@@ -261,6 +269,64 @@ class FederatedVotingStore {
     this.updateNodes();
   }
 
+  public addNode(publicKey: string, trustedNodes: string[], threshold: number) {
+    this.cancelNodeRemoval(publicKey);
+
+    if (
+      this._state.protocolContextState.protocolStates.find(
+        (state) => state.node.publicKey === publicKey,
+      )
+    ) {
+      return; //already there
+    }
+
+    this.simulation.addUserAction(
+      new AddNode(publicKey, new QuorumSet(threshold, trustedNodes, [])),
+    );
+
+    this.updateNodes();
+  }
+
+  public cancelNodeRemoval(publicKey: string) {
+    const pendingRemoval = this.simulation
+      .pendingUserActions()
+      .find(
+        (action) =>
+          action instanceof RemoveNode && action.publicKey === publicKey,
+      );
+
+    if (pendingRemoval) {
+      this.simulation.cancelPendingUserAction(pendingRemoval);
+      this.updateNodes();
+    }
+  }
+
+  public cancelNodeAdd(publicKey: string) {
+    const pendingAdd = this.simulation
+      .pendingUserActions()
+      .find(
+        (action) => action instanceof AddNode && action.publicKey === publicKey,
+      );
+
+    if (pendingAdd) {
+      this.simulation.cancelPendingUserAction(pendingAdd);
+      this.updateNodes();
+    }
+  }
+
+  public removeNode(publicKey: string) {
+    this.cancelNodeAdd(publicKey);
+    if (
+      !this._state.protocolContextState.protocolStates.find(
+        (state) => state.node.publicKey === publicKey,
+      )
+    ) {
+      return; //not there, no need to remove
+    }
+    this.simulation.addUserAction(new RemoveNode(publicKey));
+    this.updateNodes();
+  }
+
   public cancelNodeTrustUpdate(publicKey: string) {
     const pendingUpdate = this.simulation
       .pendingUserActions()
@@ -277,7 +343,7 @@ class FederatedVotingStore {
 
   public cancelPendingUserAction(action: UserAction) {
     this.simulation.cancelPendingUserAction(action);
-    if (action instanceof UpdateQuorumSet) {
+    if (action.immediateExecution) {
       this.updateNodes();
     }
   }

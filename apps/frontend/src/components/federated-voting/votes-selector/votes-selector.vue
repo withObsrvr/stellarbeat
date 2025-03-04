@@ -43,7 +43,7 @@ function showInfo() {
   infoBoxStore.show(VotesSelectorInfo);
 }
 
-const nodes = federatedVotingStore.nodes;
+const nodes = computed(() => federatedVotingStore.nodes);
 
 const processedVotesByNode = computed(() => {
   const map: Record<string, boolean> = {};

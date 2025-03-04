@@ -17,14 +17,30 @@
         <tbody>
           <tr v-for="node in paginatedNodes" :key="node.publicKey">
             <td class="node-td">
-              <span class="node">
+              <span
+                class="node node-control"
+                :class="{
+                  'node-active': isNodeActive(node.publicKey),
+                  'node-inactive': !isNodeActive(node.publicKey),
+                }"
+                @click="toggleNode(node.publicKey)"
+              >
                 {{ node.publicKey.substring(0, 8) }}
               </span>
             </td>
-            <td>
+            <td
+              v-if="!isNodeActive(node.publicKey)"
+              class="placeholder-td"
+              colspan="2"
+            >
+              <span class="placeholder-text"
+                >Add node to set trust configuration</span
+              >
+            </td>
+            <td v-else>
               <div class="node-list">
                 <span
-                  v-for="otherNode in nodesCache"
+                  v-for="otherNode in activeNodesForTrustColumn"
                   :key="otherNode.publicKey"
                   class="node"
                   :class="{
@@ -37,7 +53,7 @@
                 </span>
               </div>
             </td>
-            <td class="threshold-td">
+            <td v-if="isNodeActive(node.publicKey)" class="threshold-td">
               <div class="threshold-selector">
                 <select
                   class="form-select form-select-sm"
@@ -73,13 +89,10 @@
         >
           <div>
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <span v-if="hasLocalChanges"
-              >You have unsaved trust configuration changes</span
-            >
+            <span>You have unsaved trust configuration changes</span>
           </div>
           <div>
             <button
-              v-if="hasLocalChanges"
               class="btn btn-primary btn-sm me-2 mr-2"
               @click="applyChanges"
             >
@@ -132,13 +145,115 @@ interface TrustConfig {
   publicKey: string;
   trustedNodes: string[];
   trustThreshold: number;
+  isActive: boolean;
+  isNew?: boolean;
+  isRemoved?: boolean;
 }
 
 const nodes: ComputedRef<FederatedNode[]> = computed(
   () => federatedVotingStore.nodes,
 );
-const nodesCache = ref<TrustConfig[]>();
+const nodesCache = ref<TrustConfig[]>([]);
 const hasLocalChanges = ref(false);
+
+// Maximum number of nodes in the system
+const MAX_NODES = 10;
+
+// Define the standard order for nodes based on peopleNames
+const standardNodeOrder = [
+  "Alice",
+  "Bob",
+  "Chad",
+  "Steve",
+  "Daisy",
+  "Frank",
+  "Grace",
+  "Henry",
+  "Isabel",
+  "Jack",
+];
+
+const allNodesWithPlaceholders = computed(() => {
+  if (!nodesCache.value) return [];
+
+  const nodes = [...nodesCache.value];
+
+  nodes.sort((a, b) => {
+    const indexA = standardNodeOrder.indexOf(a.publicKey);
+    const indexB = standardNodeOrder.indexOf(b.publicKey);
+
+    if (indexA !== -1 && indexB !== -1) {
+      return indexA - indexB;
+    }
+
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+
+    return a.publicKey.localeCompare(b.publicKey);
+  });
+
+  return nodes;
+});
+
+const activeNodesForTrustColumn = computed(() => {
+  return nodesCache.value.filter((node) => node.isActive && !node.isRemoved);
+});
+
+function isNodeActive(publicKey: string): boolean {
+  const node = nodesCache.value.find((n) => n.publicKey === publicKey);
+  return node ? node.isActive : false;
+}
+
+function toggleNode(publicKey: string): void {
+  const nodeIndex = nodesCache.value.findIndex(
+    (n) => n.publicKey === publicKey,
+  );
+  if (nodeIndex >= 0) {
+    nodesCache.value[nodeIndex].isActive =
+      !nodesCache.value[nodeIndex].isActive;
+
+    if (nodesCache.value[nodeIndex].isActive) {
+      const existingNodeKeys = nodesCache.value
+        .filter((n) => n.isActive && n.publicKey !== publicKey && !n.isRemoved)
+        .map((n) => n.publicKey);
+
+      nodesCache.value[nodeIndex].trustedNodes = existingNodeKeys;
+      nodesCache.value[nodeIndex].trustThreshold = Math.max(
+        1,
+        Math.floor(existingNodeKeys.length / 2) + 1,
+      );
+
+      if (nodesCache.value[nodeIndex].isNew === undefined) {
+        nodesCache.value[nodeIndex].isNew = true;
+      }
+
+      if (nodesCache.value[nodeIndex].isRemoved) {
+        nodesCache.value[nodeIndex].isRemoved = false;
+      }
+    } else {
+      nodesCache.value[nodeIndex].isRemoved = true;
+      const nodeToRemove = publicKey;
+      nodesCache.value.forEach((otherNode) => {
+        if (otherNode.publicKey !== nodeToRemove) {
+          const trustIndex = otherNode.trustedNodes.indexOf(nodeToRemove);
+          if (trustIndex !== -1) {
+            otherNode.trustedNodes.splice(trustIndex, 1);
+
+            if (otherNode.trustThreshold > otherNode.trustedNodes.length) {
+              otherNode.trustThreshold = Math.max(
+                1,
+                otherNode.trustedNodes.length,
+              );
+            }
+            hasLocalChanges.value = true;
+          }
+        }
+      });
+    }
+
+    hasLocalChanges.value = true;
+  }
+}
 
 watch(
   () => federatedVotingStore.nodes,
@@ -198,36 +313,115 @@ function compareTrust(node1: FederatedNode, node2: TrustConfig): boolean {
 
 function initializeNodeCache() {
   hasLocalChanges.value = false;
-  const newNodesCache: TrustConfig[] = [];
-  nodes.value.forEach((node) => {
+
+  // Start with existing active nodes
+  const newNodesCache: TrustConfig[] = nodes.value.map((node) => ({
+    publicKey: node.publicKey,
+    trustedNodes: node.trustedNodes.slice(),
+    trustThreshold: node.trustThreshold,
+    isActive: true,
+  }));
+
+  const existingNodeCount = newNodesCache.length;
+  const placeholderCount = Math.max(0, MAX_NODES - existingNodeCount);
+
+  const peopleNames = standardNodeOrder;
+  const existingNames = new Set(nodes.value.map((node) => node.publicKey));
+  const availableNames = peopleNames.filter((name) => !existingNames.has(name));
+
+  let placeholdersAdded = 0;
+  let nameIndex = 0;
+
+  while (
+    placeholdersAdded < placeholderCount &&
+    nameIndex < availableNames.length
+  ) {
+    const personName = availableNames[nameIndex++];
+
     newNodesCache.push({
-      publicKey: node.publicKey,
-      trustedNodes: node.trustedNodes.slice(),
-      trustThreshold: node.trustThreshold,
+      publicKey: personName,
+      trustedNodes: [],
+      trustThreshold: 0,
+      isActive: false,
     });
+
+    placeholdersAdded++;
+  }
+
+  // If we've used all available names but still need more placeholders,
+  // create generic placeholder names. Should not happen...
+  while (placeholdersAdded < placeholderCount) {
+    const placeholderName = `Node${existingNodeCount + placeholdersAdded + 1}`;
+
+    newNodesCache.push({
+      publicKey: placeholderName,
+      trustedNodes: [],
+      trustThreshold: 0,
+      isActive: false,
+    });
+
+    placeholdersAdded++;
+  }
+
+  // Sort the nodes according to the standard order
+  newNodesCache.sort((a, b) => {
+    const indexA = standardNodeOrder.indexOf(a.publicKey);
+    const indexB = standardNodeOrder.indexOf(b.publicKey);
+
+    if (indexA !== -1 && indexB !== -1) {
+      return indexA - indexB;
+    }
+
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+
+    return a.publicKey.localeCompare(b.publicKey);
   });
 
   nodesCache.value = newNodesCache;
 }
 
 function applyChanges() {
-  if (!nodesCache.value) {
-    return;
-  }
-  nodesCache.value.forEach((node) => {
-    const originalNode = getOriginalNode(node.publicKey);
-    if (originalNode && !compareTrust(originalNode, node)) {
-      federatedVotingStore.updateNodeTrust(
+  if (!nodesCache.value) return;
+
+  // Handle removed nodes first
+  nodesCache.value
+    .filter((node) => node.isRemoved)
+    .forEach((node) => {
+      federatedVotingStore.removeNode(node.publicKey);
+    });
+
+  // Handle new nodes
+  nodesCache.value
+    .filter((node) => node.isNew && node.isActive)
+    .forEach((node) => {
+      federatedVotingStore.addNode(
         node.publicKey,
         node.trustedNodes,
         node.trustThreshold,
       );
-    } else {
-      federatedVotingStore.cancelNodeTrustUpdate(node.publicKey);
-    }
-  });
+    });
+
+  // Handle trust updates for existing nodes
+  nodesCache.value
+    .filter((node) => node.isActive && !node.isNew && !node.isRemoved)
+    .forEach((node) => {
+      const originalNode = getOriginalNode(node.publicKey);
+      if (originalNode && !compareTrust(originalNode, node)) {
+        federatedVotingStore.updateNodeTrust(
+          node.publicKey,
+          node.trustedNodes,
+          node.trustThreshold,
+        );
+      } else {
+        federatedVotingStore.cancelNodeTrustUpdate(node.publicKey);
+      }
+    });
 
   hasLocalChanges.value = false;
+
+  // Re-initialize the cache after all changes are applied
+  initializeNodeCache();
 }
 
 function reset() {
@@ -237,14 +431,14 @@ function reset() {
 const currentPage = ref(1);
 const itemsPerPage = 5;
 
-const totalPages = computed(() =>
-  Math.ceil(nodesCache.value!.length / itemsPerPage),
-);
-
 const paginatedNodes: ComputedRef<TrustConfig[]> = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
-  return nodesCache.value!.slice(start, start + itemsPerPage);
+  return allNodesWithPlaceholders.value.slice(start, start + itemsPerPage);
 });
+
+const totalPages = computed(() =>
+  Math.ceil(allNodesWithPlaceholders.value.length / itemsPerPage),
+);
 
 function nextPage() {
   if (currentPage.value < totalPages.value) {
@@ -260,14 +454,6 @@ function previousPage() {
 
 function showInfo() {
   infoBoxStore.show(NodeTrustConfigInfo);
-}
-
-const showingSlices = ref(false);
-const selectedNode: Ref<TrustConfig | null> = ref(null);
-
-function showSlices(node: TrustConfig | null) {
-  selectedNode.value = node;
-  showingSlices.value = true;
 }
 
 function getTrustedCount(node: TrustConfig): number {
@@ -293,12 +479,10 @@ function isThresholdModified(node: TrustConfig): boolean {
   return !!originalNode && originalNode.trustThreshold !== node.trustThreshold;
 }
 
-// Add this function to determine if trust has been modified compared to original node
 function isTrustModified(node: TrustConfig, otherNode: TrustConfig): boolean {
   const originalNode = getOriginalNode(node.publicKey);
   if (!originalNode) return false;
 
-  // Check if the trust relationship is different between original and current
   const originallyTrusted = originalNode.trustedNodes.includes(
     otherNode.publicKey,
   );
@@ -350,13 +534,28 @@ function isTrustModified(node: TrustConfig, otherNode: TrustConfig): boolean {
   cursor: pointer;
 }
 
+.node-control {
+  transition: all 0.2s ease;
+}
+
+.node-active {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.node-inactive {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+  color: #6c757d;
+}
+
 .node.trusted {
   background-color: #28a745;
   border-color: #28a745;
   color: white;
 }
 
-/* Added style for modified elements */
 .node.modified,
 select.modified {
   border: 2px solid #ffc107;
@@ -404,10 +603,23 @@ select.modified {
     border-color 0.15s ease-in-out,
     box-shadow 0.15s ease-in-out;
 }
+
 .node-td {
   width: 30px;
 }
+
 .threshold-td {
   width: 30px;
+}
+
+.placeholder-td {
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+}
+
+.placeholder-text {
+  display: block;
+  padding: 8px 0;
 }
 </style>

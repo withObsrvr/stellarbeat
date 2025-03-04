@@ -1,24 +1,20 @@
 import { Node, ProtocolAction, QuorumSet, UserAction } from '../../../core';
 import { FederatedVotingContext } from '../../FederatedVotingContext';
 
-export class AddNode extends UserAction {
-	subType = 'AddNode';
+export class RemoveNode extends UserAction {
+	subType = 'RemoveNode';
 	immediateExecution = true;
-	constructor(
-		public readonly publicKey: string,
-		public readonly quorumSet: QuorumSet
-	) {
+	constructor(public readonly publicKey: string) {
 		super();
 	}
 
 	execute(context: FederatedVotingContext): ProtocolAction[] {
-		const node = new Node(this.publicKey, this.quorumSet);
-		context.addNode(node);
+		context.removeNode(this.publicKey);
 
 		return [];
 	}
 
 	toString(): string {
-		return `Add node ${this.publicKey}`;
+		return `Remove node ${this.publicKey}`;
 	}
 }

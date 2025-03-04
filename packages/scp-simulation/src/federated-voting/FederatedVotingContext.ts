@@ -109,6 +109,18 @@ export class FederatedVotingContext
 		this.state.protocolStates.push(new FederatedVotingProtocolState(node));
 	}
 
+	removeNode(publicKey: string): void {
+		const index = this.state.protocolStates.findIndex(
+			(state) => state.node.publicKey === publicKey
+		);
+		if (index === -1) {
+			console.log('Node not found');
+			return;
+		}
+
+		this.state.protocolStates.splice(index, 1);
+	}
+
 	updateQuorumSet(
 		publicKey: PublicKey,
 		quorumSet: QuorumSet
