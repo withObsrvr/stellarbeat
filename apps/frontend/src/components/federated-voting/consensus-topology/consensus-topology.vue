@@ -189,13 +189,13 @@ watch(
 }
 
 .nav-tabs .nav-link:hover {
-  color: #007bff;
-  border-color: #e9ecef #e9ecef #dee2e6;
+  color: #1d8ab4;
+  border-color: #fff;
   text-decoration: none;
 }
 
 .nav-tabs .nav-link.active {
-  color: #007bff;
+  color: #1d8ab4;
   background-color: #fff;
   border-color: #dee2e6 #dee2e6 #fff;
 }
