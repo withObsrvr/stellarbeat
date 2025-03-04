@@ -15,7 +15,6 @@
         <span v-else-if="isBefouled" class="badge badge-warning ms-2">
           Befouled
         </span>
-        <span v-else class="badge badge-success ms-w"> Intact </span>
 
         <span v-if="isTopTierNode" class="badge badge-info ms-2">
           Top Tier Node

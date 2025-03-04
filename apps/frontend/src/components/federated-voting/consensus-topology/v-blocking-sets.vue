@@ -13,6 +13,7 @@
               :key="node"
               :node-id="node"
               :show-vote="true"
+              :visualize-phase="true"
               @select="handleNodeSelect(node)"
             />
           </div>

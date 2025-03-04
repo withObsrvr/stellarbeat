@@ -9,8 +9,9 @@
         befouled: isBefouled,
         selected: isSelected,
         main: isMain,
-        accepted: hasAccepted,
-        confirmed: hasConfirmed,
+        accepted: visualizePhase && hasAccepted,
+        confirmed: visualizePhase && hasConfirmed,
+        'neutral-style': !visualizePhase,
       },
       $attrs.class,
     ]"
@@ -31,9 +32,11 @@ const props = defineProps<{
   nodeId: string;
   isMain?: boolean;
   showVote?: boolean;
+  visualizePhase?: boolean;
 }>();
 
 const showVote = computed(() => props.showVote ?? false);
+const visualizePhase = computed(() => props.visualizePhase ?? false);
 const emit = defineEmits(["select", "mouseover", "mouseleave"]);
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
@@ -64,7 +67,7 @@ const isIntact = computed(() => intactNodes.value.includes(props.nodeId));
 const isIllBehaved = computed(() =>
   illBehavedNodes.value.includes(props.nodeId),
 );
-const isBefouled = computed(() => !isIntact.value);
+const isBefouled = computed(() => !isIntact.value && !isIllBehaved.value);
 const isSelected = computed(() => selectedNodeId.value === props.nodeId);
 
 const hasConfirmed = computed(() => {
@@ -141,8 +144,21 @@ function handleClick() {
   transition: all 0.15s ease-in-out;
 }
 
+.node.neutral-style {
+  padding: 3px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  color: #212529;
+}
+
 .node:hover {
   background-color: #888888;
+}
+
+.node.neutral-style:hover {
+  background-color: #f0f0f0;
+  color: #212529;
 }
 
 .node.selected {
@@ -162,11 +178,11 @@ function handleClick() {
 }
 
 .ill-behaved {
-  border-color: #ff0000 !important;
+  border: 2px solid #ff0000 !important;
 }
 
 .befouled {
-  border-color: #ffa500 !important;
+  border: 2px solid #ffa500 !important;
 }
 
 .vote-label {
@@ -177,5 +193,10 @@ function handleClick() {
   font-size: 0.7em;
   color: #fff;
   vertical-align: middle;
+}
+
+.neutral-style .vote-label {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #212529;
 }
 </style>
