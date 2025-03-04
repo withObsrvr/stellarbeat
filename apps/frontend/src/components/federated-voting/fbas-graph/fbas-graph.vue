@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <BreadCrumbs :root="'Trust Graph'" />
+      <BreadCrumbs :root="'FBAS Graph'" />
       <div>
         <span
           v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
@@ -116,7 +116,10 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { polygonHull } from "d3-polygon";
-import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import {
+  FederatedNode,
+  federatedVotingStore,
+} from "@/store/useFederatedVotingStore";
 import FbasGraphNode, { Node } from "./fbas-graph-node.vue";
 import FbasGraphLink, { Link } from "./fbas-graph-link.vue";
 import AnimatedMessage from "./animated-message.vue";
@@ -185,8 +188,19 @@ watch(
   },
 );
 
+watch(
+  () => federatedVotingStore.selectedNodeId,
+  () => {
+    updateNodeStates();
+  },
+);
+
 function updateNodeStates() {
-  fbasGraphService.updateNodeStates(nodes.value, federatedVotingStore.nodes);
+  fbasGraphService.updateNodeStates(
+    nodes.value,
+    federatedVotingStore.nodes,
+    federatedVotingStore.selectedNode.value as FederatedNode | null,
+  );
 }
 
 function updateOrCreateGraph() {

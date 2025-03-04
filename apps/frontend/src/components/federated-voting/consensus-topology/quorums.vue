@@ -11,14 +11,7 @@
             v-for="node in quorum"
             :key="node"
             :node-id="node"
-            :class="{
-              highlight: isInHighlightedSlice(node, index),
-              'hovered-node':
-                hoveredNode === node && hoveredQuorumIndex === index,
-            }"
             :show-vote="true"
-            @mouseover="setHoveredNode(node, quorum, index)"
-            @mouseleave="clearHoveredNode"
             @select="handleNodeSelect(node)"
           />
         </div>
@@ -64,26 +57,26 @@ import {
 } from "../analysis/DSetAnalysis";
 
 const quorums = computed(() => {
-  if (!federatedVotingStore.selectedNodeId) {
+  const selectedNodeId = federatedVotingStore.selectedNodeId;
+  if (selectedNodeId === null) {
     return federatedVotingStore.networkAnalysis.quorums;
   }
 
   return findQuorums(
     Array.from(
       findTransitivelyTrustedNodes(
-        federatedVotingStore.selectedNodeId,
+        selectedNodeId,
         federatedVotingStore.networkAnalysis.quorumSlices,
       ),
     ),
     federatedVotingStore.networkAnalysis.quorumSlices,
-  ).sort((a, b) => a.size - b.size);
+  )
+    .filter((quorum) => quorum.has(selectedNodeId))
+    .sort((a, b) => a.size - b.size);
 });
 const quorumSlices = computed(
   () => federatedVotingStore.networkAnalysis.quorumSlices,
 );
-const hoveredNode = ref<string | null>(null);
-const highlightedSlice = ref<string[]>([]);
-const hoveredQuorumIndex = ref<number | null>(null);
 const currentPage = ref(1);
 const itemsPerPage = 5;
 
@@ -95,38 +88,6 @@ const paginatedQuorums = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   return quorums.value.slice(start, start + itemsPerPage);
 });
-
-function setHoveredNode(
-  node: string,
-  quorum: Set<string>,
-  index: number,
-): void {
-  hoveredNode.value = node;
-  hoveredQuorumIndex.value = index;
-
-  const nodeSlices = quorumSlices.value.get(node) || [];
-  const slicesInQuorum = Array.from(nodeSlices).filter((slice) =>
-    Array.from(slice).every((node) => quorum.has(node)),
-  );
-
-  const smallestSlice = slicesInQuorum.reduce((smallest, slice) => {
-    return slice.size < smallest.size ? slice : smallest;
-  }, slicesInQuorum[0]);
-
-  highlightedSlice.value = Array.from(smallestSlice || []);
-}
-
-function clearHoveredNode(): void {
-  hoveredNode.value = null;
-  highlightedSlice.value = [];
-  hoveredQuorumIndex.value = null;
-}
-
-function isInHighlightedSlice(node: string, index: number): boolean {
-  return (
-    index === hoveredQuorumIndex.value && highlightedSlice.value.includes(node)
-  );
-}
 
 function handleNodeSelect(node: string): void {
   federatedVotingStore.selectedNodeId = node;
@@ -198,16 +159,6 @@ function previousPage(): void {
 
 .quorum-badge {
   margin-left: 10px;
-}
-
-.node.highlight {
-  background-color: #007bff !important;
-  color: white !important;
-}
-
-.node.hovered-node {
-  background-color: #007bff !important;
-  color: #fff !important;
 }
 
 .minimal-badge {

@@ -20,7 +20,7 @@
 
     <div class="row">
       <div class="col-md-6">
-        <FbasGraphPrototype />
+        <FbasGraph />
       </div>
       <div class="col-md-6">
         <FederatedVotingStatus />
@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import FbasGraphPrototype from "@/components/federated-voting/fbas-graph/fbas-graph-prototype.vue";
+import FbasGraph from "@/components/federated-voting/fbas-graph/fbas-graph.vue";
 import Controller from "@/components/federated-voting/simulation-control/controller.vue";
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
 import ProcessedVotes from "@/components/federated-voting/selected-nodes-panel/processed-votes.vue";

@@ -103,15 +103,65 @@ export class FbasGraphService {
     });
   }
 
-  updateNodeStates(nodes: Node[], sourceNodes: FederatedNode[]): void {
+  updateNodeStates(
+    nodes: Node[],
+    sourceNodes: FederatedNode[],
+    selectedNode: FederatedNode | null,
+  ): void {
+    // No selected node - show the system view, meaning the actual states of the nodes
+    if (!selectedNode) {
+      nodes.forEach((node) => {
+        const sourceNode = sourceNodes.find(
+          (sNode) => sNode.publicKey === node.id,
+        );
+        if (sourceNode) {
+          node.vote = sourceNode.voted;
+          node.accept = sourceNode.accepted;
+          node.confirm = sourceNode.confirmed;
+        }
+      });
+      return;
+    }
+
+    // Selected node - show the view from the perspective of the selected node based on its processed messages
     nodes.forEach((node) => {
-      const sourceNode = sourceNodes.find(
-        (sNode) => sNode.publicKey === node.id,
-      );
-      if (sourceNode) {
-        node.vote = sourceNode.voted;
-        node.accept = sourceNode.accepted;
-        node.confirm = sourceNode.confirmed;
+      if (node.id === selectedNode.publicKey) {
+        // Selected node shows its own state
+        node.vote = selectedNode.voted;
+        node.accept = selectedNode.accepted;
+        node.confirm = selectedNode.confirmed;
+      } else {
+        // For other nodes, show what the selected node knows about them
+        const processedVotes = selectedNode.processedVotes.filter(
+          (vote) => vote.publicKey === node.id,
+        );
+
+        // Reset states first
+        node.vote = null;
+        node.accept = null;
+        node.confirm = null;
+
+        // Update based on processed votes
+        if (processedVotes.length > 0) {
+          // Find regular votes (not accept votes)
+          const regularVotes = processedVotes.filter(
+            (vote) => !vote.isVoteToAccept,
+          );
+          if (regularVotes.length > 0) {
+            node.vote = regularVotes[0].statement.toString();
+          }
+
+          // Find accept votes
+          const acceptVotes = processedVotes.filter(
+            (vote) => vote.isVoteToAccept,
+          );
+          if (acceptVotes.length > 0) {
+            node.accept = acceptVotes[0].statement.toString();
+          }
+
+          // A node never knows if another node has confirmed a value
+          // So we leave node.confirm as null for other nodes
+        }
       }
     });
   }

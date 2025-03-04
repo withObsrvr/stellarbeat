@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="card-header header">
-      <BreadCrumbs root="Federated Voting Status" />
+      <BreadCrumbs root="Events & Actions" />
       <div class="labels">
         <span
-          v-if="federatedVotingStore.isStuck"
+          v-if="federatedVotingStore.isStuck.value"
           class="badge badge-danger ms-2"
         >
           Stuck

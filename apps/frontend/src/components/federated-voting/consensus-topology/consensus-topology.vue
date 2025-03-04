@@ -26,7 +26,13 @@
             href="#"
             @click.prevent="activeTab = 'quorums'"
           >
-            Quorums
+            <span>Quorums</span>
+            <BIconInfoCircle
+              v-tooltip.top="
+                'A quorum contains a slice for each node (hover to see slices)'
+              "
+              class="info-icon text-secondary"
+            />
           </a>
         </li>
         <li class="nav-item">
