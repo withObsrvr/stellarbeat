@@ -171,12 +171,23 @@ export class FbasGraphService {
     });
   }
 
+  updateRepellingForce(repellingForce: number): void {
+    if (this.simulation) {
+      this.simulation.force(
+        "charge",
+        forceManyBody().strength(-repellingForce),
+      );
+      this.simulation.alpha(0.3).restart();
+    }
+  }
+
   updateForceSimulation(
     nodes: Node[],
     links: Link[],
     width: number,
     height: number,
     topTierNodeIds: string[],
+    repellingForce: number = 1500,
   ): Simulation<Node, undefined> {
     if (this.simulation !== null) {
       this.simulation.nodes(nodes);
@@ -211,7 +222,7 @@ export class FbasGraphService {
             .id((node: Node) => node.id)
             .distance(150),
         )
-        .force("charge", forceManyBody().strength(-1500))
+        .force("charge", forceManyBody().strength(-repellingForce))
         .force("center", forceCenter(width / 2, height / 2))
         .force(
           "topTierX",

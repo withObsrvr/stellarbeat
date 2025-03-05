@@ -4,7 +4,23 @@
       <h4 class="card-title">Network connections (overlay)</h4>
     </div>
     <div class="card-body h-100">
-      <div class="chart-container h-100">
+      <div class="chart-container h-100 position-relative">
+        <!-- Add the floating control with force slider -->
+        <div class="floating-control">
+          <div v-tooltip.bottom="`Repelling Force`" class="force-control">
+            <input
+              id="repellingForce"
+              v-model.number="repellingForce"
+              type="range"
+              class="form-range"
+              min="500"
+              max="3000"
+              step="100"
+              @input="updateRepellingForce"
+            />
+          </div>
+        </div>
+
         <svg
           ref="overlayGraph"
           class="overlay-graph"
@@ -28,28 +44,6 @@
           </g>
         </svg>
       </div>
-      <!--div class="card-footer">
-        <div class="legend">
-          <span class="legend-item">
-            <span class="legend-circle active-node"></span> Active
-          </span>
-          <span v-if="!federatedVotingStore.selectedNodeId" class="legend-item">
-            <span class="legend-rectangle bidirectional-connection"></span>
-            Bidirectional Connection
-          </span>
-          <span v-else>
-            <span
-              class="legend-rectangle bidirectional-selected-connection"
-            ></span>
-            Bidirectional Connection
-          </span>
-        </div!-->
-      <!--overlay-graph-options
-          :initial-repelling-force="initialRepellingForce"
-          :initial-topology="initialTopology"
-          @updateRepellingForce="updateRepellingForce"
-        /!-->
-      <!--/div!-->
     </div>
   </div>
 </template>
@@ -66,6 +60,7 @@ import GraphLink from "@/components/federated-voting/overlay-graph/graph-link.vu
 import GraphNode from "@/components/federated-voting/overlay-graph/graph-node.vue";
 
 const initialRepellingForce = 1000;
+const repellingForce = ref(initialRepellingForce); // Add repellingForce ref
 const overlayGraph = ref<SVGElement | null>(null);
 const graphManager = reactive(new GraphManager([], []));
 
@@ -181,9 +176,10 @@ onMounted(() => {
   updateGraph();
 });
 
-const updateRepellingForce = (force: number) => {
-  if (simulationManager) {
-    simulationManager.updateSimulationForce(force);
+// Update the updateRepellingForce function to use the ref value
+const updateRepellingForce = () => {
+  if (simulationManager && nodes.value.length > 0) {
+    simulationManager.updateSimulationForce(repellingForce.value);
   }
 };
 
@@ -247,5 +243,18 @@ const height = (): number => {
   color: #333;
   font-size: 24px;
   font-weight: bold;
+}
+
+.floating-control {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 100;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.form-range {
+  height: 15px;
 }
 </style>

@@ -32,6 +32,20 @@
       </div>
     </div>
     <div class="card-body graph pt-4 pb-0" style="height: 500px">
+      <div class="floating-control">
+        <div v-tooltip.bottom="`Repelling Force`" class="force-control">
+          <input
+            id="repellingForce"
+            v-model.number="repellingForce"
+            type="range"
+            class="form-range"
+            min="500"
+            max="3000"
+            step="100"
+            @input="updateRepellingForce"
+          />
+        </div>
+      </div>
       <svg
         ref="svgRef"
         width="100%"
@@ -91,22 +105,24 @@
       </svg>
     </div>
     <div class="card-footer">
-      <div class="legend">
-        <div class="legend-item">
-          <span class="legend-color accepted-node"></span>
-          <span>Accepted</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-color confirmed-node"></span>
-          <span>Confirmed</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-color ill-behaved-node"></span>
-          <span>Ill-Behaved</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-color befouled-node"></span>
-          <span>Befouled</span>
+      <div class="d-flex justify-content-center">
+        <div class="legend">
+          <div class="legend-item">
+            <span class="legend-color accepted-node"></span>
+            <span>Accepted</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color confirmed-node"></span>
+            <span>Confirmed</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color ill-behaved-node"></span>
+            <span>Ill-Behaved</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color befouled-node"></span>
+            <span>Befouled</span>
+          </div>
         </div>
       </div>
     </div>
@@ -150,6 +166,8 @@ const messageAnimations = ref<MessageAnimation[]>([]);
 const topTierNodeIds = computed(() => {
   return Array.from(federatedVotingStore.networkAnalysis.topTierNodes);
 });
+
+const repellingForce = ref(1000); // Default value from FbasGraphService
 
 watch(
   [
@@ -217,6 +235,7 @@ function updateOrCreateGraph() {
     width.value,
     height,
     topTierNodeIds.value,
+    repellingForce.value, // Pass the repelling force value
   );
 }
 
@@ -260,6 +279,12 @@ function updateDimensions() {
   if (svgRef.value) {
     width.value = svgRef.value.clientWidth;
     heightRef.value = svgRef.value.clientHeight;
+  }
+}
+
+function updateRepellingForce() {
+  if (nodes.value.length > 0) {
+    fbasGraphService.updateRepellingForce(repellingForce.value);
   }
 }
 
@@ -328,5 +353,18 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.floating-control {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 100;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.form-range {
+  height: 15px;
 }
 </style>
