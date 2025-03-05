@@ -1,23 +1,25 @@
 import { FederatedVotingContext } from './../FederatedVotingContext';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { FederatedVotingProtocol } from './../protocol/FederatedVotingProtocol';
-import { Statement, Node, QuorumSet } from '../../';
+import { Statement, Node, QuorumSet, Overlay } from '../../';
 import { ProtocolAction, UserAction } from '../../core';
 import { Message } from '../Message';
 import { BroadcastVoteRequested } from './../protocol/event/BroadcastVoteRequested';
 import { Vote, Voted } from '../protocol';
-import { SendMessage } from '../action/protocol/SendMessage';
 import { ReceiveMessage } from '../action/protocol/ReceiveMessage';
 import { UpdateQuorumSet } from '../action/user/UpdateQuorumSet';
+import { Broadcast } from '../action/protocol/Broadcast';
 
 describe('FederatedVotingContext', () => {
 	let mockFederatedVotingProtocol: MockProxy<FederatedVotingProtocol>;
 	let context: FederatedVotingContext;
 	let node: Node;
+	let overlay: Overlay;
 
 	beforeEach(() => {
 		mockFederatedVotingProtocol = mock<FederatedVotingProtocol>();
-		context = new FederatedVotingContext(mockFederatedVotingProtocol);
+		overlay = new Overlay();
+		context = new FederatedVotingContext(mockFederatedVotingProtocol, overlay);
 		node = new Node('V1', new QuorumSet(1, ['Q'], []));
 		jest.resetAllMocks();
 		mockFederatedVotingProtocol.drainEvents.mockReturnValue([]);
@@ -35,6 +37,8 @@ describe('FederatedVotingContext', () => {
 
 			expect(context.nodes.length).toBe(0);
 			expect(context.drainEvents()).toEqual([]);
+			expect(overlay.nodes.size).toBe(0);
+			expect(overlay.connections.size).toBe(0);
 		});
 	});
 
@@ -69,6 +73,7 @@ describe('FederatedVotingContext', () => {
 			context.removeNode(node.publicKey);
 
 			expect(context.nodes).toHaveLength(0);
+			expect(overlay.nodes.size).toBe(0);
 		});
 
 		it('should not remove a node if it does not exist', () => {
@@ -83,6 +88,7 @@ describe('FederatedVotingContext', () => {
 			context.addNode(node);
 			expect(context.nodes).toHaveLength(1);
 			expect(context.nodes[0]).toEqual(node);
+			expect(overlay.nodes.size).toBe(1);
 		});
 
 		it('should not add a node if the public key already exists', () => {
@@ -168,7 +174,7 @@ describe('FederatedVotingContext', () => {
 			const actions = context.vote(node.publicKey, mock<Statement>());
 
 			expect(actions).toHaveLength(1);
-			expect(actions[0]).toBeInstanceOf(ProtocolAction);
+			expect(actions[0]).toBeInstanceOf(Broadcast);
 		});
 	});
 
@@ -219,7 +225,7 @@ describe('FederatedVotingContext', () => {
 			const actions = context.receiveMessage(message);
 
 			expect(actions).toHaveLength(1);
-			expect(actions[0]).toBeInstanceOf(SendMessage);
+			expect(actions[0]).toBeInstanceOf(Broadcast);
 
 			expect(mockFederatedVotingProtocol.processVote).toHaveBeenCalledTimes(1);
 		});

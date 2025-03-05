@@ -12,6 +12,8 @@ import {
   Vote,
   VoteOnStatement,
   RemoveNode,
+  AddConnection,
+  RemoveConnection,
 } from "scp-simulation";
 import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
 import { findAllIntactNodes } from "@/components/federated-voting/analysis/DSetAnalysis";
@@ -186,6 +188,10 @@ class FederatedVotingStore {
     return this._state.nodes;
   }
 
+  get connections() {
+    return this._state.protocolContext.connections;
+  }
+
   public getNodeWithoutPreviewChanges(publicKey: string): FederatedNode | null {
     const state = this._state.protocolContextState.protocolStates.find(
       (state) => state.node.publicKey === publicKey,
@@ -267,6 +273,16 @@ class FederatedVotingStore {
     );
 
     this.updateNodes();
+  }
+
+  addConnection(a: string, b: string) {
+    const addConnection = new AddConnection(a, b);
+    this.simulation.addUserAction(addConnection);
+  }
+
+  removeConnection(a: string, b: string) {
+    const removeConnection = new RemoveConnection(a, b);
+    this.simulation.addUserAction(removeConnection);
   }
 
   public addNode(publicKey: string, trustedNodes: string[], threshold: number) {

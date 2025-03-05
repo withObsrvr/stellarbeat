@@ -1,5 +1,4 @@
-import { UserAction, ProtocolAction, QuorumSet } from '../../../core';
-import { FederatedVotingContext } from '../../FederatedVotingContext';
+import { UserAction, ProtocolAction, QuorumSet, Context } from '../../../core';
 
 export class UpdateQuorumSet extends UserAction {
 	subType = 'UpdateQuorumSet';
@@ -11,7 +10,7 @@ export class UpdateQuorumSet extends UserAction {
 		super();
 	}
 
-	execute(context: FederatedVotingContext): ProtocolAction[] {
+	execute(context: Context): ProtocolAction[] {
 		return context.updateQuorumSet(this.publicKey, this.quorumSet);
 	}
 

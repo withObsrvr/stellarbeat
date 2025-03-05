@@ -78,6 +78,7 @@ const handleLinkClick = (event: Event, link: LinkDatum) => {
   if (simulationManager) {
     simulationManager.updateSimulationLinks(graphManager.links);
   }
+  federatedVotingStore.removeConnection(link.source.id, link.target.id);
 };
 
 const handleNodeClick = (node: NodeDatum) => {
@@ -85,6 +86,7 @@ const handleNodeClick = (node: NodeDatum) => {
     graphManager.addLink(addLinkSourceNode.value, node);
     if (simulationManager)
       simulationManager.updateSimulationLinks(graphManager.links);
+    federatedVotingStore.addConnection(addLinkSourceNode.value.id, node.id);
     addLinkSourceNode.value = null;
   } else {
     addLinkSourceNode.value = node;
@@ -97,21 +99,23 @@ function isNodeSelected(node: NodeDatum): boolean {
 
 const updateLinks = () => {
   const newLinks: LinkDatum[] = [];
-  graphManager.nodes.forEach((node) => {
-    graphManager.nodes.forEach((otherNode) => {
-      //links are bidirectional, dont add duplicates
+  federatedVotingStore.connections.forEach((node) => {
+    node.connections.forEach((connection) => {
+      const source = graphManager.nodes.find((n) => n.id === node.publicKey);
+      const target = graphManager.nodes.find((n) => n.id === connection);
+      if (!source || !target) return;
       if (
-        node.id !== otherNode.id &&
-        !newLinks.some(
+        newLinks.some(
           (link) =>
-            link.source.id === otherNode.id && link.target.id === node.id,
-        )
+            link.source.id === target.id && link.target.id === source.id,
+        ) // Bidirectional connection
       ) {
-        newLinks.push({
-          source: node,
-          target: otherNode,
-        });
+        return;
       }
+      newLinks.push({
+        source,
+        target,
+      });
     });
   });
 

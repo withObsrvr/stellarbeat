@@ -1,14 +1,11 @@
 import { Message } from '../Message';
-import { OverlayEvent } from './OverlayEvent';
+import { OverlayEvent } from '../../overlay/event/OverlayEvent';
 
 export class MessageSent extends OverlayEvent {
 	subType = 'MessageSent';
 
-	constructor(
-		public readonly publicKey: string,
-		public readonly message: Message
-	) {
-		super(publicKey);
+	constructor(public readonly message: Message) {
+		super(message.sender);
 	}
 
 	toString(): string {

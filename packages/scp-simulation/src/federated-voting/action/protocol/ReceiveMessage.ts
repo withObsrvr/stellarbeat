@@ -1,6 +1,5 @@
 import { Message } from '../../Message';
-import { ProtocolAction } from '../../../core';
-import { FederatedVotingContext } from '../../FederatedVotingContext';
+import { Context, ProtocolAction } from '../../../core';
 
 export class ReceiveMessage extends ProtocolAction {
 	subType = 'ReceiveMessage';
@@ -11,7 +10,7 @@ export class ReceiveMessage extends ProtocolAction {
 		this.publicKey = message.receiver;
 	}
 
-	execute(context: FederatedVotingContext): ProtocolAction[] {
+	execute(context: Context): ProtocolAction[] {
 		return context.receiveMessage(this.message);
 	}
 

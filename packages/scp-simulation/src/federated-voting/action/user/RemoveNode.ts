@@ -1,5 +1,4 @@
-import { Node, ProtocolAction, QuorumSet, UserAction } from '../../../core';
-import { FederatedVotingContext } from '../../FederatedVotingContext';
+import { Context, ProtocolAction, UserAction } from '../../../core';
 
 export class RemoveNode extends UserAction {
 	subType = 'RemoveNode';
@@ -8,10 +7,8 @@ export class RemoveNode extends UserAction {
 		super();
 	}
 
-	execute(context: FederatedVotingContext): ProtocolAction[] {
-		context.removeNode(this.publicKey);
-
-		return [];
+	execute(context: Context): ProtocolAction[] {
+		return context.removeNode(this.publicKey);
 	}
 
 	toString(): string {

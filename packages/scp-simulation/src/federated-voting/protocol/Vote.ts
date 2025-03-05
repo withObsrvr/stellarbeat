@@ -15,4 +15,8 @@ export class Vote {
 			return `${this.publicKey}:vote(${this.statement})`;
 		else return `${this.publicKey}:vote(accept(${this.statement}))`;
 	}
+
+	hash(): string {
+		return `${this.publicKey.toString()}${this.statement.toString()}${this.isVoteToAccept}${this.quorumSet.toJSON()}`;
+	}
 }

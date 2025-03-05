@@ -1,4 +1,5 @@
 import { Event, Context, UserAction, ProtocolAction, Node } from '../core';
+import { AddConnection, RemoveConnection } from '../overlay';
 
 //A step in the simulation. Contains all user and protocol actions to be executed next
 //and stores the state and events that got us here.
@@ -73,7 +74,10 @@ export class Simulation {
 		this.isScenario = false;
 
 		const existingAction = this.currentStep.userActions.find(
-			(a) => a.subType === action.subType && a.publicKey === action.publicKey
+			(a) =>
+				a.subType === action.subType &&
+				a.publicKey === action.publicKey &&
+				!(action instanceof AddConnection || action instanceof RemoveConnection) //todo: we need a better solution! Maybe isIdempotent Prop?
 		);
 		if (existingAction) {
 			const index = this.currentStep.userActions.indexOf(existingAction);

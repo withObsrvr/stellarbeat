@@ -10,15 +10,13 @@ import {
 
 import { Message } from './Message';
 import { ProtocolAction } from '../core/ProtocolAction';
-import { SendMessage } from './action/protocol/SendMessage';
 import { FederatedVotingProtocolState } from './protocol/FederatedVotingProtocolState';
 import { FederatedVotingProtocol } from './protocol/FederatedVotingProtocol';
-import { Statement, Vote } from './protocol';
-import { MessageSent } from './event/MessageSent';
-import { MessageReceived } from './event/MessageReceived';
+import { Statement } from './protocol';
 import { BroadcastVoteRequested } from './protocol/event/BroadcastVoteRequested';
-import { ReceiveMessage } from './action/protocol/ReceiveMessage';
 import { NodeUpdatedQuorumSet } from './protocol/event/NodeUpdatedQuorumSet';
+import { Overlay, Payload } from '../overlay/Overlay';
+import { Broadcast } from './action/protocol/Broadcast';
 
 export interface FederatedVotingContextState {
 	initialNodes: Node[];
@@ -34,7 +32,12 @@ export class FederatedVotingContext
 		protocolStates: []
 	};
 
-	constructor(private federatedVotingProtocol: FederatedVotingProtocol) {
+	constructor(
+		private federatedVotingProtocol: FederatedVotingProtocol,
+		private overlay: Overlay
+	) {
+		overlay.fullyConnected = true;
+		overlay.gossipEnabled = false;
 		super();
 	}
 
@@ -59,11 +62,15 @@ export class FederatedVotingContext
 				)
 			)
 		);
+
+		this.overlay.drainEvents();
+		this.federatedVotingProtocol.drainEvents();
 	}
 
 	reset(): void {
 		//todo: could we make this class purer?
 		this.state.protocolStates = [];
+		this.overlay.reset();
 		this.drainEvents(); // Clear the collected events
 		this.addInitialNodesToContext();
 	}
@@ -102,23 +109,47 @@ export class FederatedVotingContext
 		return newProtocolActions;
 	}
 
-	addNode(node: Node): void {
+	addNode(node: Node): ProtocolAction[] {
 		if (this.getProtocolState(node.publicKey)) {
-			return;
+			return [];
 		}
 		this.state.protocolStates.push(new FederatedVotingProtocolState(node));
+
+		this.overlay.addNode(node.publicKey);
+		//todo: Events?
+
+		return [];
 	}
 
-	removeNode(publicKey: string): void {
+	addConnection(a: PublicKey, b: PublicKey): ProtocolAction[] {
+		this.overlay.addConnection(a, b);
+		this.registerEvents(this.overlay.drainEvents());
+
+		return [];
+	}
+
+	removeConnection(a: PublicKey, b: PublicKey): ProtocolAction[] {
+		this.overlay.removeConnection(a, b);
+		this.registerEvents(this.overlay.drainEvents());
+
+		return [];
+	}
+
+	removeNode(publicKey: string): ProtocolAction[] {
 		const index = this.state.protocolStates.findIndex(
 			(state) => state.node.publicKey === publicKey
 		);
 		if (index === -1) {
 			console.log('Node not found');
-			return;
+			return [];
 		}
 
 		this.state.protocolStates.splice(index, 1);
+
+		this.overlay.removeNode(publicKey);
+		//todo: Events?
+
+		return [];
 	}
 
 	updateQuorumSet(
@@ -133,8 +164,6 @@ export class FederatedVotingContext
 			return [];
 		}
 
-		//todo: should be handled in the protocol and event should be created there
-		//but has no sideeffects at the moment so we can do it here for now
 		node.updateQuorumSet(quorumSet);
 		this.registerEvent(new NodeUpdatedQuorumSet(publicKey, quorumSet));
 
@@ -168,16 +197,21 @@ export class FederatedVotingContext
 
 		this.registerEvents(events);
 
-		return this.processBroadcastRequests(events);
+		return this.processVoteBroadcastRequests(events);
 	}
 
-	private processBroadcastRequests(events: Event[]): ProtocolAction[] {
+	private processVoteBroadcastRequests(events: Event[]): ProtocolAction[] {
 		const protocolActions: ProtocolAction[] = [];
 		events
 			.filter((event) => event instanceof BroadcastVoteRequested)
 			.forEach((event) => {
 				const broadcastVoteRequested = event as BroadcastVoteRequested;
-				protocolActions.push(...this.broadcast(broadcastVoteRequested.vote));
+				protocolActions.push(
+					new Broadcast(
+						broadcastVoteRequested.publicKey,
+						broadcastVoteRequested.vote
+					)
+				);
 			});
 
 		return protocolActions;
@@ -196,10 +230,24 @@ export class FederatedVotingContext
 	}
 
 	sendMessage(message: Message): ProtocolAction[] {
-		const messageSent = new MessageSent(message.sender, message);
-		this.registerEvent(messageSent);
+		const action = this.overlay.sendMessage(message);
+		this.registerEvents(this.overlay.drainEvents());
 
-		return [new ReceiveMessage(message)];
+		return [action];
+	}
+
+	broadcastPayload(broadcaster: PublicKey, payload: Payload): ProtocolAction[] {
+		const actions = this.overlay.broadcast(broadcaster, payload);
+		this.registerEvents(this.overlay.drainEvents());
+
+		return actions;
+	}
+
+	gossipPayload(gossiper: PublicKey, payload: Payload): ProtocolAction[] {
+		const actions = this.overlay.gossip(gossiper, payload);
+		this.registerEvents(this.overlay.drainEvents());
+
+		return actions;
 	}
 
 	receiveMessage(message: Message): ProtocolAction[] {
@@ -209,8 +257,8 @@ export class FederatedVotingContext
 			return [];
 		}
 
-		const messageReceived = new MessageReceived(message.receiver, message);
-		this.registerEvent(messageReceived);
+		const gossipActions = this.overlay.receiveMessage(message);
+		this.registerEvents(this.overlay.drainEvents());
 
 		this.federatedVotingProtocol.processVote(
 			message.vote,
@@ -220,27 +268,7 @@ export class FederatedVotingContext
 
 		this.registerEvents(events);
 
-		return this.processBroadcastRequests(events);
-	}
-
-	//in the future we handle this with an overlay class. For now we assume all nodes are connected.
-	//As in the scp whitepaper we assume an asynchronous network that eventually delivers all messages.
-	//For every message, a send action is queued. This allows the user to 'tamper' with these actions before
-	//they are actually executed
-	private broadcast(vote: Vote): ProtocolAction[] {
-		const protocolActions: ProtocolAction[] = [];
-		this.getCompleteConnections(vote.publicKey).forEach((connection) => {
-			const message = new Message(vote.publicKey, connection, vote);
-			protocolActions.push(new SendMessage(message));
-		});
-
-		return protocolActions;
-	}
-
-	private getCompleteConnections(publicKey: PublicKey): PublicKey[] {
-		return this.nodes
-			.filter((node) => node.publicKey !== publicKey)
-			.map((node) => node.publicKey);
+		return this.processVoteBroadcastRequests(events).concat(gossipActions);
 	}
 
 	get nodes(): Node[] {
@@ -260,9 +288,11 @@ export class FederatedVotingContext
 	}
 
 	get connections(): { publicKey: PublicKey; connections: PublicKey[] }[] {
-		return this.nodes.map((node) => ({
-			publicKey: node.publicKey,
-			connections: this.getCompleteConnections(node.publicKey)
-		}));
+		const result: { publicKey: PublicKey; connections: PublicKey[] }[] = [];
+		this.overlay.connections.forEach((connections, publicKey) => {
+			result.push({ publicKey, connections: Array.from(connections) });
+		});
+
+		return result;
 	}
 }

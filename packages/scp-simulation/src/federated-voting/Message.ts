@@ -5,7 +5,7 @@ export class Message {
 	constructor(
 		public readonly sender: PublicKey,
 		public readonly receiver: PublicKey,
-		public readonly vote: Vote
+		public readonly vote: Vote // in the future this should be an abstract payload with a hash function
 	) {}
 
 	toString(): string {
