@@ -1,41 +1,47 @@
 <template>
-  <path
-    :class="['link', { selected }]"
-    :d="getLinkPath(link)"
-    @click="$emit('linkClick', link)"
-  ></path>
+  <line
+    class="link"
+    :class="{ 'link-hovered': isHovered }"
+    :x1="link.source.x"
+    :y1="link.source.y"
+    :x2="link.target.x"
+    :y2="link.target.y"
+    @mouseover="handleLinkMouseOver"
+    @mouseleave="handleLinkMouseLeave"
+    @click.stop="$emit('click', $event, link)"
+  />
 </template>
+
 <script setup lang="ts">
-import useGraph from "@/composables/useGraph";
-import { type PropType, type Ref, toRefs } from "vue";
-import { type LinkDatum } from "@/components/federated-voting/overlay-graph/GraphManager";
+import { defineProps, defineEmits, ref } from "vue";
+import { LinkDatum } from "./GraphManager";
 
-const { getLinkPath } = useGraph();
+defineProps<{
+  link: LinkDatum;
+}>();
 
-const props = defineProps({
-  link: {
-    type: Object as PropType<LinkDatum>,
-    required: true,
-  },
-  selected: {
-    type: Boolean,
-    default: false,
-  },
-});
+defineEmits(["click"]);
 
-const link: Ref<LinkDatum> = toRefs(props).link;
+const isHovered = ref(false);
+
+// Add handlers for link hover
+const handleLinkMouseOver = () => {
+  isHovered.value = true;
+};
+
+const handleLinkMouseLeave = () => {
+  isHovered.value = false;
+};
 </script>
-<style lang="scss" scoped>
-@import "@/assets/variables";
+
+<style scoped>
 .link {
-  fill: none;
   stroke: #1687b2;
-  stroke-width: 0.5px;
+  stroke-width: 3px;
   cursor: pointer;
 }
 
-.link.selected {
-  stroke-width: 1px;
-  stroke: $yellow;
+.link-hovered {
+  stroke-width: 5px;
 }
 </style>

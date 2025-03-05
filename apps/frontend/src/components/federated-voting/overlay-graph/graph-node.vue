@@ -2,7 +2,10 @@
   <g
     :transform="getNodeTransform(node)"
     class="node-container"
-    @click="$emit('nodeClick', node)"
+    :class="hoveredClass"
+    @click="$emit('click', node)"
+    @mouseover="handleMouseOver"
+    @mouseout="handleMouseOut"
   >
     <circle :class="circleClassName" r="6"></circle>
     <g>
@@ -25,7 +28,7 @@
 import { useTruncate } from "@/composables/useTruncate";
 import useGraph from "@/composables/useGraph";
 import { type NodeDatum } from "@/components/federated-voting/overlay-graph/GraphManager";
-import { type PropType, toRefs, computed } from "vue";
+import { type PropType, toRefs, computed, ref } from "vue";
 
 const truncate = useTruncate();
 const { getLabelX, getLabelWidth, getNodeTransform } = useGraph();
@@ -39,6 +42,18 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+});
+
+const isHovered = ref(false);
+const handleMouseOver = () => {
+  isHovered.value = true;
+};
+const handleMouseOut = () => {
+  isHovered.value = false;
+};
+
+const hoveredClass = computed(() => {
+  return isHovered.value ? "hovered" : "";
 });
 
 const { node, selected } = toRefs(props);
@@ -60,12 +75,16 @@ const rectLabelClassName = computed(() => {
 <style lang="scss" scoped>
 @import "@/assets/variables";
 
+.node-container {
+  cursor: pointer;
+}
 .node {
   fill: #1687b2;
   stroke: #fff;
   stroke-width: 2px;
 }
 .node-selected {
+  r: 10px;
   stroke-width: 2px;
   fill: #1687b2;
   stroke: $yellow;
@@ -96,5 +115,10 @@ const rectLabelClassName = computed(() => {
   font-weight: 400;
   fill: #1687b2;
   text-transform: lowercase;
+}
+
+.hovered circle {
+  r: 10px !important;
+  cursor: pointer;
 }
 </style>

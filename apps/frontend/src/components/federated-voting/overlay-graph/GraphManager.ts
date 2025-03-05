@@ -18,7 +18,7 @@ export class GraphManager {
   constructor(nodes: NodeDatum[], links: LinkDatum[]) {
     this.nodes = nodes;
     this.nodesMap = new Map(nodes.map((node) => [node.id, node]));
-    this.updateConnections(links);
+    this.updateLinks(links);
   }
 
   getNodeById(id: string): NodeDatum | null {
@@ -31,7 +31,7 @@ export class GraphManager {
     return link.source === selectedNode;
   }
 
-  updateConnections(links: LinkDatum[]) {
+  updateLinks(links: LinkDatum[]) {
     this.links = links;
   }
 

@@ -27,34 +27,23 @@
           xmlns="http://www.w3.org/2000/svg"
           width="100%"
           height="100%"
-          @mousedown="startPan"
-          @mousemove="pan"
-          @mouseup="endPan"
-          @mouseleave="endPan"
-          @wheel.prevent="zoom"
-          @touchstart="startPan"
-          @touchmove.prevent="pan"
-          @touchend="endPan"
         >
-          <g
-            :transform="`translate(${translateX}, ${translateY}) scale(${scale})`"
-          >
-            <g>
-              <graph-link
-                v-for="link in links"
-                :key="'overlay' + link.source.id + link.target.id"
-                :link="link"
-                @click="handleLinkClick(link)"
-              />
-            </g>
-            <g>
-              <graph-node
-                v-for="node in nodes"
-                :key="'overlay' + node.id"
-                :node="node"
-                @click="handleNodeClick(node)"
-              />
-            </g>
+          <g>
+            <graph-link
+              v-for="link in graphManager.links"
+              :key="'overlay' + link.source.id + link.target.id"
+              :link="link"
+              @click="(event) => handleLinkClick(event, link)"
+            />
+          </g>
+          <g>
+            <graph-node
+              v-for="node in graphManager.nodes"
+              :key="'overlay' + node.id"
+              :node="node"
+              :selected="isNodeSelected(node)"
+              @click="handleNodeClick(node)"
+            />
           </g>
         </svg>
       </div>
@@ -73,10 +62,6 @@ import {
 import { SimulationManager } from "@/components/federated-voting/overlay-graph/SimulationManager";
 import GraphLink from "@/components/federated-voting/overlay-graph/graph-link.vue";
 import GraphNode from "@/components/federated-voting/overlay-graph/graph-node.vue";
-import { usePanning } from "../fbas-graph/usePanning";
-
-const { translateX, translateY, scale, startPan, pan, endPan, zoom } =
-  usePanning();
 
 const initialRepellingForce = 1000;
 const repellingForce = ref(initialRepellingForce);
@@ -84,36 +69,44 @@ const overlayGraph = ref<SVGElement | null>(null);
 const graphManager = reactive(new GraphManager([], []));
 
 let simulationManager: SimulationManager | null = null;
-let addLinkSourceNode: NodeDatum | null = null;
+const addLinkSourceNode: Ref<NodeDatum | null> = ref(null);
 let currentNetworkStructureUpdate = federatedVotingStore.networkStructureUpdate;
 
-const handleLinkClick = (link: LinkDatum) => {
+const handleLinkClick = (event: Event, link: LinkDatum) => {
+  event.stopPropagation();
   graphManager.removeLink(link);
   if (simulationManager) {
-    //simulationManager.updateSimulationLinks(graphManager.links);
+    simulationManager.updateSimulationLinks(graphManager.links);
   }
 };
 
 const handleNodeClick = (node: NodeDatum) => {
-  federatedVotingStore.selectedNodeId = node.id;
-  if (addLinkSourceNode) {
-    graphManager.addLink(addLinkSourceNode, node);
+  if (addLinkSourceNode.value) {
+    graphManager.addLink(addLinkSourceNode.value, node);
     if (simulationManager)
-      //simulationManager.updateSimulationLinks(graphManager.links);
-      addLinkSourceNode = null;
+      simulationManager.updateSimulationLinks(graphManager.links);
+    addLinkSourceNode.value = null;
   } else {
-    addLinkSourceNode = node;
+    addLinkSourceNode.value = node;
   }
 };
 
-const nodes: Ref<NodeDatum[]> = ref([]);
-const links: Ref<LinkDatum[]> = ref([]);
+function isNodeSelected(node: NodeDatum): boolean {
+  return addLinkSourceNode.value?.id === node.id;
+}
 
 const updateLinks = () => {
   const newLinks: LinkDatum[] = [];
-  nodes.value.forEach((node) => {
-    nodes.value.forEach((otherNode) => {
-      if (node.id !== otherNode.id) {
+  graphManager.nodes.forEach((node) => {
+    graphManager.nodes.forEach((otherNode) => {
+      //links are bidirectional, dont add duplicates
+      if (
+        node.id !== otherNode.id &&
+        !newLinks.some(
+          (link) =>
+            link.source.id === otherNode.id && link.target.id === node.id,
+        )
+      ) {
         newLinks.push({
           source: node,
           target: otherNode,
@@ -122,20 +115,20 @@ const updateLinks = () => {
     });
   });
 
-  links.value = newLinks;
+  graphManager.updateLinks(newLinks);
 };
 
 const updateGraph = () => {
   // Get node positions for persistence
   const nodePositions = new Map<string, { x: number; y: number }>();
-  nodes.value.forEach((node) => {
+  graphManager.nodes.forEach((node) => {
     if (node.x !== undefined && node.y !== undefined) {
       nodePositions.set(node.id, { x: node.x, y: node.y });
     }
   });
 
   // Update nodes from store, preserving positions
-  nodes.value = federatedVotingStore.nodes.map((node) => {
+  graphManager.nodes = federatedVotingStore.nodes.map((node) => {
     const position = nodePositions.get(node.publicKey);
     return {
       id: node.publicKey,
@@ -149,15 +142,15 @@ const updateGraph = () => {
 
   if (simulationManager) {
     simulationManager.updateSimulation(
-      nodes.value,
-      links.value,
+      graphManager.nodes,
+      graphManager.links,
       width(),
       height(),
     );
   } else {
     simulationManager = new SimulationManager(
-      nodes.value,
-      links.value,
+      graphManager.nodes,
+      graphManager.links,
       repellingForce.value,
       width(),
       height(),
@@ -179,8 +172,8 @@ watch(
     currentNetworkStructureUpdate = federatedVotingStore.networkStructureUpdate;
 
     if (
-      federatedVotingStore.nodes.length !== nodes.value.length ||
-      !nodes.value.every((node) =>
+      federatedVotingStore.nodes.length !== graphManager.nodes.length ||
+      !graphManager.nodes.every((node) =>
         federatedVotingStore.nodes.some((n) => n.publicKey === node.id),
       )
     ) {
@@ -194,7 +187,7 @@ onMounted(() => {
 });
 
 const updateRepellingForce = () => {
-  if (simulationManager && nodes.value.length > 0) {
+  if (simulationManager && graphManager.nodes.length > 0) {
     simulationManager.updateSimulationForce(repellingForce.value);
   }
 };
@@ -254,7 +247,6 @@ const height = (): number => {
 .overlay-graph {
   width: 100%;
   height: 100%;
-  cursor: grab;
 }
 .title {
   color: #333;
