@@ -27,26 +27,41 @@
           xmlns="http://www.w3.org/2000/svg"
           width="100%"
           height="100%"
+          @mousedown="startPan"
+          @mousemove="pan"
+          @mouseup="endPan"
+          @mouseleave="endPan"
+          @wheel.prevent="zoom"
+          @touchstart="startPan"
+          @touchmove.prevent="pan"
+          @touchend="endPan"
         >
-          <g>
-            <graph-link
-              v-for="link in links"
-              :key="'overlay' + link.source.id + link.target.id"
-              :link="link"
-            />
-          </g>
-          <g>
-            <graph-node
-              v-for="node in nodes"
-              :key="'overlay' + node.id"
-              :node="node"
-            />
+          <g
+            :transform="`translate(${translateX}, ${translateY}) scale(${scale})`"
+          >
+            <g>
+              <graph-link
+                v-for="link in links"
+                :key="'overlay' + link.source.id + link.target.id"
+                :link="link"
+                @click="handleLinkClick(link)"
+              />
+            </g>
+            <g>
+              <graph-node
+                v-for="node in nodes"
+                :key="'overlay' + node.id"
+                :node="node"
+                @click="handleNodeClick(node)"
+              />
+            </g>
           </g>
         </svg>
       </div>
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
 import { onMounted, reactive, Ref, ref, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
@@ -58,15 +73,18 @@ import {
 import { SimulationManager } from "@/components/federated-voting/overlay-graph/SimulationManager";
 import GraphLink from "@/components/federated-voting/overlay-graph/graph-link.vue";
 import GraphNode from "@/components/federated-voting/overlay-graph/graph-node.vue";
+import { usePanning } from "../fbas-graph/usePanning";
+
+const { translateX, translateY, scale, startPan, pan, endPan, zoom } =
+  usePanning();
 
 const initialRepellingForce = 1000;
-const repellingForce = ref(initialRepellingForce); // Add repellingForce ref
+const repellingForce = ref(initialRepellingForce);
 const overlayGraph = ref<SVGElement | null>(null);
 const graphManager = reactive(new GraphManager([], []));
 
 let simulationManager: SimulationManager | null = null;
 let addLinkSourceNode: NodeDatum | null = null;
-// Track the current network structure update
 let currentNetworkStructureUpdate = federatedVotingStore.networkStructureUpdate;
 
 const handleLinkClick = (link: LinkDatum) => {
@@ -140,7 +158,7 @@ const updateGraph = () => {
     simulationManager = new SimulationManager(
       nodes.value,
       links.value,
-      initialRepellingForce,
+      repellingForce.value,
       width(),
       height(),
     );
@@ -149,25 +167,24 @@ const updateGraph = () => {
 
 import "d3-transition";
 
-// Watch for network structure changes
 watch(
   () => federatedVotingStore.networkStructureUpdate,
   () => {
     if (
-      currentNetworkStructureUpdate !==
+      currentNetworkStructureUpdate ===
       federatedVotingStore.networkStructureUpdate
     ) {
-      currentNetworkStructureUpdate =
-        federatedVotingStore.networkStructureUpdate;
-      //check if nodes have been added or removed. checking length is not enough as a node could have been removed and another one added
-      if (
-        federatedVotingStore.nodes.length !== nodes.value.length ||
-        !nodes.value.every((node) =>
-          federatedVotingStore.nodes.some((n) => n.publicKey === node.id),
-        )
-      ) {
-        updateGraph();
-      }
+      return;
+    }
+    currentNetworkStructureUpdate = federatedVotingStore.networkStructureUpdate;
+
+    if (
+      federatedVotingStore.nodes.length !== nodes.value.length ||
+      !nodes.value.every((node) =>
+        federatedVotingStore.nodes.some((n) => n.publicKey === node.id),
+      )
+    ) {
+      updateGraph();
     }
   },
 );
@@ -176,7 +193,6 @@ onMounted(() => {
   updateGraph();
 });
 
-// Update the updateRepellingForce function to use the ref value
 const updateRepellingForce = () => {
   if (simulationManager && nodes.value.length > 0) {
     simulationManager.updateSimulationForce(repellingForce.value);
@@ -238,6 +254,7 @@ const height = (): number => {
 .overlay-graph {
   width: 100%;
   height: 100%;
+  cursor: grab;
 }
 .title {
   color: #333;
