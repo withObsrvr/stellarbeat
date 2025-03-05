@@ -33,6 +33,19 @@ export class SimulationManager {
       .alphaMin(0.1); // stops the simulation when alpha reaches 0.1
   }
 
+  public updateSimulation(
+    nodes: NodeDatum[],
+    links: LinkDatum[],
+    width: number,
+    height: number,
+  ) {
+    this.nodes = nodes;
+    this.links = links;
+    this.width = width;
+    this.height = height;
+    this.createSimulation();
+  }
+
   private getCharge() {
     return forceManyBody().strength(() => -this.repellingForce);
   }

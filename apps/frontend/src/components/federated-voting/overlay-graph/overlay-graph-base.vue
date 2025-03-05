@@ -21,9 +21,9 @@
           </g>
           <g>
             <graph-node
-              v-for="nody in nodes"
-              :key="'overlay' + nody.id"
-              :node="nody"
+              v-for="node in nodes"
+              :key="'overlay' + node.id"
+              :node="node"
             />
           </g>
         </svg>
@@ -64,7 +64,6 @@ import {
 import { SimulationManager } from "@/components/federated-voting/overlay-graph/SimulationManager";
 import GraphLink from "@/components/federated-voting/overlay-graph/graph-link.vue";
 import GraphNode from "@/components/federated-voting/overlay-graph/graph-node.vue";
-import { MessageSent } from "scp-simulation";
 
 const initialRepellingForce = 1000;
 const overlayGraph = ref<SVGElement | null>(null);
@@ -72,6 +71,8 @@ const graphManager = reactive(new GraphManager([], []));
 
 let simulationManager: SimulationManager | null = null;
 let addLinkSourceNode: NodeDatum | null = null;
+// Track the current network structure update
+let currentNetworkStructureUpdate = federatedVotingStore.networkStructureUpdate;
 
 const handleLinkClick = (link: LinkDatum) => {
   graphManager.removeLink(link);
@@ -98,7 +99,6 @@ const links: Ref<LinkDatum[]> = ref([]);
 const updateLinks = () => {
   const newLinks: LinkDatum[] = [];
   nodes.value.forEach((node) => {
-    //todo: handle in context. How do we handle bi-directionality?
     nodes.value.forEach((otherNode) => {
       if (node.id !== otherNode.id) {
         newLinks.push({
@@ -112,25 +112,73 @@ const updateLinks = () => {
   links.value = newLinks;
 };
 
-import "d3-transition";
+const updateGraph = () => {
+  // Get node positions for persistence
+  const nodePositions = new Map<string, { x: number; y: number }>();
+  nodes.value.forEach((node) => {
+    if (node.x !== undefined && node.y !== undefined) {
+      nodePositions.set(node.id, { x: node.x, y: node.y });
+    }
+  });
 
-onMounted(() => {
-  nodes.value = federatedVotingStore.nodes.map((node) => ({
-    id: node.publicKey,
-    name: node.publicKey,
-    x: 0,
-    y: 0,
-  }));
+  // Update nodes from store, preserving positions
+  nodes.value = federatedVotingStore.nodes.map((node) => {
+    const position = nodePositions.get(node.publicKey);
+    return {
+      id: node.publicKey,
+      name: node.publicKey,
+      x: position ? position.x : 0,
+      y: position ? position.y : 0,
+    };
+  });
 
   updateLinks();
 
-  simulationManager = new SimulationManager(
-    nodes.value,
-    links.value,
-    initialRepellingForce,
-    width(),
-    height(),
-  );
+  if (simulationManager) {
+    simulationManager.updateSimulation(
+      nodes.value,
+      links.value,
+      width(),
+      height(),
+    );
+  } else {
+    simulationManager = new SimulationManager(
+      nodes.value,
+      links.value,
+      initialRepellingForce,
+      width(),
+      height(),
+    );
+  }
+};
+
+import "d3-transition";
+
+// Watch for network structure changes
+watch(
+  () => federatedVotingStore.networkStructureUpdate,
+  () => {
+    if (
+      currentNetworkStructureUpdate !==
+      federatedVotingStore.networkStructureUpdate
+    ) {
+      currentNetworkStructureUpdate =
+        federatedVotingStore.networkStructureUpdate;
+      //check if nodes have been added or removed. checking length is not enough as a node could have been removed and another one added
+      if (
+        federatedVotingStore.nodes.length !== nodes.value.length ||
+        !nodes.value.every((node) =>
+          federatedVotingStore.nodes.some((n) => n.publicKey === node.id),
+        )
+      ) {
+        updateGraph();
+      }
+    }
+  },
+);
+
+onMounted(() => {
+  updateGraph();
 });
 
 const updateRepellingForce = (force: number) => {
