@@ -1,7 +1,38 @@
 <template>
   <div class="card h-100">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
       <h4 class="card-title">Network connections (overlay)</h4>
+      <div class="badges">
+        <span
+          v-if="federatedVotingStore.overlayIsGossipEnabled"
+          v-tooltip.bottom="'Disable in scenario settings'"
+          class="badge badge-info ms-2"
+        >
+          Gossiping
+        </span>
+        <span
+          v-if="!federatedVotingStore.overlayIsGossipEnabled"
+          v-tooltip.bottom="'Enable in scenario settings'"
+          class="badge bg-secondary ms-2"
+        >
+          Gossiping Disabled
+        </span>
+        <span
+          v-if="federatedVotingStore.overlayIsFullyConnected"
+          v-tooltip.bottom="
+            'Disable to allow user modifications in scenario settings'
+          "
+          class="badge bg-info ms-2"
+        >
+          Fully Connected
+        </span>
+        <span
+          v-else
+          v-tooltip.bottom="'User can add/remove connections'"
+          class="badge bg-info ms-2"
+          >Editable</span
+        >
+      </div>
     </div>
     <div class="card-body h-100">
       <div class="chart-container h-100 position-relative">
@@ -33,6 +64,7 @@
               v-for="link in graphManager.links"
               :key="'overlay' + link.source.id + link.target.id"
               :link="link"
+              :hover-disabled="federatedVotingStore.overlayIsFullyConnected"
               @click="(event) => handleLinkClick(event, link)"
             />
           </g>
@@ -42,6 +74,7 @@
               :key="'overlay' + node.id"
               :node="node"
               :selected="isNodeSelected(node)"
+              :hover-disabled="federatedVotingStore.overlayIsFullyConnected"
               @click="handleNodeClick(node)"
             />
           </g>
@@ -72,6 +105,7 @@ let simulationManager: SimulationManager | null = null;
 const addLinkSourceNode: Ref<NodeDatum | null> = ref(null);
 
 const handleLinkClick = (event: Event, link: LinkDatum) => {
+  if (federatedVotingStore.overlayIsFullyConnected) return; // Prevent editing when fully connected
   event.stopPropagation();
   graphManager.removeLink(link);
   if (simulationManager) {
@@ -81,6 +115,8 @@ const handleLinkClick = (event: Event, link: LinkDatum) => {
 };
 
 const handleNodeClick = (node: NodeDatum) => {
+  if (federatedVotingStore.overlayIsFullyConnected) return; // Prevent editing when fully connected
+
   if (addLinkSourceNode.value) {
     graphManager.addLink(addLinkSourceNode.value, node);
     if (simulationManager)
@@ -219,5 +255,15 @@ const height = (): number => {
 
 .form-range {
   height: 15px;
+}
+
+.badges {
+  display: flex;
+}
+
+.badge {
+  margin-right: 4px;
+  font-size: 0.85rem;
+  padding: 0.35em 0.65em;
 }
 </style>

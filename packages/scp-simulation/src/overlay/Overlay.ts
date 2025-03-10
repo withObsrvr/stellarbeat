@@ -22,6 +22,12 @@ export class Overlay extends InMemoryEventCollector {
 	private _fullyConnected = false;
 	private _gossipEnabled = false;
 
+	constructor(fullyConnected = true, gossipEnabled = false) {
+		super();
+		this._fullyConnected = fullyConnected;
+		this._gossipEnabled = gossipEnabled;
+	}
+
 	//Track sent and received payloads(e.g. votes) for every node
 	private exchanges = new Set<string>();
 	private getExchangeKey(
@@ -53,19 +59,8 @@ export class Overlay extends InMemoryEventCollector {
 		);
 	}
 
-	set fullyConnected(value: boolean) {
-		this._fullyConnected = value;
-		if (this._fullyConnected) {
-			this.makeFullyConnected();
-		}
-	}
-
 	get fullyConnected(): boolean {
 		return this._fullyConnected;
-	}
-
-	set gossipEnabled(value: boolean) {
-		this._gossipEnabled = value;
 	}
 
 	get gossipEnabled(): boolean {

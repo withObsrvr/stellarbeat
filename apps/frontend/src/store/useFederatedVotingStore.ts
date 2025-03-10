@@ -211,7 +211,7 @@ class FederatedVotingStore {
   }
 
   private updateOverlayConnections() {
-    const connections = this._state.protocolContext.connections;
+    const connections = this._state.protocolContext.overlayConnections;
 
     // Apply pending user actions
     connections.forEach((connection) => {
@@ -300,12 +300,19 @@ class FederatedVotingStore {
     );
   }
 
-  public selectScenario(scenarioId: string): void {
+  public selectScenario(
+    scenarioId: string,
+    overlayIsFullyConnected = true,
+    overlayIsGossipEnabled = false,
+  ): void {
     this._state.selectedScenarioId = scenarioId;
     const scenario = this.scenarios.find((s) => s.id === scenarioId);
     if (!scenario) throw new Error("Scenario not found");
 
-    this._state.protocolContext = FederatedVotingContextFactory.create();
+    this._state.protocolContext = FederatedVotingContextFactory.create(
+      overlayIsFullyConnected,
+      overlayIsGossipEnabled,
+    );
     this._state.protocolContextState = this._state.protocolContext.getState();
     this._state.simulation = new Simulation(this._state.protocolContext);
     scenario.loader(this.simulation as Simulation);
@@ -537,6 +544,14 @@ class FederatedVotingStore {
 
   get latestSimulationStepWentForwards(): boolean {
     return this._state.latestSimulationStepWentForwards;
+  }
+
+  get overlayIsFullyConnected(): boolean {
+    return this._state.protocolContext.overlayIsFullyConnected;
+  }
+
+  get overlayIsGossipEnabled(): boolean {
+    return this._state.protocolContext.overlayIsGossipEnabled;
   }
 }
 

@@ -44,7 +44,7 @@ export class ConsoleInterfacer {
 
 	private showNodeConnections(): void {
 		this.consoleAdjacencyMatrixVisualizer.visualize(
-			this.federatedVotingContext.connections
+			this.federatedVotingContext.overlayConnections
 		);
 	}
 

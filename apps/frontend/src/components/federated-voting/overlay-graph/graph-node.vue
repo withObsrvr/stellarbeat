@@ -42,10 +42,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  hoverDisabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const isHovered = ref(false);
 const handleMouseOver = () => {
+  if (props.hoverDisabled) return;
   isHovered.value = true;
 };
 const handleMouseOut = () => {
@@ -75,9 +80,6 @@ const rectLabelClassName = computed(() => {
 <style lang="scss" scoped>
 @import "@/assets/variables";
 
-.node-container {
-  cursor: pointer;
-}
 .node {
   fill: #1687b2;
   stroke: #fff;

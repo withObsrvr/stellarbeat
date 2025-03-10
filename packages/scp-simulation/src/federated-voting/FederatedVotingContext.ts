@@ -36,8 +36,6 @@ export class FederatedVotingContext
 		private federatedVotingProtocol: FederatedVotingProtocol,
 		private overlay: Overlay
 	) {
-		overlay.fullyConnected = true;
-		overlay.gossipEnabled = false;
 		super();
 	}
 
@@ -287,12 +285,23 @@ export class FederatedVotingContext
 		}));
 	}
 
-	get connections(): { publicKey: PublicKey; connections: PublicKey[] }[] {
+	get overlayConnections(): {
+		publicKey: PublicKey;
+		connections: PublicKey[];
+	}[] {
 		const result: { publicKey: PublicKey; connections: PublicKey[] }[] = [];
 		this.overlay.connections.forEach((connections, publicKey) => {
 			result.push({ publicKey, connections: Array.from(connections) });
 		});
 
 		return result;
+	}
+
+	get overlayIsGossipEnabled(): boolean {
+		return this.overlay.gossipEnabled;
+	}
+
+	get overlayIsFullyConnected(): boolean {
+		return this.overlay.fullyConnected;
 	}
 }

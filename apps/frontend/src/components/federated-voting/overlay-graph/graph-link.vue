@@ -16,8 +16,9 @@
 import { defineProps, defineEmits, ref } from "vue";
 import { LinkDatum } from "./GraphManager";
 
-defineProps<{
+const props = defineProps<{
   link: LinkDatum;
+  hoverDisabled?: boolean;
 }>();
 
 defineEmits(["click"]);
@@ -26,6 +27,7 @@ const isHovered = ref(false);
 
 // Add handlers for link hover
 const handleLinkMouseOver = () => {
+  if (props.hoverDisabled) return;
   isHovered.value = true;
 };
 
@@ -38,10 +40,10 @@ const handleLinkMouseLeave = () => {
 .link {
   stroke: #1687b2;
   stroke-width: 3px;
-  cursor: pointer;
 }
 
 .link-hovered {
   stroke-width: 5px;
+  cursor: pointer;
 }
 </style>

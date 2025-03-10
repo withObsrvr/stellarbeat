@@ -4,10 +4,13 @@ import { FederatedVotingProtocol } from './protocol/FederatedVotingProtocol';
 import { PhaseTransitioner } from './protocol/phase-transitioner/PhaseTransitioner';
 
 export class FederatedVotingContextFactory {
-	static create(): FederatedVotingContext {
+	static create(
+		overlayFullyConnected = true,
+		overlayGossipEnabled = false
+	): FederatedVotingContext {
 		return new FederatedVotingContext(
 			new FederatedVotingProtocol(new PhaseTransitioner()),
-			new Overlay()
+			new Overlay(overlayFullyConnected, overlayGossipEnabled)
 		);
 	}
 }
