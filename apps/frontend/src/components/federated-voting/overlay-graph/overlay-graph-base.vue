@@ -70,7 +70,6 @@ const graphManager = reactive(new GraphManager([], []));
 
 let simulationManager: SimulationManager | null = null;
 const addLinkSourceNode: Ref<NodeDatum | null> = ref(null);
-let currentNetworkStructureUpdate = federatedVotingStore.networkStructureUpdate;
 
 const handleLinkClick = (event: Event, link: LinkDatum) => {
   event.stopPropagation();
@@ -97,52 +96,14 @@ function isNodeSelected(node: NodeDatum): boolean {
   return addLinkSourceNode.value?.id === node.id;
 }
 
-const updateLinks = () => {
-  const newLinks: LinkDatum[] = [];
-  federatedVotingStore.connections.forEach((node) => {
-    node.connections.forEach((connection) => {
-      const source = graphManager.nodes.find((n) => n.id === node.publicKey);
-      const target = graphManager.nodes.find((n) => n.id === connection);
-      if (!source || !target) return;
-      if (
-        newLinks.some(
-          (link) =>
-            link.source.id === target.id && link.target.id === source.id,
-        ) // Bidirectional connection
-      ) {
-        return;
-      }
-      newLinks.push({
-        source,
-        target,
-      });
-    });
-  });
-
-  graphManager.updateLinks(newLinks);
-};
-
 const updateGraph = () => {
-  // Get node positions for persistence
-  const nodePositions = new Map<string, { x: number; y: number }>();
-  graphManager.nodes.forEach((node) => {
-    if (node.x !== undefined && node.y !== undefined) {
-      nodePositions.set(node.id, { x: node.x, y: node.y });
-    }
-  });
+  const changed = graphManager.updateGraph(
+    federatedVotingStore.nodes,
+    federatedVotingStore.overlayConnections,
+  );
 
-  // Update nodes from store, preserving positions
-  graphManager.nodes = federatedVotingStore.nodes.map((node) => {
-    const position = nodePositions.get(node.publicKey);
-    return {
-      id: node.publicKey,
-      name: node.publicKey,
-      x: position ? position.x : 0,
-      y: position ? position.y : 0,
-    };
-  });
-
-  updateLinks();
+  // If nothing changed, do not update the simulation
+  if (!changed) return;
 
   if (simulationManager) {
     simulationManager.updateSimulation(
@@ -165,24 +126,13 @@ const updateGraph = () => {
 import "d3-transition";
 
 watch(
-  () => federatedVotingStore.networkStructureUpdate,
+  [
+    () => federatedVotingStore.overlayUpdate,
+    () => federatedVotingStore.simulationUpdate, //because we do live updates, we need to update the graph
+    //when the simulation is updated. Or we could miss changes when going back in the simulation
+  ],
   () => {
-    if (
-      currentNetworkStructureUpdate ===
-      federatedVotingStore.networkStructureUpdate
-    ) {
-      return;
-    }
-    currentNetworkStructureUpdate = federatedVotingStore.networkStructureUpdate;
-
-    if (
-      federatedVotingStore.nodes.length !== graphManager.nodes.length ||
-      !graphManager.nodes.every((node) =>
-        federatedVotingStore.nodes.some((n) => n.publicKey === node.id),
-      )
-    ) {
-      updateGraph();
-    }
+    updateGraph();
   },
 );
 

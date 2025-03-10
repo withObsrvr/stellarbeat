@@ -34,12 +34,14 @@ class FederatedVotingStore {
   private readonly _state = reactive<{
     simulationUpdate: number;
     networkStructureUpdate: number;
+    overlayUpdate: number;
     selectedScenarioId: string;
     selectedNodeId: string | null;
     protocolContext: FederatedVotingContext;
     protocolContextState: FederatedVotingContextState;
     networkAnalysis: NetworkAnalysis;
     nodes: FederatedNode[];
+    overlayConnections: { publicKey: string; connections: string[] }[];
     latestSimulationStepWentForwards: boolean;
     simulation: Simulation;
   }>({
@@ -53,9 +55,12 @@ class FederatedVotingStore {
     networkAnalysis: {} as NetworkAnalysis,
     nodes: [] as FederatedNode[],
     simulation: {} as Simulation, // temporary placeholder until constructor load
+    overlayConnections: [],
+    overlayUpdate: 0,
   });
 
   private _networkStructureHash: string = "";
+  private _overlayConnectionsHash: string = "";
 
   readonly scenarios = [
     {
@@ -80,7 +85,7 @@ class FederatedVotingStore {
     this._state.protocolContextState = this._state.protocolContext.getState();
     this._state.simulation = new Simulation(this._state.protocolContext);
     scenario.loader(this.simulation as Simulation);
-    this.updateNodes();
+    this.updateNetwork();
   }
 
   private calculateNetworkStructureHash(): string {
@@ -91,6 +96,23 @@ class FederatedVotingStore {
       .map((node) => {
         const trustedNodesSorted = [...node.trustedNodes].sort().join(",");
         return `${node.publicKey}:${node.trustThreshold}:[${trustedNodesSorted}]`;
+      })
+      .join("|");
+  }
+
+  private calculateOverlayConnectionsHash(
+    connections: {
+      publicKey: string;
+      connections: string[];
+    }[],
+  ): string {
+    const sortedConnections = [...connections].sort((a, b) =>
+      a.publicKey.localeCompare(b.publicKey),
+    );
+    return sortedConnections
+      .map((connection) => {
+        const sortedConnections = [...connection.connections].sort().join(",");
+        return `${connection.publicKey}:[${sortedConnections}]`;
       })
       .join("|");
   }
@@ -136,7 +158,13 @@ class FederatedVotingStore {
     return this.nodes.find((node) => node.publicKey === this.selectedNodeId);
   });
 
-  public updateNodes() {
+  private updateNetwork() {
+    this.updateNodes();
+    this.checkAndRecalculateNetworkAnalysis();
+    this.updateOverlayConnections();
+  }
+
+  private updateNodes() {
     let nodes: FederatedNode[] =
       this._state.protocolContextState.protocolStates.map((state) =>
         this.mapStateToFederatedNode(state as FederatedVotingProtocolState),
@@ -180,16 +208,56 @@ class FederatedVotingStore {
       });
 
     this._state.nodes = nodes;
+  }
 
-    this.checkAndRecalculateNetworkAnalysis();
+  private updateOverlayConnections() {
+    const connections = this._state.protocolContext.connections;
+
+    // Apply pending user actions
+    connections.forEach((connection) => {
+      this.simulation.pendingUserActions().find((action) => {
+        if (
+          action instanceof AddConnection &&
+          action.a === connection.publicKey
+        ) {
+          connection.connections.push(action.b);
+        }
+      });
+      this.simulation.pendingUserActions().find((action) => {
+        if (
+          action instanceof RemoveConnection &&
+          action.a === connection.publicKey
+        ) {
+          connection.connections = connection.connections.filter(
+            (c) => c !== action.b,
+          );
+        }
+        if (
+          action instanceof RemoveConnection &&
+          action.b === connection.publicKey
+        ) {
+          //todo: handle bidirectional connections better
+          connection.connections = connection.connections.filter(
+            (c) => c !== action.a,
+          );
+        }
+      });
+    });
+
+    const hash = this.calculateOverlayConnectionsHash(connections);
+    if (hash !== this._overlayConnectionsHash) {
+      this._overlayConnectionsHash = hash;
+      this._state.overlayConnections = connections;
+      this._state.overlayUpdate++;
+    }
   }
 
   get nodes() {
     return this._state.nodes;
   }
 
-  get connections() {
-    return this._state.protocolContext.connections;
+  get overlayConnections() {
+    return this._state.overlayConnections;
   }
 
   public getNodeWithoutPreviewChanges(publicKey: string): FederatedNode | null {
@@ -241,7 +309,7 @@ class FederatedVotingStore {
     this._state.protocolContextState = this._state.protocolContext.getState();
     this._state.simulation = new Simulation(this._state.protocolContext);
     scenario.loader(this.simulation as Simulation);
-    this.updateNodes();
+    this.updateNetwork();
   }
 
   //SIMULATION ACTIONS
@@ -300,10 +368,10 @@ class FederatedVotingStore {
       new AddNode(publicKey, new QuorumSet(threshold, trustedNodes, [])),
     );
 
-    this.updateNodes();
+    this.updateNetwork();
   }
 
-  public cancelNodeRemoval(publicKey: string) {
+  private cancelNodeRemoval(publicKey: string) {
     const pendingRemoval = this.simulation
       .pendingUserActions()
       .find(
@@ -313,11 +381,11 @@ class FederatedVotingStore {
 
     if (pendingRemoval) {
       this.simulation.cancelPendingUserAction(pendingRemoval);
-      this.updateNodes();
+      this.updateNetwork();
     }
   }
 
-  public cancelNodeAdd(publicKey: string) {
+  private cancelNodeAdd(publicKey: string) {
     const pendingAdd = this.simulation
       .pendingUserActions()
       .find(
@@ -326,7 +394,7 @@ class FederatedVotingStore {
 
     if (pendingAdd) {
       this.simulation.cancelPendingUserAction(pendingAdd);
-      this.updateNodes();
+      this.updateNetwork();
     }
   }
 
@@ -340,7 +408,7 @@ class FederatedVotingStore {
       return; //not there, no need to remove
     }
     this.simulation.addUserAction(new RemoveNode(publicKey));
-    this.updateNodes();
+    this.updateNetwork();
   }
 
   public cancelNodeTrustUpdate(publicKey: string) {
@@ -353,20 +421,20 @@ class FederatedVotingStore {
 
     if (pendingUpdate) {
       this.simulation.cancelPendingUserAction(pendingUpdate);
-      this.updateNodes();
+      this.updateNetwork();
     }
   }
 
   public cancelPendingUserAction(action: UserAction) {
     this.simulation.cancelPendingUserAction(action);
     if (action.immediateExecution) {
-      this.updateNodes();
+      this.updateNetwork();
     }
   }
 
   private simulationUpdated(forwardDirection: boolean = true) {
     this._state.latestSimulationStepWentForwards = forwardDirection;
-    this.updateNodes();
+    this.updateNetwork();
     this._state.simulationUpdate++;
   }
 
@@ -461,6 +529,10 @@ class FederatedVotingStore {
 
   get simulationUpdate(): number {
     return this._state.simulationUpdate;
+  }
+
+  get overlayUpdate(): number {
+    return this._state.overlayUpdate;
   }
 
   get latestSimulationStepWentForwards(): boolean {

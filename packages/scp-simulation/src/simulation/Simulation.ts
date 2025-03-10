@@ -104,8 +104,6 @@ export class Simulation {
 	}
 
 	public cancelPendingUserAction(userAction: UserAction) {
-		console.log(userAction);
-		console.log(this.currentStep.userActions.map((a) => a.toString()));
 		this.isScenario = false;
 		const index = this.currentStep.userActions.indexOf(userAction);
 		if (index > -1) {
