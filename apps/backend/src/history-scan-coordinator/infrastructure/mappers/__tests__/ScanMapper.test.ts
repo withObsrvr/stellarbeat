@@ -20,7 +20,8 @@ describe('ScanMapper', () => {
 			latestVerifiedLedger: 49,
 			concurrency: 10,
 			isSlowArchive: false,
-			error: null
+			error: null,
+			scanJobRemoteId: 'remoteId'
 		};
 	});
 

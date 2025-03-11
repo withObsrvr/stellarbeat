@@ -52,17 +52,53 @@
       </div>
     </div>
 
-    <!-- Events Counter Footer -->
     <div class="mt-2 text-center text-muted" style="font-size: 0.9em">
       {{ actions.length }} action(s) will be executed next
     </div>
+
+    <BModal
+      id="disruptModal"
+      ref="disruptModal"
+      title="Select Neighbors to Disrupt"
+      @ok="saveDisruptSelection"
+      @hidden="clearCurrentAction"
+    >
+      <p>
+        Select neighbors of {{ currentAction?.publicKey }} to disrupt broadcast
+        to:
+      </p>
+      <div v-if="neighbors.length === 0" class="text-center py-3">
+        <p>No overlay connections available for this node</p>
+      </div>
+      <div v-else class="neighbor-list">
+        <div v-for="neighbor in neighbors" :key="neighbor" class="form-check">
+          <input
+            :id="`neighbor-${neighbor}`"
+            v-model="selectedNeighbors"
+            class="form-check-input"
+            type="checkbox"
+            :value="neighbor"
+          />
+          <label :for="`neighbor-${neighbor}`" class="form-check-label">
+            {{ neighbor }}
+          </label>
+        </div>
+      </div>
+      <template #modal-footer="{ ok, cancel }">
+        <button class="btn btn-outline-secondary" @click="cancel()">
+          Cancel
+        </button>
+        <button class="btn btn-primary" @click="ok()">Save</button>
+      </template>
+    </BModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import { ProtocolAction, UserAction } from "scp-simulation";
+import { Broadcast, Gossip, ProtocolAction, UserAction } from "scp-simulation";
 import { ref, computed, watch, nextTick } from "vue";
+import { BModal } from "bootstrap-vue";
 
 const actionsList = ref<HTMLElement | null>(null);
 
@@ -75,16 +111,68 @@ const props = withDefaults(
   },
 );
 
+const disruptModal = ref<BModal | null>(null);
+const currentAction = ref<Broadcast | Gossip | null>(null);
+const neighbors = ref<string[]>([]);
+const selectedNeighbors = ref<string[]>([]);
+
 function handleEventAction(action: ProtocolAction) {
   if (!(action instanceof ProtocolAction)) {
     return;
   }
 
-  if (isActionDisrupted(action)) {
-    federatedVotingStore.simulation.undisrupt(action);
+  if (action instanceof Broadcast || action instanceof Gossip) {
+    currentAction.value = action;
+    neighbors.value = getNodeConnections(action.publicKey);
+
+    if (action.isDisrupted) {
+      selectedNeighbors.value = action.getBlackList();
+    } else {
+      selectedNeighbors.value = [];
+    }
+
+    if (disruptModal.value) {
+      disruptModal.value.show();
+    }
   } else {
-    federatedVotingStore.simulation.disrupt(action);
+    action.isDisrupted = !action.isDisrupted;
   }
+}
+
+function getNodeConnections(nodeId: string): string[] {
+  const connections = federatedVotingStore.overlayConnections;
+  const nodeConnections: string[] = [];
+
+  for (const connection of connections) {
+    if (connection.publicKey === nodeId) {
+      nodeConnections.push(...connection.connections);
+    }
+  }
+
+  return nodeConnections;
+}
+
+function saveDisruptSelection() {
+  if (!currentAction.value) return;
+
+  if (selectedNeighbors.value.length > 0) {
+    currentAction.value.isDisrupted = true;
+    currentAction.value.blackListNeighbors(selectedNeighbors.value);
+  } else {
+    // No neighbors selected, disable disruption completely
+    currentAction.value.isDisrupted = false;
+
+    // Clear the blacklist if the action has that method
+    if ("blackListNeighbors" in currentAction.value) {
+      currentAction.value.blackListNeighbors([]);
+    }
+  }
+}
+
+function clearCurrentAction() {
+  currentAction.value = null;
+  neighbors.value = [];
+  selectedNeighbors.value = [];
 }
 
 function cancelUserAction(action: UserAction) {
@@ -95,7 +183,7 @@ const isActionDisrupted = (action: ProtocolAction | UserAction) => {
   if (!(action instanceof ProtocolAction)) {
     return false;
   }
-  return federatedVotingStore.simulation.isDisrupted(action);
+  return action.isDisrupted;
 };
 
 function mapSubType(subType: string) {
@@ -245,5 +333,19 @@ function selectNode(publicKey: string) {
 .clickable:hover {
   color: #0056b3;
   background-color: white;
+}
+
+.neighbor-list {
+  padding: 10px;
+}
+
+.form-check {
+  padding: 8px;
+  margin: 4px 0;
+  border-radius: 4px;
+}
+
+.form-check:hover {
+  background-color: #f8f9fa;
 }
 </style>

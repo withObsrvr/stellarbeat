@@ -234,29 +234,45 @@ export class FederatedVotingContext
 		return [action];
 	}
 
-	broadcastPayload(broadcaster: PublicKey, payload: Payload): ProtocolAction[] {
-		const actions = this.overlay.broadcast(broadcaster, payload);
+	broadcast(
+		broadcaster: PublicKey,
+		payload: Payload,
+		neighborBlackList: PublicKey[]
+	): ProtocolAction[] {
+		const actions = this.overlay.broadcast(
+			broadcaster,
+			payload,
+			neighborBlackList
+		);
 		this.registerEvents(this.overlay.drainEvents());
 
 		return actions;
 	}
 
-	gossipPayload(gossiper: PublicKey, payload: Payload): ProtocolAction[] {
-		const actions = this.overlay.gossip(gossiper, payload);
+	gossip(
+		gossiper: PublicKey,
+		payload: Payload,
+		neighborBlackList: PublicKey[]
+	): ProtocolAction[] {
+		const actions = this.overlay.gossip(gossiper, payload, neighborBlackList);
 		this.registerEvents(this.overlay.drainEvents());
 
 		return actions;
 	}
 
-	receiveMessage(message: Message): ProtocolAction[] {
+	receiveMessage(message: Message, isDisrupted: boolean): ProtocolAction[] {
 		const nodeFederatedVotingState = this.getProtocolState(message.receiver);
 		if (!nodeFederatedVotingState) {
 			console.log('Node not found'); //todo: throw error?
 			return [];
 		}
 
-		const gossipActions = this.overlay.receiveMessage(message);
+		const gossipActions = this.overlay.receiveMessage(message, isDisrupted);
 		this.registerEvents(this.overlay.drainEvents());
+
+		if (isDisrupted) {
+			return gossipActions;
+		}
 
 		this.federatedVotingProtocol.processVote(
 			message.vote,

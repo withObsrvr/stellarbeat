@@ -4,8 +4,9 @@ import { Payload } from '../Overlay';
 type PublicKey = string;
 
 export class Gossip extends ProtocolAction {
-	readonly subType = 'GossipMessage';
+	readonly subType = 'Gossip';
 	readonly publicKey: PublicKey;
+	private neighborBlackList: PublicKey[] = [];
 
 	constructor(
 		public readonly sender: PublicKey,
@@ -16,10 +17,22 @@ export class Gossip extends ProtocolAction {
 	}
 
 	execute(context: Context): ProtocolAction[] {
-		return context.gossipPayload(this.sender, this.payload);
+		return context.gossip(this.sender, this.payload, this.neighborBlackList);
+	}
+
+	blackListNeighbors(neighbors: PublicKey[]): void {
+		this.neighborBlackList = neighbors;
+	}
+
+	getBlackList(): PublicKey[] {
+		return this.neighborBlackList.slice();
 	}
 
 	toString(): string {
 		return `${this.sender} gossips message: "${this.payload}"`;
+	}
+
+	hash(): string {
+		return this.subType + this.sender + this.payload;
 	}
 }

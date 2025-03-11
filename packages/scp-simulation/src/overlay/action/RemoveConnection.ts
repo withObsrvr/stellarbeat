@@ -21,4 +21,8 @@ export class RemoveConnection extends UserAction {
 	toString(): string {
 		return `Remove connection between ${this.a} and ${this.b}`;
 	}
+
+	hash(): string {
+		return this.subType + this.a + this.b;
+	}
 }

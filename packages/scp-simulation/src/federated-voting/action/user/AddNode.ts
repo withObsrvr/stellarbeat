@@ -24,4 +24,13 @@ export class AddNode extends UserAction {
 	toString(): string {
 		return `Add node ${this.publicKey}`;
 	}
+
+	hash(): string {
+		return (
+			this.subType +
+			this.publicKey +
+			this.quorumSet.threshold +
+			this.quorumSet.validators.join('')
+		);
+	}
 }

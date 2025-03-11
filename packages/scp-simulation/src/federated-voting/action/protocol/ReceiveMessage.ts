@@ -11,10 +11,14 @@ export class ReceiveMessage extends ProtocolAction {
 	}
 
 	execute(context: Context): ProtocolAction[] {
-		return context.receiveMessage(this.message);
+		return context.receiveMessage(this.message, this.isDisrupted);
 	}
 
 	toString(): string {
 		return `${this.message.toString()}`;
+	}
+
+	hash(): string {
+		return this.subType + this.message + this.publicKey + this.isDisrupted;
 	}
 }

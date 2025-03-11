@@ -176,6 +176,25 @@ describe('FederatedVotingContext', () => {
 			expect(actions).toHaveLength(1);
 			expect(actions[0]).toBeInstanceOf(Broadcast);
 		});
+
+		it('should not broadcast to blacklisted neighbors', () => {
+			context.addNode(node);
+			context.addNode(new Node('other', new QuorumSet(1, [], [])));
+			const actions = context.broadcast(node.publicKey, mock<Vote>(), [
+				'other'
+			]);
+
+			expect(actions).toHaveLength(0);
+		});
+
+		it('should broadcast to all neighbors if no blacklist', () => {
+			context.addNode(node);
+			context.addNode(new Node('other', new QuorumSet(1, [], [])));
+			const actions = context.broadcast(node.publicKey, mock<Vote>(), []);
+
+			expect(actions).toHaveLength(1);
+			expect(actions[0]).toBeInstanceOf(ReceiveMessage);
+		});
 	});
 
 	describe('canVote', () => {
@@ -222,7 +241,7 @@ describe('FederatedVotingContext', () => {
 				new BroadcastVoteRequested(node.publicKey, message.vote)
 			]);
 
-			const actions = context.receiveMessage(message);
+			const actions = context.receiveMessage(message, false);
 
 			expect(actions).toHaveLength(1);
 			expect(actions[0]).toBeInstanceOf(Broadcast);
@@ -234,7 +253,17 @@ describe('FederatedVotingContext', () => {
 			context.addNode(node);
 			const message = new Message('sender', 'nonexistent', mock<Vote>());
 
-			const actions = context.receiveMessage(message);
+			const actions = context.receiveMessage(message, false);
+
+			expect(actions).toEqual([]);
+			expect(mockFederatedVotingProtocol.processVote).not.toHaveBeenCalled();
+		});
+
+		it('should not process message if disrupted', () => {
+			context.addNode(node);
+			const message = new Message('sender', node.publicKey, mock<Vote>());
+
+			const actions = context.receiveMessage(message, true);
 
 			expect(actions).toEqual([]);
 			expect(mockFederatedVotingProtocol.processVote).not.toHaveBeenCalled();
@@ -265,41 +294,35 @@ describe('FederatedVotingContext', () => {
 		});
 	});
 
-	describe('connections', () => {
-		it('should return empty connections for a single node', () => {
+	describe('gossip handling', () => {
+		it('should handle gossiping correctly', () => {
 			context.addNode(node);
+			context.addNode(new Node('other', new QuorumSet(1, [], [])));
+			overlay.addConnection(node.publicKey, 'other');
 
-			const result = context.connections;
+			// Mock overlay gossip enabled
+			Object.defineProperty(overlay, 'gossipEnabled', { get: () => true });
 
-			expect(result).toHaveLength(1);
-			expect(result[0]).toEqual({
-				publicKey: 'V1',
-				connections: []
-			});
+			const payload = mock<Vote>();
+
+			const actions = context.gossip(node.publicKey, payload, []);
+			expect(actions.length).toBeGreaterThan(0);
 		});
 
-		it('should correctly compute connections between multiple nodes', () => {
-			const node2 = new Node('V2', new QuorumSet(1, ['Q'], []));
-			const node3 = new Node('V3', new QuorumSet(1, ['Q'], []));
+		it('should respect neighbor blacklist when gossiping', () => {
 			context.addNode(node);
-			context.addNode(node2);
-			context.addNode(node3);
+			context.addNode(new Node('other', new QuorumSet(1, [], [])));
+			overlay.addConnection(node.publicKey, 'other');
 
-			const result = context.connections;
+			// Mock overlay gossip enabled
+			Object.defineProperty(overlay, 'gossipEnabled', { get: () => true });
 
-			expect(result).toHaveLength(3);
-			expect(result).toContainEqual({
-				publicKey: 'V1',
-				connections: ['V2', 'V3']
-			});
-			expect(result).toContainEqual({
-				publicKey: 'V2',
-				connections: ['V1', 'V3']
-			});
-			expect(result).toContainEqual({
-				publicKey: 'V3',
-				connections: ['V1', 'V2']
-			});
+			const blacklist = ['other'];
+			const payload = mock<Vote>();
+
+			const actions = context.gossip(node.publicKey, payload, blacklist);
+
+			expect(actions.length).toBe(0);
 		});
 	});
 });

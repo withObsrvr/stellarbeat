@@ -18,12 +18,20 @@ export interface Context extends EventCollector {
 	): ProtocolAction[];
 	reset(): void;
 
-	//message actions
-	receiveMessage(message: Message): ProtocolAction[];
-	broadcastPayload(broadcaster: PublicKey, payload: Payload): ProtocolAction[];
-	gossipPayload(gossiper: PublicKey, payload: Payload): ProtocolAction[];
+	//protocol actions
+	receiveMessage(message: Message, isDisrupted: boolean): ProtocolAction[];
+	broadcast(
+		broadcaster: PublicKey,
+		payload: Payload,
+		neighborBlackList: PublicKey[]
+	): ProtocolAction[];
+	gossip(
+		gossiper: PublicKey,
+		payload: Payload,
+		neighborBlackList: PublicKey[]
+	): ProtocolAction[];
 
-	//network structure actions
+	//user actions
 	addNode(node: Node): ProtocolAction[];
 	addConnection(a: PublicKey, b: PublicKey): ProtocolAction[];
 	removeNode(publicKey: string): ProtocolAction[];

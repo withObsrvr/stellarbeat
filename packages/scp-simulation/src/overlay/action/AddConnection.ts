@@ -21,4 +21,8 @@ export class AddConnection extends UserAction {
 	toString(): string {
 		return `Add connection between ${this.a} and ${this.b}`;
 	}
+
+	hash(): string {
+		return this.subType + this.a + this.b;
+	}
 }

@@ -17,4 +17,8 @@ export class UpdateQuorumSet extends UserAction {
 	toString(): string {
 		return `${this.publicKey}:update quorumSet(${this.quorumSet.toString()})`;
 	}
+
+	hash(): string {
+		return this.subType + this.publicKey + this.quorumSet.toJSON();
+	}
 }

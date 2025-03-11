@@ -7,26 +7,25 @@ import { AddConnection, RemoveConnection } from '../overlay';
 interface SimulationStep {
 	userActions: UserAction[];
 	protocolActions: ProtocolAction[];
-	disruptedProtocolActions: ProtocolAction[];
 	previousEvents: Event[]; //the events executed in the previous step. Todo: or store executed events? Improve naming?
 	nextStep: SimulationStep | null;
 	previousStep: SimulationStep | null;
+	previousStepHash: string;
 }
 
 //The simulation. Works on a context and manages the user and protocol actions. Provides an eventlog, and allows to replay the simulation.
 export class Simulation {
 	private initialStep: SimulationStep; //handy to replay the state
 	private currentStep: SimulationStep;
-	private isScenario: boolean = true;
 
 	constructor(private context: Context) {
 		this.currentStep = {
 			userActions: [],
 			protocolActions: [],
-			disruptedProtocolActions: [],
 			previousEvents: [],
 			nextStep: null,
-			previousStep: null
+			previousStep: null,
+			previousStepHash: ''
 		};
 		this.initialStep = this.currentStep;
 	}
@@ -52,9 +51,11 @@ export class Simulation {
 			stepIterator !== this.currentStep.nextStep &&
 			stepIterator !== null
 		) {
-			stepIterator.disruptedProtocolActions.forEach((action) => {
-				disruptedNodes.add(action.publicKey);
-			});
+			stepIterator.protocolActions
+				.filter((action) => action.isDisrupted)
+				.forEach((action) => {
+					disruptedNodes.add(action.publicKey);
+				});
 			stepIterator = stepIterator.nextStep;
 		}
 
@@ -71,8 +72,6 @@ export class Simulation {
 
 	//in every step you can only add a specific action only once for a node
 	public addUserAction(action: UserAction): void {
-		this.isScenario = false;
-
 		const existingAction = this.currentStep.userActions.find(
 			(a) =>
 				a.subType === action.subType &&
@@ -95,16 +94,11 @@ export class Simulation {
 		}
 	}
 
-	public markScenarioStart(): void {
-		this.isScenario = true;
-	}
-
 	public pendingUserActions(): UserAction[] {
 		return this.currentStep.userActions;
 	}
 
 	public cancelPendingUserAction(userAction: UserAction) {
-		this.isScenario = false;
 		const index = this.currentStep.userActions.indexOf(userAction);
 		if (index > -1) {
 			this.currentStep.userActions.splice(index, 1);
@@ -115,33 +109,28 @@ export class Simulation {
 		return this.currentStep.protocolActions;
 	}
 
-	public disrupt(action: ProtocolAction): void {
-		this.isScenario = false;
-		this.currentStep.disruptedProtocolActions.push(action);
-	}
-
-	public undisrupt(action: ProtocolAction): void {
-		this.isScenario = false;
-		const index = this.currentStep.disruptedProtocolActions.indexOf(action);
-		if (index > -1) {
-			this.currentStep.disruptedProtocolActions.splice(index, 1);
-		}
-	}
-
-	public isDisrupted(action: ProtocolAction): boolean {
-		return this.currentStep.disruptedProtocolActions.includes(action);
+	private calculateStepHash(step: SimulationStep): string {
+		return step.userActions
+			.map((a) => a.toString())
+			.concat(step.protocolActions.map((a) => a.toString()))
+			.join('|')
+			.concat(step.protocolActions.map((a) => a.hash()).join('|'));
 	}
 
 	//Executes the pending actions. UserActions are always first, then protocol actions
 	public executeStep() {
 		const newActions = this.context.executeActions(
-			this.currentStep.protocolActions.filter(
-				(action) => !this.currentStep.disruptedProtocolActions.includes(action)
-			),
+			this.currentStep.protocolActions,
 			this.currentStep.userActions
 		);
+		const stepHash = this.calculateStepHash(this.currentStep);
 
-		if (this.isScenario && this.currentStep.nextStep !== null) {
+		//because we want to be able to replay predefined scenarios,
+		//only when the current step has not been modified
+		if (
+			this.currentStep.nextStep !== null &&
+			this.currentStep.nextStep.previousStepHash === stepHash
+		) {
 			this.context.drainEvents();
 			this.currentStep = this.currentStep.nextStep;
 			return; //context is deterministic, and if we are playing a scenario, we can reuse the next step, if there is one
@@ -149,11 +138,11 @@ export class Simulation {
 
 		const nextStep: SimulationStep = {
 			userActions: [],
-			disruptedProtocolActions: [],
 			protocolActions: newActions,
 			previousEvents: this.context.drainEvents(),
 			nextStep: null,
-			previousStep: this.currentStep
+			previousStep: this.currentStep,
+			previousStepHash: stepHash
 		};
 
 		//todo: sanity check that garbage collection picks up discarded next steps
@@ -176,7 +165,6 @@ export class Simulation {
 	goBackOneStep(): void {
 		if (this.currentStep.previousStep !== null) {
 			this.currentStep = this.currentStep.previousStep;
-			this.isScenario = true; //user has ability to go forward to the same steps, unless he modifies anything
 			this.replayState();
 		}
 	}
@@ -187,9 +175,7 @@ export class Simulation {
 		let stepIterator = this.initialStep;
 		while (stepIterator !== this.currentStep) {
 			this.context.executeActions(
-				stepIterator.protocolActions.filter(
-					(action) => !stepIterator.disruptedProtocolActions.includes(action)
-				),
+				stepIterator.protocolActions,
 				stepIterator.userActions
 			);
 			this.context.drainEvents();
@@ -204,7 +190,6 @@ export class Simulation {
 	}
 
 	goToFirstStep(): void {
-		this.isScenario = true; //user has ability to go forward to the same steps, unless he modifies anything
 		this.currentStep = this.initialStep;
 		this.context.reset();
 		this.context.drainEvents();

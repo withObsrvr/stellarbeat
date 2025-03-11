@@ -7,9 +7,12 @@ import {
 } from '../federated-voting';
 import { ReceiveMessage } from '../federated-voting/action/protocol/ReceiveMessage';
 import { Gossip } from './action/Gossip';
+import { BroadcastDisrupted } from './event/BroadcastDisrupted';
 import { BroadcastFailed } from './event/BroadcastFailed';
 import { ConnectionAdded } from './event/ConnectionAdded';
 import { ConnectionRemoved } from './event/ConnectionRemoved';
+import { GossipDisrupted } from './event/GossipDisrupted';
+import { ReceiveMessageDisrupted } from './event/ReceiveMessageDisrupted';
 
 export type PublicKey = string;
 export type OverlayAction = ReceiveMessage | Gossip;
@@ -120,10 +123,18 @@ export class Overlay extends InMemoryEventCollector {
 		}
 	}
 
-	broadcast(broadcaster: PublicKey, payload: Payload): OverlayAction[] {
+	broadcast(
+		broadcaster: PublicKey,
+		payload: Payload,
+		neighborBlackList: PublicKey[] = []
+	): OverlayAction[] {
 		const actions: OverlayAction[] = [];
 		for (const node of this.connections.get(broadcaster) || []) {
 			if (node === broadcaster) {
+				continue;
+			}
+			if (neighborBlackList.includes(node)) {
+				this.registerEvent(new BroadcastDisrupted(broadcaster, node, payload));
 				continue;
 			}
 			const message = new Message(broadcaster, node, payload);
@@ -136,7 +147,17 @@ export class Overlay extends InMemoryEventCollector {
 		return actions;
 	}
 
-	receiveMessage(message: Message): OverlayAction[] {
+	receiveMessage(message: Message, isDisrupted: boolean): OverlayAction[] {
+		if (isDisrupted) {
+			this.registerEvent(
+				new ReceiveMessageDisrupted(
+					message.receiver,
+					message.sender,
+					message.vote
+				)
+			);
+			return [];
+		}
 		this.markReceived(message);
 		const results: OverlayAction[] = [];
 
@@ -150,12 +171,20 @@ export class Overlay extends InMemoryEventCollector {
 		return results;
 	}
 
-	gossip(sender: PublicKey, payload: Payload): OverlayAction[] {
+	gossip(
+		sender: PublicKey,
+		payload: Payload,
+		neighborBlackList: PublicKey[]
+	): OverlayAction[] {
 		const actions: OverlayAction[] = [];
 		const neighbors = this.connections.get(sender) || new Set();
 
 		for (const neighbor of neighbors) {
 			if (!this.hasExchangedPayload(sender, neighbor, payload)) {
+				if (neighborBlackList.includes(neighbor)) {
+					this.registerEvent(new GossipDisrupted(sender, neighbor, payload));
+					continue;
+				}
 				const newMessage = new Message(sender, neighbor, payload);
 				actions.push(this.sendMessage(newMessage));
 			}

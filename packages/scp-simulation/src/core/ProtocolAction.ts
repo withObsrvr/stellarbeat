@@ -3,10 +3,13 @@
 
 import { Context } from './Context';
 
+//todo rename ProtocolAction to OverlayActions? This is the only thing to be tampered with?
 export abstract class ProtocolAction {
 	public readonly type = 'ProtocolAction';
 	abstract readonly subType: string;
 	abstract readonly publicKey: string;
+	isDisrupted: boolean = false;
 	abstract execute(context: Context): ProtocolAction[];
 	abstract toString(): string;
+	abstract hash(): string;
 }

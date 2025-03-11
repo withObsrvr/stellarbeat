@@ -10,4 +10,5 @@ export abstract class UserAction {
 	abstract readonly immediateExecution: boolean;
 	abstract execute(context: Context): ProtocolAction[];
 	abstract toString(): string;
+	abstract hash(): string;
 }
