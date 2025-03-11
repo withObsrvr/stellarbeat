@@ -9,6 +9,7 @@ export { RemoveNode } from './action/user/RemoveNode';
 export { VoteOnStatement } from './action/user/VoteOnStatement';
 export { UpdateQuorumSet } from './action/user/UpdateQuorumSet';
 export { Broadcast } from './action/protocol/Broadcast';
+export { ForgeMessage } from './action/user/ForgeMessage';
 
 //export events
 export { MessageSent } from './event/MessageSent';

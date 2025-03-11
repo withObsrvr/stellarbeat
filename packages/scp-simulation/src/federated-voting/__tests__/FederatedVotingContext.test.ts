@@ -9,6 +9,7 @@ import { Vote, Voted } from '../protocol';
 import { ReceiveMessage } from '../action/protocol/ReceiveMessage';
 import { UpdateQuorumSet } from '../action/user/UpdateQuorumSet';
 import { Broadcast } from '../action/protocol/Broadcast';
+import { MessageForged } from '../event/MessageForged';
 
 describe('FederatedVotingContext', () => {
 	let mockFederatedVotingProtocol: MockProxy<FederatedVotingProtocol>;
@@ -31,7 +32,7 @@ describe('FederatedVotingContext', () => {
 			context.addNode(node);
 			const mockStatement = mock<Statement>();
 			context.vote(node.publicKey, mockStatement);
-			context.sendMessage(new Message('sender', node.publicKey, mock<Vote>()));
+			context.forgeMessage(new Message('sender', node.publicKey, mock<Vote>()));
 
 			context.reset();
 
@@ -222,17 +223,7 @@ describe('FederatedVotingContext', () => {
 		});
 	});
 
-	describe('sendMessage', () => {
-		it('should send a message and queue a Receive action', () => {
-			context.addNode(node);
-			const message = new Message('sender', node.publicKey, mock<Vote>());
-
-			const actions = context.sendMessage(message);
-
-			expect(actions).toHaveLength(1);
-			expect(actions[0]).toBeInstanceOf(ReceiveMessage);
-		});
-
+	describe('ReceiveMessage', () => {
 		it('should process delivered messages and handle new broadcast events', () => {
 			context.addNode(node);
 			const message = new Message('sender', node.publicKey, mock<Vote>());
@@ -323,6 +314,20 @@ describe('FederatedVotingContext', () => {
 			const actions = context.gossip(node.publicKey, payload, blacklist);
 
 			expect(actions.length).toBe(0);
+		});
+	});
+	describe('ForgeMessage handling', () => {
+		it('should send a forged message', () => {
+			context.addNode(node);
+			const message = new Message('sender', node.publicKey, mock<Vote>());
+
+			const actions = context.forgeMessage(message);
+
+			expect(actions).toHaveLength(1);
+			expect(actions[0]).toBeInstanceOf(ReceiveMessage);
+
+			const events = context.drainEvents();
+			expect(events.find((e) => e instanceof MessageForged)).toBeDefined();
 		});
 	});
 });

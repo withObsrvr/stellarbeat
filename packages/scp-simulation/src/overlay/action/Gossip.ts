@@ -33,6 +33,11 @@ export class Gossip extends ProtocolAction {
 	}
 
 	hash(): string {
-		return this.subType + this.sender + this.payload;
+		return (
+			this.subType +
+			this.sender +
+			this.payload +
+			this.neighborBlackList.join('|')
+		);
 	}
 }

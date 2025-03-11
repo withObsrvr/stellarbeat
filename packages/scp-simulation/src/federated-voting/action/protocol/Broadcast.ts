@@ -37,7 +37,6 @@ export class Broadcast extends ProtocolAction {
 			this.subType +
 			this.broadcaster +
 			this.payload +
-			this.isDisrupted +
 			this.neighborBlackList.join('|')
 		);
 	}

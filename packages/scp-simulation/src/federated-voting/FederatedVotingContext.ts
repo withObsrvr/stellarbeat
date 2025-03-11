@@ -17,6 +17,7 @@ import { BroadcastVoteRequested } from './protocol/event/BroadcastVoteRequested'
 import { NodeUpdatedQuorumSet } from './protocol/event/NodeUpdatedQuorumSet';
 import { Overlay, Payload } from '../overlay/Overlay';
 import { Broadcast } from './action/protocol/Broadcast';
+import { MessageForged } from './event/MessageForged';
 
 export interface FederatedVotingContextState {
 	initialNodes: Node[];
@@ -227,7 +228,8 @@ export class FederatedVotingContext
 		return nodeFederatedVotingState.voted === null; //todo also check if there is a command!
 	}
 
-	sendMessage(message: Message): ProtocolAction[] {
+	forgeMessage(message: Message): ProtocolAction[] {
+		this.registerEvent(new MessageForged(message));
 		const action = this.overlay.sendMessage(message);
 		this.registerEvents(this.overlay.drainEvents());
 

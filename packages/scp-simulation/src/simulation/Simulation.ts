@@ -1,4 +1,5 @@
 import { Event, Context, UserAction, ProtocolAction, Node } from '../core';
+import { ForgeMessage } from '../federated-voting';
 import { AddConnection, RemoveConnection } from '../overlay';
 
 //A step in the simulation. Contains all user and protocol actions to be executed next
@@ -56,6 +57,11 @@ export class Simulation {
 				.forEach((action) => {
 					disruptedNodes.add(action.publicKey);
 				});
+			stepIterator.userActions
+				.filter((action) => action instanceof ForgeMessage)
+				.forEach((action) => {
+					disruptedNodes.add(action.publicKey);
+				});
 			stepIterator = stepIterator.nextStep;
 		}
 
@@ -76,7 +82,11 @@ export class Simulation {
 			(a) =>
 				a.subType === action.subType &&
 				a.publicKey === action.publicKey &&
-				!(action instanceof AddConnection || action instanceof RemoveConnection) //todo: we need a better solution! Maybe isIdempotent Prop?
+				!(
+					action instanceof AddConnection ||
+					action instanceof RemoveConnection ||
+					action instanceof ForgeMessage
+				) //todo: we need a better solution! Maybe isIdempotent Prop?
 		);
 		if (existingAction) {
 			const index = this.currentStep.userActions.indexOf(existingAction);

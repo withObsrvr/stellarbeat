@@ -14,6 +14,8 @@ import {
   RemoveNode,
   AddConnection,
   RemoveConnection,
+  Message,
+  ForgeMessage,
 } from "scp-simulation";
 import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
 import { findAllIntactNodes } from "@/components/federated-voting/analysis/DSetAnalysis";
@@ -358,6 +360,10 @@ class FederatedVotingStore {
   removeConnection(a: string, b: string) {
     const removeConnection = new RemoveConnection(a, b);
     this.simulation.addUserAction(removeConnection);
+  }
+
+  public forgeMessage(message: Message) {
+    this.simulation.addUserAction(new ForgeMessage(message));
   }
 
   public addNode(publicKey: string, trustedNodes: string[], threshold: number) {
