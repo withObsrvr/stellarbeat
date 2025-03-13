@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import SelectedNodePanel from "../selected-nodes-panel/selected-node-panel.vue";
 import EventLog from "./event-log.vue";
-import Actions from "./actions.vue";
+import Actions from "./actions/actions.vue";
 import BreadCrumbs from "./../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 </script>

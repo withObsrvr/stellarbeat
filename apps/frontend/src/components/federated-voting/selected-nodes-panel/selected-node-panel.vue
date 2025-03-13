@@ -48,7 +48,7 @@ import { computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import NodeInformation from "./node-information.vue";
 import EventLog from "../simulation-control/event-log.vue";
-import Actions from "../simulation-control/actions.vue";
+import Actions from "../simulation-control/actions/actions.vue";
 import BreadCrumbs from "../bread-crumbs.vue";
 
 const props = defineProps({
