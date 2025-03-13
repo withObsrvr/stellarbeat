@@ -49,11 +49,9 @@
         <div class="events-divider-vertical"></div>
 
         <div class="events-section">
-          <div class="events-container">
-            <ProcessedVotesNodeEvents
-              :selected-node-id="selectedNodeId ?? undefined"
-            />
-          </div>
+          <ProcessedVotesNodeEvents
+            :selected-node-id="selectedNodeId ?? undefined"
+          />
         </div>
       </div>
     </div>
@@ -61,32 +59,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import BreadCrumbs from "../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasNodeBadge from "../fbas-node-badge.vue";
 import ProcessedVotesNodeEvents from "./processed-votes-node-events.vue";
-import { QuorumSet, QuorumSetService } from "scp-simulation";
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
 function selectNodeId(nodeId: string) {
   federatedVotingStore.selectedNodeId = nodeId;
-}
-
-function getVBlockedNodes(acceptVotes: string[]): string[] {
-  if (!acceptVotes.length) return [];
-
-  return federatedVotingStore.nodes
-    .filter(
-      (node) =>
-        !acceptVotes.includes(node.publicKey) &&
-        QuorumSetService.isSetVBlocking(
-          acceptVotes,
-          new QuorumSet(node.trustThreshold, node.trustedNodes, []),
-        ),
-    )
-    .map((node) => node.publicKey);
 }
 
 const processedVotesByStatement = computed(() => {
@@ -135,25 +117,32 @@ const processedVotesByStatement = computed(() => {
 .processed-votes {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .content-container {
   display: flex;
   align-items: stretch;
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
 }
 
 .statements-section {
-  flex: 4; /* Changed from flex: 1 to flex: 3 */
+  flex: 4;
   overflow-y: auto;
-  max-width: none; /* Removed max-width restriction */
+  max-width: none;
+  padding-right: 5px;
 }
 
 .events-section {
-  flex: 3; /* Changed from flex: 1 to flex: 2 */
-  overflow-y: auto;
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
-/* Vertical divider styling */
 .events-divider-vertical {
   width: 1px;
   background-color: #dee2e6;
@@ -200,7 +189,6 @@ const processedVotesByStatement = computed(() => {
   gap: 6px;
 }
 
-/* Events section styling */
 .section-title {
   font-size: 1.1em;
   font-weight: bold;
@@ -211,11 +199,6 @@ const processedVotesByStatement = computed(() => {
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-.events-container {
-  background-color: #f8f9fa;
-  border-radius: 4px;
 }
 
 .empty-events {

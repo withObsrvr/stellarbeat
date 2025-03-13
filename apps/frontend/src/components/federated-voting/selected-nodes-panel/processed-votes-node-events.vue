@@ -1,30 +1,32 @@
 <template>
-  <ul class="events-list">
-    <li
-      v-for="(event, idx) in nodeEvents"
-      :key="`event-${idx}`"
-      :class="['event-item', event.eventClass]"
-      :style="!props.selectedNodeId ? 'cursor: pointer;' : ''"
-      @click="!props.selectedNodeId && selectNode(event.nodeId)"
-    >
-      <div class="event-basic">
-        <strong v-if="!props.selectedNodeId">{{ event.nodeId }}: </strong>
-        <span v-html="event.message"></span>
-      </div>
+  <div ref="eventsContainer" class="events-container">
+    <ul class="events-list">
+      <li
+        v-for="(event, idx) in nodeEvents"
+        :key="`event-${idx}`"
+        :class="['event-item', event.eventClass]"
+        :style="!props.selectedNodeId ? 'cursor: pointer;' : ''"
+        @click="!props.selectedNodeId && selectNode(event.nodeId)"
+      >
+        <div class="event-basic">
+          <strong v-if="!props.selectedNodeId">{{ event.nodeId }}: </strong>
+          <span v-html="event.message"></span>
+        </div>
 
-      <div v-if="props.selectedNodeId && event.details" class="event-details">
-        <span v-html="event.details"></span>
-      </div>
-    </li>
+        <div v-if="props.selectedNodeId && event.details" class="event-details">
+          <span v-html="event.details"></span>
+        </div>
+      </li>
 
-    <li v-if="nodeEvents.length === 0" class="event-item empty-event">
-      {{ emptyMessage }}
-    </li>
-  </ul>
+      <li v-if="nodeEvents.length === 0" class="event-item empty-event">
+        {{ emptyMessage }}
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, watch, ref, nextTick } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import {
   AcceptVoteVBlocked,
@@ -32,15 +34,25 @@ import {
   AcceptVoteRatified,
   Event,
 } from "scp-simulation";
-import SelectedNodePanel from "./selected-node-panel.vue";
 
 const props = defineProps<{
   selectedNodeId?: string;
 }>();
 
+const eventsContainer = ref<HTMLElement | null>(null);
+
 function selectNode(nodeId: string) {
   federatedVotingStore.selectedNodeId = nodeId;
 }
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (eventsContainer.value) {
+      eventsContainer.value.scrollTop = eventsContainer.value.scrollHeight;
+    }
+  });
+}
+
 const nodeEvents = computed(() => {
   const allEvents = federatedVotingStore.fullEventLog.flat() as Event[];
 
@@ -108,20 +120,33 @@ const emptyMessage = computed(() => {
     : "No events found";
 });
 
-// Helper to format node lists - only used for the unselected view
-function getNodeListText(nodes: string[]) {
-  if (nodes.length <= 2) {
-    return nodes.join(", ");
-  }
-  return `${nodes.length} nodes`;
-}
+watch(
+  [
+    nodeEvents,
+    () => federatedVotingStore.fullEventLog,
+    () => props.selectedNodeId,
+  ],
+  () => {
+    scrollToBottom();
+  },
+  { flush: "post" },
+);
 </script>
 
 <style scoped>
+.events-container {
+  flex: 1;
+  max-height: none;
+  overflow-y: auto;
+  height: 100%;
+  flex-direction: column;
+}
+
 .events-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  flex-grow: 1;
 }
 
 .event-item {
@@ -186,7 +211,6 @@ function getNodeListText(nodes: string[]) {
   padding-left: 10px;
 }
 
-/* Add a hover effect for clickable events */
 li.event-item:hover {
   opacity: 0.9;
 }
