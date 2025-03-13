@@ -132,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, Ref, ComputedRef, onBeforeMount, watch } from "vue";
+import { ref, computed, ComputedRef, onBeforeMount, watch } from "vue";
 import {
   FederatedNode,
   federatedVotingStore,
@@ -290,6 +290,13 @@ function getOriginalNode(publicKey: string): FederatedNode | null {
   return federatedVotingStore.getNodeWithoutPreviewChanges(publicKey);
 }
 
+function getNode(publicKey: string): FederatedNode | null {
+  return (
+    federatedVotingStore.nodes.find((node) => node.publicKey === publicKey) ??
+    null
+  );
+}
+
 function compareTrust(node1: FederatedNode, node2: TrustConfig): boolean {
   if (node1.trustThreshold !== node2.trustThreshold) {
     return false;
@@ -312,6 +319,7 @@ function compareTrust(node1: FederatedNode, node2: TrustConfig): boolean {
 }
 
 function initializeNodeCache() {
+  console.log("Initializing node cache");
   hasLocalChanges.value = false;
 
   // Start with existing active nodes
@@ -407,6 +415,16 @@ function applyChanges() {
     .filter((node) => node.isActive && !node.isNew && !node.isRemoved)
     .forEach((node) => {
       const originalNode = getOriginalNode(node.publicKey);
+      if (!originalNode) {
+        const nodeAddedInThisSimulationStep = getNode(node.publicKey); //maybe we just added it in the same simulation step
+        if (nodeAddedInThisSimulationStep) {
+          federatedVotingStore.addNode(
+            node.publicKey,
+            node.trustedNodes,
+            node.trustThreshold,
+          ); //replace the addNode action
+        }
+      }
       if (originalNode && !compareTrust(originalNode, node)) {
         federatedVotingStore.updateNodeTrust(
           node.publicKey,
@@ -420,7 +438,6 @@ function applyChanges() {
 
   hasLocalChanges.value = false;
 
-  // Re-initialize the cache after all changes are applied
   initializeNodeCache();
 }
 

@@ -132,7 +132,6 @@ function goBackOneStep() {
 const handleKeydown = (event: KeyboardEvent) => {
   // Check if focus is in an editable element - if so, don't handle the keystroke
   const target = event.target as HTMLElement;
-  console.log(target.tagName);
   const isEditableElement =
     target.tagName === "INPUT" ||
     target.tagName === "TEXTAREA" ||
