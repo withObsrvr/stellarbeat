@@ -31,7 +31,8 @@
 	"author": "pieterjan84",
 	"license": "MIT",
 	"engines": {
-		"node": "20.x"
+		"node": "20.x",
+		"pnpm": "9.15.0"
 	},
 	"type": "module",
 	"dependencies": {
@@ -60,6 +61,5 @@
 		"ts-node": "10.9.2",
 		"typescript": "^5.7.3",
 		"jest": "29.7.0"
-	},
-	"packageManager": "pnpm@9.15.0"
+	}
 }
