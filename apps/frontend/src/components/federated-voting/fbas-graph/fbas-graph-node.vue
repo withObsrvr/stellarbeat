@@ -72,7 +72,7 @@ import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 export interface Node extends SimulationNodeDatum {
   id: string;
-  validators?: readonly string[];
+  validators?: string[];
   threshold?: number;
   vote: string | null;
   accept: string | null;
@@ -175,47 +175,52 @@ function handleClick() {
 
 const events = toRef(props.node, "events");
 
-watch(events, (newEvents) => {
-  currentEvents.value = [];
-  initialDialogShow.value = false;
+watch(
+  events,
+  (newEvents) => {
+    currentEvents.value = [];
+    initialDialogShow.value = false;
 
-  newEvents.forEach((event) => {
-    if (event instanceof Voted && !event.vote.isVoteToAccept) {
-      currentEvents.value.push({
-        shortDescription: `Voted "${event.vote.statement}"`,
-        fullDescription: `${event.publicKey} voted "${event.vote.statement}"`,
-      });
-    } else if (event instanceof Voted && event.vote.isVoteToAccept) {
-      /*currentEvents.value.push({
+    newEvents.forEach((event) => {
+      console.log(event.toString());
+      if (event instanceof Voted && !event.vote.isVoteToAccept) {
+        currentEvents.value.push({
+          shortDescription: `Voted "${event.vote.statement}"`,
+          fullDescription: `${event.publicKey} voted "${event.vote.statement}"`,
+        });
+      } else if (event instanceof Voted && event.vote.isVoteToAccept) {
+        /*currentEvents.value.push({
         shortDescription: `Accepted "${event.vote.statement}"`,
         fullDescription: `${event.publicKey} accepted "${event.vote.statement}"`,
       });*/
-    } else if (event instanceof VoteRatified) {
-      currentEvents.value.push({
-        shortDescription: `Quorum ratified "${event.statement}"`,
-        fullDescription: `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "${event.statement}"`,
-      });
-    } else if (event instanceof AcceptVoteVBlocked) {
-      currentEvents.value.push({
-        shortDescription: `VBlocking set accepted "${event.statement}"`,
-        fullDescription: `VBlocking set [${Array.from(event.vBlockingSet).join(", ")}] accepted "${event.statement}"`,
-      });
-    } else if (event instanceof AcceptVoteRatified) {
-      currentEvents.value.push({
-        shortDescription: `Quorum ratified accept("${event.statement}")`,
-        fullDescription: `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "accept(${event.statement})"`,
-      });
-    } else if (event instanceof ConsensusReached) {
-      /*currentEvents.value.push({
+      } else if (event instanceof VoteRatified) {
+        currentEvents.value.push({
+          shortDescription: `Quorum ratified "${event.statement}"`,
+          fullDescription: `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "${event.statement}"`,
+        });
+      } else if (event instanceof AcceptVoteVBlocked) {
+        currentEvents.value.push({
+          shortDescription: `VBlocking set accepted "${event.statement}"`,
+          fullDescription: `VBlocking set [${Array.from(event.vBlockingSet).join(", ")}] accepted "${event.statement}"`,
+        });
+      } else if (event instanceof AcceptVoteRatified) {
+        currentEvents.value.push({
+          shortDescription: `Quorum ratified accept("${event.statement}")`,
+          fullDescription: `Quorum {${Array.from(event.quorum.keys()).join(", ")}} ratified "accept(${event.statement})"`,
+        });
+      } else if (event instanceof ConsensusReached) {
+        /*currentEvents.value.push({
         shortDescription: `Confirmed "${event.statement}"`,
         fullDescription: `${event.publicKey} confirmed "${event.statement}"`,
       });*/
+      }
+    });
+    if (currentEvents.value.length > 0) {
+      animateEvents();
     }
-  });
-  if (currentEvents.value.length > 0) {
-    animateEvents();
-  }
-});
+  },
+  { immediate: true },
+);
 
 const transform = computed(() => {
   return `translate(${props.node.x}, ${props.node.y})`;

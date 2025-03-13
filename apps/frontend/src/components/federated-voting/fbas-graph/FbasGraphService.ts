@@ -10,6 +10,7 @@ import {
 import { Node } from "./fbas-graph-node.vue";
 import { Link } from "./fbas-graph-link.vue";
 import { FederatedNode } from "@/store/useFederatedVotingStore";
+import { ProtocolEvent } from "scp-simulation";
 
 export class FbasGraphService {
   private simulation: Simulation<Node, undefined> | null = null;
@@ -73,45 +74,43 @@ export class FbasGraphService {
   }
 
   createNodes(nodes: FederatedNode[], existingNodes: Node[] = []): Node[] {
-    const nodePositions = new Map<
-      string,
-      { x: number; y: number; vx?: number; vy?: number }
-    >();
     existingNodes.forEach((node) => {
-      if (node.x !== undefined && node.y !== undefined) {
-        nodePositions.set(node.id, {
-          x: node.x,
-          y: node.y,
-          vx: node.vx,
-          vy: node.vy,
-        });
+      const sourceNode = nodes.find((sNode) => sNode.publicKey === node.id);
+      if (sourceNode) {
+        node.validators = sourceNode.trustedNodes;
+        node.threshold = sourceNode.trustThreshold;
+        node.vote = sourceNode.voted;
+        node.accept = sourceNode.accepted;
+        node.confirm = sourceNode.confirmed;
       }
     });
 
-    // Create new nodes
-    return nodes.map((node) => {
-      const position = nodePositions.get(node.publicKey);
+    const newNodes = nodes
+      .filter((node) => !existingNodes.find((n) => n.id === node.publicKey))
+      .map((node) => {
+        return {
+          id: node.publicKey,
+          validators: node.trustedNodes,
+          threshold: node.trustThreshold,
+          vote: node.voted,
+          accept: node.accepted,
+          confirm: node.confirmed,
+          x: 0,
+          y: 0,
+          events: [],
+        };
+      });
 
-      return {
-        id: node.publicKey,
-        validators: node.trustedNodes,
-        threshold: node.trustThreshold,
-        vote: node.voted,
-        accept: node.accepted,
-        confirm: node.confirmed,
-        x: position ? position.x : 0,
-        y: position ? position.y : 0,
-        vx: position?.vx || 0,
-        vy: position?.vy || 0,
-        events: [],
-      };
-    });
+    return existingNodes
+      .concat(newNodes)
+      .filter((node) => nodes.find((n) => n.publicKey === node.id));
   }
 
   updateNodeStates(
     nodes: Node[],
     sourceNodes: FederatedNode[],
     selectedNode: FederatedNode | null,
+    events: ProtocolEvent[],
   ): void {
     // No selected node - show the system view, meaning the actual states of the nodes
     if (!selectedNode) {
@@ -123,6 +122,10 @@ export class FbasGraphService {
           node.vote = sourceNode.voted;
           node.accept = sourceNode.accepted;
           node.confirm = sourceNode.confirmed;
+          node.events = events.filter(
+            (event) =>
+              event instanceof ProtocolEvent && event.publicKey === node.id,
+          );
         }
       });
       return;
@@ -135,6 +138,10 @@ export class FbasGraphService {
         node.vote = selectedNode.voted;
         node.accept = selectedNode.accepted;
         node.confirm = selectedNode.confirmed;
+        node.events = events.filter(
+          (event) =>
+            event instanceof ProtocolEvent && event.publicKey === node.id,
+        );
       } else {
         // For other nodes, show what the selected node knows about them
         const processedVotes = selectedNode.processedVotes.filter(

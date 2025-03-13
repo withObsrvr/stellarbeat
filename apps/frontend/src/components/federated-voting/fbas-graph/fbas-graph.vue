@@ -144,6 +144,7 @@ import BreadCrumbs from "../bread-crumbs.vue";
 import { curveCatmullRomClosed, line } from "d3-shape";
 import fbasGraphService from "./FbasGraphService";
 import messageService, { MessageAnimation } from "./MessageService";
+import { ProtocolEvent } from "scp-simulation";
 
 const { translateX, translateY, scale, startPan, pan, endPan, zoom } =
   usePanning();
@@ -218,6 +219,7 @@ function updateNodeStates() {
     nodes.value,
     federatedVotingStore.nodes,
     federatedVotingStore.selectedNode.value as FederatedNode | null,
+    federatedVotingStore.getLatestEvents().filter(event => event instanceof ProtocolEvent),
   );
 }
 

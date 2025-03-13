@@ -36,7 +36,6 @@
     </div>
     <div class="card-body h-100">
       <div class="chart-container h-100 position-relative">
-        <!-- Add the floating control with force slider -->
         <div class="floating-control">
           <div v-tooltip.bottom="`Repelling Force`" class="force-control">
             <input
@@ -246,7 +245,7 @@ const height = (): number => {
 
 .floating-control {
   position: absolute;
-  bottom: 10px;
+  bottom: -20px;
   right: 10px;
   z-index: 100;
   border-radius: 8px;

@@ -73,9 +73,10 @@ export class SimulationManager {
   }
 
   private boundingBoxForce() {
+    const padding = 40;
     for (const node of this.nodes) {
-      node.x = Math.max(8, Math.min(this.width - 8, node.x ?? 0));
-      node.y = Math.max(8, Math.min(this.height - 8, node.y ?? 0));
+      node.x = Math.max(padding, Math.min(this.width - padding, node.x ?? 0));
+      node.y = Math.max(padding, Math.min(this.height - padding, node.y ?? 0));
     }
   }
 }

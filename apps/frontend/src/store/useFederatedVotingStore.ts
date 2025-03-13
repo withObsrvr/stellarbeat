@@ -213,7 +213,19 @@ class FederatedVotingStore {
   }
 
   private updateOverlayConnections() {
-    const connections = this._state.protocolContext.overlayConnections;
+    let connections: { publicKey: string; connections: string[] }[] = [];
+    if (this.overlayIsFullyConnected) {
+      connections = this.nodes.map((node) => {
+        return {
+          publicKey: node.publicKey,
+          connections: this.nodes
+            .filter((n) => n.publicKey !== node.publicKey)
+            .map((n) => n.publicKey),
+        };
+      });
+    } else {
+      connections = this._state.protocolContext.overlayConnections;
+    }
 
     // Apply pending user actions
     connections.forEach((connection) => {
@@ -318,6 +330,8 @@ class FederatedVotingStore {
     this._state.protocolContextState = this._state.protocolContext.getState();
     this._state.simulation = new Simulation(this._state.protocolContext);
     scenario.loader(this.simulation as Simulation);
+    this._state.overlayUpdate++;
+    this._state.networkStructureUpdate++;
     this.updateNetwork();
   }
 

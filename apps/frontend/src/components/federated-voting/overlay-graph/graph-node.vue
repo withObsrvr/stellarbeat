@@ -119,8 +119,11 @@ const rectLabelClassName = computed(() => {
   text-transform: lowercase;
 }
 
+.hovered {
+  cursor: pointer;
+}
+
 .hovered circle {
   r: 10px !important;
-  cursor: pointer;
 }
 </style>
