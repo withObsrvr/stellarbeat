@@ -66,7 +66,6 @@ import ControllerInfo from "./controller-info.vue";
 const playing = ref(false);
 const progressBar = ref<HTMLElement | null>(null);
 let playInterval: NodeJS.Timeout | null = null;
-const delayImmediateUserActionsInterval: NodeJS.Timeout | null = null;
 
 const tickTime = computed(
   () => federatedVotingStore.simulationStepDurationInSeconds * 1000,
@@ -131,17 +130,28 @@ function goBackOneStep() {
 
 // Keydown event handler
 const handleKeydown = (event: KeyboardEvent) => {
+  // Check if focus is in an editable element - if so, don't handle the keystroke
+  const target = event.target as HTMLElement;
+  console.log(target.tagName);
+  const isEditableElement =
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.contentEditable === "true" ||
+    target.isContentEditable;
+
+  if (isEditableElement) {
+    return;
+  }
+
   if (event.key === "n") {
     if (federatedVotingStore.hasNextStep()) {
       executeNextStep();
-      event.preventDefault();
     }
   }
   if (event.key === "N") {
     if (federatedVotingStore.hasPreviousStep()) {
       goBackOneStep();
     }
-    event.preventDefault();
   }
 };
 
