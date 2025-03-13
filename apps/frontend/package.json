@@ -56,7 +56,7 @@
     "jest-localstorage-mock": "^2.4.26",
     "sass": "1.64.2",
     "tslib": "^2.7.0",
-    "vite": "^6.1.0",
+    "vite": "^6.2.1",
     "vite-bundle-visualizer": "^1.2.1",
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-static-copy": "^2.2.0",
