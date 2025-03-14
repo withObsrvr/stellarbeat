@@ -8,6 +8,9 @@
 		"build-and-start": "pnpm build && node ./lib/start-console.js",
 		"start": "node ./lib/start-console.js"
 	},
+	"dependencies": {
+		"murmurhash": "2.0.1"
+	},
 	"main": "lib/index.js",
 	"types": "lib/index.d.ts",
 	"author": "pieterjan84@github",

@@ -18,6 +18,9 @@ import {
   FederatedVotingScenarioFactory,
   ScenarioLoader,
   Scenario,
+  ScenarioSerializer,
+  SimulationStepListSerializer,
+  SimulationStepSerializer,
 } from "scp-simulation";
 import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
 import { findAllIntactNodes } from "@/components/federated-voting/analysis/DSetAnalysis";
@@ -575,6 +578,22 @@ class FederatedVotingStore {
 
   get overlayIsGossipEnabled(): boolean {
     return this._state.protocolContext.overlayIsGossipEnabled;
+  }
+
+  exportScenario() {
+    const scenarioSerializer = new ScenarioSerializer(
+      new SimulationStepListSerializer(new SimulationStepSerializer()),
+    );
+
+    const scenarioToExport = new Scenario(
+      this.selectedScenario.id,
+      this.selectedScenario.name,
+      this.selectedScenario.description,
+      this.overlayIsFullyConnected,
+      this.overlayIsGossipEnabled,
+      this.simulation.getInitialStep(), //we create a new scenario with the current state
+    );
+    return scenarioSerializer.toJSON(scenarioToExport);
   }
 }
 

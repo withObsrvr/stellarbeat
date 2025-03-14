@@ -39,27 +39,27 @@
 		"@stellar/stellar-base": "13.0.1",
 		"dotenv": "^16.4.7",
 		"lru-cache": "^11.0.2",
-		"neverthrow": "^8.1.1",
+		"neverthrow": "^8.2.0",
 		"pino": "^9.6.0",
 		"reflect-metadata": "^0.2.2"
 	},
 	"devDependencies": {
 		"@types/jest": "29.5.6",
-		"@types/node": "^22.13.1",
+		"@types/node": "^22.13.10",
 		"@typescript-eslint/eslint-plugin": "8.24.0",
 		"@typescript-eslint/parser": "8.24.0",
 		"@vue/eslint-config-prettier": "^10.2.0",
-		"@vue/eslint-config-typescript": "^14.4.0",
+		"@vue/eslint-config-typescript": "^14.5.0",
 		"concurrently": "^9.1.2",
 		"eslint": "9.20.0",
 		"eslint-plugin-import": "^2.31.0",
-		"eslint-plugin-vue": "^9.32.0",
-		"globals": "^15.14.0",
+		"eslint-plugin-vue": "^9.33.0",
+		"globals": "^15.15.0",
+		"jest": "29.7.0",
 		"jest-mock-extended": "4.0.0-beta1",
 		"prettier": "3.3.3",
 		"ts-jest": "29.2.5",
 		"ts-node": "10.9.2",
-		"typescript": "^5.7.3",
-		"jest": "29.7.0"
+		"typescript": "^5.8.2"
 	}
 }

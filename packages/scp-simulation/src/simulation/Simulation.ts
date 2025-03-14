@@ -1,3 +1,4 @@
+import murmurhash from 'murmurhash';
 import { Event, Context, UserAction, ProtocolAction, Node } from '../core';
 import { ForgeMessage } from '../federated-voting';
 import { AddConnection, RemoveConnection } from '../overlay';
@@ -124,10 +125,19 @@ export class Simulation {
 	}
 
 	private calculateStepHash(step: SimulationStep): string {
-		return step.userActions
-			.map((a) => a.toJSON())
-			.join('|')
-			.concat(step.protocolActions.map((a) => a.toJSON()).join('|'));
+		return murmurhash
+			.v3(
+				step.userActions
+					.map((a) => JSON.stringify(a.toJSON()))
+					.join('|')
+					.concat(
+						step.protocolActions
+							.map((a) => JSON.stringify(a.toJSON()))
+							.join('|')
+					),
+				1
+			)
+			.toString();
 	}
 
 	//Executes the pending actions. UserActions are always first, then protocol actions

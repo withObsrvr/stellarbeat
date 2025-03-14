@@ -8,12 +8,13 @@ export class ScenarioSerializer {
 
 	toJSON(scenario: Scenario) {
 		return {
+			serializeVersion: '1.0.0',
 			id: scenario.id,
 			name: scenario.name,
 			description: scenario.description,
 			isOverlayFullyConnected: scenario.isOverlayFullyConnected,
 			isOverlayGossipEnabled: scenario.isOverlayGossipEnabled,
-			initialSimulationStep: this.simulationStepListSerializer.toJSON(
+			simulationSteps: this.simulationStepListSerializer.toJSON(
 				scenario.initialSimulationStep
 			)
 		};
@@ -26,7 +27,7 @@ export class ScenarioSerializer {
 			json.description,
 			json.isOverlayFullyConnected,
 			json.isOverlayGossipEnabled,
-			this.simulationStepListSerializer.fromJSON(json.initialSimulationStep)
+			this.simulationStepListSerializer.fromJSON(json.simulationSteps)
 		);
 	}
 }
