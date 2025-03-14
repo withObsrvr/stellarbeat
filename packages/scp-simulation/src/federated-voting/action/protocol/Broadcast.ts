@@ -40,4 +40,22 @@ export class Broadcast extends ProtocolAction {
 			this.neighborBlackList.join('|')
 		);
 	}
+
+	toJSON(): object {
+		return {
+			type: this.type,
+			subType: this.subType,
+			broadcaster: this.broadcaster,
+			payload: this.payload,
+			neighborBlackList: this.neighborBlackList,
+			isDisrupted: this.isDisrupted
+		};
+	}
+
+	static fromJSON(json: any): Broadcast {
+		const broadcast = new Broadcast(json.broadcaster, json.payload);
+		broadcast.blackListNeighbors(json.neighborBlackList);
+		broadcast.isDisrupted = json.isDisrupted;
+		return broadcast;
+	}
 }

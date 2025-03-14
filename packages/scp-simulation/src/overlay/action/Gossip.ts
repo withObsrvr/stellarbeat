@@ -40,4 +40,22 @@ export class Gossip extends ProtocolAction {
 			this.neighborBlackList.join('|')
 		);
 	}
+
+	toJSON(): object {
+		return {
+			type: this.type,
+			subType: this.subType,
+			sender: this.sender,
+			payload: this.payload,
+			neighborBlackList: this.neighborBlackList,
+			isDisrupted: this.isDisrupted
+		};
+	}
+
+	static fromJSON(json: any): Gossip {
+		const gossip = new Gossip(json.sender, json.payload);
+		gossip.blackListNeighbors(json.neighborBlackList);
+		gossip.isDisrupted = json.isDisrupted;
+		return gossip;
+	}
 }

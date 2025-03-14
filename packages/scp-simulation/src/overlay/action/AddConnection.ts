@@ -25,4 +25,17 @@ export class AddConnection extends UserAction {
 	hash(): string {
 		return this.subType + this.a + this.b;
 	}
+
+	toJSON(): object {
+		return {
+			type: this.type,
+			subType: this.subType,
+			a: this.a,
+			b: this.b
+		};
+	}
+
+	static fromJSON(json: any): AddConnection {
+		return new AddConnection(json.a, json.b);
+	}
 }

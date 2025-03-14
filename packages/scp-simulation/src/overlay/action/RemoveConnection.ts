@@ -25,4 +25,17 @@ export class RemoveConnection extends UserAction {
 	hash(): string {
 		return this.subType + this.a + this.b;
 	}
+
+	toJSON(): object {
+		return {
+			type: this.type,
+			subType: this.subType,
+			a: this.a,
+			b: this.b
+		};
+	}
+
+	static fromJSON(json: any): RemoveConnection {
+		return new RemoveConnection(json.a, json.b);
+	}
 }

@@ -14,7 +14,7 @@ export class QuorumSet {
 		};
 	}
 
-	fromJSON(json: Record<string, unknown>): QuorumSet {
+	static fromJSON(json: Record<string, unknown>): QuorumSet {
 		return new QuorumSet(
 			json.threshold as number,
 			json.validators as ReadonlyArray<string>,

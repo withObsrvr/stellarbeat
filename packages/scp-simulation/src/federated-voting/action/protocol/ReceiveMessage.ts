@@ -21,4 +21,20 @@ export class ReceiveMessage extends ProtocolAction {
 	hash(): string {
 		return this.subType + this.message + this.publicKey + this.isDisrupted;
 	}
+
+	toJSON(): object {
+		return {
+			type: this.type,
+			subType: this.subType,
+			message: this.message.toJSON(),
+			isDisrupted: this.isDisrupted
+		};
+	}
+
+	static fromJSON(json: any): ReceiveMessage {
+		const message = Message.fromJSON(json.message);
+		const receiveMessage = new ReceiveMessage(message);
+		receiveMessage.isDisrupted = json.isDisrupted;
+		return receiveMessage;
+	}
 }

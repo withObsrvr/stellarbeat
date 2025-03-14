@@ -33,4 +33,17 @@ export class AddNode extends UserAction {
 			this.quorumSet.validators.join('')
 		);
 	}
+
+	toJSON(): object {
+		return {
+			type: this.type,
+			subType: this.subType,
+			publicKey: this.publicKey,
+			quorumSet: this.quorumSet.toJSON()
+		};
+	}
+
+	static fromJSON(json: any): AddNode {
+		return new AddNode(json.publicKey, QuorumSet.fromJSON(json.quorumSet));
+	}
 }

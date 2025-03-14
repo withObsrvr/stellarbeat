@@ -19,4 +19,22 @@ export class Vote {
 	hash(): string {
 		return `${this.publicKey.toString()}${this.statement.toString()}${this.isVoteToAccept}${this.quorumSet.toJSON()}`;
 	}
+
+	toJSON(): object {
+		return {
+			statement: this.statement,
+			isVoteToAccept: this.isVoteToAccept,
+			publicKey: this.publicKey,
+			quorumSet: this.quorumSet.toJSON()
+		};
+	}
+
+	static fromJSON(json: any): Vote {
+		return new Vote(
+			json.statement,
+			json.isVoteToAccept,
+			json.publicKey,
+			QuorumSet.fromJSON(json.quorumSet)
+		);
+	}
 }

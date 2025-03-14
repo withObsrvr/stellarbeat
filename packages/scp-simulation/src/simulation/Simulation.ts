@@ -121,8 +121,7 @@ export class Simulation {
 
 	private calculateStepHash(step: SimulationStep): string {
 		return step.userActions
-			.map((a) => a.toString())
-			.concat(step.protocolActions.map((a) => a.toString()))
+			.map((a) => a.hash())
 			.join('|')
 			.concat(step.protocolActions.map((a) => a.hash()).join('|'));
 	}
@@ -132,7 +131,7 @@ export class Simulation {
 		const newActions = this.context.executeActions(
 			this.currentStep.protocolActions,
 			this.currentStep.userActions
-		);
+		); //update the context state
 		const stepHash = this.calculateStepHash(this.currentStep);
 
 		//because we want to be able to replay predefined scenarios,
@@ -141,7 +140,7 @@ export class Simulation {
 			this.currentStep.nextStep !== null &&
 			this.currentStep.nextStep.previousStepHash === stepHash
 		) {
-			this.context.drainEvents();
+			this.currentStep.nextStep.previousEvents = this.context.drainEvents(); //if the step was loaded from JSON, there are no events yet
 			this.currentStep = this.currentStep.nextStep;
 			return; //context is deterministic, and if we are playing a scenario, we can reuse the next step, if there is one
 		}

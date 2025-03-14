@@ -25,10 +25,10 @@ export class Node {
 		};
 	}
 
-	fromJSON(json: Record<string, unknown>): Node {
+	static fromJSON(json: Record<string, unknown>): Node {
 		return new Node(
 			json.publicKey as string,
-			this._quorumSet.fromJSON(json.quorumSet as Record<string, unknown>)
+			QuorumSet.fromJSON(json.quorumSet as Record<string, unknown>)
 		);
 	}
 }

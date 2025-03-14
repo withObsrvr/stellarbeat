@@ -23,4 +23,17 @@ export class VoteOnStatement extends UserAction {
 	hash(): string {
 		return this.subType + this.publicKey + this.statement.toString();
 	}
+
+	toJSON(): object {
+		return {
+			type: this.type,
+			subType: this.subType,
+			publicKey: this.publicKey,
+			statement: this.statement
+		};
+	}
+
+	static fromJSON(json: any): VoteOnStatement {
+		return new VoteOnStatement(json.publicKey, json.statement);
+	}
 }

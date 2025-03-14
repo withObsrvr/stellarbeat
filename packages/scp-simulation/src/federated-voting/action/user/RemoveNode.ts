@@ -18,4 +18,16 @@ export class RemoveNode extends UserAction {
 	hash(): string {
 		return this.subType + this.publicKey;
 	}
+
+	toJSON(): object {
+		return {
+			type: this.type,
+			subType: this.subType,
+			publicKey: this.publicKey
+		};
+	}
+
+	static fromJSON(json: any): RemoveNode {
+		return new RemoveNode(json.publicKey);
+	}
 }

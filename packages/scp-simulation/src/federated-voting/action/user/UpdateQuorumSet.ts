@@ -21,4 +21,20 @@ export class UpdateQuorumSet extends UserAction {
 	hash(): string {
 		return this.subType + this.publicKey + this.quorumSet.toJSON();
 	}
+
+	toJSON(): object {
+		return {
+			type: this.type,
+			subType: this.subType,
+			publicKey: this.publicKey,
+			quorumSet: this.quorumSet.toJSON()
+		};
+	}
+
+	static fromJSON(json: any): UpdateQuorumSet {
+		return new UpdateQuorumSet(
+			json.publicKey,
+			QuorumSet.fromJSON(json.quorumSet)
+		);
+	}
 }
