@@ -182,7 +182,6 @@ watch(
     initialDialogShow.value = false;
 
     newEvents.forEach((event) => {
-      console.log(event.toString());
       if (event instanceof Voted && !event.vote.isVoteToAccept) {
         currentEvents.value.push({
           shortDescription: `Voted "${event.vote.statement}"`,

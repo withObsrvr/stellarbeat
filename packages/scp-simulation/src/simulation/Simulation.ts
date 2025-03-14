@@ -124,29 +124,13 @@ export class Simulation {
 		return this.currentStep.protocolActions;
 	}
 
-	private calculateStepHash(step: SimulationStep): string {
-		return murmurhash
-			.v3(
-				step.userActions
-					.map((a) => JSON.stringify(a.toJSON()))
-					.join('|')
-					.concat(
-						step.protocolActions
-							.map((a) => JSON.stringify(a.toJSON()))
-							.join('|')
-					),
-				1
-			)
-			.toString();
-	}
-
 	//Executes the pending actions. UserActions are always first, then protocol actions
 	public executeStep() {
 		const newActions = this.context.executeActions(
 			this.currentStep.protocolActions,
 			this.currentStep.userActions
 		); //update the context state
-		const stepHash = this.calculateStepHash(this.currentStep);
+		const stepHash = calculateStepHash(this.currentStep);
 
 		//because we want to be able to replay predefined scenarios,
 		//only when the current step has not been modified
@@ -220,4 +204,18 @@ export class Simulation {
 	getInitialStep(): SimulationStep {
 		return this.initialStep;
 	}
+}
+
+export function calculateStepHash(step: SimulationStep): string {
+	return murmurhash
+		.v3(
+			step.userActions
+				.map((a) => JSON.stringify(a.toJSON()))
+				.join('|')
+				.concat(
+					step.protocolActions.map((a) => JSON.stringify(a.toJSON())).join('|')
+				),
+			1
+		)
+		.toString();
 }

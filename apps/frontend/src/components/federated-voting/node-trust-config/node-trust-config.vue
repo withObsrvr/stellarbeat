@@ -319,7 +319,6 @@ function compareTrust(node1: FederatedNode, node2: TrustConfig): boolean {
 }
 
 function initializeNodeCache() {
-  console.log("Initializing node cache");
   hasLocalChanges.value = false;
 
   // Start with existing active nodes

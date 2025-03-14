@@ -34,8 +34,7 @@ describe('SimulationStepSerializer', () => {
 
 			expect(json).toEqual({
 				userActions: [userAction.toJSON()],
-				protocolActions: [protocolAction.toJSON()],
-				previousStepHash: '123456'
+				protocolActions: [protocolAction.toJSON()]
 			});
 		});
 	});
@@ -44,8 +43,7 @@ describe('SimulationStepSerializer', () => {
 		it('should deserialize JSON back to a step with correct structure', () => {
 			const json = {
 				userActions: [userAction.toJSON()],
-				protocolActions: [protocolAction.toJSON()],
-				previousStepHash: '123456'
+				protocolActions: [protocolAction.toJSON()]
 			};
 
 			const deserializedStep = simulationStepSerializer.fromJSON(json);
@@ -56,7 +54,7 @@ describe('SimulationStepSerializer', () => {
 				previousEvents: [],
 				nextStep: null,
 				previousStep: null,
-				previousStepHash: '123456'
+				previousStepHash: ''
 			});
 		});
 	});

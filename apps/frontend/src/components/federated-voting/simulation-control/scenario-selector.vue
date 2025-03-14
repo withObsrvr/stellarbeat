@@ -26,9 +26,9 @@
     <button class="btn btn-sm" title="Export Scenario" @click="showExportModal">
       <BIconDownload />
     </button>
-    <!--button class="btn btn-sm" title="Import Scenario" @click="showImportModal">
+    <button class="btn btn-sm" title="Import Scenario" @click="showImportModal">
       <BIconUpload />
-    </button!-->
+    </button>
 
     <BModal
       id="settings-modal"
@@ -103,9 +103,6 @@
     >
       <div v-if="importError" class="alert alert-danger">
         <strong>Error:</strong> {{ importError }}
-      </div>
-      <div class="alert alert-warning">
-        Only supports imports of Scenarios that are exported from this app
       </div>
       <p>Paste the scenario JSON below:</p>
       <div class="form-group">
