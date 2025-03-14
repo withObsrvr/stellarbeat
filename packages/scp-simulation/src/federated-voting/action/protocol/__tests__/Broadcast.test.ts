@@ -1,10 +1,14 @@
 import { Broadcast } from '../Broadcast';
-import { mock } from 'jest-mock-extended';
-import { Payload } from '../../../../overlay/Overlay';
+import { QuorumSet, Vote } from '../../../..';
 
 describe('Broadcast', () => {
 	const broadcaster = 'node';
-	const payload = mock<Payload>();
+	const payload = new Vote(
+		'pizza',
+		true,
+		broadcaster,
+		new QuorumSet(1, [], [])
+	);
 	let action: Broadcast;
 
 	beforeEach(() => {
@@ -19,7 +23,7 @@ describe('Broadcast', () => {
 				type: 'ProtocolAction',
 				subType: 'Broadcast',
 				broadcaster: broadcaster,
-				payload: payload,
+				payload: payload.toJSON(),
 				neighborBlackList: ['neighbor'],
 				isDisrupted: true
 			});
@@ -29,9 +33,10 @@ describe('Broadcast', () => {
 	describe('fromJSON', () => {
 		it('should deserialize the action correctly', () => {
 			const json = {
+				type: 'ProtocolAction',
 				subType: 'Broadcast',
 				broadcaster: broadcaster,
-				payload: payload
+				payload: payload.toJSON()
 			};
 			const deserialized = Broadcast.fromJSON(json);
 			expect(deserialized).toBeInstanceOf(Broadcast);
@@ -45,7 +50,7 @@ describe('Broadcast', () => {
 			const json = action.toJSON();
 			const deserialized = Broadcast.fromJSON(json);
 			expect(deserialized.publicKey).toBe(action.publicKey);
-			expect(deserialized.payload).toBe(action.payload);
+			expect(deserialized.payload).toEqual(action.payload);
 			expect(deserialized.getBlackList()).toEqual(['neighbor']);
 			expect(deserialized.isDisrupted).toBe(action.isDisrupted);
 			expect(deserialized.toString()).toBe(action.toString());

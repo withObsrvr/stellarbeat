@@ -595,6 +595,20 @@ class FederatedVotingStore {
     );
     return scenarioSerializer.toJSON(scenarioToExport);
   }
+
+  importScenario(json: object) {
+    const scenarioSerializer = new ScenarioSerializer(
+      new SimulationStepListSerializer(new SimulationStepSerializer()),
+    );
+    const scenario = scenarioSerializer.fromJSON(json);
+    const existingIndex = this.scenarios.findIndex((s) => s.id === scenario.id);
+    if (existingIndex !== -1) {
+      this.scenarios.splice(existingIndex, 1, scenario);
+    } else {
+      this.scenarios.push(scenario);
+    }
+    this.selectScenario(scenario.id);
+  }
 }
 
 export const federatedVotingStore = new FederatedVotingStore();

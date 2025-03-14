@@ -1,10 +1,16 @@
 import { mock } from 'jest-mock-extended';
 import { Payload } from '../../Overlay';
 import { Gossip } from '../Gossip';
+import { QuorumSet, Vote } from '../../..';
 
 describe('Gossip', () => {
 	const sender = 'node1';
-	const payload: Payload = mock<Payload>();
+	const payload: Payload = new Vote(
+		'pizza',
+		true,
+		sender,
+		new QuorumSet(1, [], [])
+	);
 
 	describe('toJSON', () => {
 		it('should serialize Gossip object to JSON', () => {
@@ -40,7 +46,7 @@ describe('Gossip', () => {
 
 			expect(gossip).toBeInstanceOf(Gossip);
 			expect(gossip.sender).toBe(sender);
-			expect(gossip.payload).toBe(payload);
+			expect(gossip.payload).toEqual(payload);
 			expect(gossip.getBlackList()).toEqual(['node2', 'node3']);
 			expect(gossip.isDisrupted).toBe(true);
 			expect(gossip.publicKey).toBe(sender);
@@ -57,7 +63,7 @@ describe('Gossip', () => {
 			const deserializedGossip = Gossip.fromJSON(json);
 
 			expect(deserializedGossip.sender).toBe(originalGossip.sender);
-			expect(deserializedGossip.payload).toBe(originalGossip.payload);
+			expect(deserializedGossip.payload).toEqual(originalGossip.payload);
 			expect(deserializedGossip.getBlackList()).toEqual(
 				originalGossip.getBlackList()
 			);

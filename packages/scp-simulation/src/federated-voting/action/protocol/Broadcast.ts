@@ -1,5 +1,6 @@
 import { Context, ProtocolAction, PublicKey } from '../../../core';
 import { Payload } from '../../../overlay/Overlay';
+import { Vote } from '../../protocol';
 
 export class Broadcast extends ProtocolAction {
 	subType = 'Broadcast';
@@ -37,15 +38,21 @@ export class Broadcast extends ProtocolAction {
 			type: this.type,
 			subType: this.subType,
 			broadcaster: this.broadcaster,
-			payload: this.payload,
+			payload: this.payload.toJSON(),
 			neighborBlackList: this.neighborBlackList,
 			isDisrupted: this.isDisrupted
 		};
 	}
 
 	static fromJSON(json: any): Broadcast {
-		const broadcast = new Broadcast(json.broadcaster, json.payload);
-		broadcast.blackListNeighbors(json.neighborBlackList);
+		const neighborBlackList = Array.isArray(json.neighborBlackList)
+			? json.neighborBlackList
+			: [];
+		const broadcast = new Broadcast(
+			json.broadcaster,
+			Vote.fromJSON(json.payload),
+			neighborBlackList
+		);
 		broadcast.isDisrupted = json.isDisrupted;
 		return broadcast;
 	}

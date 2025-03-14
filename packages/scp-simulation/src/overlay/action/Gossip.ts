@@ -1,4 +1,5 @@
 import { Context, ProtocolAction } from '../../core';
+import { Vote } from '../../federated-voting';
 import { Payload } from '../Overlay';
 
 type PublicKey = string;
@@ -37,14 +38,14 @@ export class Gossip extends ProtocolAction {
 			type: this.type,
 			subType: this.subType,
 			sender: this.sender,
-			payload: this.payload,
+			payload: this.payload.toJSON(),
 			neighborBlackList: this.neighborBlackList,
 			isDisrupted: this.isDisrupted
 		};
 	}
 
 	static fromJSON(json: any): Gossip {
-		const gossip = new Gossip(json.sender, json.payload);
+		const gossip = new Gossip(json.sender, Vote.fromJSON(json.payload));
 		gossip.blackListNeighbors(json.neighborBlackList);
 		gossip.isDisrupted = json.isDisrupted;
 		return gossip;

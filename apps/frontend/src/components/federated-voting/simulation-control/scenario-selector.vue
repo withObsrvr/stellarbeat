@@ -26,6 +26,9 @@
     <button class="btn btn-sm" title="Export Scenario" @click="showExportModal">
       <BIconDownload />
     </button>
+    <button class="btn btn-sm" title="Import Scenario" @click="showImportModal">
+      <BIconUpload />
+    </button>
 
     <BModal
       id="settings-modal"
@@ -90,12 +93,42 @@
         </button>
       </template>
     </BModal>
+
+    <BModal
+      id="import-modal"
+      ref="importModal"
+      title="Import Scenario"
+      size="lg"
+      @ok="importScenario"
+    >
+      <div v-if="importError" class="alert alert-danger">
+        <strong>Error:</strong> {{ importError }}
+      </div>
+      <p>Paste the scenario JSON below:</p>
+      <div class="form-group">
+        <textarea
+          v-model="importJsonText"
+          class="form-control import-json-textarea"
+          placeholder="Paste JSON here..."
+          rows="10"
+        ></textarea>
+      </div>
+      <template #modal-footer="{ ok, cancel }">
+        <button class="btn btn-secondary" @click="cancel()">Cancel</button>
+        <button class="btn btn-primary" @click="ok()">Import</button>
+      </template>
+    </BModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import { BIconArrowClockwise, BIconGear, BIconDownload } from "bootstrap-vue";
+import {
+  BIconArrowClockwise,
+  BIconGear,
+  BIconDownload,
+  BIconUpload,
+} from "bootstrap-vue";
 import { BModal } from "bootstrap-vue";
 import { computed, ref } from "vue";
 
@@ -111,6 +144,9 @@ const isGossipEnabled = ref(federatedVotingStore.overlayIsGossipEnabled);
 const settingsModal = ref<BModal | null>(null);
 const exportModal = ref<BModal | null>(null);
 const exportedScenario = ref("");
+const importModal = ref<BModal | null>(null);
+const importJsonText = ref("");
+const importError = ref("");
 
 function reloadScenario() {
   federatedVotingStore.selectScenario(
@@ -170,6 +206,33 @@ function copyToClipboard() {
       console.error("Could not copy text: ", err);
     });
 }
+
+function showImportModal() {
+  importJsonText.value = "";
+  importError.value = "";
+  if (importModal.value) {
+    importModal.value.show();
+  }
+}
+
+function hideImportModal() {
+  if (importModal.value) {
+    importModal.value.hide();
+  }
+}
+
+function importScenario() {
+  try {
+    const scenarioData = importJsonText.value;
+    federatedVotingStore.importScenario(JSON.parse(scenarioData));
+    importError.value = "";
+    hideImportModal();
+  } catch (err) {
+    console.error(err);
+    importError.value =
+      err instanceof Error ? err.message : "Invalid JSON format";
+  }
+}
 </script>
 
 <style scoped>
@@ -196,5 +259,12 @@ function copyToClipboard() {
   border: 1px solid #dee2e6;
   font-family: monospace;
   font-size: 0.9rem;
+}
+
+.import-json-textarea {
+  width: 100%;
+  font-family: monospace;
+  font-size: 0.9rem;
+  resize: vertical;
 }
 </style>

@@ -1,5 +1,5 @@
 import { mock } from 'jest-mock-extended';
-import { UserAction, ProtocolAction, Event } from '../../../core';
+import { UserAction, ProtocolAction, Event, QuorumSet } from '../../../core';
 import { Broadcast, Vote, VoteOnStatement } from '../../../federated-voting';
 import { SimulationStep } from '../../Simulation';
 import { SimulationStepSerializer } from '../SimulationStepSerializer';
@@ -12,7 +12,11 @@ describe('SimulationStepSerializer', () => {
 
 	beforeEach(() => {
 		userAction = new VoteOnStatement('Alice', 'pizza');
-		protocolAction = new Broadcast('Alice', mock<Vote>());
+		protocolAction = new Broadcast(
+			'Alice',
+			new Vote('pizza', true, 'Alice', new QuorumSet(1, [], [])),
+			['neighbor']
+		);
 
 		step = {
 			userActions: [userAction],
