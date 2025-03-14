@@ -19,10 +19,6 @@ export class ForgeMessage extends UserAction {
 		return `Forge message from ${this.publicKey} to ${this.message.receiver}: "${this.message.vote}"`;
 	}
 
-	hash(): string {
-		return this.subType + this.publicKey;
-	}
-
 	toJSON(): object {
 		return {
 			type: this.type,

@@ -20,7 +20,6 @@ import { Broadcast } from './action/protocol/Broadcast';
 import { MessageForged } from './event/MessageForged';
 
 export interface FederatedVotingContextState {
-	initialNodes: Node[];
 	protocolStates: FederatedVotingProtocolState[];
 }
 
@@ -29,7 +28,6 @@ export class FederatedVotingContext
 	implements Context
 {
 	private state: FederatedVotingContextState = {
-		initialNodes: [],
 		protocolStates: []
 	};
 
@@ -40,38 +38,11 @@ export class FederatedVotingContext
 		super();
 	}
 
-	loadInitialNodes(nodes: Node[]): void {
-		this.state.initialNodes = nodes;
-		this.addInitialNodesToContext();
-	}
-
-	addInitialNodesToContext() {
-		//we have to make copies in case the nodes are updated
-		//to make this cleaner we should make nodes and quorumsets immutable
-		//because an UpdateQuorumSet action is at the moment modifying the existing node
-		this.state.initialNodes.forEach((node) =>
-			this.addNode(
-				new Node(
-					node.publicKey,
-					new QuorumSet(
-						node.quorumSet.threshold,
-						node.quorumSet.validators.slice(),
-						node.quorumSet.innerQuorumSets.slice()
-					)
-				)
-			)
-		);
-
-		this.overlay.drainEvents();
-		this.federatedVotingProtocol.drainEvents();
-	}
-
 	reset(): void {
 		//todo: could we make this class purer?
 		this.state.protocolStates = [];
 		this.overlay.reset();
 		this.drainEvents(); // Clear the collected events
-		this.addInitialNodesToContext();
 	}
 
 	//for exposing the state in GUI. Should not be altered directly

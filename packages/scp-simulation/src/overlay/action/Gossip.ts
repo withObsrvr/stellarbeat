@@ -32,15 +32,6 @@ export class Gossip extends ProtocolAction {
 		return `${this.sender} gossips message: "${this.payload}"`;
 	}
 
-	hash(): string {
-		return (
-			this.subType +
-			this.sender +
-			this.payload +
-			this.neighborBlackList.join('|')
-		);
-	}
-
 	toJSON(): object {
 		return {
 			type: this.type,

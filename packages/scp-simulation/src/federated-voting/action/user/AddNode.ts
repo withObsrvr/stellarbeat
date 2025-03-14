@@ -25,15 +25,6 @@ export class AddNode extends UserAction {
 		return `Add node ${this.publicKey}`;
 	}
 
-	hash(): string {
-		return (
-			this.subType +
-			this.publicKey +
-			this.quorumSet.threshold +
-			this.quorumSet.validators.join('')
-		);
-	}
-
 	toJSON(): object {
 		return {
 			type: this.type,

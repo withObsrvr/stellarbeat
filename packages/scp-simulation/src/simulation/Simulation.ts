@@ -80,10 +80,6 @@ export class Simulation {
 		return this.currentStep.previousEvents;
 	}
 
-	public loadInitialNodes(nodes: Node[]): void {
-		this.context.loadInitialNodes(nodes);
-	}
-
 	//in every step you can only add a specific action only once for a node
 	public addUserAction(action: UserAction): void {
 		const existingAction = this.currentStep.userActions.find(
@@ -129,9 +125,9 @@ export class Simulation {
 
 	private calculateStepHash(step: SimulationStep): string {
 		return step.userActions
-			.map((a) => a.hash())
+			.map((a) => a.toJSON())
 			.join('|')
-			.concat(step.protocolActions.map((a) => a.hash()).join('|'));
+			.concat(step.protocolActions.map((a) => a.toJSON()).join('|'));
 	}
 
 	//Executes the pending actions. UserActions are always first, then protocol actions

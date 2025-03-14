@@ -18,10 +18,6 @@ export class UpdateQuorumSet extends UserAction {
 		return `${this.publicKey}:update quorumSet(${this.quorumSet.toString()})`;
 	}
 
-	hash(): string {
-		return this.subType + this.publicKey + this.quorumSet.toJSON();
-	}
-
 	toJSON(): object {
 		return {
 			type: this.type,

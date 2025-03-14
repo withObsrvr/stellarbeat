@@ -108,7 +108,7 @@ export class Overlay extends InMemoryEventCollector {
 		this.connections.get(a)!.add(b);
 		this.connections.get(b)!.add(a);
 
-		this.registerEvent(new ConnectionAdded(a, b));
+		if (!this.fullyConnected) this.registerEvent(new ConnectionAdded(a, b));
 	}
 
 	removeConnection(a: PublicKey, b: PublicKey): void {

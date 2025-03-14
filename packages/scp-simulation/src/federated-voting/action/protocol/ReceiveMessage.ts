@@ -18,10 +18,6 @@ export class ReceiveMessage extends ProtocolAction {
 		return `${this.message.toString()}`;
 	}
 
-	hash(): string {
-		return this.subType + this.message + this.publicKey + this.isDisrupted;
-	}
-
 	toJSON(): object {
 		return {
 			type: this.type,

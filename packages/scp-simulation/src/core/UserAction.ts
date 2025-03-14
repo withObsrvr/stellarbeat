@@ -10,7 +10,6 @@ export abstract class UserAction {
 	abstract readonly immediateExecution: boolean;
 	abstract execute(context: Context): ProtocolAction[];
 	abstract toString(): string;
-	abstract hash(): string;
 	abstract toJSON(): object;
 	// Note: fromJSON is static, so it's implemented in each subclass
 }

@@ -1,12 +1,12 @@
 <template>
   <div class="scenario-controls">
-    <select id="scenario" v-model="selectedScenario" class="fv-dropdown">
+    <select id="scenario" v-model="selectedScenarioId" class="fv-dropdown">
       <option
         v-for="scenario in federatedVotingStore.scenarios"
         :key="scenario.id"
         :value="scenario.id"
       >
-        {{ scenario.label }}
+        {{ scenario.name }}
       </option>
     </select>
     <button
@@ -24,7 +24,11 @@
       <BIconGear />
     </button>
 
-    <BModal id="settings-modal" ref="settingsModal" title="Network Settings">
+    <BModal
+      id="settings-modal"
+      ref="settingsModal"
+      title="Network Settings for scenario"
+    >
       <div class="alert alert-warning">
         <strong>Warning:</strong> Changing these settings will reset the current
         scenario.
@@ -72,8 +76,8 @@ import { BIconArrowClockwise, BIconGear } from "bootstrap-vue";
 import { BModal } from "bootstrap-vue";
 import { computed, ref } from "vue";
 
-const selectedScenario = computed({
-  get: () => federatedVotingStore.selectedScenarioId,
+const selectedScenarioId = computed({
+  get: () => federatedVotingStore.selectedScenario.id,
   set: (value: string) => {
     federatedVotingStore.selectScenario(value);
   },
@@ -85,16 +89,14 @@ const settingsModal = ref<BModal | null>(null);
 
 function reloadScenario() {
   federatedVotingStore.selectScenario(
-    selectedScenario.value,
+    selectedScenarioId.value,
     isFullyConnected.value,
     isGossipEnabled.value,
   );
 }
 
 function resetScenario() {
-  isFullyConnected.value = true; //when we have better scenario's, values will be encapsulated there
-  isGossipEnabled.value = false;
-  reloadScenario();
+  federatedVotingStore.selectScenario(selectedScenarioId.value);
 }
 
 function showSettingsModal() {

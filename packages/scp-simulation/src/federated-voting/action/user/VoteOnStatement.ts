@@ -20,9 +20,6 @@ export class VoteOnStatement extends UserAction {
 	toString(): string {
 		return `${this.publicKey}:vote(${this.statement.toString()})`;
 	}
-	hash(): string {
-		return this.subType + this.publicKey + this.statement.toString();
-	}
 
 	toJSON(): object {
 		return {

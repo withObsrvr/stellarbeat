@@ -1,6 +1,5 @@
 import { computed, reactive } from "vue";
 import {
-  BasicFederatedVotingScenario,
   FederatedVotingContext,
   FederatedVotingContextFactory,
   Simulation,
@@ -16,6 +15,9 @@ import {
   RemoveConnection,
   Message,
   ForgeMessage,
+  FederatedVotingScenarioFactory,
+  ScenarioLoader,
+  Scenario,
 } from "scp-simulation";
 import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
 import { findAllIntactNodes } from "@/components/federated-voting/analysis/DSetAnalysis";
@@ -33,11 +35,16 @@ export interface FederatedNode {
 }
 
 class FederatedVotingStore {
+  readonly scenarios = [
+    FederatedVotingScenarioFactory.createBasicConsensus(),
+    FederatedVotingScenarioFactory.createStuck(),
+  ];
+
   private readonly _state = reactive<{
     simulationUpdate: number;
     networkStructureUpdate: number;
     overlayUpdate: number;
-    selectedScenarioId: string;
+    selectedScenario: Scenario;
     selectedNodeId: string | null;
     protocolContext: FederatedVotingContext;
     protocolContextState: FederatedVotingContextState;
@@ -50,7 +57,7 @@ class FederatedVotingStore {
     simulationUpdate: 0,
     networkStructureUpdate: 0,
     latestSimulationStepWentForwards: false,
-    selectedScenarioId: "consensus-reached",
+    selectedScenario: this.scenarios[0],
     selectedNodeId: null,
     protocolContext: FederatedVotingContextFactory.create(),
     protocolContextState: {} as FederatedVotingContextState, // temporary placeholder until constructor load
@@ -63,30 +70,15 @@ class FederatedVotingStore {
 
   private _networkStructureHash: string = "";
   private _overlayConnectionsHash: string = "";
-
-  readonly scenarios = [
-    {
-      id: "consensus-reached",
-      label: "Consensus Scenario",
-      loader: BasicFederatedVotingScenario.loadConsensusReached,
-    },
-    {
-      id: "stuck",
-      label: "Stuck Scenario",
-      loader: BasicFederatedVotingScenario.loadStuck,
-    },
-  ];
+  private scenarioLoader = new ScenarioLoader();
 
   constructor() {
-    const scenario = this.scenarios.find(
-      (s) => s.id === this._state.selectedScenarioId,
+    const result = this.scenarioLoader.loadScenario(
+      this._state.selectedScenario,
     );
-    if (!scenario) throw new Error("Scenario not found");
-
-    this._state.protocolContext = FederatedVotingContextFactory.create();
-    this._state.protocolContextState = this._state.protocolContext.getState();
-    this._state.simulation = new Simulation(this._state.protocolContext);
-    scenario.loader(this.simulation as Simulation);
+    this._state.protocolContext = result.protocolContext;
+    this._state.protocolContextState = result.protocolContext.getState();
+    this._state.simulation = result.simulation;
     this.updateNetwork();
   }
 
@@ -136,8 +128,8 @@ class FederatedVotingStore {
     return this._state.networkStructureUpdate;
   }
 
-  get selectedScenarioId(): string {
-    return this._state.selectedScenarioId;
+  get selectedScenario(): Scenario {
+    return this._state.selectedScenario;
   }
 
   get selectedNodeId(): string | null {
@@ -146,10 +138,6 @@ class FederatedVotingStore {
 
   get networkAnalysis(): NetworkAnalysis {
     return this._state.networkAnalysis;
-  }
-
-  set selectedScenarioId(value: string) {
-    this._state.selectedScenarioId = value;
   }
 
   set selectedNodeId(value: string | null) {
@@ -316,24 +304,39 @@ class FederatedVotingStore {
 
   public selectScenario(
     scenarioId: string,
-    overlayIsFullyConnected = true,
-    overlayIsGossipEnabled = false,
+    overlayIsFullyConnected?: boolean,
+    overlayIsGossipEnabled?: boolean,
   ): void {
-    this._state.selectedScenarioId = scenarioId;
-    const scenario = this.scenarios.find((s) => s.id === scenarioId);
-    if (!scenario) throw new Error("Scenario not found");
+    let scenario = this.scenarios.find((s) => s.id === scenarioId);
+    if (!scenario) {
+      console.error(`Scenario with id ${scenarioId} not found`);
+      return;
+    }
+    if (
+      overlayIsFullyConnected !== undefined ||
+      overlayIsGossipEnabled !== undefined
+    ) {
+      scenario = new Scenario(
+        scenario.id,
+        scenario.name,
+        scenario.description,
+        overlayIsFullyConnected ?? scenario.isOverlayFullyConnected,
+        overlayIsGossipEnabled ?? scenario.isOverlayGossipEnabled,
+        scenario.initialSimulationStep,
+      );
+    }
 
-    this._state.protocolContext = FederatedVotingContextFactory.create(
-      overlayIsFullyConnected,
-      overlayIsGossipEnabled,
-    );
+    this._state.selectedScenario = scenario;
+    const result = this.scenarioLoader.loadScenario(scenario);
+
+    this._state.protocolContext = result.protocolContext;
     this._state.protocolContextState = this._state.protocolContext.getState();
-    this._state.simulation = new Simulation(this._state.protocolContext);
-    scenario.loader(this.simulation as Simulation);
+    this._state.simulation = result.simulation;
     this._state.overlayUpdate++;
     this._state.networkStructureUpdate++;
     this.updateNetwork();
   }
+  public resetScenario;
 
   //SIMULATION ACTIONS
   public getLatestEvents() {

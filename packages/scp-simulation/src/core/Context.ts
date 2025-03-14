@@ -11,7 +11,6 @@ import { UserAction } from './UserAction';
 // For example the federated voting protocol allows a user to vote on a single statement,
 // Acts as a mediator between the protocol and the overlay
 export interface Context extends EventCollector {
-	loadInitialNodes(nodes: Node[]): void;
 	executeActions(
 		protocolActions: ProtocolAction[],
 		userActions: UserAction[]

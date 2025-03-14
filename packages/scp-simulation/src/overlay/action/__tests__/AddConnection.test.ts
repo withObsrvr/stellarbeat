@@ -45,7 +45,6 @@ describe('AddConnection', () => {
 			expect(deserialized.b).toBe(action.b);
 			expect(deserialized.publicKey).toBe(action.publicKey);
 			expect(deserialized.toString()).toBe(action.toString());
-			expect(deserialized.hash()).toBe(action.hash());
 		});
 	});
 });

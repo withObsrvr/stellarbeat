@@ -15,10 +15,6 @@ export class RemoveNode extends UserAction {
 		return `Remove node ${this.publicKey}`;
 	}
 
-	hash(): string {
-		return this.subType + this.publicKey;
-	}
-
 	toJSON(): object {
 		return {
 			type: this.type,

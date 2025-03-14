@@ -44,7 +44,6 @@ describe('UpdateQuorumSet', () => {
 			expect(deserialized.publicKey).toBe(action.publicKey);
 			expect(deserialized.quorumSet).toEqual(action.quorumSet);
 			expect(deserialized.toString()).toBe(action.toString());
-			expect(deserialized.hash()).toBe(action.hash());
 		});
 	});
 });

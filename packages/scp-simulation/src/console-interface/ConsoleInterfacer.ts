@@ -1,5 +1,9 @@
 import * as readline from 'readline';
-import { Simulation, BasicFederatedVotingScenario } from '../simulation';
+import {
+	Simulation,
+	FederatedVotingScenarioFactory,
+	ScenarioLoader
+} from '../simulation';
 import { ConsoleAdjacencyMatrixVisualization } from './ConsoleAdjacencyMatrixVisualizer';
 import { QuorumSet } from '../core';
 import {
@@ -13,7 +17,8 @@ export class ConsoleInterfacer {
 	private federatedVotingContext: FederatedVotingContext; //todo: could me made more generic, but not a priority right now
 
 	constructor(
-		private consoleAdjacencyMatrixVisualizer: ConsoleAdjacencyMatrixVisualization
+		private consoleAdjacencyMatrixVisualizer: ConsoleAdjacencyMatrixVisualization,
+		private scenarioLoader: ScenarioLoader
 	) {
 		this.federatedVotingContext = FederatedVotingContextFactory.create();
 		this.simulation = new Simulation(this.federatedVotingContext);
@@ -128,7 +133,10 @@ export class ConsoleInterfacer {
 
 	private startSimulation(): void {
 		console.log('\n-- Loading default scenario --\n');
-		BasicFederatedVotingScenario.load(this.simulation);
+		const scenario = FederatedVotingScenarioFactory.createBasicConsensus();
+		const result = this.scenarioLoader.loadScenario(scenario);
+		this.simulation = result.simulation;
+		this.federatedVotingContext = result.protocolContext;
 		console.log('Pending user actions');
 
 		console.log("\n-- Enter 'next' to start federated consensus -- \n");

@@ -32,15 +32,6 @@ export class Broadcast extends ProtocolAction {
 		return `${this.payload.toString()}`;
 	}
 
-	hash(): string {
-		return (
-			this.subType +
-			this.broadcaster +
-			this.payload +
-			this.neighborBlackList.join('|')
-		);
-	}
-
 	toJSON(): object {
 		return {
 			type: this.type,
