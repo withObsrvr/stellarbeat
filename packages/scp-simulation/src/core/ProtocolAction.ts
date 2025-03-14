@@ -12,4 +12,5 @@ export abstract class ProtocolAction {
 	abstract execute(context: Context): ProtocolAction[];
 	abstract toString(): string;
 	abstract hash(): string;
+	abstract toJSON(): object;
 }

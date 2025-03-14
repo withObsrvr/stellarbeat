@@ -1,4 +1,4 @@
-import { Simulation } from '../Simulation';
+import { Simulation, SimulationStep } from '../Simulation';
 import { Context } from '../../core/Context';
 import { UserAction } from '../../core/UserAction';
 import { ProtocolAction } from '../../core/ProtocolAction';
@@ -128,5 +128,15 @@ describe('Simulation Class', () => {
 		const eventLog = simulation.getFullEventLog();
 
 		expect(eventLog).toEqual([[], [event1], [event2]]);
+	});
+
+	it('should correctly set initial step when supplied in constructor', () => {
+		const initialStep = mock<SimulationStep>();
+		initialStep.userActions = [];
+		simulation = new Simulation(context, initialStep);
+		const userAction = mock<UserAction>();
+		simulation.addUserAction(userAction);
+		expect(initialStep.userActions).toEqual([userAction]);
+		expect(simulation.getInitialStep()).toBe(initialStep);
 	});
 });

@@ -5,7 +5,7 @@ import { AddConnection, RemoveConnection } from '../overlay';
 //A step in the simulation. Contains all user and protocol actions to be executed next
 //and stores the state and events that got us here.
 //Linked list
-interface SimulationStep {
+export interface SimulationStep {
 	userActions: UserAction[];
 	protocolActions: ProtocolAction[];
 	previousEvents: Event[]; //the events executed in the previous step. Todo: or store executed events? Improve naming?
@@ -19,16 +19,24 @@ export class Simulation {
 	private initialStep: SimulationStep; //handy to replay the state
 	private currentStep: SimulationStep;
 
-	constructor(private context: Context) {
-		this.currentStep = {
-			userActions: [],
-			protocolActions: [],
-			previousEvents: [],
-			nextStep: null,
-			previousStep: null,
-			previousStepHash: ''
-		};
-		this.initialStep = this.currentStep;
+	constructor(
+		private context: Context,
+		initialStep?: SimulationStep
+	) {
+		if (initialStep) {
+			this.initialStep = initialStep;
+			this.currentStep = initialStep;
+		} else {
+			this.currentStep = {
+				userActions: [],
+				protocolActions: [],
+				previousEvents: [],
+				nextStep: null,
+				previousStep: null,
+				previousStepHash: ''
+			};
+			this.initialStep = this.currentStep;
+		}
 	}
 
 	getFullEventLog(): Event[][] {
@@ -141,7 +149,7 @@ export class Simulation {
 			this.currentStep.nextStep.previousStepHash === stepHash
 		) {
 			this.currentStep.nextStep.previousEvents = this.context.drainEvents(); //if the step was loaded from JSON, there are no events yet
-			this.currentStep = this.currentStep.nextStep;
+			this.currentStep = this.currentStep.nextStep; //advance to the next step
 			return; //context is deterministic, and if we are playing a scenario, we can reuse the next step, if there is one
 		}
 
@@ -154,7 +162,6 @@ export class Simulation {
 			previousStepHash: stepHash
 		};
 
-		//todo: sanity check that garbage collection picks up discarded next steps
 		this.currentStep.nextStep = nextStep;
 		this.currentStep = nextStep;
 	}
@@ -202,5 +209,9 @@ export class Simulation {
 		this.currentStep = this.initialStep;
 		this.context.reset();
 		this.context.drainEvents();
+	}
+
+	getInitialStep(): SimulationStep {
+		return this.initialStep;
 	}
 }
