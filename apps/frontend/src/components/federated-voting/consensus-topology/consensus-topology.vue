@@ -1,5 +1,5 @@
 <template>
-  <div class="card h-100">
+  <div class="card">
     <div class="card-header">
       <div>
         <BreadCrumbs root="Consensus Topology"></BreadCrumbs>

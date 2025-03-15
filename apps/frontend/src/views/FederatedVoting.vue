@@ -28,24 +28,24 @@
           <EventsAndActions />
         </div>
       </div>
-      <div class="row pb-5" style="height: 500px">
-        <div class="col-md-6 col-sm-12 h-100">
-          <ProcessedVotes class="h-100" />
+      <div class="row pb-5">
+        <div class="col-md-6 col-sm-12">
+          <ProcessedVotes class="" style="height: 500px" />
         </div>
-        <div class="col-md-6 col-sm-12 h-100">
-          <ConsensusTopology />
+        <div class="col-md-6 col-sm-12">
+          <ConsensusTopology class="" style="height: 500px" />
         </div>
       </div>
-      <div class="row pb-5" style="height: 550px">
-        <div class="col-6">
+      <div class="row mb-5">
+        <div class="col-md-6 col-sm-12" style="height: 550px">
           <DSets />
         </div>
-        <div class="col-6">
+        <div class="col-md-6 col-sm-12" style="height: 550px">
           <OverlayGraphBase />
         </div>
       </div>
       <div class="row">
-        <div class="col-12 pb-5">
+        <div class="col-12 mb-5">
           <NodeTrustConfig />
         </div>
       </div>

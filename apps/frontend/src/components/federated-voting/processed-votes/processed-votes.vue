@@ -3,67 +3,88 @@
     <div class="card-header">
       <BreadCrumbs root="Processed Votes" />
     </div>
-    <div class="card-body processed-votes h-100">
-      <div v-if="processedVotesByStatement.length === 0">
-        <p>No votes processed yet</p>
-      </div>
-      <div v-else class="row h-100">
-        <div class="statements-section col-lg-6 col-md-12 col-sm-12">
-          <div
-            v-for="(statementGroup, index) in processedVotesByStatement"
-            :key="index"
-            class="statement-group"
-          >
-            <h5 class="statement-title">
-              Statement: {{ statementGroup.statement }}
-            </h5>
-            <div class="voter-groups">
-              <!-- Regular votes column -->
-              <div class="voter-group">
-                <strong>Votes</strong>
-                <div class="voter-list">
-                  <FbasNodeBadge
-                    v-for="(publicKey, idx) in statementGroup.votes"
-                    :key="`vote-${idx}`"
-                    :node-id="publicKey"
-                    @select="selectNodeId"
-                  />
-                </div>
-              </div>
+    <div class="card-body my-body">
+      <div class="processed-votes mb-4">
+        <div v-if="processedVotesByStatement.length === 0">
+          <div class="content-container">
+            <p>No votes processed yet</p>
+          </div>
+        </div>
+        <div v-else class="content-container">
+          <ul class="nav nav-tabs mb-3">
+            <li
+              v-for="(statementGroup, index) in processedVotesByStatement"
+              :key="`tab-${index}`"
+              class="nav-item"
+            >
+              <a
+                class="nav-link"
+                :class="{ active: activeTab === index }"
+                href="#"
+                @click.prevent="activeTab = index"
+              >
+                <span class="statement-tab"
+                  >{{ statementGroup.statement }}
+                </span>
+              </a>
+            </li>
+          </ul>
 
-              <div class="voter-group">
-                <strong>Votes to Accept</strong>
-                <div class="voter-list">
-                  <FbasNodeBadge
-                    v-for="(publicKey, idx) in statementGroup.votesToAccept"
-                    :key="`accept-${idx}`"
-                    :node-id="publicKey"
-                    @select="selectNodeId"
-                  />
+          <div class="tab-content">
+            <div
+              v-for="(statementGroup, index) in processedVotesByStatement"
+              :key="`content-${index}`"
+              class="tab-pane fade"
+              :class="{ 'show active': activeTab === index }"
+            >
+              <div class="voter-groups">
+                <div class="voter-group">
+                  <strong>Votes</strong>
+                  <div class="voter-list">
+                    <FbasNodeBadge
+                      v-for="(publicKey, idx) in statementGroup.votes"
+                      :key="`vote-${idx}`"
+                      :node-id="publicKey"
+                      @select="selectNodeId"
+                    />
+                  </div>
+                </div>
+
+                <div class="voter-group">
+                  <strong>Votes to Accept</strong>
+                  <div class="voter-list">
+                    <FbasNodeBadge
+                      v-for="(publicKey, idx) in statementGroup.votesToAccept"
+                      :key="`accept-${idx}`"
+                      :node-id="publicKey"
+                      @select="selectNodeId"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        <div class="events-section col-lg-6 col-md-12 col-sm-12 h-100">
-          <ProcessedVotesNodeEvents
-            class="events-component"
-            :selected-node-id="selectedNodeId ?? undefined"
-          />
-        </div>
+      </div>
+      <div class="events-section">
+        <h5>Events</h5>
+        <ProcessedVotesNodeEvents
+          class="events-component"
+          :selected-node-id="selectedNodeId ?? undefined"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import BreadCrumbs from "../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasNodeBadge from "../fbas-node-badge.vue";
 import ProcessedVotesNodeEvents from "./processed-votes-node-events.vue";
 
+const activeTab = ref(0);
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
 function selectNodeId(nodeId: string) {
@@ -113,48 +134,90 @@ const processedVotesByStatement = computed(() => {
 </script>
 
 <style scoped>
+.my-body {
+  height: 100%;
+  padding: 0 1rem;
+}
 .processed-votes {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 200px;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .content-container {
-  max-height: 100px;
+  display: flex;
+  flex-direction: column;
 }
 
-.statements-section {
-  overflow-y: auto;
-  max-width: none;
-  padding-right: 5px;
+.nav-tabs {
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
 }
 
-.events-section {
-  height: 100%;
-  width: 100%;
+.nav-tabs .nav-item {
+  margin-bottom: -1px;
 }
 
-.events-divider-vertical {
-  width: 1px;
-  background-color: #dee2e6;
-  margin: 0 5px;
+.nav-tabs .nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  color: #495057;
+  background-color: transparent;
+  cursor: pointer;
 }
 
-.statement-group {
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
+.nav-tabs .nav-link:hover {
+  color: #1d8ab4;
+  border-color: #fff;
+  text-decoration: none;
 }
 
-.statement-group:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+.nav-tabs .nav-link.active {
+  color: #1d8ab4;
+  background-color: #fff;
+  border-color: #dee2e6 #dee2e6 #fff;
+}
+
+/* Statement title and tabs */
+.statement-tab {
+  white-space: nowrap;
+  font-size: 0.9em;
 }
 
 .statement-title {
   font-size: 1.2em;
   font-weight: bold;
-  margin-bottom: 6px;
+  margin-bottom: 1rem;
+}
+
+/* Tab pane transitions */
+.tab-pane {
+  transition: opacity 0.15s linear;
+  opacity: 0;
+}
+
+.tab-pane.show {
+  opacity: 1;
+}
+
+.tab-content {
+  margin-bottom: 1rem;
+}
+
+.events-section {
+  height: 180px;
+  flex-shrink: 0;
+}
+
+.events-component {
+  height: 100%;
+  overflow-y: auto;
 }
 
 .voter-groups {
@@ -178,29 +241,5 @@ const processedVotesByStatement = computed(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-}
-
-.section-title {
-  font-size: 1.1em;
-  font-weight: bold;
-  margin-bottom: 15px;
-}
-
-.event-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.empty-events {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  color: #6c757d;
-  font-style: italic;
-  font-size: 0.9em;
 }
 </style>
