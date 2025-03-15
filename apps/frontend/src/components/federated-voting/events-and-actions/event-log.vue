@@ -161,7 +161,6 @@ function selectNode(publicKey: string) {
 }
 
 .log-line {
-  display: flex;
   align-items: baseline;
   padding: 2px 0;
 }

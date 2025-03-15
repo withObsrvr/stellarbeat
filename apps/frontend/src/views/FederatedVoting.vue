@@ -25,7 +25,7 @@
       <div class="row">
         <div class="col-md-6"><FbasGraph /></div>
         <div class="col-md-6">
-          <FederatedVotingStatus />
+          <EventsAndActions />
         </div>
       </div>
       <div class="row pb-5" style="height: 500px">
@@ -57,9 +57,9 @@
 import FbasGraph from "@/components/federated-voting/fbas-graph/fbas-graph.vue";
 import Controller from "@/components/federated-voting/simulation-control/controller.vue";
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
-import ProcessedVotes from "@/components/federated-voting/selected-nodes-panel/processed-votes.vue";
-import FederatedVotingStatus from "@/components/federated-voting/simulation-control/federated-voting-status.vue";
 import DSets from "@/components/federated-voting/intactness.vue";
+import EventsAndActions from "@/components/federated-voting/events-and-actions/events-and-actions.vue";
+import ProcessedVotes from "@/components/federated-voting/processed-votes/processed-votes.vue";
 import VotesSelector from "@/components/federated-voting/votes-selector/votes-selector.vue";
 import InfoBox from "@/components/federated-voting/info-box/info-box.vue";
 import NodeTrustConfig from "@/components/federated-voting/node-trust-config/node-trust-config.vue";

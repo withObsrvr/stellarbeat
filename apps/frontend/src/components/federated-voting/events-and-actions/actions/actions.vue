@@ -104,13 +104,13 @@ import {
   ForgeMessage,
   Gossip,
   ProtocolAction,
-  UserAction
+  UserAction,
 } from "scp-simulation";
 import { ref, computed, watch, nextTick } from "vue";
 import {
   BIconExclamationTriangle,
   BIconExclamationTriangleFill,
-  BModal
+  BModal,
 } from "bootstrap-vue";
 import ForgeMessages from "./forge-messages.vue";
 
@@ -270,7 +270,6 @@ function selectNode(publicKey: string) {
 <style scoped>
 .actions-panel {
   flex: 1;
-  margin-right: 10px;
   overflow-y: auto;
   font-family: monospace;
   font-size: 12px;
@@ -376,6 +375,5 @@ function selectNode(publicKey: string) {
 
 .text-center {
   text-align: center;
-  width: 90%;
 }
 </style>

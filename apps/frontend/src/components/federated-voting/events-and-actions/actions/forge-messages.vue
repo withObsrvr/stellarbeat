@@ -2,10 +2,10 @@
   <div>
     <button
       v-tooltip="'Forge Message'"
-      class="btn btn-danger btn-sm"
+      class="btn btn-danger btn-sm py-0 pr-1"
       @click="showForgeMessageModal"
     >
-      <BIconEnvelopeFill class="mr-2" /><BIconExclamation />
+      <BIconEnvelopeFill class="mr-1" /><BIconExclamation />
     </button>
 
     <BModal

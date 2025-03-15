@@ -21,7 +21,7 @@
         </span>
       </div>
     </div>
-    <div class="selected">
+    <div class="selected px-3">
       <NodeInformation :public-key="selectedNodeId" class="px-3 py-3" />
       <!--ProcessedVotes /!-->
 
@@ -47,9 +47,9 @@
 import { computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import NodeInformation from "./node-information.vue";
-import EventLog from "../simulation-control/event-log.vue";
-import Actions from "../simulation-control/actions/actions.vue";
-import BreadCrumbs from "../bread-crumbs.vue";
+import EventLog from "../event-log.vue";
+import Actions from "../actions/actions.vue";
+import BreadCrumbs from "../../bread-crumbs.vue";
 
 const props = defineProps({
   selectedNodeId: {

@@ -2,7 +2,7 @@
   <div class="card">
     <div v-if="!federatedVotingStore.selectedNodeId">
       <div
-        class="pt-3 px-3 card-header d-flex justify-content-between align-items-center"
+        class="card-header d-flex justify-content-between align-items-center"
       >
         <BreadCrumbs root="Events & Actions" />
         <div class="d-flex align-items-center">
@@ -26,13 +26,13 @@
           </span>
         </div>
       </div>
-      <div class="card-body p-0">
+      <div class="card-body px-3 py-0">
         <EventLog style="height: 250px" />
         <Actions style="height: 250px" />
       </div>
     </div>
-    <div v-else class="card-body p-0">
-      <SelectedNodePanel
+    <div v-else class="card-body p-0 pt-0">
+      <SelectedNodeEventsAndActions
         :selected-node-id="federatedVotingStore.selectedNodeId"
       />
     </div>
@@ -40,13 +40,11 @@
       <div class="legend">
         <div class="legend-item">
           <span class="legend-bold">Event:</span>
-          <span class="legend-description">Occurred in the past</span>
+          <span class="legend-description">What happened</span>
         </div>
         <div class="legend-item">
           <span class="legend-bold">Action:</span>
-          <span class="legend-description"
-            >Will be executed next (in order)</span
-          >
+          <span class="legend-description">Executed next</span>
         </div>
       </div>
     </div>
@@ -54,11 +52,11 @@
 </template>
 
 <script setup lang="ts">
-import SelectedNodePanel from "../selected-nodes-panel/selected-node-panel.vue";
 import EventLog from "./event-log.vue";
 import Actions from "./actions/actions.vue";
 import BreadCrumbs from "./../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import SelectedNodeEventsAndActions from "./selected-node-events-and-actions/selected-node-events-and-actions.vue";
 </script>
 
 <style scoped>
