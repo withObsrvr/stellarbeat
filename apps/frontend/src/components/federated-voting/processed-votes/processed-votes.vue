@@ -72,6 +72,7 @@
         <ProcessedVotesNodeEvents
           class="events-component"
           :selected-node-id="selectedNodeId ?? undefined"
+          @statement-selected="selectTabByStatement"
         />
       </div>
     </div>
@@ -90,6 +91,16 @@ const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
 function selectNodeId(nodeId: string) {
   federatedVotingStore.selectedNodeId = nodeId;
+}
+
+function selectTabByStatement(statement: string) {
+  const tabIndex = processedVotesByStatement.value.findIndex(
+    (group) => group.statement === statement,
+  );
+
+  if (tabIndex >= 0) {
+    activeTab.value = tabIndex;
+  }
 }
 
 const processedVotesByStatement = computed(() => {

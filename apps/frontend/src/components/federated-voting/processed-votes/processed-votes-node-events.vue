@@ -6,7 +6,9 @@
         :key="`event-${idx}`"
         :class="['event-item', event.eventClass]"
         :style="!props.selectedNodeId ? 'cursor: pointer;' : ''"
-        @click="!props.selectedNodeId && selectNode(event.nodeId)"
+        @click="
+          !props.selectedNodeId && selectNode(event.nodeId, event.statement)
+        "
       >
         <div class="event-basic">
           <strong v-if="!props.selectedNodeId">{{ event.nodeId }}: </strong>
@@ -39,10 +41,15 @@ const props = defineProps<{
   selectedNodeId?: string;
 }>();
 
+const emit = defineEmits<{
+  (e: "statement-selected", statement: string): void;
+}>();
+
 const eventsContainer = ref<HTMLElement | null>(null);
 
-function selectNode(nodeId: string) {
+function selectNode(nodeId: string, statement: string) {
   federatedVotingStore.selectedNodeId = nodeId;
+  emit("statement-selected", statement);
 }
 
 function scrollToBottom() {

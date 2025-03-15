@@ -1,7 +1,7 @@
 <template>
   <div class="card h-100">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h4 class="card-title">Network connections (overlay)</h4>
+      <h4 class="card-title">Network connections</h4>
       <div class="badges">
         <span
           v-if="federatedVotingStore.overlayIsGossipEnabled"
@@ -258,6 +258,8 @@ const height = (): number => {
 
 .badges {
   display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
 }
 
 .badge {
