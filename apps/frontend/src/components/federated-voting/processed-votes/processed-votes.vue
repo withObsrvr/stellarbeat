@@ -57,6 +57,7 @@
                       v-for="(publicKey, idx) in statementGroup.votesToAccept"
                       :key="`accept-${idx}`"
                       :node-id="publicKey"
+                      :visualize-phase="true"
                       @select="selectNodeId"
                     />
                   </div>
