@@ -2,170 +2,61 @@
   <div>
     <div class="card mb-3">
       <div class="card-header">
-        <div class="controls-container">
-          <div class="controls-main">
-            <div class="btn-group" role="group">
-              <button
-                class="btn btn-secondary btn-sm"
-                :disabled="!federatedVotingStore.hasPreviousStep() || playing"
-                @click="goBackOneStep"
-              >
-                <BIconSkipBackwardFill class="icon-color" />
-              </button>
-              <button
-                class="btn btn-success btn-sm"
-                :disabled="!federatedVotingStore.hasNextStep() || playing"
-                @click="play"
-              >
-                <BIconPlayFill class="icon-color" />
-              </button>
-              <button
-                :disabled="!federatedVotingStore.hasNextStep() || playing"
-                class="btn btn-primary btn-sm"
-                @click="executeNextStep"
-              >
-                <BIconSkipForwardFill class="icon-color" />
-              </button>
-              <button
-                class="btn btn-secondary btn-sm"
-                :disabled="!federatedVotingStore.hasPreviousStep()"
-                @click="stop"
-              >
-                <BIconStopFill v-if="!playing" class="icon-color" />
-                <BIconPauseFill v-else class="icon-color" />
-              </button>
-            </div>
+        <div class="row w-100 controls-row mr-2">
+          <div class="col-lg-2 col-md-3 col-sm-12">
+            <SimulationController
+              ref="simulationController"
+              @resetAnimation="resetAnimation"
+            />
+          </div>
+          <div class="col-lg-10 col-md-9 col-sm-12">
             <ScenarioSelector />
           </div>
-          <InfoButton @click="showInfo" />
         </div>
+        <InfoButton @click="showInfo" />
       </div>
       <!-- Tick Time Animation -->
-      <div v-show="playing" class="tick-animation">
+      <div v-show="isPlaying" class="tick-animation">
         <div ref="progressBar" class="progress-bar"></div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, nextTick, computed } from "vue";
-import {
-  BIconPauseFill,
-  BIconPlayFill,
-  BIconSkipBackwardFill,
-  BIconSkipForwardFill,
-  BIconStopFill,
-} from "bootstrap-vue";
-import { ref } from "vue";
-import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import { computed, ref, nextTick } from "vue";
 import ScenarioSelector from "./scenario-selector.vue";
 import InfoButton from "../info-box/info-button.vue";
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import ControllerInfo from "./controller-info.vue";
+import SimulationController from "./simulation-controller.vue";
 
-const playing = ref(false);
+const simulationController = ref<InstanceType<
+  typeof SimulationController
+> | null>(null);
 const progressBar = ref<HTMLElement | null>(null);
-let playInterval: NodeJS.Timeout | null = null;
 
-const tickTime = computed(
-  () => federatedVotingStore.simulationStepDurationInSeconds * 1000,
-);
-
-function play() {
-  playing.value = true;
-  resetAnimation();
-  if (federatedVotingStore.hasNextStep()) {
-    executeNextStep();
-  }
-  playInterval = setInterval(() => {
-    if (federatedVotingStore.hasNextStep()) {
-      resetAnimation();
-      executeNextStep();
-    } else {
-      clearPlayingInterval();
-      playing.value = false;
-    }
-  }, tickTime.value);
-}
+const isPlaying = computed(() => {
+  return simulationController.value?.playing || false;
+});
 
 function resetAnimation() {
   nextTick(() => {
     if (progressBar.value) {
+      // Get tick time from simulation controller
+      const tickTime = simulationController.value?.tickTime || 1000;
+
       // Restart the animation
       progressBar.value.style.animation = "none";
       // Trigger reflow to restart the animation
       void progressBar.value.offsetWidth;
-      progressBar.value.style.animation = `tickAnimation ${tickTime.value}ms linear`;
+      progressBar.value.style.animation = `tickAnimation ${tickTime}ms linear`;
     }
   });
 }
 
-const clearPlayingInterval = () => {
-  if (playInterval) {
-    clearInterval(playInterval);
-    playInterval = null;
-  }
-};
-
-function stop() {
-  if (playing.value) {
-    clearPlayingInterval();
-    playing.value = false;
-  } else {
-    reset();
-  }
-}
-
-function executeNextStep() {
-  federatedVotingStore.executeStep();
-}
-
-function reset() {
-  federatedVotingStore.reset();
-}
-
-function goBackOneStep() {
-  federatedVotingStore.goBackOneStep();
-}
-
-// Keydown event handler
-const handleKeydown = (event: KeyboardEvent) => {
-  // Check if focus is in an editable element - if so, don't handle the keystroke
-  const target = event.target as HTMLElement;
-  const isEditableElement =
-    target.tagName === "INPUT" ||
-    target.tagName === "TEXTAREA" ||
-    target.contentEditable === "true" ||
-    target.isContentEditable;
-
-  if (isEditableElement) {
-    return;
-  }
-
-  if (event.key === "n") {
-    if (federatedVotingStore.hasNextStep()) {
-      executeNextStep();
-    }
-  }
-  if (event.key === "N") {
-    if (federatedVotingStore.hasPreviousStep()) {
-      goBackOneStep();
-    }
-  }
-};
-
 function showInfo() {
   infoBoxStore.show(ControllerInfo);
 }
-
-onMounted(() => {
-  document.addEventListener("keydown", handleKeydown, { capture: true });
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener("keydown", handleKeydown, { capture: true });
-  clearPlayingInterval();
-});
 </script>
 
 <style scoped>
@@ -191,7 +82,14 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-/* Additional styles for layout */
+.controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  row-gap: 0.4em;
+  flex-wrap: wrap-reverse;
+}
+
 .card {
   background-color: white;
 }
@@ -226,14 +124,6 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  gap: 1rem;
-}
-
-.controls-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex: 1;
   gap: 1rem;
 }
 

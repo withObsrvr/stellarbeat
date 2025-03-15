@@ -9,31 +9,36 @@
         {{ scenario.name }}
       </option>
     </select>
-    <button
-      class="btn btn-sm"
-      title="Reset current scenario"
-      @click="resetScenario"
+
+    <BDropdown
+      size="sm"
+      right
+      text="Actions"
+      class="ml-0"
+      toggle-class="btn btn-outline-secondary"
     >
-      <BIconArrowClockwise />
-    </button>
-    <button
-      class="btn btn-sm"
-      title="Network Settings"
-      @click="showSettingsModal"
-    >
-      <BIconGear />
-    </button>
-    <button class="btn btn-sm" title="Export Scenario" @click="showExportModal">
-      <BIconDownload />
-    </button>
-    <button class="btn btn-sm" title="Import Scenario" @click="showImportModal">
-      <BIconUpload />
-    </button>
+      <template #button-content>
+        <BIconGear />
+      </template>
+      <BDropdownItem @click="showSettingsModal">
+        <BIconGear class="me-2" /> Edit Settings
+      </BDropdownItem>
+      <BDropdownItem @click="showExportModal">
+        <BIconDownload class="me-2" /> Export Scenario
+      </BDropdownItem>
+      <BDropdownItem @click="showImportModal">
+        <BIconUpload class="me-2" /> Import Scenario
+      </BDropdownItem>
+      <BDropdownItem @click="resetScenario">
+        <BIconArrowClockwise class="me-2" /> Reset Scenario
+      </BDropdownItem>
+    </BDropdown>
 
     <BModal
       id="settings-modal"
       ref="settingsModal"
-      title="Network Settings for Scenario"
+      size="md"
+      title="Edit Scenario Settings"
     >
       <div class="alert alert-warning">
         <strong>Warning:</strong> Changing these settings will reset the current
@@ -129,7 +134,7 @@ import {
   BIconDownload,
   BIconUpload,
 } from "bootstrap-vue";
-import { BModal } from "bootstrap-vue";
+import { BModal, BDropdown, BDropdownItem } from "bootstrap-vue";
 import { computed, ref } from "vue";
 
 const selectedScenarioId = computed({
@@ -240,10 +245,12 @@ function importScenario() {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  justify-content: end;
 }
 
 .fv-dropdown {
   padding: 0rem 0.5rem;
+  height: 26px;
   border: 1px solid #ced4da;
   border-radius: 4px;
   background-color: white;
@@ -253,6 +260,8 @@ function importScenario() {
 .export-json-container {
   max-height: 400px;
   overflow-y: auto;
+  width: 100%;
+  display: inline-block;
   background-color: #f8f9fa;
   padding: 1rem;
   border-radius: 4px;
@@ -266,5 +275,16 @@ function importScenario() {
   font-family: monospace;
   font-size: 0.9rem;
   resize: vertical;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  padding: 0.25rem 1rem;
+}
+
+.me-2 {
+  margin-right: 0.5rem;
 }
 </style>

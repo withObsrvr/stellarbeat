@@ -335,6 +335,7 @@ class FederatedVotingStore {
     this._state.protocolContext = result.protocolContext;
     this._state.protocolContextState = this._state.protocolContext.getState();
     this._state.simulation = result.simulation;
+    this._state.simulationUpdate++;
     this._state.overlayUpdate++;
     this._state.networkStructureUpdate++;
     this.updateNetwork();

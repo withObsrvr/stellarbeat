@@ -7,44 +7,47 @@
         <h2 class="page-title">Federated Voting Simulation (Beta)</h2>
       </div>
     </div>
-    <div class="row mb-4">
-      <div class="col-lg-12">
+
+    <!-- Sticky Controller -->
+    <div class="sticky-controller-container">
+      <div class="col-lg-12 px-0 controller-row">
         <Controller></Controller>
       </div>
     </div>
-    <div class="row mb-4">
-      <div class="col-lg-12">
-        <VotesSelector />
-      </div>
-    </div>
 
-    <div class="row">
-      <div class="col-md-6">
-        <FbasGraph />
+    <div class="content-container">
+      <div class="row mb-4">
+        <div class="col-lg-12">
+          <VotesSelector />
+        </div>
       </div>
-      <div class="col-md-6">
-        <FederatedVotingStatus />
+
+      <div class="row">
+        <div class="col-md-6"><FbasGraph /></div>
+        <div class="col-md-6">
+          <FederatedVotingStatus />
+        </div>
       </div>
-    </div>
-    <div class="row pb-5" style="height: 500px">
-      <div class="col-md-6 col-sm-12 h-100">
-        <ProcessedVotes class="h-100" />
+      <div class="row pb-5" style="height: 500px">
+        <div class="col-md-6 col-sm-12 h-100">
+          <ProcessedVotes class="h-100" />
+        </div>
+        <div class="col-md-6 col-sm-12 h-100">
+          <ConsensusTopology />
+        </div>
       </div>
-      <div class="col-md-6 col-sm-12 h-100">
-        <ConsensusTopology />
+      <div class="row pb-5" style="height: 550px">
+        <div class="col-6">
+          <DSets />
+        </div>
+        <div class="col-6">
+          <OverlayGraphBase />
+        </div>
       </div>
-    </div>
-    <div class="row pb-5" style="height: 550px">
-      <div class="col-6">
-        <DSets />
-      </div>
-      <div class="col-6">
-        <OverlayGraphBase />
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12 pb-5">
-        <NodeTrustConfig />
+      <div class="row">
+        <div class="col-12 pb-5">
+          <NodeTrustConfig />
+        </div>
       </div>
     </div>
   </div>
@@ -67,5 +70,22 @@ import ConsensusTopology from "@/components/federated-voting/consensus-topology/
 .badge-success {
   background-color: #28a745;
   color: white;
+}
+
+.sticky-controller-container {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: white;
+  padding: 0 0;
+  border: none;
+}
+
+.content-container {
+  padding-top: 1rem;
+}
+
+.controller-row {
+  box-shadow: 0 0px 2px rgba(0, 0, 0, 0.1);
 }
 </style>
