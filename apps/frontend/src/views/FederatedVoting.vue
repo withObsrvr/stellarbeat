@@ -28,7 +28,7 @@
           <EventsAndActions />
         </div>
       </div>
-      <div class="row pb-5">
+      <div class="row mb-2">
         <div class="col-md-6 col-sm-12">
           <ProcessedVotes class="" style="height: 500px" />
         </div>
@@ -36,11 +36,11 @@
           <ConsensusTopology class="" style="height: 500px" />
         </div>
       </div>
-      <div class="row mb-5">
-        <div class="col-md-6 col-sm-12" style="height: 550px">
+      <div class="row">
+        <div class="col-md-6 col-sm-12 mb-4" style="height: 550px">
           <DSets />
         </div>
-        <div class="col-md-6 col-sm-12" style="height: 550px">
+        <div class="col-md-6 col-sm-12 mb-4" style="height: 550px">
           <OverlayGraphBase />
         </div>
       </div>

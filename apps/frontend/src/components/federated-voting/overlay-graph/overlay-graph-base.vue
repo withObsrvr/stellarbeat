@@ -13,7 +13,7 @@
         <span
           v-if="!federatedVotingStore.overlayIsGossipEnabled"
           v-tooltip.bottom="'Enable in scenario settings'"
-          class="badge bg-secondary ms-2"
+          class="badge badge-secondary ms-2"
         >
           Gossiping Disabled
         </span>
@@ -22,14 +22,14 @@
           v-tooltip.bottom="
             'Disable to allow user modifications in scenario settings'
           "
-          class="badge bg-info ms-2"
+          class="badge badge-info ms-2"
         >
           Fully Connected
         </span>
         <span
           v-else
           v-tooltip.bottom="'User can add/remove connections'"
-          class="badge bg-info ms-2"
+          class="badge badge-info ms-2"
           >Editable</span
         >
       </div>
@@ -260,11 +260,5 @@ const height = (): number => {
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
-}
-
-.badge {
-  margin-right: 4px;
-  font-size: 0.85rem;
-  padding: 0.35em 0.65em;
 }
 </style>
