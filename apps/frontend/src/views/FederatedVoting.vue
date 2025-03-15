@@ -86,6 +86,6 @@ import ConsensusTopology from "@/components/federated-voting/consensus-topology/
 }
 
 .controller-row {
-  box-shadow: 0 0px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>

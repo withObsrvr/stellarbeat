@@ -92,6 +92,7 @@ function showInfo() {
 
 .card {
   background-color: white;
+  border-bottom: none;
 }
 
 .card-header {
