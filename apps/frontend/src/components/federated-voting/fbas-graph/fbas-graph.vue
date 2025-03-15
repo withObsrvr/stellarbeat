@@ -105,7 +105,7 @@
       </svg>
     </div>
     <div class="card-footer">
-      <div class="d-flex justify-content-center">
+      <div class="jlex-footer justify-content-center">
         <div class="legend">
           <div class="legend-item">
             <span class="legend-color accepted-node"></span>
@@ -219,7 +219,9 @@ function updateNodeStates() {
     nodes.value,
     federatedVotingStore.nodes,
     federatedVotingStore.selectedNode.value as FederatedNode | null,
-    federatedVotingStore.getLatestEvents().filter(event => event instanceof ProtocolEvent),
+    federatedVotingStore
+      .getLatestEvents()
+      .filter((event) => event instanceof ProtocolEvent),
   );
 }
 
@@ -301,6 +303,7 @@ onMounted(() => {
   display: flex;
   gap: 16px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .legend-item {
@@ -368,5 +371,9 @@ onMounted(() => {
 
 .form-range {
   height: 15px;
+}
+
+.flex-footer {
+  display: flex;
 }
 </style>
