@@ -3,12 +3,12 @@
     <div class="card-header">
       <BreadCrumbs root="Processed Votes" />
     </div>
-    <div class="card-body processed-votes">
+    <div class="card-body processed-votes h-100">
       <div v-if="processedVotesByStatement.length === 0">
         <p>No votes processed yet</p>
       </div>
-      <div v-else class="content-container">
-        <div class="statements-section">
+      <div v-else class="row h-100">
+        <div class="statements-section col-lg-6 col-md-12 col-sm-12">
           <div
             v-for="(statementGroup, index) in processedVotesByStatement"
             :key="index"
@@ -46,10 +46,9 @@
           </div>
         </div>
 
-        <div class="events-divider-vertical"></div>
-
-        <div class="events-section">
+        <div class="events-section col-lg-6 col-md-12 col-sm-12 h-100">
           <ProcessedVotesNodeEvents
+            class="events-component"
             :selected-node-id="selectedNodeId ?? undefined"
           />
         </div>
@@ -59,7 +58,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import BreadCrumbs from "../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasNodeBadge from "../fbas-node-badge.vue";
@@ -121,26 +120,18 @@ const processedVotesByStatement = computed(() => {
 }
 
 .content-container {
-  display: flex;
-  align-items: stretch;
-  flex: 1;
-  overflow: hidden;
-  height: 100%;
+  max-height: 100px;
 }
 
 .statements-section {
-  flex: 4;
   overflow-y: auto;
   max-width: none;
   padding-right: 5px;
 }
 
 .events-section {
-  flex: 3;
-  display: flex;
-  flex-direction: column;
   height: 100%;
-  overflow: hidden;
+  width: 100%;
 }
 
 .events-divider-vertical {

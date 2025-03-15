@@ -1,6 +1,6 @@
 <template>
   <div ref="eventsContainer" class="events-container">
-    <ul class="events-list">
+    <ul class="events-list pl-0 ml-0">
       <li
         v-for="(event, idx) in nodeEvents"
         :key="`event-${idx}`"
@@ -135,18 +135,15 @@ watch(
 
 <style scoped>
 .events-container {
-  flex: 1;
-  max-height: none;
-  overflow-y: auto;
-  height: 100%;
+  display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
 }
-
 .events-list {
   list-style: none;
-  padding: 0;
   margin: 0;
-  flex-grow: 1;
+  height: 100%;
 }
 
 .event-item {
@@ -154,9 +151,6 @@ watch(
   margin-bottom: 4px;
   font-size: 0.85rem;
   border-radius: 3px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
 .event-basic {
