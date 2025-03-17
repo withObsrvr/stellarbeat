@@ -32,15 +32,6 @@
         </div>
       </div>
     </div>
-
-    <div class="events-section">
-      <h5>Events</h5>
-      <ProcessedVotesNodeEvents
-        class="events-component"
-        :selected-node-id="selectedNodeId"
-        @statement-selected="$emit('statement-selected', $event)"
-      />
-    </div>
   </div>
 </template>
 
@@ -51,8 +42,7 @@ import ProcessedVotesNodeEvents from "./processed-votes-node-events.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 const props = defineProps<{
-  votes: string[];
-  votesToAccept: string[];
+  statement: string;
 }>();
 
 const emit = defineEmits<{
@@ -60,9 +50,31 @@ const emit = defineEmits<{
   (e: "statement-selected", statement: string): void;
 }>();
 
-const selectedNodeId = computed(
-  () => federatedVotingStore.selectedNodeId ?? undefined,
-);
+const votes = computed(() => {
+  if (!federatedVotingStore.selectedNode.value) return [];
+  return (
+    federatedVotingStore.selectedNode.value.processedVotes
+      .filter(
+        (vote) =>
+          !vote.isVoteToAccept &&
+          vote.statement === props.statement.toLowerCase(),
+      )
+      .map((vote) => vote.publicKey) ?? []
+  );
+});
+
+const votesToAccept = computed(() => {
+  if (!federatedVotingStore.selectedNode.value) return [];
+  return (
+    federatedVotingStore.selectedNode.value.processedVotes
+      .filter(
+        (vote) =>
+          vote.isVoteToAccept &&
+          vote.statement === props.statement.toLocaleLowerCase(),
+      )
+      .map((vote) => vote.publicKey) ?? []
+  );
+});
 
 function selectNodeId(nodeId: string) {
   emit("select-node", nodeId);
@@ -99,23 +111,5 @@ function selectNodeId(nodeId: string) {
   font-style: italic;
   display: block;
   padding: 4px 0;
-}
-
-/* Events section styling */
-.events-section {
-  margin-top: 1rem;
-  border-top: 1px solid #dee2e6;
-  padding-top: 1rem;
-}
-
-.events-section h5 {
-  font-size: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.events-component {
-  height: 140px;
-  overflow-y: auto;
-  border-radius: 4px;
 }
 </style>

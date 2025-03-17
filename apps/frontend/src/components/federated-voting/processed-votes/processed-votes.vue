@@ -13,15 +13,19 @@
     </div>
     <div class="card-body my-body">
       <div class="processed-votes mb-4">
-        <div v-if="processedVotesByStatement.length === 0">
-          <div class="content-container">
-            <p>No votes processed yet</p>
+        <div class="content-container">
+          <div v-if="selectedNodeId" class="mb-2 events-section">
+            <ProcessedVotesNodeEvents
+              class="events-component"
+              :selected-node-id="
+                federatedVotingStore.selectedNodeId ?? undefined
+              "
+            />
           </div>
-        </div>
-        <div v-else class="content-container">
+
           <ul class="nav nav-tabs mb-3">
             <li
-              v-for="(statementGroup, index) in processedVotesByStatement"
+              v-for="(statement, index) in fixedStatements"
               :key="`tab-${index}`"
               class="nav-item"
             >
@@ -31,31 +35,29 @@
                 href="#"
                 @click.prevent="activeTab = index"
               >
-                <span class="statement-tab"
-                  >{{ statementGroup.statement }}
-                </span>
+                <span class="statement-tab">{{ statement }}</span>
               </a>
             </li>
           </ul>
 
           <div class="tab-content">
             <div
-              v-for="(statementGroup, index) in processedVotesByStatement"
+              v-for="(statement, index) in fixedStatements"
               :key="`content-${index}`"
               class="tab-pane fade"
               :class="{ 'show active': activeTab === index }"
             >
               <ProcessedVotesTable
                 v-if="!selectedNodeId"
-                :statement="statementGroup.statement"
+                :statement="statement"
                 @select-node="selectNodeId"
               />
 
               <ProcessedVotesForNode
                 v-else
-                :votes="statementGroup.votes"
-                :votes-to-accept="statementGroup.votesToAccept"
+                :statement="statement"
                 @select-node="selectNodeId"
+                @statement-selected="handleStatementSelected"
               />
             </div>
           </div>
@@ -74,7 +76,9 @@ import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import ProcessedVotesInfo from "./processed-votes-info.vue";
 import ProcessedVotesTable from "./processed-votes-table.vue";
 import ProcessedVotesForNode from "./processed-votes-for-node.vue";
+import ProcessedVotesNodeEvents from "./processed-votes-node-events.vue";
 
+const fixedStatements = ["Burger", "Pizza", "Salad"];
 const activeTab = ref(0);
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
@@ -84,53 +88,14 @@ function showInfo() {
 
 function selectNodeId(nodeId: string) {
   federatedVotingStore.selectedNodeId = nodeId;
-  selectTabByStatement();
 }
 
-function selectTabByStatement() {
-  console.log(activeTab.value);
+function handleStatementSelected(statement: string) {
+  const tabIndex = fixedStatements.indexOf(statement);
+  if (tabIndex !== -1) {
+    activeTab.value = tabIndex;
+  }
 }
-
-const processedVotesByStatement = computed(() => {
-  const votes = federatedVotingStore.nodes
-    .filter((node) =>
-      selectedNodeId.value ? node.publicKey === selectedNodeId.value : true,
-    )
-    .flatMap((node) => node.processedVotes);
-
-  const grouped = votes.reduce(
-    (acc, vote) => {
-      let group = acc.find((g) => g.statement === vote.statement);
-      if (!group) {
-        group = {
-          statement: vote.statement.toString(),
-          votesToAccept: new Set<string>(),
-          votes: new Set<string>(),
-        };
-        acc.push(group);
-      }
-      if (vote.isVoteToAccept) {
-        group.votesToAccept.add(vote.publicKey);
-      } else {
-        group.votes.add(vote.publicKey);
-      }
-      return acc;
-    },
-    [] as Array<{
-      statement: string;
-      votesToAccept: Set<string>;
-      votes: Set<string>;
-    }>,
-  );
-
-  return grouped
-    .map((group) => ({
-      statement: group.statement,
-      votesToAccept: Array.from(group.votesToAccept).sort(),
-      votes: Array.from(group.votes).sort(),
-    }))
-    .sort((a, b) => a.statement.localeCompare(b.statement));
-});
 </script>
 
 <style scoped>

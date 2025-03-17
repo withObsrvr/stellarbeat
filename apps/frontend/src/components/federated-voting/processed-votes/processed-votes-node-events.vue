@@ -19,10 +19,6 @@
           <span v-html="event.details"></span>
         </div>
       </li>
-
-      <li v-if="nodeEvents.length === 0" class="event-item empty-event">
-        {{ emptyMessage }}
-      </li>
     </ul>
   </div>
 </template>

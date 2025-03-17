@@ -30,7 +30,7 @@
                 v-if="row.processedVotes.length === 0"
                 class="placeholder-text"
               >
-                No votes processed
+                None processed
               </span>
             </div>
           </td>
@@ -46,7 +46,7 @@
                 v-if="row.processedAcceptVotes.length === 0"
                 class="placeholder-text"
               >
-                No accept votes processed
+                None processed
               </span>
             </div>
           </td>
@@ -89,16 +89,10 @@ const emit = defineEmits<{
 }>();
 
 const currentPage = ref(1);
-const itemsPerPage = 4;
+const itemsPerPage = 5;
 
 function getTableDataForStatement(statement: string) {
-  return federatedVotingStore.nodes
-    .filter((node) =>
-      node.processedVotes.some(
-        (vote) => vote.statement.toString() === statement,
-      ),
-    )
-    .sort((a, b) => a.publicKey.localeCompare(b.publicKey))
+  return nodes.value
     .map((node) => {
       const processedVotes = node.processedVotes
         .filter(
@@ -119,11 +113,16 @@ function getTableDataForStatement(statement: string) {
         processedVotes,
         processedAcceptVotes,
       };
-    });
+    })
+    .sort((a, b) => a.nodeId.localeCompare(b.nodeId));
 }
 
+const nodes = computed(() => {
+  return federatedVotingStore.nodes;
+});
+
 const tableData = computed(() => {
-  return getTableDataForStatement(props.statement);
+  return getTableDataForStatement(props.statement.toLowerCase());
 });
 
 const paginatedTableData = computed(() => {
@@ -187,7 +186,6 @@ watch(
   color: #6c757d;
   font-style: italic;
   display: block;
-  padding: 4px 0;
 }
 
 .pagination {
