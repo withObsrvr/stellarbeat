@@ -28,7 +28,9 @@
       </li>
       <li>
         <strong>Processing:</strong> Once a vote is processed, it cannot be
-        changed (unless you go back in the simulation)
+        changed (unless you go back in the simulation). You can get an overview
+        of all the processed votes (through the eyes of every node) in the
+        'Processed Votes' dashboard component.
       </li>
     </ul>
   </div>

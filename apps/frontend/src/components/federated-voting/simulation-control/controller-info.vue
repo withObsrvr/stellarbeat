@@ -1,12 +1,27 @@
 <template>
   <div class="controller-info">
-    <h3>Simulation</h3>
+    <h3>Simulation Overview</h3>
     <p>
       The federated voting simulation allows you to explore the behavior of the
       Federated Voting protocol under different conditions. You have the ability
       to cast votes, modify the trust configurations of every node and also the
       network overlay (the actual network connections between nodes).
     </p>
+    <h4>System view and Node view</h4>
+    <p>
+      <strong>System view:</strong> By default you are shown the system view in
+      the dashboard. This means you see the states of all the nodes in the
+      network. For example you can directly observe which nodes transititioned
+      to the accept phase.
+    </p>
+    <p>
+      <strong>Node view:</strong> You can also inspect the state of a single,
+      selected, node. States of other nodes will then depend on the messages
+      that the selected node have received! For example if another node has
+      transitioned to the accept phase, but the selected node has not received a
+      message indicating this, it will not show this node as accepted.
+    </p>
+    <h4>Simulation Steps</h4>
     <p>
       The simulation is divided into <strong> simulation steps</strong>. Every
       step some actions are executed that advance the protocol. Which in turn
@@ -26,7 +41,7 @@
       you also have the ability to create fake votes for a node.
     </p>
 
-    <h3>Scenario</h3>
+    <h4>Scenarios</h4>
     <p>
       The simulation provides interesting scenario's to explore. If you modify
       the simulation at any point, the scenario is abandoned and you actually
