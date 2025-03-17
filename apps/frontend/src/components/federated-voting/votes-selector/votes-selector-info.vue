@@ -14,15 +14,17 @@
           <li>Salad 🥗</li>
         </ul>
       </li>
+
       <li>
-        Selecting a vote creates a UserAction that you can observe in the
-        Federated Voting status window. A UserAction is executed in the next
-        Simulation Step.
+        <strong>Vote validity</strong> All voting options are 'valid' for every
+        Node. Unlike real validators that could reject statements/votes if it
+        contains for example an invalid transaction that is incompatible with
+        its history.
       </li>
       <li>
-        All voting options are 'valid' for every Node. Unlike real validators
-        that could reject statements if it contains for example an invalid
-        transaction that is incompatible with its history
+        <strong>User action</strong> Selecting a vote creates a UserAction that
+        you can observe in the Events and Actions dashboard component. The
+        UserAction is executed when advancing to the next simulation step.
       </li>
       <li>
         <strong>Processing:</strong> Once a vote is processed, it cannot be
