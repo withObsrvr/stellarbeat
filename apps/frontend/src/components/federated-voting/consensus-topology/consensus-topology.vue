@@ -1,23 +1,30 @@
 <template>
   <div class="card">
-    <div class="card-header">
-      <div>
+    <div class="card-header consensus-topology-header">
+      <div class="card-header-content">
         <BreadCrumbs root="Consensus Topology"></BreadCrumbs>
+        <div>
+          <span
+            v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
+            class="badge badge-success ms-2"
+            >Quorum Intersection</span
+          >
+          <span v-else class="badge badge-danger ms-2"
+            >No Quorum Intersection</span
+          >
+        </div>
       </div>
-      <div>
-        <span
-          v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
-          class="badge badge-success ms-2"
-          >Quorum Intersection</span
-        >
-        <span v-else class="badge badge-danger ms-2"
-          >No Quorum Intersection</span
-        >
-      </div>
+      <button
+        class="btn btn-sm btn-secondary ml-4"
+        type="button"
+        title="Show consensus topology information"
+        @click="showInfo"
+      >
+        <BIconInfoCircle class="text-muted" />
+      </button>
     </div>
 
     <div class="card-body content h-100">
-      <!-- Tab navigation - changed from pills to tabs -->
       <ul class="nav nav-tabs mb-3">
         <li class="nav-item">
           <a
@@ -28,9 +35,7 @@
           >
             <span>Quorums</span>
             <BIconInfoCircle
-              v-tooltip.top="
-                'A quorum contains a slice for each node (hover to see slices)'
-              "
+              v-tooltip.top="'A quorum contains a slice for each node'"
               class="info-icon text-secondary"
             />
           </a>
@@ -73,7 +78,6 @@
         </li>
       </ul>
 
-      <!-- Tab content with fade effect -->
       <div class="tab-content">
         <div
           v-if="activeTab === 'quorums'"
@@ -137,11 +141,17 @@ import { BIconInfoCircle, BIconPerson } from "bootstrap-vue";
 import QuorumsTab from "./quorums.vue";
 import QuorumSlicesTab from "./quorum-slices.vue";
 import VBlockingSetsTab from "./v-blocking-sets.vue";
+import { infoBoxStore } from "../info-box/useInfoBoxStore";
+import ConsensusTopologyInfo from "./consensus-topology-info.vue";
 
 // Tab management
 const activeTab = ref("quorums");
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
+
+function showInfo() {
+  infoBoxStore.show(ConsensusTopologyInfo);
+}
 
 // Watch for changes in selectedNodeId and reset to quorums tab if node is unselected
 watch(
@@ -240,5 +250,15 @@ watch(
 
 .tab-pane.show {
   opacity: 1;
+}
+.consensus-topology-header {
+  display: flex;
+  align-items: center;
+}
+.card-header-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 </style>
