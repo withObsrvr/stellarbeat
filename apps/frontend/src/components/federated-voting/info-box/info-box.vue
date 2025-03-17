@@ -1,5 +1,11 @@
 <template>
-  <BModal v-model="isOpen" ok-only hide-header @hide="infoBoxStore.hide()">
+  <BModal
+    v-model="isOpen"
+    size="lg"
+    ok-only
+    hide-header
+    @hide="infoBoxStore.hide()"
+  >
     <component
       :is="infoBoxStore.state.component"
       v-if="infoBoxStore.state.component"
