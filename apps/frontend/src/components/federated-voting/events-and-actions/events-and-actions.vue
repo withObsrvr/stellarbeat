@@ -24,6 +24,14 @@
           >
             Vote Stuck
           </span>
+          <button
+            class="btn btn-sm btn-secondary ml-3"
+            type="button"
+            title="Show events and actions information"
+            @click="showInfo"
+          >
+            <BIconInfoCircle class="text-muted" />
+          </button>
         </div>
       </div>
       <div class="card-body px-3 py-0">
@@ -57,6 +65,13 @@ import Actions from "./actions/actions.vue";
 import BreadCrumbs from "./../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import SelectedNodeEventsAndActions from "./selected-node-events-and-actions/selected-node-events-and-actions.vue";
+import { BIconInfoCircle } from "bootstrap-vue";
+import { infoBoxStore } from "../info-box/useInfoBoxStore";
+import EventsAndActionsInfo from "./events-and-actions-info.vue";
+
+function showInfo() {
+  infoBoxStore.show(EventsAndActionsInfo);
+}
 </script>
 
 <style scoped>

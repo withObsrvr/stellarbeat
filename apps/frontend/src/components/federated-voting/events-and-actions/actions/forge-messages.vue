@@ -147,8 +147,13 @@ function handleForgeMessage() {
 
 <style scoped>
 .form-select {
-  font-size: 0.875rem;
-  padding: 0.25rem 0.5rem;
+  padding: 0rem 0.5rem;
+  height: 26px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: white;
+  min-width: 90px;
+  color: #495057;
 }
 
 .form-check-inline {
