@@ -100,7 +100,6 @@ function stop() {
 watch(
   () => federatedVotingStore.simulationUpdate,
   () => {
-    console.log(simulationUpdate, federatedVotingStore.simulationUpdate);
     if (
       playing.value &&
       simulationUpdate !== federatedVotingStore.simulationUpdate

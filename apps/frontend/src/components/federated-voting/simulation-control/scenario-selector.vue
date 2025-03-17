@@ -255,6 +255,7 @@ function importScenario() {
   border-radius: 4px;
   background-color: white;
   min-width: 200px;
+  color: #495057;
 }
 
 .export-json-container {

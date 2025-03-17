@@ -15,7 +15,7 @@
                 :id="`voteSelection-${node.publicKey}`"
                 v-model="selectedVotes[node.publicKey]"
                 :disabled="processedVotesByNode[node.publicKey]"
-                class="vote-select"
+                class="vote-select fv-dropdown"
                 @change="onVoteSelectionChange(node.publicKey)"
               >
                 <option value="">No vote</option>
@@ -118,12 +118,13 @@ watch(
 
 .vote-select {
   flex: 1;
-  min-width: 90px;
-  padding: 0.25rem;
-  font-size: 0.875rem;
+  padding: 0rem 0.5rem;
+  height: 26px;
   border: 1px solid #ced4da;
   border-radius: 4px;
   background-color: white;
+  min-width: 90px;
+  color: #495057;
 }
 
 .vote-select:disabled {
