@@ -2,35 +2,37 @@
   <div>
     <div class="card-header header">
       <BreadCrumbs root="Events & Actions" />
-      <div class="labels">
-        <span
-          v-if="federatedVotingStore.isStuck.value"
-          class="badge badge-danger ms-2"
-        >
-          Stuck
-        </span>
-        <span v-if="isIllBehaved" class="badge badge-danger ms-2">
-          Ill-behaved
-        </span>
-        <span v-else-if="isBefouled" class="badge badge-warning ms-2">
-          Befouled
-        </span>
+      <div class="d-flex align-items-center">
+        <div class="labels">
+          <span
+            v-if="federatedVotingStore.isStuck.value"
+            class="badge badge-danger ms-2"
+          >
+            Stuck
+          </span>
+          <span v-if="isIllBehaved" class="badge badge-danger ms-2">
+            Ill-behaved
+          </span>
+          <span v-else-if="isBefouled" class="badge badge-warning ms-2">
+            Befouled
+          </span>
 
-        <span v-if="isTopTierNode" class="badge badge-info ms-2">
-          Top Tier Node
-        </span>
+          <span v-if="isTopTierNode" class="badge badge-info ms-2">
+            Top Tier Node
+          </span>
+        </div>
+        <button
+          class="btn btn-sm btn-secondary ml-4"
+          type="button"
+          title="Show events and actions information"
+          @click="showInfo"
+        >
+          <BIconInfoCircle class="text-muted" />
+        </button>
       </div>
     </div>
     <div class="selected px-3">
       <NodeInformation :public-key="selectedNodeId" class="px-3 py-3" />
-      <!--ProcessedVotes /!-->
-
-      <!-- Quorum Set Section -->
-      <!--div class="quorum-set">
-          <h3>Quorum Set</h3>
-          <quorum-set-display :quorum-set="quorumSet" :level="1" />
-        </div!-->
-
       <div class="row">
         <div class="col-12">
           <EventLog :public-key="selectedNodeId" style="height: 250px" />
@@ -50,6 +52,9 @@ import NodeInformation from "./node-information.vue";
 import EventLog from "../event-log.vue";
 import Actions from "../actions/actions.vue";
 import BreadCrumbs from "../../bread-crumbs.vue";
+import { BIconInfoCircle } from "bootstrap-vue";
+import { infoBoxStore } from "../../info-box/useInfoBoxStore";
+import EventsAndActionsInfo from "../events-and-actions-info.vue";
 
 const props = defineProps({
   selectedNodeId: {
@@ -57,6 +62,10 @@ const props = defineProps({
     required: true,
   },
 });
+
+function showInfo() {
+  infoBoxStore.show(EventsAndActionsInfo);
+}
 
 const isIllBehaved = computed(() => {
   return federatedVotingStore.illBehavedNodes.some(

@@ -1,7 +1,15 @@
 <template>
   <div class="card">
-    <div class="card-header">
+    <div class="card-header processed-votes-header">
       <BreadCrumbs root="Processed Votes" />
+      <button
+        class="btn btn-sm btn-secondary ml-3"
+        type="button"
+        title="Show processed votes information"
+        @click="showInfo"
+      >
+        <BIconInfoCircle class="text-muted" />
+      </button>
     </div>
     <div class="card-body my-body">
       <div class="processed-votes mb-4">
@@ -85,9 +93,16 @@ import BreadCrumbs from "../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import FbasNodeBadge from "../fbas-node-badge.vue";
 import ProcessedVotesNodeEvents from "./processed-votes-node-events.vue";
+import { BIconInfoCircle } from "bootstrap-vue";
+import { infoBoxStore } from "../info-box/useInfoBoxStore";
+import ProcessedVotesInfo from "./processed-votes-info.vue";
 
 const activeTab = ref(0);
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
+
+function showInfo() {
+  infoBoxStore.show(ProcessedVotesInfo);
+}
 
 function selectNodeId(nodeId: string) {
   federatedVotingStore.selectedNodeId = nodeId;
@@ -253,5 +268,11 @@ const processedVotesByStatement = computed(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+.processed-votes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 </style>
