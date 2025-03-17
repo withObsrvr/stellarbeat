@@ -7,12 +7,12 @@ import {
   forceY,
   Simulation,
 } from "d3-force";
-import { Node } from "./fbas-graph-node.vue";
-import { Link } from "./fbas-graph-link.vue";
+import { Node } from "./trust-graph-node.vue";
+import { Link } from "./trust-graph-link.vue";
 import { FederatedNode } from "@/store/useFederatedVotingStore";
 import { ProtocolEvent } from "scp-simulation";
 
-export class FbasGraphService {
+export class TrustGraphService {
   private simulation: Simulation<Node, undefined> | null = null;
 
   createLinksFromNodes(nodes: Node[]): Link[] {
@@ -249,4 +249,4 @@ export class FbasGraphService {
   }
 }
 
-export default new FbasGraphService();
+export default new TrustGraphService();

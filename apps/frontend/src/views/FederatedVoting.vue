@@ -23,7 +23,7 @@
       </div>
 
       <div class="row">
-        <div class="col-md-6"><FbasGraph /></div>
+        <div class="col-md-6"><TrustGraph /></div>
         <div class="col-md-6">
           <EventsAndActions />
         </div>
@@ -54,8 +54,8 @@
 </template>
 
 <script setup lang="ts">
-import FbasGraph from "@/components/federated-voting/fbas-graph/fbas-graph.vue";
 import Controller from "@/components/federated-voting/simulation-control/controller.vue";
+import TrustGraph from "@/components/federated-voting/trust-graph/trust-graph.vue";
 import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
 import DSets from "@/components/federated-voting/intactness.vue";
 import EventsAndActions from "@/components/federated-voting/events-and-actions/events-and-actions.vue";

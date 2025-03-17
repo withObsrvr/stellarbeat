@@ -1,35 +1,45 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <BreadCrumbs :root="'FBAS Graph'" />
-      <div>
-        <span
-          v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
-          class="badge badge-success ms-2 mr-2"
-          >Quorum Intersection</span
-        >
-        <span v-else class="badge badge-danger ms-2 mr-2"
-          >No Quorum Intersection</span
-        >
-        <span
-          v-if="federatedVotingStore.consensusReached.value"
-          class="badge badge-success ms-2"
-        >
-          Consensus Reached
-        </span>
-        <span
-          v-if="federatedVotingStore.isNetworkSplit.value"
-          class="badge badge-danger ms-2"
-        >
-          Network Split
-        </span>
-        <span
-          v-else-if="federatedVotingStore.isStuck.value"
-          class="badge badge-danger ms-2"
-        >
-          Vote Stuck
-        </span>
+      <div class="card-header-content">
+        <BreadCrumbs :root="'Trust Graph'" />
+        <div>
+          <span
+            v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
+            class="badge badge-success ms-2 mr-2"
+            >Quorum Intersection</span
+          >
+          <span v-else class="badge badge-danger ms-2 mr-2"
+            >No Quorum Intersection</span
+          >
+          <span
+            v-if="federatedVotingStore.consensusReached.value"
+            class="badge badge-success ms-2"
+          >
+            Consensus Reached
+          </span>
+          <span
+            v-if="federatedVotingStore.isNetworkSplit.value"
+            class="badge badge-danger ms-2"
+          >
+            Network Split
+          </span>
+          <span
+            v-else-if="federatedVotingStore.isStuck.value"
+            class="badge badge-danger ms-2"
+          >
+            Vote Stuck
+          </span>
+        </div>
       </div>
+      <button
+        class="btn btn-sm btn-secondary ml-3"
+        type="button"
+        title="Show graph information"
+        @click="showInfo"
+      >
+        <BIconInfoCircle class="text-muted" />
+      </button>
     </div>
     <div class="card-body graph pt-4 pb-0" style="height: 500px">
       <div class="floating-control">
@@ -136,15 +146,18 @@ import {
   FederatedNode,
   federatedVotingStore,
 } from "@/store/useFederatedVotingStore";
-import FbasGraphNode, { Node } from "./fbas-graph-node.vue";
-import FbasGraphLink, { Link } from "./fbas-graph-link.vue";
+import FbasGraphNode, { Node } from "./trust-graph-node.vue";
+import FbasGraphLink, { Link } from "./trust-graph-link.vue";
 import AnimatedMessage from "./animated-message.vue";
 import { usePanning } from "./usePanning";
 import BreadCrumbs from "../bread-crumbs.vue";
 import { curveCatmullRomClosed, line } from "d3-shape";
-import fbasGraphService from "./FbasGraphService";
+import fbasGraphService from "./TrustGraphService";
 import messageService, { MessageAnimation } from "./MessageService";
 import { ProtocolEvent } from "scp-simulation";
+import { BIconInfoCircle } from "bootstrap-vue";
+import { infoBoxStore } from "../info-box/useInfoBoxStore";
+import FbasGraphInfo from "./trust-graph-info.vue";
 
 const { translateX, translateY, scale, startPan, pan, endPan, zoom } =
   usePanning();
@@ -292,6 +305,10 @@ function updateRepellingForce() {
   }
 }
 
+function showInfo() {
+  infoBoxStore.show(FbasGraphInfo);
+}
+
 onMounted(() => {
   updateDimensions();
   updateOrCreateGraph();
@@ -375,5 +392,11 @@ onMounted(() => {
 
 .flex-footer {
   display: flex;
+}
+.card-header-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 </style>

@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { SimulationLinkDatum } from "d3-force";
-import { Node } from "./fbas-graph-node.vue";
+import { Node } from "./trust-graph-node.vue";
 import { computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { isObject } from "shared";
@@ -40,8 +40,7 @@ const strokeWidth = computed(() => {
   const sourceId = isObject(props.link.source)
     ? props.link.source.id
     : props.link.source;
-  return props.link.hovered ||
-    federatedVotingStore.selectedNodeId === sourceId 
+  return props.link.hovered || federatedVotingStore.selectedNodeId === sourceId
     ? 5
     : 2;
 });

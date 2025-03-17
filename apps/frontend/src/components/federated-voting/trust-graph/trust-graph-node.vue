@@ -67,7 +67,7 @@ import {
   Voted,
   VoteRatified,
 } from "scp-simulation";
-import FbasGraphNodeDialog from "./fbas-graph-node-dialog.vue";
+import FbasGraphNodeDialog from "./trust-graph-node-dialog.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 export interface Node extends SimulationNodeDatum {

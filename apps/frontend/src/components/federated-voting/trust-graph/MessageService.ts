@@ -1,4 +1,4 @@
-import { Node } from "./fbas-graph-node.vue";
+import { Node } from "./trust-graph-node.vue";
 import { Event, MessageSent } from "scp-simulation";
 
 export interface MessageAnimation {
