@@ -30,10 +30,10 @@
       </div>
       <div class="row mb-2">
         <div class="col-md-6 col-sm-12">
-          <ProcessedVotes class="" style="height: 500px" />
+          <ProcessedVotes class="" style="height: 550px" />
         </div>
         <div class="col-md-6 col-sm-12">
-          <ConsensusTopology class="" style="height: 500px" />
+          <ConsensusTopology class="" style="height: 550px" />
         </div>
       </div>
       <div class="row">

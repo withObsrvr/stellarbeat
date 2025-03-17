@@ -45,43 +45,21 @@
               class="tab-pane fade"
               :class="{ 'show active': activeTab === index }"
             >
-              <div class="voter-groups">
-                <div class="voter-group">
-                  <strong>Votes</strong>
-                  <div class="voter-list">
-                    <FbasNodeBadge
-                      v-for="(publicKey, idx) in statementGroup.votes"
-                      :key="`vote-${idx}`"
-                      :node-id="publicKey"
-                      @select="selectNodeId"
-                    />
-                  </div>
-                </div>
+              <ProcessedVotesTable
+                v-if="!selectedNodeId"
+                :statement="statementGroup.statement"
+                @select-node="selectNodeId"
+              />
 
-                <div class="voter-group">
-                  <strong>Votes to Accept</strong>
-                  <div class="voter-list">
-                    <FbasNodeBadge
-                      v-for="(publicKey, idx) in statementGroup.votesToAccept"
-                      :key="`accept-${idx}`"
-                      :node-id="publicKey"
-                      :visualize-phase="true"
-                      @select="selectNodeId"
-                    />
-                  </div>
-                </div>
-              </div>
+              <ProcessedVotesForNode
+                v-else
+                :votes="statementGroup.votes"
+                :votes-to-accept="statementGroup.votesToAccept"
+                @select-node="selectNodeId"
+              />
             </div>
           </div>
         </div>
-      </div>
-      <div class="events-section">
-        <h5>Events</h5>
-        <ProcessedVotesNodeEvents
-          class="events-component"
-          :selected-node-id="selectedNodeId ?? undefined"
-          @statement-selected="selectTabByStatement"
-        />
       </div>
     </div>
   </div>
@@ -91,11 +69,11 @@
 import { computed, ref, watch } from "vue";
 import BreadCrumbs from "../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import FbasNodeBadge from "../fbas-node-badge.vue";
-import ProcessedVotesNodeEvents from "./processed-votes-node-events.vue";
 import { BIconInfoCircle } from "bootstrap-vue";
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import ProcessedVotesInfo from "./processed-votes-info.vue";
+import ProcessedVotesTable from "./processed-votes-table.vue";
+import ProcessedVotesForNode from "./processed-votes-for-node.vue";
 
 const activeTab = ref(0);
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
@@ -106,16 +84,11 @@ function showInfo() {
 
 function selectNodeId(nodeId: string) {
   federatedVotingStore.selectedNodeId = nodeId;
+  selectTabByStatement();
 }
 
-function selectTabByStatement(statement: string) {
-  const tabIndex = processedVotesByStatement.value.findIndex(
-    (group) => group.statement === statement,
-  );
-
-  if (tabIndex >= 0) {
-    activeTab.value = tabIndex;
-  }
+function selectTabByStatement() {
+  console.log(activeTab.value);
 }
 
 const processedVotesByStatement = computed(() => {
@@ -165,11 +138,10 @@ const processedVotesByStatement = computed(() => {
   height: 100%;
   padding: 0 1rem;
 }
+
 .processed-votes {
   display: flex;
   flex-direction: column;
-  height: 200px;
-  border-bottom: 1px solid #dee2e6;
 }
 
 .content-container {
@@ -237,38 +209,6 @@ const processedVotesByStatement = computed(() => {
   margin-bottom: 1rem;
 }
 
-.events-section {
-  height: 180px;
-  flex-shrink: 0;
-}
-
-.events-component {
-  height: 100%;
-  overflow-y: auto;
-}
-
-.voter-groups {
-  display: flex;
-}
-
-.voter-group {
-  flex: 1;
-  position: relative;
-  padding-right: 15px;
-}
-
-.voter-group strong {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 1em;
-  font-weight: bold;
-}
-
-.voter-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
 .processed-votes-header {
   display: flex;
   justify-content: space-between;
