@@ -26,6 +26,28 @@
       </li>
     </ul>
 
+    <h4>Managing Nodes</h4>
+    <p>
+      The simulation supports up to 10 nodes. You can manage nodes by clicking
+      on them in the Node column:
+    </p>
+    <ul>
+      <li>
+        <strong>Add a node:</strong> Click on an inactive node in the Node
+        column to add it to the network
+      </li>
+      <li>
+        <strong>Disable a node:</strong> Click on an active node to disable it
+        (the node will remain in the configuration but won't participate in
+        consensus)
+      </li>
+    </ul>
+    <p>
+      When a node is active, you can configure its trust relationships and
+      threshold. Remember that changes must be applied using the "Apply Changes"
+      button that appears when you modify the configuration.
+    </p>
+
     <h4>From trust configuration to quorum slices example</h4>
     <p>
       Let's take a look at the trust configuration of node A. Node A trusts
@@ -51,6 +73,13 @@
 h3 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+h4 {
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
   color: #2c3e50;
 }
 
