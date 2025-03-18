@@ -4,7 +4,15 @@
     <!-- Page Header -->
     <div class="page-header d-flex justify-content-between py-3">
       <div class="d-flex align-items-center">
-        <h2 class="page-title">Federated Voting Simulation (Beta)</h2>
+        <h2 class="page-title">Federated Voting Simulation</h2>
+        <button
+          class="btn btn-sm btn-secondary ml-0"
+          type="button"
+          title="Show simulation information"
+          @click="showInfo"
+        >
+          <BIconInfoCircle class="text-muted" />
+        </button>
       </div>
     </div>
 
@@ -64,6 +72,13 @@ import VotesSelector from "@/components/federated-voting/votes-selector/votes-se
 import InfoBox from "@/components/federated-voting/info-box/info-box.vue";
 import NodeTrustConfig from "@/components/federated-voting/node-trust-config/node-trust-config.vue";
 import ConsensusTopology from "@/components/federated-voting/consensus-topology/consensus-topology.vue";
+import { infoBoxStore } from "@/components/federated-voting/info-box/useInfoBoxStore";
+import FederatedVotingInfo from "@/components/federated-voting/federated-voting-info.vue";
+import { BIconInfoCircle } from "bootstrap-vue";
+
+function showInfo() {
+  infoBoxStore.show(FederatedVotingInfo);
+}
 </script>
 
 <style>
