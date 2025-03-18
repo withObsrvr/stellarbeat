@@ -81,7 +81,6 @@ export class Simulation {
 		return this.currentStep.previousEvents;
 	}
 
-	//in every step you can only add a specific action only once for a node
 	public addUserAction(action: UserAction): void {
 		const existingAction = this.currentStep.userActions.find(
 			(a) =>
@@ -91,22 +90,26 @@ export class Simulation {
 					action instanceof AddConnection ||
 					action instanceof RemoveConnection ||
 					action instanceof ForgeMessage
-				) //todo: we need a better solution! Maybe isIdempotent Prop?
+				) //todo: we need a better solution! Maybe isIdempotent property?
 		);
 		if (existingAction) {
 			const index = this.currentStep.userActions.indexOf(existingAction);
 			this.currentStep.userActions[index] = action;
-			return;
+			return; //replace the action
 		}
 
-		// If action requires immediate execution, add to front of array
-		// these actions are previewed by the GUI
-		if (action.immediateExecution) {
-			this.currentStep.userActions.unshift(action);
-		} else {
-			// Otherwise add to end as before
-			this.currentStep.userActions.push(action);
-		}
+		this.currentStep.userActions.push(action);
+
+		this.currentStep.userActions.sort((a, b) => {
+			if (a.immediateExecution && !b.immediateExecution) {
+				return -1;
+			}
+			if (!a.immediateExecution && b.immediateExecution) {
+				return 1;
+			}
+			return 0;
+		}); //make sure that immediate actions are shown first, in order!
+		//context should also make sure to execute in this order
 	}
 
 	public pendingUserActions(): UserAction[] {

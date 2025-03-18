@@ -251,7 +251,7 @@ const filteredActions = computed(() => {
     );
   }
 
-  return result.sort((a, b) => a.publicKey.localeCompare(b.publicKey));
+  return result;
 });
 
 watch(filteredActions, () => {

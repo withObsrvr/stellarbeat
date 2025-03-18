@@ -58,6 +58,7 @@ export class FederatedVotingContext
 		const newProtocolActions: ProtocolAction[] = [];
 
 		//sort userActions such that userActions with boolean immediateExecution set to true runs first
+		//order of immediateExecution should be preserved
 		userActions.sort((a, b) => {
 			if (a.immediateExecution && !b.immediateExecution) {
 				return -1;

@@ -52,11 +52,7 @@ export class PhaseTransitioner extends InMemoryEventCollector {
 
 		const votesForStatement = this.filterVotesForStatement(state, statement);
 
-		const quorumOrNull = this.isVoteRatified(
-			state,
-			statement,
-			votesForStatement
-		);
+		const quorumOrNull = this.isVoteRatified(state, votesForStatement);
 		if (quorumOrNull !== null) {
 			state.phase = FederatedVotingPhase.accepted;
 			state.accepted = statement;
@@ -88,11 +84,7 @@ export class PhaseTransitioner extends InMemoryEventCollector {
 
 		const votesToAcceptStatement = this.filterVotesToAccept(state, statement);
 
-		const quorumOrNull = this.isVoteRatified(
-			state,
-			statement,
-			votesToAcceptStatement
-		);
+		const quorumOrNull = this.isVoteRatified(state, votesToAcceptStatement);
 		if (quorumOrNull !== null) {
 			state.phase = FederatedVotingPhase.confirmed;
 			this.registerEvent(
@@ -120,7 +112,6 @@ export class PhaseTransitioner extends InMemoryEventCollector {
 
 	private isVoteRatified(
 		state: FederatedVotingProtocolState,
-		statement: Statement,
 		votes: Vote[]
 	): Map<string, QuorumSet> | null {
 		const quorumCandidate = new Map<string, QuorumSet>();

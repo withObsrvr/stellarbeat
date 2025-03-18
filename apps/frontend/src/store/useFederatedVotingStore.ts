@@ -219,20 +219,21 @@ class FederatedVotingStore {
     }
 
     // Apply pending user actions
-    connections.forEach((connection) => {
+    this.nodes.forEach((node) => {
+      let connection = connections.find(
+        (connection) => connection.publicKey === node.publicKey,
+      );
+      if (!connection) {
+        connection = { publicKey: node.publicKey, connections: [] };
+        connections.push(connection);
+      } //make sure every node has a connection object to add to
       this.simulation.pendingUserActions().find((action) => {
-        if (
-          action instanceof AddConnection &&
-          action.a === connection.publicKey
-        ) {
+        if (action instanceof AddConnection && action.a === node.publicKey) {
           connection.connections.push(action.b);
         }
       });
       this.simulation.pendingUserActions().find((action) => {
-        if (
-          action instanceof RemoveConnection &&
-          action.a === connection.publicKey
-        ) {
+        if (action instanceof RemoveConnection && action.a === node.publicKey) {
           connection.connections = connection.connections.filter(
             (c) => c !== action.b,
           );
