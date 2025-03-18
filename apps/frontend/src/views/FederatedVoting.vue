@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import Controller from "@/components/federated-voting/simulation-control/controller.vue";
 import TrustGraph from "@/components/federated-voting/trust-graph/trust-graph.vue";
-import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph-base.vue";
+import OverlayGraphBase from "@/components/federated-voting/overlay-graph/overlay-graph.vue";
 import DSets from "@/components/federated-voting/intactness.vue";
 import EventsAndActions from "@/components/federated-voting/events-and-actions/events-and-actions.vue";
 import ProcessedVotes from "@/components/federated-voting/processed-votes/processed-votes.vue";

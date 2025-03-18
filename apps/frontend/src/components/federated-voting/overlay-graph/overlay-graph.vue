@@ -1,38 +1,41 @@
 <template>
   <div class="card h-100">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h4 class="card-title">Network connections</h4>
-      <div class="badges">
-        <span
-          v-if="federatedVotingStore.overlayIsGossipEnabled"
-          v-tooltip.bottom="'Disable in scenario settings'"
-          class="badge badge-info ms-2"
-        >
-          Gossiping
-        </span>
-        <span
-          v-if="!federatedVotingStore.overlayIsGossipEnabled"
-          v-tooltip.bottom="'Enable in scenario settings'"
-          class="badge badge-secondary ms-2"
-        >
-          Gossiping Disabled
-        </span>
-        <span
-          v-if="federatedVotingStore.overlayIsFullyConnected"
-          v-tooltip.bottom="
-            'Disable to allow user modifications in scenario settings'
-          "
-          class="badge badge-info ms-2"
-        >
-          Fully Connected
-        </span>
-        <span
-          v-else
-          v-tooltip.bottom="'User can add/remove connections'"
-          class="badge badge-info ms-2"
-          >Editable</span
-        >
+      <div class="overlay-graph-header-content">
+        <h4 class="card-title mb-0">Network connections</h4>
+        <div class="badges">
+          <span
+            v-if="federatedVotingStore.overlayIsGossipEnabled"
+            v-tooltip.bottom="'Disable in scenario settings'"
+            class="badge badge-info ms-2"
+          >
+            Gossiping
+          </span>
+          <span
+            v-if="!federatedVotingStore.overlayIsGossipEnabled"
+            v-tooltip.bottom="'Enable in scenario settings'"
+            class="badge badge-secondary ms-2"
+          >
+            Gossiping Disabled
+          </span>
+          <span
+            v-if="federatedVotingStore.overlayIsFullyConnected"
+            v-tooltip.bottom="
+              'Disable to allow user modifications in scenario settings'
+            "
+            class="badge badge-info ms-2"
+          >
+            Fully Connected
+          </span>
+          <span
+            v-else
+            v-tooltip.bottom="'User can add/remove connections'"
+            class="badge badge-info ms-2"
+            >Editable</span
+          >
+        </div>
       </div>
+      <InfoButton class="ml-4" @click="showInfo" />
     </div>
     <div class="card-body h-100">
       <div class="chart-container h-100 position-relative">
@@ -94,6 +97,14 @@ import {
 import { SimulationManager } from "@/components/federated-voting/overlay-graph/SimulationManager";
 import GraphLink from "@/components/federated-voting/overlay-graph/graph-link.vue";
 import GraphNode from "@/components/federated-voting/overlay-graph/graph-node.vue";
+import InfoButton from "../info-box/info-button.vue";
+import { infoBoxStore } from "../info-box/useInfoBoxStore";
+import OverlayGraphInfo from "./overlay-graph-info.vue";
+
+// Add the showInfo function
+function showInfo() {
+  infoBoxStore.show(OverlayGraphInfo);
+}
 
 const initialRepellingForce = 1000;
 const repellingForce = ref(initialRepellingForce);
@@ -260,5 +271,11 @@ const height = (): number => {
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
+}
+.overlay-graph-header-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 </style>
