@@ -1,7 +1,10 @@
 <template>
   <div class="card h-100">
     <div class="card-header">
-      <BreadCrumbs root="Intactness"></BreadCrumbs>
+      <div class="card-header-content">
+        <BreadCrumbs root="Intactness"></BreadCrumbs>
+        <InfoButton @click="showInfo" />
+      </div>
     </div>
     <div class="card-body content h-100">
       <div class="section">
@@ -133,6 +136,14 @@ import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import BreadCrumbs from "./bread-crumbs.vue";
 import { BIconInfoCircle } from "bootstrap-vue";
 import FbasNodeBadge from "./fbas-node-badge.vue";
+import InfoButton from "./info-box/info-button.vue";
+import { infoBoxStore } from "./info-box/useInfoBoxStore";
+import IntactnessInfo from "./intactness/intactness-info.vue";
+
+// Add the showInfo function
+function showInfo() {
+  infoBoxStore.show(IntactnessInfo);
+}
 
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
@@ -278,5 +289,13 @@ const befouledNodes = computed(() => {
 
 .pagination button {
   padding: 4px 8px;
+}
+
+/* Add this new style for the header content */
+.card-header-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 </style>

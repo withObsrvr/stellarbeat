@@ -13,7 +13,8 @@
 
     <p>
       The processing node also shows its current phase and the statement it is
-      actually voting for.
+      actually voting for. All nodes show if they are ill-behaved or befouled
+      trough a red or orange border.
     </p>
 
     <div class="section">

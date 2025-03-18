@@ -5,6 +5,11 @@
       The Consensus Topology component provides insight into the trust structure
       of the Federated Byzantine Agreement System through three different views.
     </p>
+    <p>
+      If nodes are ill-behaved or befouled, they are visualized with a red or
+      orange border. This will show you the trust worthiness of the quorums,
+      slices and v-blocking sets.
+    </p>
 
     <div class="section">
       <h4>Quorums</h4>
