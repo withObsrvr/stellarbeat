@@ -4,7 +4,16 @@
     <p>
       This component displays the votes that have been processed by the nodes in
       the network. A vote is processed when it has been received by a node. It
-      shows both regular votes and votes to accept.
+      shows both regular votes and votes to accept. When selecting a node you
+      can also see the events that have been triggered by the processing of the
+      votes. For example v-blocking sets accepting a value or a quorum ratifying
+      a vote. You can cross check this information in the 'consensus topology'
+      dashboard component.
+    </p>
+
+    <p>
+      The processing node also shows its current phase and the statement it is
+      actually voting for.
     </p>
 
     <div class="section">
@@ -16,8 +25,7 @@
         </li>
         <li>
           <strong>Votes to Accept</strong>: Votes indicating that a node has
-          voted to accept a statemnt. The accept votes turn green when the node
-          owning the vote has observed a quorum voting to accept the statement.
+          voted to accept a statement.
         </li>
       </ul>
     </div>
@@ -59,11 +67,12 @@
       <ul>
         <li>
           <strong>System View</strong>: Shows all processed votes across the
-          network
+          network for every node.
         </li>
         <li>
           <strong>Node View</strong>: When a node is selected, shows only the
-          votes processed by that specific node
+          votes processed by that specific node and the events triggered by the
+          processing of those votes.
         </li>
       </ul>
     </div>
