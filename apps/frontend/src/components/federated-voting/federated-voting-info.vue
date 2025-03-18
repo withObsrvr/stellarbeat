@@ -26,6 +26,11 @@
       updated and you are shown which nodes are intact, ill-behaved or befouled.
     </p>
     <p>
+      At every step you can inspect the state of every individual node, based on
+      the votes it processed. Or you can inspect the 'system view' which shows
+      you an overview of all the nodes.
+    </p>
+    <p>
       The original SCP whitepaper assumes the underlying network to
       <strong>eventually deliver all messages</strong>, but makes no mention of
       how to implement this. The standard overlay network in this simulation
