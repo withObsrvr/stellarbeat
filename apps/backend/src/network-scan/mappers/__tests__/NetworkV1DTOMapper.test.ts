@@ -38,6 +38,7 @@ describe('NetworkV1DTOMapper', () => {
 		const organizationV1DTOs = [mock<OrganizationV1>()];
 		const networkMeasurement = new NetworkMeasurement(new Date());
 		networkMeasurement.nrOfActiveWatchers = 1;
+		networkMeasurement.nrOfActiveWatchers = 3;
 		networkMeasurement.nrOfActiveValidators = 2;
 		networkMeasurement.nrOfActiveFullValidators = 3;
 		networkMeasurement.nrOfActiveOrganizations = 4;
@@ -98,6 +99,7 @@ describe('NetworkV1DTOMapper', () => {
 			statistics: {
 				time: networkMeasurement.time.toISOString(),
 				nrOfActiveWatchers: networkMeasurement.nrOfActiveWatchers,
+				nrOfConnectableNodes: networkMeasurement.nrOfConnectableNodes,
 				nrOfActiveValidators: networkMeasurement.nrOfActiveValidators,
 				nrOfActiveFullValidators: networkMeasurement.nrOfActiveFullValidators,
 				nrOfActiveOrganizations: networkMeasurement.nrOfActiveOrganizations,

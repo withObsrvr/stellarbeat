@@ -129,6 +129,9 @@ describe('NetworkScan', () => {
 		expect(networkScan.measurement.nrOfActiveWatchers).toEqual(
 			nodeScan.getActiveWatchersCount()
 		);
+		expect(networkScan.measurement.nrOfConnectableNodes).toEqual(
+			nodeScan.getConnectableNodesCount()
+		);
 		expect(networkScan.measurement.nrOfActiveValidators).toEqual(
 			nodeScan.getActiveValidatorsCount()
 		);

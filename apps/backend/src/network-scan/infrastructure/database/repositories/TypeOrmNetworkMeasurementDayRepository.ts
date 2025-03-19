@@ -46,7 +46,7 @@ export class TypeOrmNetworkMeasurementDayRepository
 
 	async rollup(fromNetworkScanId: number, toNetworkScanId: number) {
 		await this.baseRepository.query(
-			`INSERT INTO network_measurement_day ("time", "nrOfActiveWatchersSum", "nrOfActiveValidatorsSum",
+			`INSERT INTO network_measurement_day ("time", "nrOfActiveWatchersSum", "nrOfConnectableNodesSum", "nrOfActiveValidatorsSum",
 												  "nrOfActiveFullValidatorsSum", "nrOfActiveOrganizationsSum",
 												  "transitiveQuorumSetSizeSum", "hasQuorumIntersectionCount",
 												  "hasSymmetricTopTierCount", "topTierMin", "topTierMax",
@@ -77,6 +77,7 @@ export class TypeOrmNetworkMeasurementDayRepository
 							  group by "crawlDay")
 			 select date_trunc('day', NetworkScan."time")     "day",
 					sum("nrOfActiveWatchers"::int)                "nrOfActiveWatchersSum",
+					sum("nrOfConnectableNodes"::int)              "nrOfConnectableNodesSum",
 					sum("nrOfActiveValidators"::int)              "nrOfActiveValidatorsSum",
 					sum("nrOfActiveFullValidators"::int)          "nrOfActiveFullValidatorsSum",
 					sum("nrOfActiveOrganizations"::int)           "nrOfActiveOrganizationsSum",
@@ -136,6 +137,8 @@ export class TypeOrmNetworkMeasurementDayRepository
 			 ON CONFLICT (time) DO UPDATE
 				 SET "nrOfActiveWatchersSum"            = network_measurement_day."nrOfActiveWatchersSum" +
 														  EXCLUDED."nrOfActiveWatchersSum",
+					"nrOfConnectableNodesSum"            = network_measurement_day."nrOfConnectableNodesSum" +
+														  EXCLUDED."nrOfConnectableNodesSum",
 					 "nrOfActiveValidatorsSum"          = network_measurement_day."nrOfActiveValidatorsSum" +
 														  EXCLUDED."nrOfActiveValidatorsSum",
 					 "nrOfActiveFullValidatorsSum"      = network_measurement_day."nrOfActiveFullValidatorsSum" +

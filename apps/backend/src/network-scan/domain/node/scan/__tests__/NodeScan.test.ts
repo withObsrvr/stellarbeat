@@ -300,6 +300,18 @@ describe('NodeScan', () => {
 		expect(nodeScan.getActiveWatchersCount()).toEqual(1);
 	});
 
+	test('getConnectableNodesCount', () => {
+		const scanTime = new Date('2020-01-03T00:00:00.000Z');
+		const nodeScan = new NodeScan(scanTime, [activeNode, missingNode]);
+		const activeMeasurement = new NodeMeasurement(scanTime, activeNode);
+		activeMeasurement.isActive = true;
+		activeNode.addMeasurement(activeMeasurement);
+		const missingNodeMeasurement = new NodeMeasurement(scanTime, missingNode);
+		missingNodeMeasurement.isActive = false;
+		missingNode.addMeasurement(new NodeMeasurement(scanTime, missingNode));
+		expect(nodeScan.getConnectableNodesCount()).toEqual(1);
+	});
+
 	test('getActiveValidatorsCount', () => {
 		const scanTime = new Date('2020-01-03T00:00:00.000Z');
 		const validatingValidator = createDummyNode();

@@ -16,7 +16,10 @@ export class NodeScan {
 	public latestLedger = BigInt(0);
 	public latestLedgerCloseTime: Date | null = null;
 
-	constructor(public readonly time: Date, public readonly nodes: Node[]) {}
+	constructor(
+		public readonly time: Date,
+		public readonly nodes: Node[]
+	) {}
 
 	public processCrawl(
 		peerNodes: PeerNode[],
@@ -215,6 +218,10 @@ export class NodeScan {
 		return this.nodes.filter(
 			(node) => node.isWatcher() && node.isActive() && !node.isValidating()
 		).length;
+	}
+
+	getConnectableNodesCount(): number {
+		return this.nodes.filter((node) => node.isActive()).length;
 	}
 
 	getActiveValidatorsCount(): number {

@@ -1,8 +1,4 @@
-import {
-	NetworkV1,
-	NodeV1,
-	OrganizationV1
-} from 'shared';
+import { NetworkV1, NodeV1, OrganizationV1 } from 'shared';
 import NetworkMeasurement from '../domain/network/NetworkMeasurement';
 import { Network } from '../domain/network/Network';
 import { BaseQuorumSetDTOMapper } from './BaseQuorumSetDTOMapper';
@@ -31,7 +27,7 @@ export class NetworkV1DTOMapper {
 			quorumSetConfiguration: network
 				? BaseQuorumSetDTOMapper.fromNetworkQuorumSetConfiguration(
 						network.quorumSetConfiguration
-				  )
+					)
 				: undefined,
 			nodes: nodeV1DTOs,
 			organizations: organizationV1DTOs,
@@ -40,6 +36,7 @@ export class NetworkV1DTOMapper {
 			statistics: {
 				time: networkMeasurement.time.toISOString(),
 				nrOfActiveWatchers: networkMeasurement.nrOfActiveWatchers,
+				nrOfConnectableNodes: networkMeasurement.nrOfConnectableNodes,
 				nrOfActiveValidators: networkMeasurement.nrOfActiveValidators,
 				nrOfActiveFullValidators: networkMeasurement.nrOfActiveFullValidators,
 				nrOfActiveOrganizations: networkMeasurement.nrOfActiveOrganizations,

@@ -1,6 +1,7 @@
 export default class NetworkStatisticsAggregation {
 	time: Date = new Date();
 	nrOfActiveWatchersSum = 0;
+	nrOfConnectableNodesSum = 0;
 	nrOfActiveValidatorsSum = 0;
 	nrOfActiveFullValidatorsSum = 0;
 	nrOfActiveOrganizationsSum = 0;
@@ -54,6 +55,10 @@ export default class NetworkStatisticsAggregation {
 
 	get nrOfActiveWatchersAverage() {
 		return +(this.nrOfActiveWatchersSum / this.crawlCount).toFixed(2);
+	}
+
+	get nrOfConnectableNodesAverage() {
+		return +(this.nrOfConnectableNodesSum / this.crawlCount).toFixed(2);
 	}
 
 	get nrOfActiveValidatorsAverage() {

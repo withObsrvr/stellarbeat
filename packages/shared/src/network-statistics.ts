@@ -3,7 +3,8 @@ import PropertyMapper from './PropertyMapper';
 
 export default class NetworkStatistics {
 	time: Date = new Date();
-	nrOfActiveWatchers = 0;
+	nrOfActiveWatchers = 0; //@deprectated
+	nrOfConnectableNodes = 0;
 	nrOfActiveValidators = 0; //validators that are validating
 	nrOfActiveFullValidators = 0;
 	nrOfActiveOrganizations = 0;

@@ -48,7 +48,7 @@ export class TypeOrmNetworkMeasurementMonthRepository
 
 	async rollup(fromCrawlId: number, toCrawlId: number) {
 		await this.baseRepository.query(
-			`INSERT INTO network_measurement_month ("time", "nrOfActiveWatchersSum", "nrOfActiveValidatorsSum",
+			`INSERT INTO network_measurement_month ("time", "nrOfActiveWatchersSum", "nrOfConnectableNodesSum", "nrOfActiveValidatorsSum",
                                                     "nrOfActiveFullValidatorsSum", "nrOfActiveOrganizationsSum",
                                                     "transitiveQuorumSetSizeSum", "hasQuorumIntersectionCount",
                                                     "hasSymmetricTopTierCount", "topTierMin", "topTierMax",
@@ -80,6 +80,7 @@ export class TypeOrmNetworkMeasurementMonthRepository
                               group by "crawlMonth")
              select date_trunc('month', NetworkScan."time")   "month",
                     sum("nrOfActiveWatchers"::int)                "nrOfActiveWatchersSum",
+                    sum("nrOfConnectableNodes"::int)                "nrOfConnectableNodesSum",
                     sum("nrOfActiveValidators"::int)              "nrOfActiveValidatorsSum",
                     sum("nrOfActiveFullValidators"::int)          "nrOfActiveFullValidatorsSum",
                     sum("nrOfActiveOrganizations"::int)           "nrOfActiveOrganizationsSum",
@@ -139,6 +140,8 @@ export class TypeOrmNetworkMeasurementMonthRepository
              ON CONFLICT (time) DO UPDATE
                  SET "nrOfActiveWatchersSum"            = network_measurement_month."nrOfActiveWatchersSum" +
                                                           EXCLUDED."nrOfActiveWatchersSum",
+                        "nrOfConnectableNodesSum"            = network_measurement_month."nrOfConnectableNodesSum" +
+                                                          EXCLUDED."nrOfConnectableNodesSum",
                      "nrOfActiveValidatorsSum"          = network_measurement_month."nrOfActiveValidatorsSum" +
                                                           EXCLUDED."nrOfActiveValidatorsSum",
                      "nrOfActiveFullValidatorsSum"      = network_measurement_month."nrOfActiveFullValidatorsSum" +

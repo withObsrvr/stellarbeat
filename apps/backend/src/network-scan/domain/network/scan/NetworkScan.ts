@@ -96,6 +96,8 @@ export default class NetworkScan extends CoreEntity {
 		networkMeasurement.topTierOrgsSize =
 			analysisResult.organization.topTierSize;
 		networkMeasurement.nrOfActiveWatchers = nodeScan.getActiveWatchersCount();
+		networkMeasurement.nrOfConnectableNodes =
+			nodeScan.getConnectableNodesCount();
 		networkMeasurement.nrOfActiveValidators =
 			nodeScan.getActiveValidatorsCount();
 		networkMeasurement.nrOfActiveFullValidators =

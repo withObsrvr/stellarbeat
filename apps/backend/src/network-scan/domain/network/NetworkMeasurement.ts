@@ -9,8 +9,12 @@ export default class NetworkMeasurement implements Measurement {
 	@Column('timestamptz', { primary: true })
 	time: Date;
 
+	//@deprecated
 	@Column('smallint', { default: 0 })
 	nrOfActiveWatchers = 0;
+
+	@Column('smallint', { default: 0 })
+	nrOfConnectableNodes = 0;
 
 	@Column('smallint', { default: 0 })
 	nrOfActiveValidators = 0; //validators that are validating

@@ -2,15 +2,12 @@
   <div class="row row-cards row-deck">
     <div class="col-md-6 col-lg-3 col-xl-3">
       <network-statistics-card
-        :value="
-          network.networkStatistics.nrOfActiveWatchers +
-          network.networkStatistics.nrOfActiveValidators
-        "
+        :value="network.networkStatistics.nrOfConnectableNodes"
         :is-loading="isLoading"
         title="Connectable nodes"
         tooltip="Number of nodes allowing incoming connections"
         :initial-data-loaded="initialDataLoaded"
-        stats-property="nrOfActiveWatchersAverage"
+        stats-property="nrOfConnectableNodesAverage"
         :year-statistics="yearStatistics"
       >
         <template #info>

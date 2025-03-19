@@ -7,8 +7,12 @@ export abstract class NetworkMeasurementAggregation
 	@Column('date', { primary: true, name: 'time' })
 	time: Date = new Date();
 
+	//@deprecated
 	@Column('int', { default: 0 })
 	nrOfActiveWatchersSum = 0;
+
+	@Column('int', { default: 0 })
+	nrOfConnectableNodesSum = 0;
 
 	@Column('int', { default: 0 })
 	nrOfActiveValidatorsSum = 0; //validators that are validating
