@@ -1,7 +1,7 @@
 import { FederatedVotingContext } from './../FederatedVotingContext';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { FederatedVotingProtocol } from './../protocol/FederatedVotingProtocol';
-import { Statement, Node, QuorumSet, Overlay } from '../../';
+import { Statement, Node, QuorumSet, Overlay, ForgedMessageSent } from '../../';
 import { ProtocolAction, UserAction } from '../../core';
 import { Message } from '../Message';
 import { BroadcastVoteRequested } from './../protocol/event/BroadcastVoteRequested';
@@ -9,7 +9,6 @@ import { Vote, Voted } from '../protocol';
 import { ReceiveMessage } from '../action/protocol/ReceiveMessage';
 import { UpdateQuorumSet } from '../action/user/UpdateQuorumSet';
 import { Broadcast } from '../action/protocol/Broadcast';
-import { MessageForged } from '../event/MessageForged';
 
 describe('FederatedVotingContext', () => {
 	let mockFederatedVotingProtocol: MockProxy<FederatedVotingProtocol>;
@@ -327,7 +326,7 @@ describe('FederatedVotingContext', () => {
 			expect(actions[0]).toBeInstanceOf(ReceiveMessage);
 
 			const events = context.drainEvents();
-			expect(events.find((e) => e instanceof MessageForged)).toBeDefined();
+			expect(events.find((e) => e instanceof ForgedMessageSent)).toBeDefined();
 		});
 	});
 });

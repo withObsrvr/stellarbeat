@@ -26,7 +26,7 @@
         v-for="item in filteredConsoleLogs"
         :key="item.lineNumber"
         class="log-line"
-        :class="getBackgroundClass(item.stepIndex)"
+        :class="getBackgroundClass(item.stepIndex, item.event)"
       >
         <span class="line-number">{{ item.lineNumber }}</span>
         <span
@@ -46,7 +46,12 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import { OverlayEvent, ProtocolEvent } from "scp-simulation";
+import {
+  ForgedMessageSent,
+  OverlayEvent,
+  ProtocolEvent,
+  BroadcastDisrupted,
+} from "scp-simulation";
 
 const props = withDefaults(
   defineProps<{
@@ -95,8 +100,13 @@ const filteredConsoleLogs = computed(() => {
   return logsWithLineNumbers;
 });
 
-// Method to determine class based on step index
-function getBackgroundClass(stepIndex: number) {
+function getBackgroundClass(stepIndex: number, event: any) {
+  if (
+    event instanceof ForgedMessageSent ||
+    event instanceof BroadcastDisrupted
+  ) {
+    return "byzantine-event";
+  }
   return stepIndex % 2 === 0 ? "even-step log-line" : "odd-step log-line";
 }
 
@@ -194,5 +204,16 @@ input[type="text"] {
 .clickable:hover {
   color: #0056b3;
   background-color: white;
+}
+
+.byzantine-event {
+  background-color: #f8d7da;
+  font-style: italic;
+  align-items: baseline;
+  padding: 2px 0;
+}
+
+.byzantine-event:hover {
+  background-color: #f9ced2;
 }
 </style>

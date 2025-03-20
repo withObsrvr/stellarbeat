@@ -1,5 +1,6 @@
 import { InMemoryEventCollector } from '../core';
 import {
+	ForgedMessageSent,
 	Message,
 	MessageReceived,
 	MessageSent,
@@ -192,8 +193,8 @@ export class Overlay extends InMemoryEventCollector {
 		return actions;
 	}
 
-	sendMessage(message: Message): OverlayAction {
-		this.markSent(message);
+	sendMessage(message: Message, isForged = false): OverlayAction {
+		this.markSent(message, isForged);
 		return new ReceiveMessage(message);
 	}
 
@@ -207,8 +208,9 @@ export class Overlay extends InMemoryEventCollector {
 		}
 	}
 
-	private markSent(message: Message): void {
-		this.registerEvent(new MessageSent(message));
+	private markSent(message: Message, isForged = false): void {
+		if (!isForged) this.registerEvent(new MessageSent(message));
+		else this.registerEvent(new ForgedMessageSent(message));
 		this.markExchanged(message);
 	}
 

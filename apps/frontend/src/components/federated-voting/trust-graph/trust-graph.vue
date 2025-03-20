@@ -80,6 +80,16 @@
               stroke-width="60"
             ></path>
           </g>
+          <g class="links">
+            <FbasGraphLink
+              v-for="(link, i) in links"
+              :key="i"
+              :link="link"
+              :center-x="width / 2"
+              :center-y="height / 2"
+              :highlight="false"
+            />
+          </g>
           <g class="animation-layer">
             <AnimatedMessage
               v-for="message in messageAnimations"
@@ -89,17 +99,7 @@
               :end-x="message.endX"
               :end-y="message.endY"
               :duration="message.duration"
-            />
-          </g>
-
-          <g class="links">
-            <FbasGraphLink
-              v-for="(link, i) in links"
-              :key="i"
-              :link="link"
-              :center-x="width / 2"
-              :center-y="height / 2"
-              :highlight="false"
+              :is-forged="message.isForged"
             />
           </g>
           <g class="nodes">

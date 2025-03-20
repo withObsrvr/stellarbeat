@@ -1,5 +1,5 @@
 import { Node } from "./trust-graph-node.vue";
-import { Event, MessageSent } from "scp-simulation";
+import { Event, ForgedMessageSent, MessageSent } from "scp-simulation";
 
 export interface MessageAnimation {
   id: number;
@@ -8,6 +8,7 @@ export interface MessageAnimation {
   endX: number;
   endY: number;
   duration: number;
+  isForged: boolean;
 }
 
 export class MessageService {
@@ -20,8 +21,22 @@ export class MessageService {
     return events
       .map((event) => {
         if (event instanceof MessageSent) {
-          return this.createMessageAnimation(event, nodes, animationDuration);
-        } else return null;
+          return this.createMessageAnimation(
+            event,
+            nodes,
+            animationDuration,
+            false,
+          );
+        } else if (event instanceof ForgedMessageSent) {
+          return this.createMessageAnimation(
+            event,
+            nodes,
+            animationDuration,
+            true,
+          );
+        } else {
+          return null;
+        }
       })
       .filter((animation) => animation !== null);
   }
@@ -30,6 +45,7 @@ export class MessageService {
     event: MessageSent,
     nodes: Node[],
     animationDuration: number,
+    isForged: boolean,
   ): MessageAnimation | null {
     const source = event.message.sender;
     const target = event.message.receiver;
@@ -44,6 +60,7 @@ export class MessageService {
         endX: targetNode.x ?? 0,
         endY: targetNode.y ?? 0,
         duration: animationDuration / 1000,
+        isForged,
       };
     }
     return null;

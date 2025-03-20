@@ -1,5 +1,10 @@
 <template>
-  <circle :cx="startX" :cy="startY" r="6" fill="#f1c40f">
+  <circle
+    :cx="startX"
+    :cy="startY"
+    r="6"
+    :fill="isForged ? '#cc201f' : '#f1c40f'"
+  >
     <animate
       ref="animateX"
       attributeName="cx"
@@ -29,6 +34,7 @@ defineProps<{
   endX: number;
   endY: number;
   duration: number;
+  isForged: boolean;
 }>();
 
 const emit = defineEmits<{
