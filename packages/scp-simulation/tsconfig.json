@@ -6,7 +6,7 @@
 		"composite": true
 	},
 
-	"include": ["src/**/*.ts", "decs.d.ts"],
+	"include": ["src/**/*.ts", "decs.d.ts", "src/**/*.json"],
 	"exclude": [
 		"node_modules/**/*",
 		"src/**/__tests__/*",

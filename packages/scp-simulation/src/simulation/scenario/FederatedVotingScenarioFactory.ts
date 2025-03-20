@@ -1,8 +1,12 @@
 import { Node, QuorumSet } from '../../core';
 import { AddNode, VoteOnStatement } from '../../federated-voting';
 import { Scenario } from './Scenario';
+import { ScenarioSerializer } from './ScenarioSerializer';
+import acceptingSafetyScenario from './data/accepting-not-enough-safety.json';
 
 export class FederatedVotingScenarioFactory {
+	constructor(private scenarioSerializer: ScenarioSerializer) {}
+
 	static createBasicConsensus(): Scenario {
 		const quorumSet = new QuorumSet(2, ['Alice', 'Bob', 'Chad'], []);
 		const steve = new Node(
@@ -81,5 +85,16 @@ export class FederatedVotingScenarioFactory {
 				nextStep: null
 			}
 		);
+	}
+
+	createAcceptingNotEnoughSafety(): Scenario {
+		try {
+			return this.scenarioSerializer.fromJSON(acceptingSafetyScenario);
+		} catch (e: unknown) {
+			if (e instanceof Error) {
+				throw new Error('Failed to create scenario', { cause: e });
+			}
+			throw new Error('Failed to create scenario');
+		}
 	}
 }

@@ -1,4 +1,4 @@
-import { computed, reactive } from "vue";
+import { computed, reactive, UnwrapRef } from "vue";
 import {
   FederatedVotingContext,
   FederatedVotingContextFactory,
@@ -37,45 +37,31 @@ export interface FederatedNode {
   processedVotes: Vote[];
 }
 
+interface State {
+  simulationUpdate: number;
+  networkStructureUpdate: number;
+  overlayUpdate: number;
+  selectedScenario: Scenario;
+  selectedNodeId: string | null;
+  protocolContext: FederatedVotingContext;
+  protocolContextState: FederatedVotingContextState;
+  networkAnalysis: NetworkAnalysis;
+  nodes: FederatedNode[];
+  overlayConnections: { publicKey: string; connections: string[] }[];
+  latestSimulationStepWentForwards: boolean;
+  simulation: Simulation;
+}
+
 class FederatedVotingStore {
-  readonly scenarios = [
-    FederatedVotingScenarioFactory.createBasicConsensus(),
-    FederatedVotingScenarioFactory.createStuck(),
-  ];
-
-  private readonly _state = reactive<{
-    simulationUpdate: number;
-    networkStructureUpdate: number;
-    overlayUpdate: number;
-    selectedScenario: Scenario;
-    selectedNodeId: string | null;
-    protocolContext: FederatedVotingContext;
-    protocolContextState: FederatedVotingContextState;
-    networkAnalysis: NetworkAnalysis;
-    nodes: FederatedNode[];
-    overlayConnections: { publicKey: string; connections: string[] }[];
-    latestSimulationStepWentForwards: boolean;
-    simulation: Simulation;
-  }>({
-    simulationUpdate: 0,
-    networkStructureUpdate: 0,
-    latestSimulationStepWentForwards: false,
-    selectedScenario: this.scenarios[0],
-    selectedNodeId: null,
-    protocolContext: FederatedVotingContextFactory.create(),
-    protocolContextState: {} as FederatedVotingContextState, // temporary placeholder until constructor load
-    networkAnalysis: {} as NetworkAnalysis,
-    nodes: [] as FederatedNode[],
-    simulation: {} as Simulation, // temporary placeholder until constructor load
-    overlayConnections: [],
-    overlayUpdate: 0,
-  });
-
+  readonly scenarios: Scenario[];
+  private readonly _state: UnwrapRef<State>;
   private _networkStructureHash: string = "";
   private _overlayConnectionsHash: string = "";
   private scenarioLoader = new ScenarioLoader();
 
   constructor() {
+    this.scenarios = this.registerScenarios();
+    this._state = reactive(this.createState(this.scenarios[0]));
     const result = this.scenarioLoader.loadScenario(
       this._state.selectedScenario,
     );
@@ -83,6 +69,37 @@ class FederatedVotingStore {
     this._state.protocolContextState = result.protocolContext.getState();
     this._state.simulation = result.simulation;
     this.updateNetwork();
+  }
+
+  private registerScenarios() {
+    const scenarioSerializer = new ScenarioSerializer(
+      new SimulationStepListSerializer(new SimulationStepSerializer()),
+    );
+    const scenarioFactory = new FederatedVotingScenarioFactory(
+      scenarioSerializer,
+    );
+    return [
+      FederatedVotingScenarioFactory.createBasicConsensus(),
+      FederatedVotingScenarioFactory.createStuck(),
+      scenarioFactory.createAcceptingNotEnoughSafety(),
+    ];
+  }
+
+  private createState(scenario: Scenario) {
+    return {
+      simulationUpdate: 0,
+      networkStructureUpdate: 0,
+      latestSimulationStepWentForwards: false,
+      selectedScenario: scenario,
+      selectedNodeId: null,
+      protocolContext: FederatedVotingContextFactory.create(),
+      protocolContextState: {} as FederatedVotingContextState, // temporary placeholder until constructor load
+      networkAnalysis: {} as NetworkAnalysis,
+      nodes: [] as FederatedNode[],
+      simulation: {} as Simulation, // temporary placeholder until constructor load
+      overlayConnections: [],
+      overlayUpdate: 0,
+    };
   }
 
   private calculateNetworkStructureHash(): string {

@@ -21,8 +21,8 @@
           <td>
             <div class="node-list">
               <FbasNodeBadge
-                v-for="voterId in row.processedVotes"
-                :key="`vote-${voterId}`"
+                v-for="(voterId, key) in row.processedVotes"
+                :key="`vote-${key}`"
                 :node-id="voterId"
                 @select="selectNodeId"
               />
@@ -37,8 +37,8 @@
           <td>
             <div class="node-list">
               <FbasNodeBadge
-                v-for="voterId in row.processedAcceptVotes"
-                :key="`accept-${voterId}`"
+                v-for="(voterId, key) in row.processedAcceptVotes"
+                :key="`accept-${key}`"
                 :node-id="voterId"
                 @select="selectNodeId"
               />
