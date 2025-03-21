@@ -54,22 +54,14 @@
               </div>
             </td>
             <td v-if="isNodeActive(node.publicKey)" class="threshold-td">
-              <div class="threshold-selector">
-                <select
-                  class="form-select form-select-sm"
-                  :class="{ modified: isThresholdModified(node) }"
-                  :value="node.trustThreshold"
-                  @change="updateThreshold(node, $event)"
-                >
-                  <option
-                    v-for="n in getThresholdOptions(node)"
-                    :key="n"
-                    :value="n"
-                  >
-                    {{ n }}/{{ getTrustedCount(node) }}
-                  </option>
-                </select>
-              </div>
+              <TrustThresholdSelector
+                :nr-of-trusted-nodes="getTrustedCount(node)"
+                :trust-threshold="node.trustThreshold"
+                :is-modified="isThresholdModified(node)"
+                @threshold-changed="
+                  (newThreshold) => updateNodeThreshold(node, newThreshold)
+                "
+              />
             </td>
           </tr>
         </tbody>
@@ -140,6 +132,7 @@ import {
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import InfoButton from "../info-box/info-button.vue";
 import NodeTrustConfigInfo from "./node-trust-config-info.vue";
+import TrustThresholdSelector from "./trust-threshold-selector.vue";
 
 interface TrustConfig {
   publicKey: string;
@@ -256,7 +249,7 @@ function toggleNode(publicKey: string): void {
 }
 
 watch(
-  () => federatedVotingStore.nodes,
+  () => federatedVotingStore.networkStructureUpdate,
   () => {
     initializeNodeCache();
   },
@@ -476,20 +469,6 @@ function getTrustedCount(node: TrustConfig): number {
   return node.trustedNodes.length;
 }
 
-function getThresholdOptions(node: TrustConfig): number[] {
-  const validatorCount = getTrustedCount(node);
-  if (validatorCount === 0) return [0];
-  return Array.from({ length: validatorCount }, (_, i) => i + 1);
-}
-
-function updateThreshold(node: TrustConfig, event: Event): void {
-  const newThreshold = parseInt((event.target as HTMLSelectElement).value);
-  if (newThreshold !== node.trustThreshold) {
-    node.trustThreshold = newThreshold;
-    hasLocalChanges.value = true;
-  }
-}
-
 function isThresholdModified(node: TrustConfig): boolean {
   const originalNode = getOriginalNode(node.publicKey);
   return !!originalNode && originalNode.trustThreshold !== node.trustThreshold;
@@ -505,6 +484,11 @@ function isTrustModified(node: TrustConfig, otherNode: TrustConfig): boolean {
   const currentlyTrusted = node.trustedNodes.includes(otherNode.publicKey);
 
   return originallyTrusted !== currentlyTrusted;
+}
+
+function updateNodeThreshold(node: TrustConfig, newThreshold: number): void {
+  node.trustThreshold = newThreshold;
+  hasLocalChanges.value = true;
 }
 </script>
 
