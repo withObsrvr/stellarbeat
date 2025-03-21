@@ -26,6 +26,32 @@
     </div>
 
     <div class="section">
+      <h4>Quorum Intersections</h4>
+      <p>
+        Quorum intersections are overlapping nodes between different quorums.
+        They are critical for ensuring agreement and preventing network splits
+        (Safety). Every quorum should pair-wise intersect with every other
+        quorum.
+      </p>
+      <ul>
+        <li>
+          <strong>Safety Guarantee</strong>: When all quorums intersect, the
+          network cannot make contradictory decisions
+        </li>
+        <li>
+          This tab shows the minimal quorum intersections, which are the
+          smallest sets of nodes that overlap every quorum. If two quorums are
+          found to not overlap, this list will be empty.
+        </li>
+        <li>
+          If there exists a quorum intersection entirely out of ill-behaved
+          nodes, then there is a possibility that node could cause the network
+          to split by lying to the overlapping quorums.
+        </li>
+      </ul>
+    </div>
+
+    <div class="section">
       <h4>Quorum Slices</h4>
       <p>
         Select a node to view its slices. Quorum slices are subsets of nodes

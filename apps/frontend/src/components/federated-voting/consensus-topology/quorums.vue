@@ -54,25 +54,36 @@ import {
 
 const quorums = computed(() => {
   const selectedNodeId = federatedVotingStore.selectedNodeId;
+  let result;
+
   if (selectedNodeId === null) {
-    return federatedVotingStore.networkAnalysis.quorums;
+    result = federatedVotingStore.networkAnalysis.quorums;
+  } else {
+    result = findQuorums(
+      Array.from(
+        findTransitivelyTrustedNodes(
+          selectedNodeId,
+          federatedVotingStore.networkAnalysis.quorumSlices,
+        ),
+      ),
+      federatedVotingStore.networkAnalysis.quorumSlices,
+    ).filter((quorum) => quorum.has(selectedNodeId));
   }
 
-  return findQuorums(
-    Array.from(
-      findTransitivelyTrustedNodes(
-        selectedNodeId,
-        federatedVotingStore.networkAnalysis.quorumSlices,
-      ),
-    ),
-    federatedVotingStore.networkAnalysis.quorumSlices,
-  )
-    .filter((quorum) => quorum.has(selectedNodeId))
-    .sort((a, b) => a.size - b.size);
+  // Sort by minimal first, then by size
+  return result.sort((a, b) => {
+    const aIsMinimal = isMinimal(a);
+    const bIsMinimal = isMinimal(b);
+
+    // Sort minimal quorums first
+    if (aIsMinimal && !bIsMinimal) return -1;
+    if (!aIsMinimal && bIsMinimal) return 1;
+
+    // If both are minimal or both are non-minimal, sort by size
+    return a.size - b.size;
+  });
 });
-const quorumSlices = computed(
-  () => federatedVotingStore.networkAnalysis.quorumSlices,
-);
+
 const currentPage = ref(1);
 const itemsPerPage = 5;
 

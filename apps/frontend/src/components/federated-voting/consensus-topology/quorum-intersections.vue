@@ -20,7 +20,7 @@
     </ul>
 
     <!-- Pagination Controls -->
-    <div class="pagination">
+    <div v-if="intersections.length > 0" class="pagination">
       <button
         class="btn btn-sm btn-secondary"
         :disabled="currentPage === 1"
@@ -39,7 +39,7 @@
     </div>
 
     <div v-if="intersections.length === 0" class="empty-message">
-      No quorum intersections found
+      Some quorums do not overlap
       <span v-if="selectedNodeId">containing {{ selectedNodeId }}</span>
     </div>
   </div>

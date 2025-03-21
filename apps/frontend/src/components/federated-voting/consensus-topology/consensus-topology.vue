@@ -54,7 +54,9 @@
           >
             <span>Quorum Intersections</span>
             <BIconInfoCircle
-              v-tooltip.top="'Overlapping nodes between different quorums'"
+              v-tooltip.top="
+                'Minimal overlapping nodes between different quorums'
+              "
               class="info-icon text-secondary"
             />
           </a>

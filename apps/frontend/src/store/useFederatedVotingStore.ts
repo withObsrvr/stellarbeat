@@ -384,7 +384,7 @@ class FederatedVotingStore {
       ),
     );
 
-    this.updateNodes();
+    this.updateNetwork();
   }
 
   addConnection(a: string, b: string) {
