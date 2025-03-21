@@ -3,6 +3,8 @@ import { AddNode, VoteOnStatement } from '../../federated-voting';
 import { Scenario } from './Scenario';
 import { ScenarioSerializer } from './ScenarioSerializer';
 import acceptingSafetyScenario from './data/accepting-not-enough-safety.json';
+import acceptingLivenessScenario from './data/accepting-not-enough-liveness.json';
+import acceptingLivenessGossipScenario from './data/accepting-not-enough-liveness-gossip-fix.json';
 
 export class FederatedVotingScenarioFactory {
 	constructor(private scenarioSerializer: ScenarioSerializer) {}
@@ -87,14 +89,24 @@ export class FederatedVotingScenarioFactory {
 		);
 	}
 
-	createAcceptingNotEnoughSafety(): Scenario {
+	public loadJSONScenario(json: any): Scenario {
 		try {
-			return this.scenarioSerializer.fromJSON(acceptingSafetyScenario);
+			return this.scenarioSerializer.fromJSON(json);
 		} catch (e: unknown) {
 			if (e instanceof Error) {
 				throw new Error('Failed to create scenario', { cause: e });
 			}
 			throw new Error('Failed to create scenario');
 		}
+	}
+
+	loadAll(): Scenario[] {
+		return [
+			FederatedVotingScenarioFactory.createBasicConsensus(),
+			FederatedVotingScenarioFactory.createStuck(),
+			this.loadJSONScenario(acceptingSafetyScenario),
+			this.loadJSONScenario(acceptingLivenessScenario),
+			this.loadJSONScenario(acceptingLivenessGossipScenario)
+		];
 	}
 }

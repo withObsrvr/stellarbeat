@@ -142,7 +142,8 @@ export class Overlay extends InMemoryEventCollector {
 			actions.push(new ReceiveMessage(message));
 			this.markSent(message);
 		}
-		if (actions.length === 0) {
+		if (actions.length === 0 && neighborBlackList.length === 0) {
+			//indicate that there were no overlay connections
 			this.registerEvent(new BroadcastFailed(broadcaster, payload));
 		}
 		return actions;

@@ -13,6 +13,6 @@ export class BroadcastDisrupted extends OverlayEvent {
 	}
 
 	toString(): string {
-		return `${this.broadcaster} ignored broadcast of "${this.payload}" to ${this.neighbor}`;
+		return `${this.broadcaster} did not broadcast"${this.payload}" to ${this.neighbor}`;
 	}
 }

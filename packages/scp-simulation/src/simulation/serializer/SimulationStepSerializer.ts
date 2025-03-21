@@ -14,6 +14,7 @@ import { SimulationStep } from '../Simulation';
 export interface SerializedSimulationStep {
 	userActions: any[];
 	protocolActions: any[];
+	previousStepHash: string;
 }
 
 /**
@@ -26,7 +27,8 @@ export class SimulationStepSerializer {
 	public toJSON(step: SimulationStep): SerializedSimulationStep {
 		return {
 			userActions: step.userActions.map((action) => action.toJSON()),
-			protocolActions: step.protocolActions.map((action) => action.toJSON())
+			protocolActions: step.protocolActions.map((action) => action.toJSON()),
+			previousStepHash: step.previousStepHash ?? ''
 		};
 	}
 
@@ -48,9 +50,9 @@ export class SimulationStepSerializer {
 			userActions,
 			protocolActions,
 			previousEvents: [], // Events will be regenerated during execution
-			nextStep: null, // These links need to be established by the Simulation class
+			nextStep: null, //after loading all steps
 			previousStep: null, // after loading all steps
-			previousStepHash: '' // This will be added when creating a list
+			previousStepHash: json.previousStepHash
 		};
 	}
 

@@ -133,7 +133,11 @@ export class Simulation {
 			this.currentStep.protocolActions,
 			this.currentStep.userActions
 		); //update the context state
-		const stepHash = calculateStepHash(this.currentStep);
+		const stepHash = calculateStepHash(
+			this.currentStep,
+			this.context.getOverlaySettings().fullyConnected,
+			this.context.getOverlaySettings().gossipEnabled
+		);
 
 		//because we want to be able to replay predefined scenarios,
 		//only when the current step has not been modified
@@ -209,7 +213,11 @@ export class Simulation {
 	}
 }
 
-export function calculateStepHash(step: SimulationStep): string {
+export function calculateStepHash(
+	step: SimulationStep,
+	isOverlayFullyConnected: boolean,
+	isOverlayGossipEnabled: boolean
+): string {
 	return murmurhash
 		.v3(
 			step.userActions
@@ -217,7 +225,9 @@ export function calculateStepHash(step: SimulationStep): string {
 				.join('|')
 				.concat(
 					step.protocolActions.map((a) => JSON.stringify(a.toJSON())).join('|')
-				),
+				)
+				.concat(isOverlayFullyConnected ? '1' : '0')
+				.concat(isOverlayGossipEnabled ? '1' : '0'),
 			1
 		)
 		.toString();

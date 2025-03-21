@@ -7,7 +7,7 @@ import { ProtocolAction } from './ProtocolAction';
 import { QuorumSet } from './QuorumSet';
 import { UserAction } from './UserAction';
 
-// The context runs the protocol and provides a playground.
+// The context runs the protocol, links with the overlay and provides a playground.
 // For example the federated voting protocol allows a user to vote on a single statement,
 // Acts as a mediator between the protocol and the overlay
 export interface Context extends EventCollector {
@@ -36,4 +36,9 @@ export interface Context extends EventCollector {
 	removeNode(publicKey: string): ProtocolAction[];
 	removeConnection(a: PublicKey, b: PublicKey): ProtocolAction[];
 	updateQuorumSet(publicKey: string, quorumSet: QuorumSet): ProtocolAction[];
+
+	getOverlaySettings(): {
+		gossipEnabled: boolean;
+		fullyConnected: boolean;
+	};
 }

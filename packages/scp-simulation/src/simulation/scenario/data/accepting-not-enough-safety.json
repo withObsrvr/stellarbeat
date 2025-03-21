@@ -2,7 +2,7 @@
 	"serializeVersion": "1.0.0",
 	"id": "accepting-not-enough-safety",
 	"name": "Accepting not enough: safety",
-	"description": "In this scenario, we will demonstrate why we need an extra phase after ach consensus",
+	"description": "In this scenario, we will demonstrate why we need an extra phase after accepting to accomodate for safety",
 	"isOverlayFullyConnected": true,
 	"isOverlayGossipEnabled": false,
 	"simulationSteps": [
@@ -79,7 +79,8 @@
 					"statement": "burger"
 				}
 			],
-			"protocolActions": []
+			"protocolActions": [],
+			"previousStepHash": ""
 		},
 		{
 			"userActions": [],
@@ -152,7 +153,8 @@
 					"neighborBlackList": [],
 					"isDisrupted": false
 				}
-			]
+			],
+			"previousStepHash": "867677803"
 		},
 		{
 			"userActions": [],
@@ -385,7 +387,8 @@
 					},
 					"isDisrupted": false
 				}
-			]
+			],
+			"previousStepHash": "334477205"
 		},
 		{
 			"userActions": [
@@ -426,7 +429,8 @@
 					}
 				}
 			],
-			"protocolActions": []
+			"protocolActions": [],
+			"previousStepHash": "348571655"
 		},
 		{
 			"userActions": [],
@@ -469,7 +473,8 @@
 					},
 					"isDisrupted": false
 				}
-			]
+			],
+			"previousStepHash": "2255118729"
 		},
 		{
 			"userActions": [],
@@ -508,7 +513,8 @@
 					"neighborBlackList": [],
 					"isDisrupted": false
 				}
-			]
+			],
+			"previousStepHash": "94076638"
 		},
 		{
 			"userActions": [],
@@ -627,7 +633,8 @@
 					},
 					"isDisrupted": false
 				}
-			]
+			],
+			"previousStepHash": "3202845531"
 		},
 		{
 			"userActions": [],
@@ -666,7 +673,8 @@
 					"neighborBlackList": [],
 					"isDisrupted": false
 				}
-			]
+			],
+			"previousStepHash": "2358372351"
 		},
 		{
 			"userActions": [],
@@ -785,11 +793,13 @@
 					},
 					"isDisrupted": false
 				}
-			]
+			],
+			"previousStepHash": "226405456"
 		},
 		{
 			"userActions": [],
-			"protocolActions": []
+			"protocolActions": [],
+			"previousStepHash": "1579446055"
 		}
 	]
 }

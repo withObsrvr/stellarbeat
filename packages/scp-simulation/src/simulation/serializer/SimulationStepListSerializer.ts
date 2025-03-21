@@ -29,7 +29,6 @@ export class SimulationStepListSerializer {
 		for (let i = 0; i < steps.length - 1; i++) {
 			steps[i].nextStep = steps[i + 1];
 			steps[i + 1].previousStep = steps[i];
-			steps[i + 1].previousStepHash = calculateStepHash(steps[i]);
 		}
 
 		return steps[0];

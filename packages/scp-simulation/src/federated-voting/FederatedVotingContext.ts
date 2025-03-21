@@ -292,4 +292,14 @@ export class FederatedVotingContext
 	get overlayIsFullyConnected(): boolean {
 		return this.overlay.fullyConnected;
 	}
+
+	getOverlaySettings(): {
+		gossipEnabled: boolean;
+		fullyConnected: boolean;
+	} {
+		return {
+			gossipEnabled: this.overlayIsGossipEnabled,
+			fullyConnected: this.overlayIsFullyConnected
+		};
+	}
 }

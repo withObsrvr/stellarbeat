@@ -78,11 +78,7 @@ class FederatedVotingStore {
     const scenarioFactory = new FederatedVotingScenarioFactory(
       scenarioSerializer,
     );
-    return [
-      FederatedVotingScenarioFactory.createBasicConsensus(),
-      FederatedVotingScenarioFactory.createStuck(),
-      scenarioFactory.createAcceptingNotEnoughSafety(),
-    ];
+    return scenarioFactory.loadAll();
   }
 
   private createState(scenario: Scenario) {
@@ -518,12 +514,14 @@ class FederatedVotingStore {
   }
 
   public consensusReached = computed(() => {
-    const nodes = this.nodes;
-    if (!nodes.every((node) => node.confirmed)) {
+    const nonBefouledNodes = this.nodes.filter(
+      (node) => this.illBehavedNodes.indexOf(node.publicKey) === -1,
+    );
+    if (!nonBefouledNodes.every((node) => node.confirmed)) {
       return false;
     }
 
-    const confirmedValues = nodes
+    const confirmedValues = nonBefouledNodes
       .filter((state) => state.confirmed)
       .map((state) => state.confirmed);
 
