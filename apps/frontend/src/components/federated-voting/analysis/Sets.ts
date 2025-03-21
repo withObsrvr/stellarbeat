@@ -82,3 +82,54 @@ export function findSubSetsOfSize<A>(mySet: Set<A>, size: number): Set<A>[] {
   generateSubsets(0, new Set<A>());
   return subsets;
 }
+
+//if only 1 set is passed, return it
+export function findIntersections<A>(sets: Set<A>[]): A[][] {
+  const allIntersections: A[][] = [];
+  if (sets.length < 2) return sets.map((set) => Array.from(set));
+
+  for (let i = 0; i < sets.length; i++) {
+    for (let j = i + 1; j < sets.length; j++) {
+      const first = sets[i];
+      const second = sets[j];
+
+      // Compute the intersection
+      const intersection = new Set<A>(
+        [...first].filter((node) => second.has(node)),
+      );
+
+      // Add it to the list
+      allIntersections.push(Array.from(intersection));
+    }
+  }
+
+  return allIntersections;
+}
+
+//empty array is subset of all arrays
+export function findMinimalSubSets<A>(sets: A[][]): A[][] {
+  // 1. Sort by ascending length
+  sets.sort((a, b) => a.length - b.length);
+  if (sets.length === 0) return [];
+  if (sets[0].length === 0) return [];
+
+  const minimal: A[][] = [];
+
+  // We'll iterate until we've exhausted the list
+  // In each iteration, pick the smallest intersection & remove its supersets
+  while (sets.length > 0) {
+    // 2. Take the first (smallest) intersection
+    const candidate = sets[0];
+
+    // 3. Add it to the result
+    minimal.push(candidate);
+
+    // 4. Remove all intersections that contain candidate
+    //    i.e. for which candidate is a subset
+    sets = sets.filter(
+      (intersection) => !candidate.every((elem) => intersection.includes(elem)),
+    );
+  }
+
+  return minimal;
+}

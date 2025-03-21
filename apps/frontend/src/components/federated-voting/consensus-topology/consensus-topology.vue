@@ -5,12 +5,17 @@
         <BreadCrumbs root="Consensus Topology"></BreadCrumbs>
         <div>
           <span
-            v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
+            v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection()"
+            v-tooltip="'Quorum intersection'"
             class="badge badge-success ms-2"
             >Quorum Intersection</span
           >
-          <span v-else class="badge badge-danger ms-2"
-            >No Quorum Intersection</span
+          <span
+            v-else
+            v-tooltip="'No quorum intersection'"
+            class="badge badge-danger ms-2"
+          >
+            No Quorum Intersection</span
           >
         </div>
       </div>
@@ -36,6 +41,20 @@
             <span>Quorums</span>
             <BIconInfoCircle
               v-tooltip.top="'A quorum contains a slice for each node'"
+              class="info-icon text-secondary"
+            />
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            :class="{ active: activeTab === 'quorum-intersections' }"
+            href="#"
+            @click.prevent="activeTab = 'quorum-intersections'"
+          >
+            <span>Quorum Intersections</span>
+            <BIconInfoCircle
+              v-tooltip.top="'Overlapping nodes between different quorums'"
               class="info-icon text-secondary"
             />
           </a>
@@ -85,6 +104,14 @@
           :class="{ 'show active': activeTab === 'quorums' }"
         >
           <QuorumsTab />
+        </div>
+
+        <div
+          v-if="activeTab === 'quorum-intersections'"
+          class="tab-pane fade"
+          :class="{ 'show active': activeTab === 'quorum-intersections' }"
+        >
+          <QuorumIntersections />
         </div>
 
         <div
@@ -143,6 +170,7 @@ import QuorumSlicesTab from "./quorum-slices.vue";
 import VBlockingSetsTab from "./v-blocking-sets.vue";
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import ConsensusTopologyInfo from "./consensus-topology-info.vue";
+import QuorumIntersections from "./quorum-intersections.vue";
 
 // Tab management
 const activeTab = ref("quorums");
@@ -184,12 +212,13 @@ watch(
 
 .nav-tabs .nav-item {
   margin-bottom: -1px;
+  padding: 0 0.6rem;
 }
 
 .nav-tabs .nav-link {
   display: flex;
   align-items: center;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.5rem;
   border: 1px solid transparent;
   border-top-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;

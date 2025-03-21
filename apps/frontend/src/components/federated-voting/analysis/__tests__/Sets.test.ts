@@ -6,6 +6,8 @@ import {
   isEqualSet,
   isSubsetOf,
   findIntersection,
+  findIntersections,
+  findMinimalSubSets,
 } from "../Sets";
 
 describe("Sets utility functions", () => {
@@ -113,6 +115,82 @@ describe("Sets utility functions", () => {
       const setB = new Set([3, 4]);
       const intersection = findIntersection(setA, setB);
       expect(intersection.size).toBe(0);
+    });
+  });
+
+  describe("findIntersections", () => {
+    test("should find intersections between all pairs of sets", () => {
+      const sets = [new Set([1, 2, 3]), new Set([2, 3, 4]), new Set([3, 4, 5])];
+
+      const intersections = findIntersections(sets);
+
+      expect(intersections).toContainEqual([2, 3]); // 1st and 2nd set
+      expect(intersections).toContainEqual([3]); // 1st and 3rd set
+      expect(intersections).toContainEqual([3, 4]); // 2nd and 3rd set
+      expect(intersections.length).toBe(3);
+    });
+
+    test("should return set when there's only one set", () => {
+      const sets = [new Set([1, 2, 3])];
+      expect(findIntersections(sets)).toEqual([[1, 2, 3]]);
+    });
+
+    test("should return empty array when input is empty", () => {
+      expect(findIntersections([])).toEqual([]);
+    });
+
+    test("should include empty intersections", () => {
+      const sets = [new Set([1, 2]), new Set([3, 4]), new Set([1, 5])];
+
+      const intersections = findIntersections(sets);
+
+      expect(intersections).toContainEqual([]); // 1st and 2nd set
+      expect(intersections).toContainEqual([1]); // 1st and 3rd set
+      expect(intersections.length).toBe(3);
+    });
+  });
+
+  describe("findMinimalSubSets", () => {
+    test("should identify minimal subsets in an array", () => {
+      const sets = [
+        [1, 2, 3],
+        [2, 3],
+        [4, 5],
+        [1, 2, 3, 4],
+      ];
+
+      const minimal = findMinimalSubSets(sets);
+
+      expect(minimal).toContainEqual([2, 3]);
+      expect(minimal).toContainEqual([4, 5]);
+      expect(minimal.length).toBe(2);
+    });
+
+    test("should return empty array when input is empty", () => {
+      expect(findMinimalSubSets([])).toEqual([]);
+    });
+
+    test("should return empty array when empty array is present", () => {
+      const sets = [[1, 2, 3], [], [4, 5]];
+
+      expect(findMinimalSubSets(sets)).toEqual([]);
+    });
+
+    test("should handle complex nested subset relationships", () => {
+      const sets = [
+        [1, 2, 3, 4, 5],
+        [2, 3, 4],
+        [3, 4],
+        [1, 2],
+        [5, 6],
+      ];
+
+      const minimal = findMinimalSubSets(sets);
+
+      expect(minimal).toContainEqual([3, 4]);
+      expect(minimal).toContainEqual([1, 2]);
+      expect(minimal).toContainEqual([5, 6]);
+      expect(minimal.length).toBe(3);
     });
   });
 });

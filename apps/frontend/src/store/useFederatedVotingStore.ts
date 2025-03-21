@@ -552,7 +552,7 @@ class FederatedVotingStore {
     this.simulation.addUserAction(action);
   }
 
-  private cancelPendingVote(publicKey: string) {
+  public cancelPendingVote(publicKey: string) {
     const vote = this.simulation
       .pendingUserActions()
       .find(

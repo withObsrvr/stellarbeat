@@ -86,7 +86,6 @@ export function findMinimalQuorums(quorums: Set<NodeID>[]): Set<NodeID>[] {
 }
 
 export function hasQuorumIntersection(quorums: Set<NodeID>[]): boolean {
-  // Check pairwise intersection for minimal quorums
   for (let i = 0; i < quorums.length; i++) {
     for (let j = i + 1; j < quorums.length; j++) {
       const first = quorums[i];

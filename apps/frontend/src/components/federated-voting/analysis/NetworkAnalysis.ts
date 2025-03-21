@@ -1,9 +1,13 @@
-import { findSubSetsOfSize } from "./Sets";
+import {
+  findIntersections,
+  findMinimalSubSets,
+  findSubSetsOfSize,
+} from "./Sets";
 import {
   findAllDSets,
   findMinimalQuorums,
   findQuorums,
-  hasQuorumIntersection,
+  NodeID,
 } from "./DSetAnalysis";
 import { FederatedNode } from "@/store/useFederatedVotingStore";
 
@@ -40,10 +44,7 @@ export class NetworkAnalysis {
    */
   public readonly topTierNodes: Set<PublicKey>;
 
-  /**
-   *  Whether the network has quorum intersection. Every quorum overlaps with any other other quorum.
-   */
-  public readonly hasQuorumIntersection: boolean;
+  public readonly minimalQuorumIntersections: PublicKey[][];
 
   private constructor(
     dSets: Set<PublicKey>[],
@@ -51,14 +52,14 @@ export class NetworkAnalysis {
     quorums: Set<PublicKey>[],
     minimalQuorums: Set<PublicKey>[],
     topTierNodes: Set<PublicKey>,
-    hasQuorumIntersection: boolean,
+    minimalQuorumIntersections: PublicKey[][],
   ) {
     this.dSets = dSets;
     this.quorumSlices = quorumSlices;
     this.quorums = quorums;
     this.minimalQuorums = minimalQuorums;
     this.topTierNodes = topTierNodes;
-    this.hasQuorumIntersection = hasQuorumIntersection;
+    this.minimalQuorumIntersections = minimalQuorumIntersections;
   }
 
   /**
@@ -94,13 +95,21 @@ export class NetworkAnalysis {
       quorum.forEach((publicKey) => topTierNodes.add(publicKey));
     });
 
+    const minimalQuorumIntersections = findMinimalSubSets<NodeID>(
+      findIntersections<NodeID>(minimalQuorums),
+    );
+
     return new NetworkAnalysis(
       dSets,
       quorumSlices,
       quorums,
       minimalQuorums,
       topTierNodes,
-      hasQuorumIntersection(minimalQuorums),
+      minimalQuorumIntersections,
     );
+  }
+
+  hasQuorumIntersection(): boolean {
+    return this.minimalQuorumIntersections.length > 0;
   }
 }

@@ -5,12 +5,17 @@
         <BreadCrumbs :root="'Trust Graph'" />
         <div>
           <span
-            v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
+            v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection()"
+            v-tooltip="'Quorum Intersection'"
             class="badge badge-success ms-2 mr-2"
             >Quorum Intersection</span
           >
-          <span v-else class="badge badge-danger ms-2 mr-2"
-            >No Quorum Intersection</span
+          <span
+            v-else
+            v-tooltip="'No quorum intersection'"
+            class="badge badge-danger ms-2 mr-2"
+          >
+            No Quorum Intersection</span
           >
           <span
             v-if="federatedVotingStore.consensusReached.value"

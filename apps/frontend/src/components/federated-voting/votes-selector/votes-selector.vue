@@ -61,6 +61,8 @@ function onVoteSelectionChange(publicKey: string) {
   const voteValue = selectedVotes.value[publicKey];
   if (voteValue) {
     federatedVotingStore.vote(publicKey, voteValue);
+  } else {
+    federatedVotingStore.cancelPendingVote(publicKey);
   }
 }
 

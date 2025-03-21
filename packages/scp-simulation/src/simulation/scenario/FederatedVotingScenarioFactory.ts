@@ -5,6 +5,7 @@ import { ScenarioSerializer } from './ScenarioSerializer';
 import acceptingSafetyScenario from './data/accepting-not-enough-safety.json';
 import acceptingLivenessScenario from './data/accepting-not-enough-liveness.json';
 import acceptingLivenessGossipScenario from './data/accepting-not-enough-liveness-gossip-fix.json';
+import networkSplitComplete from './data/network-split-complete.json';
 
 export class FederatedVotingScenarioFactory {
 	constructor(private scenarioSerializer: ScenarioSerializer) {}
@@ -106,7 +107,8 @@ export class FederatedVotingScenarioFactory {
 			FederatedVotingScenarioFactory.createStuck(),
 			this.loadJSONScenario(acceptingSafetyScenario),
 			this.loadJSONScenario(acceptingLivenessScenario),
-			this.loadJSONScenario(acceptingLivenessGossipScenario)
+			this.loadJSONScenario(acceptingLivenessGossipScenario),
+			this.loadJSONScenario(networkSplitComplete)
 		];
 	}
 }
