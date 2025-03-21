@@ -12,8 +12,8 @@
     <!-- Actions List -->
     <div ref="actionsList" class="actions-list">
       <div
-        v-for="action in filteredActions"
-        :key="action.description"
+        v-for="(action, id) in filteredActions"
+        :key="id"
         class="action-item"
         :class="{
           'disrupted-item': isActionDisrupted(action.actionRef),

@@ -115,7 +115,6 @@ export class Overlay extends InMemoryEventCollector {
 	removeConnection(a: PublicKey, b: PublicKey): void {
 		const aConnectectToB = this.connections.get(a)?.has(b);
 		const bConnectectToA = this.connections.get(b)?.has(a);
-		console.log(a, b, aConnectectToB, bConnectectToA);
 
 		if (aConnectectToB || bConnectectToA) {
 			this.registerEvent(new ConnectionRemoved(a, b));

@@ -1,8 +1,8 @@
 {
 	"serializeVersion": "1.0.0",
-	"id": "network-stuck-because-node",
-	"name": "Network stuck because of node crash",
-	"description": "In this scenario, the network will be stuck because of a node crashing",
+	"id": "network-split-no-quorum-intersection",
+	"name": "Network split lack of quorum intersection",
+	"description": "In this scenario, nodes are well behaved but the network lacks quorum intersection",
 	"isOverlayFullyConnected": true,
 	"isOverlayGossipEnabled": false,
 	"simulationSteps": [
@@ -14,7 +14,7 @@
 					"publicKey": "Alice",
 					"quorumSet": {
 						"threshold": 2,
-						"validators": ["Alice", "Bob", "Chad"],
+						"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 						"innerQuorumSets": []
 					}
 				},
@@ -24,7 +24,7 @@
 					"publicKey": "Bob",
 					"quorumSet": {
 						"threshold": 2,
-						"validators": ["Alice", "Bob", "Chad"],
+						"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 						"innerQuorumSets": []
 					}
 				},
@@ -34,7 +34,7 @@
 					"publicKey": "Chad",
 					"quorumSet": {
 						"threshold": 2,
-						"validators": ["Alice", "Bob", "Chad"],
+						"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 						"innerQuorumSets": []
 					}
 				},
@@ -44,7 +44,7 @@
 					"publicKey": "Steve",
 					"quorumSet": {
 						"threshold": 2,
-						"validators": ["Bob", "Chad", "Steve"],
+						"validators": ["Bob", "Chad", "Alice", "Steve", "Daisy"],
 						"innerQuorumSets": []
 					}
 				},
@@ -54,7 +54,7 @@
 					"publicKey": "Daisy",
 					"quorumSet": {
 						"threshold": 2,
-						"validators": ["Steve", "Chad", "Daisy"],
+						"validators": ["Chad", "Alice", "Bob", "Daisy", "Steve"],
 						"innerQuorumSets": []
 					}
 				},
@@ -105,7 +105,7 @@
 						"publicKey": "Alice",
 						"quorumSet": {
 							"threshold": 2,
-							"validators": ["Alice", "Bob", "Chad"],
+							"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 							"innerQuorumSets": []
 						}
 					},
@@ -122,7 +122,7 @@
 						"publicKey": "Bob",
 						"quorumSet": {
 							"threshold": 2,
-							"validators": ["Alice", "Bob", "Chad"],
+							"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 							"innerQuorumSets": []
 						}
 					},
@@ -139,7 +139,7 @@
 						"publicKey": "Chad",
 						"quorumSet": {
 							"threshold": 2,
-							"validators": ["Alice", "Bob", "Chad"],
+							"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 							"innerQuorumSets": []
 						}
 					},
@@ -156,7 +156,7 @@
 						"publicKey": "Steve",
 						"quorumSet": {
 							"threshold": 2,
-							"validators": ["Bob", "Chad", "Steve"],
+							"validators": ["Bob", "Chad", "Alice", "Steve", "Daisy"],
 							"innerQuorumSets": []
 						}
 					},
@@ -173,7 +173,7 @@
 						"publicKey": "Daisy",
 						"quorumSet": {
 							"threshold": 2,
-							"validators": ["Steve", "Chad", "Daisy"],
+							"validators": ["Chad", "Alice", "Bob", "Daisy", "Steve"],
 							"innerQuorumSets": []
 						}
 					},
@@ -181,7 +181,7 @@
 					"isDisrupted": false
 				}
 			],
-			"previousStepHash": "595540680"
+			"previousStepHash": "3626837005"
 		},
 		{
 			"userActions": [],
@@ -198,7 +198,7 @@
 							"publicKey": "Alice",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -217,7 +217,7 @@
 							"publicKey": "Alice",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -236,7 +236,7 @@
 							"publicKey": "Alice",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -255,7 +255,7 @@
 							"publicKey": "Alice",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -274,7 +274,7 @@
 							"publicKey": "Bob",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -293,7 +293,7 @@
 							"publicKey": "Bob",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -312,7 +312,7 @@
 							"publicKey": "Bob",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -331,7 +331,7 @@
 							"publicKey": "Bob",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -350,7 +350,7 @@
 							"publicKey": "Chad",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -369,7 +369,7 @@
 							"publicKey": "Chad",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -388,7 +388,7 @@
 							"publicKey": "Chad",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -407,7 +407,7 @@
 							"publicKey": "Chad",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -426,7 +426,7 @@
 							"publicKey": "Steve",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Bob", "Chad", "Steve"],
+								"validators": ["Bob", "Chad", "Alice", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -445,7 +445,7 @@
 							"publicKey": "Steve",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Bob", "Chad", "Steve"],
+								"validators": ["Bob", "Chad", "Alice", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -464,7 +464,7 @@
 							"publicKey": "Steve",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Bob", "Chad", "Steve"],
+								"validators": ["Bob", "Chad", "Alice", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -483,7 +483,7 @@
 							"publicKey": "Steve",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Bob", "Chad", "Steve"],
+								"validators": ["Bob", "Chad", "Alice", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -502,7 +502,7 @@
 							"publicKey": "Daisy",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Steve", "Chad", "Daisy"],
+								"validators": ["Chad", "Alice", "Bob", "Daisy", "Steve"],
 								"innerQuorumSets": []
 							}
 						}
@@ -521,7 +521,7 @@
 							"publicKey": "Daisy",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Steve", "Chad", "Daisy"],
+								"validators": ["Chad", "Alice", "Bob", "Daisy", "Steve"],
 								"innerQuorumSets": []
 							}
 						}
@@ -540,7 +540,7 @@
 							"publicKey": "Daisy",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Steve", "Chad", "Daisy"],
+								"validators": ["Chad", "Alice", "Bob", "Daisy", "Steve"],
 								"innerQuorumSets": []
 							}
 						}
@@ -559,7 +559,7 @@
 							"publicKey": "Daisy",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Steve", "Chad", "Daisy"],
+								"validators": ["Chad", "Alice", "Bob", "Daisy", "Steve"],
 								"innerQuorumSets": []
 							}
 						}
@@ -567,7 +567,7 @@
 					"isDisrupted": false
 				}
 			],
-			"previousStepHash": "3624891931"
+			"previousStepHash": "574042451"
 		},
 		{
 			"userActions": [],
@@ -582,7 +582,7 @@
 						"publicKey": "Bob",
 						"quorumSet": {
 							"threshold": 2,
-							"validators": ["Alice", "Bob", "Chad"],
+							"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 							"innerQuorumSets": []
 						}
 					},
@@ -599,15 +599,66 @@
 						"publicKey": "Alice",
 						"quorumSet": {
 							"threshold": 2,
-							"validators": ["Alice", "Bob", "Chad"],
+							"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 							"innerQuorumSets": []
 						}
 					},
-					"neighborBlackList": ["Bob", "Chad", "Steve", "Daisy"],
-					"isDisrupted": true
+					"neighborBlackList": [],
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "Broadcast",
+					"broadcaster": "Steve",
+					"payload": {
+						"statement": "burger",
+						"isVoteToAccept": true,
+						"publicKey": "Steve",
+						"quorumSet": {
+							"threshold": 2,
+							"validators": ["Bob", "Chad", "Alice", "Steve", "Daisy"],
+							"innerQuorumSets": []
+						}
+					},
+					"neighborBlackList": [],
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "Broadcast",
+					"broadcaster": "Daisy",
+					"payload": {
+						"statement": "burger",
+						"isVoteToAccept": true,
+						"publicKey": "Daisy",
+						"quorumSet": {
+							"threshold": 2,
+							"validators": ["Chad", "Alice", "Bob", "Daisy", "Steve"],
+							"innerQuorumSets": []
+						}
+					},
+					"neighborBlackList": [],
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "Broadcast",
+					"broadcaster": "Chad",
+					"payload": {
+						"statement": "burger",
+						"isVoteToAccept": true,
+						"publicKey": "Chad",
+						"quorumSet": {
+							"threshold": 2,
+							"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
+							"innerQuorumSets": []
+						}
+					},
+					"neighborBlackList": [],
+					"isDisrupted": false
 				}
 			],
-			"previousStepHash": "2948352980"
+			"previousStepHash": "4217464485"
 		},
 		{
 			"userActions": [],
@@ -624,12 +675,12 @@
 							"publicKey": "Bob",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
 					},
-					"isDisrupted": true
+					"isDisrupted": false
 				},
 				{
 					"type": "ProtocolAction",
@@ -643,7 +694,7 @@
 							"publicKey": "Bob",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -662,7 +713,7 @@
 							"publicKey": "Bob",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -681,7 +732,311 @@
 							"publicKey": "Bob",
 							"quorumSet": {
 								"threshold": 2,
-								"validators": ["Alice", "Bob", "Chad"],
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Alice",
+						"receiver": "Bob",
+						"vote": {
+							"statement": "pizza",
+							"isVoteToAccept": true,
+							"publicKey": "Alice",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Alice",
+						"receiver": "Chad",
+						"vote": {
+							"statement": "pizza",
+							"isVoteToAccept": true,
+							"publicKey": "Alice",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Alice",
+						"receiver": "Steve",
+						"vote": {
+							"statement": "pizza",
+							"isVoteToAccept": true,
+							"publicKey": "Alice",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Alice",
+						"receiver": "Daisy",
+						"vote": {
+							"statement": "pizza",
+							"isVoteToAccept": true,
+							"publicKey": "Alice",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Steve",
+						"receiver": "Alice",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Steve",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Bob", "Chad", "Alice", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Steve",
+						"receiver": "Bob",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Steve",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Bob", "Chad", "Alice", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Steve",
+						"receiver": "Chad",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Steve",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Bob", "Chad", "Alice", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Steve",
+						"receiver": "Daisy",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Steve",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Bob", "Chad", "Alice", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Daisy",
+						"receiver": "Alice",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Daisy",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Chad", "Alice", "Bob", "Daisy", "Steve"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Daisy",
+						"receiver": "Bob",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Daisy",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Chad", "Alice", "Bob", "Daisy", "Steve"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Daisy",
+						"receiver": "Chad",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Daisy",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Chad", "Alice", "Bob", "Daisy", "Steve"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Daisy",
+						"receiver": "Steve",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Daisy",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Chad", "Alice", "Bob", "Daisy", "Steve"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Chad",
+						"receiver": "Alice",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Chad",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Chad",
+						"receiver": "Bob",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Chad",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Chad",
+						"receiver": "Steve",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Chad",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
+								"innerQuorumSets": []
+							}
+						}
+					},
+					"isDisrupted": false
+				},
+				{
+					"type": "ProtocolAction",
+					"subType": "ReceiveMessage",
+					"message": {
+						"sender": "Chad",
+						"receiver": "Daisy",
+						"vote": {
+							"statement": "burger",
+							"isVoteToAccept": true,
+							"publicKey": "Chad",
+							"quorumSet": {
+								"threshold": 2,
+								"validators": ["Alice", "Bob", "Chad", "Steve", "Daisy"],
 								"innerQuorumSets": []
 							}
 						}
@@ -689,12 +1044,12 @@
 					"isDisrupted": false
 				}
 			],
-			"previousStepHash": "2049529431"
+			"previousStepHash": "361093687"
 		},
 		{
 			"userActions": [],
 			"protocolActions": [],
-			"previousStepHash": "1970516068"
+			"previousStepHash": "4134924529"
 		}
 	]
 }

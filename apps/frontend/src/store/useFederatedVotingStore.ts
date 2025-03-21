@@ -58,6 +58,12 @@ class FederatedVotingStore {
   private _networkStructureHash: string = "";
   private _overlayConnectionsHash: string = "";
   private scenarioLoader = new ScenarioLoader();
+  private scenarioSerializer = new ScenarioSerializer(
+    new SimulationStepListSerializer(new SimulationStepSerializer()),
+  );
+  private scenarioFactory = new FederatedVotingScenarioFactory(
+    this.scenarioSerializer,
+  );
 
   constructor() {
     this.scenarios = this.registerScenarios();
@@ -72,13 +78,7 @@ class FederatedVotingStore {
   }
 
   private registerScenarios() {
-    const scenarioSerializer = new ScenarioSerializer(
-      new SimulationStepListSerializer(new SimulationStepSerializer()),
-    );
-    const scenarioFactory = new FederatedVotingScenarioFactory(
-      scenarioSerializer,
-    );
-    return scenarioFactory.loadAll();
+    return this.scenarioFactory.loadAll();
   }
 
   private createState(scenario: Scenario) {
@@ -240,12 +240,10 @@ class FederatedVotingStore {
         connection = { publicKey: node.publicKey, connections: [] };
         connections.push(connection);
       } //make sure every node has a connection object to add to
-      this.simulation.pendingUserActions().find((action) => {
+      this.simulation.pendingUserActions().forEach((action) => {
         if (action instanceof AddConnection && action.a === node.publicKey) {
           connection.connections.push(action.b);
         }
-      });
-      this.simulation.pendingUserActions().find((action) => {
         if (action instanceof RemoveConnection && action.a === node.publicKey) {
           connection.connections = connection.connections.filter(
             (c) => c !== action.b,
@@ -324,7 +322,8 @@ class FederatedVotingStore {
     overlayIsFullyConnected?: boolean,
     overlayIsGossipEnabled?: boolean,
   ): void {
-    let scenario = this.scenarios.find((s) => s.id === scenarioId);
+    const scenarios = this.scenarioFactory.loadAll(); //make sure we have the load a fresh, unedited, scenario
+    let scenario = scenarios.find((s) => s.id === scenarioId);
     if (!scenario) {
       console.error(`Scenario with id ${scenarioId} not found`);
       return;
@@ -342,7 +341,13 @@ class FederatedVotingStore {
         scenario.initialSimulationStep,
       );
     }
-
+    //replace scenario in this.scenarios
+    const index = this.scenarios.findIndex((s) => s.id === scenario.id);
+    if (index !== -1) {
+      this.scenarios.splice(index, 1, scenario);
+    } else {
+      this.scenarios.push(scenario);
+    }
     this._state.selectedScenario = scenario;
     const result = this.scenarioLoader.loadScenario(scenario);
 
@@ -354,7 +359,6 @@ class FederatedVotingStore {
     this._state.networkStructureUpdate++;
     this.updateNetwork();
   }
-  public resetScenario;
 
   //SIMULATION ACTIONS
   public getLatestEvents() {

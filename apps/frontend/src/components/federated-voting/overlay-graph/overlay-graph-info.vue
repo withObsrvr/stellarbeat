@@ -1,7 +1,7 @@
 <template>
   <div class="overlay-graph-info">
     <div class="section">
-      <h3>Network Connections</h3>
+      <h3>Network Overlay (connections)</h3>
       <p>
         This component visualizes the network connections between nodes in the
         federated voting system. It shows how messages propagate through the

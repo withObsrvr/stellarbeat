@@ -2,7 +2,7 @@
   <div class="card h-100">
     <div class="card-header d-flex justify-content-between align-items-center">
       <div class="overlay-graph-header-content">
-        <h4 class="card-title mb-0">Network connections</h4>
+        <h4 class="card-title mb-0">Network Overlay</h4>
         <div class="badges">
           <span
             v-if="federatedVotingStore.overlayIsGossipEnabled"
