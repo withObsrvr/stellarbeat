@@ -36,12 +36,8 @@
       <ul>
         <li>
           <strong>Safety Guarantee</strong>: When all quorums intersect, the
-          network cannot make contradictory decisions
-        </li>
-        <li>
-          This tab shows the minimal quorum intersections, which are the
-          smallest sets of nodes that overlap every quorum. If two quorums are
-          found to not overlap, this list will be empty.
+          network cannot make contradictory decisions. Unless the overlapping
+          nodes are malicious (and working together).
         </li>
         <li>
           If there exists a quorum intersection entirely out of ill-behaved

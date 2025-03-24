@@ -1,7 +1,7 @@
 {
 	"serializeVersion": "1.0.0",
 	"id": "network-split-ill-behaved-node",
-	"name": "Network split due to ill-behaved node",
+	"name": "Network split: ill-behaved node forging messages",
 	"description": "In this scenario, Alice will split the network in half by forging votes",
 	"isOverlayFullyConnected": true,
 	"isOverlayGossipEnabled": false,

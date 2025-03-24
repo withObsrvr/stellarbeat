@@ -1,8 +1,8 @@
 {
 	"serializeVersion": "1.0.0",
-	"id": "network-stuck-because-node",
-	"name": "Network stuck because of node crash",
-	"description": "In this scenario, the network will be stuck because of a node crashing",
+	"id": "voting-stuck-because-node-crash-and-votes",
+	"name": "Voting stuck: node crash & differing votes",
+	"description": "In this scenario, the network will be stuck because of a node crashing and the remaining nodes have differing votes",
 	"isOverlayFullyConnected": true,
 	"isOverlayGossipEnabled": false,
 	"simulationSteps": [

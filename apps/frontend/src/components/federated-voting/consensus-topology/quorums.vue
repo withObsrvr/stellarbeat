@@ -59,15 +59,15 @@ const quorums = computed(() => {
   if (selectedNodeId === null) {
     result = federatedVotingStore.networkAnalysis.quorums;
   } else {
-    result = findQuorums(
-      Array.from(
-        findTransitivelyTrustedNodes(
-          selectedNodeId,
-          federatedVotingStore.networkAnalysis.quorumSlices,
-        ),
-      ),
+    //only show quorums that make sense for the selected node. meaning quorums that it transitively trusts.
+    //E.g. No nodes that trust the selected node, but are not trusted back
+    const transitiveTrusts = findTransitivelyTrustedNodes(
+      selectedNodeId,
       federatedVotingStore.networkAnalysis.quorumSlices,
-    ).filter((quorum) => quorum.has(selectedNodeId));
+    );
+    result = federatedVotingStore.networkAnalysis.quorums.filter((quorum) => {
+      return Array.from(quorum).every((node) => transitiveTrusts.has(node));
+    });
   }
 
   // Sort by minimal first, then by size

@@ -50,6 +50,9 @@ interface State {
   overlayConnections: { publicKey: string; connections: string[] }[];
   latestSimulationStepWentForwards: boolean;
   simulation: Simulation;
+  safetyDisruptingNodes: string[];
+  livenessDisruptingNodes: string[];
+  intactNodes: string[];
 }
 
 class FederatedVotingStore {
@@ -81,7 +84,7 @@ class FederatedVotingStore {
     return this.scenarioFactory.loadAll();
   }
 
-  private createState(scenario: Scenario) {
+  private createState(scenario: Scenario): State {
     return {
       simulationUpdate: 0,
       networkStructureUpdate: 0,
@@ -95,6 +98,9 @@ class FederatedVotingStore {
       simulation: {} as Simulation, // temporary placeholder until constructor load
       overlayConnections: [],
       overlayUpdate: 0,
+      safetyDisruptingNodes: [],
+      livenessDisruptingNodes: [],
+      intactNodes: [],
     };
   }
 
@@ -168,6 +174,36 @@ class FederatedVotingStore {
     this.updateNodes();
     this.checkAndRecalculateNetworkAnalysis();
     this.updateOverlayConnections();
+    this.updateDisruptingNodes();
+  }
+
+  private updateDisruptingNodes() {
+    console.log("updateDisruptingNodes");
+    this._state.safetyDisruptingNodes = Array.from(
+      this._state.protocolContextState.safetyDisruptingNodes,
+    );
+    this._state.livenessDisruptingNodes = Array.from(
+      this._state.protocolContextState.livenessDisruptingNodes,
+    );
+
+    console.log(this._state.protocolContextState);
+
+    this._state.simulation.pendingProtocolActions().forEach((action) => {
+      if (action.isDisrupted) {
+        this._state.livenessDisruptingNodes.push(action.publicKey);
+      }
+    });
+    this._state.simulation.pendingUserActions().forEach((action) => {
+      if (action instanceof ForgeMessage) {
+        this._state.safetyDisruptingNodes.push(action.message.sender);
+      }
+    });
+
+    this._state.intactNodes = findAllIntactNodes(
+      this.nodes.map((node) => node.publicKey),
+      new Set(this.disruptingNodes),
+      this._state.networkAnalysis.dSets,
+    );
   }
 
   private updateNodes() {
@@ -306,15 +342,25 @@ class FederatedVotingStore {
   }
 
   get illBehavedNodes() {
-    return this.simulation.getDisruptedNodes();
+    return this.disruptingNodes;
+  }
+
+  get disruptingNodes() {
+    return this._state.livenessDisruptingNodes.concat(
+      this._state.safetyDisruptingNodes,
+    );
+  }
+
+  get livenessDisruptingNodes() {
+    return this._state.livenessDisruptingNodes;
+  }
+
+  get safetyDisruptingNodes() {
+    return this._state.safetyDisruptingNodes;
   }
 
   get intactNodes() {
-    return findAllIntactNodes(
-      this.nodes.map((node) => node.publicKey),
-      new Set(this.illBehavedNodes),
-      this._state.networkAnalysis.dSets,
-    );
+    return this._state.intactNodes;
   }
 
   public selectScenario(
@@ -518,14 +564,14 @@ class FederatedVotingStore {
   }
 
   public consensusReached = computed(() => {
-    const nonBefouledNodes = this.nodes.filter(
+    const wellBehavedNodes = this.nodes.filter(
       (node) => this.illBehavedNodes.indexOf(node.publicKey) === -1,
     );
-    if (!nonBefouledNodes.every((node) => node.confirmed)) {
+    if (!wellBehavedNodes.every((node) => node.confirmed)) {
       return false;
     }
 
-    const confirmedValues = nonBefouledNodes
+    const confirmedValues = wellBehavedNodes
       .filter((state) => state.confirmed)
       .map((state) => state.confirmed);
 

@@ -1,11 +1,9 @@
 import { SimulationStepListSerializer } from '../SimulationStepListSerializer';
 import { SimulationStepSerializer } from '../SimulationStepSerializer';
-import { Simulation, SimulationStep } from '../../Simulation';
-import { MockProxy, mock } from 'jest-mock-extended';
+import { SimulationStep } from '../../Simulation';
 import { AddConnection } from '../../../overlay';
 
 describe('SimulationStepListSerializer', () => {
-	let mockStepSerializer: MockProxy<SimulationStepSerializer>;
 	let serializer: SimulationStepListSerializer;
 	const step1: SimulationStep = {
 		nextStep: null,
@@ -21,7 +19,7 @@ describe('SimulationStepListSerializer', () => {
 		userActions: [new AddConnection('a', 'b')],
 		protocolActions: [],
 		previousEvents: [],
-		previousStepHash: ''
+		previousStepHash: '1364076727'
 	};
 	const step3: SimulationStep = {
 		nextStep: null,
@@ -29,7 +27,7 @@ describe('SimulationStepListSerializer', () => {
 		userActions: [],
 		protocolActions: [],
 		previousEvents: [],
-		previousStepHash: ''
+		previousStepHash: '480464260'
 	};
 	step1.nextStep = step2;
 	step2.previousStep = step1;
@@ -48,7 +46,8 @@ describe('SimulationStepListSerializer', () => {
 			expect(result).toEqual([
 				{
 					userActions: [],
-					protocolActions: []
+					protocolActions: [],
+					previousStepHash: ''
 				},
 				{
 					userActions: [
@@ -59,11 +58,13 @@ describe('SimulationStepListSerializer', () => {
 							b: 'b'
 						}
 					],
-					protocolActions: []
+					protocolActions: [],
+					previousStepHash: '1364076727'
 				},
 				{
 					userActions: [],
-					protocolActions: []
+					protocolActions: [],
+					previousStepHash: '480464260'
 				}
 			]);
 		});

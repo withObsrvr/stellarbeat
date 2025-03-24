@@ -12,6 +12,10 @@ describe('Simulation Class', () => {
 	beforeEach(() => {
 		context = mock<Context>();
 		context.executeActions.mockReturnValue([]);
+		context.getOverlaySettings.mockReturnValue({
+			fullyConnected: false,
+			gossipEnabled: false
+		});
 		simulation = new Simulation(context);
 	});
 

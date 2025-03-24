@@ -3,39 +3,7 @@
     <div class="card-header">
       <div class="card-header-content">
         <BreadCrumbs :root="'Trust Graph'" />
-        <div>
-          <span
-            v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection()"
-            v-tooltip="'Quorum Intersection'"
-            class="badge badge-success ms-2 mr-2"
-            >Quorum Intersection</span
-          >
-          <span
-            v-else
-            v-tooltip="'No quorum intersection'"
-            class="badge badge-danger ms-2 mr-2"
-          >
-            No Quorum Intersection</span
-          >
-          <span
-            v-if="federatedVotingStore.consensusReached.value"
-            class="badge badge-success ms-2"
-          >
-            Consensus Reached
-          </span>
-          <span
-            v-if="federatedVotingStore.isNetworkSplit.value"
-            class="badge badge-danger ms-2"
-          >
-            Network Split
-          </span>
-          <span
-            v-else-if="federatedVotingStore.isStuck.value"
-            class="badge badge-danger ms-2"
-          >
-            Vote Stuck
-          </span>
-        </div>
+        <NetworkAnalysisBadges />
       </div>
       <button
         class="btn btn-sm btn-secondary ml-3"
@@ -163,6 +131,7 @@ import { ProtocolEvent } from "scp-simulation";
 import { BIconInfoCircle } from "bootstrap-vue";
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import FbasGraphInfo from "./trust-graph-info.vue";
+import NetworkAnalysisBadges from "../network-analysis-badges.vue";
 
 const { translateX, translateY, scale, startPan, pan, endPan, zoom } =
   usePanning();

@@ -5,18 +5,18 @@
         <BreadCrumbs root="Consensus Topology"></BreadCrumbs>
         <div>
           <span
-            v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection()"
+            v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
             v-tooltip="'Quorum intersection'"
-            class="badge badge-success ms-2"
+            class="badge badge-success ms-2 mr-2"
             >Quorum Intersection</span
           >
           <span
             v-else
             v-tooltip="'No quorum intersection'"
-            class="badge badge-danger ms-2"
+            class="badge badge-danger ms-2 mr-2"
           >
-            No Quorum Intersection</span
-          >
+            No Quorum Intersection
+          </span>
         </div>
       </div>
       <button
@@ -54,9 +54,7 @@
           >
             <span>Quorum Intersections</span>
             <BIconInfoCircle
-              v-tooltip.top="
-                'Minimal overlapping nodes between different quorums'
-              "
+              v-tooltip.top="'Overlapping nodes between relevant quorums'"
               class="info-icon text-secondary"
             />
           </a>

@@ -185,6 +185,12 @@ describe('FederatedVotingContext', () => {
 			]);
 
 			expect(actions).toHaveLength(0);
+			expect(
+				context.getState().livenessDisruptingNodes.has(node.publicKey)
+			).toBe(true);
+			expect(context.getState().safetyDisruptingNodes.has(node.publicKey)).toBe(
+				false
+			);
 		});
 
 		it('should broadcast to all neighbors if no blacklist', () => {
@@ -257,6 +263,12 @@ describe('FederatedVotingContext', () => {
 
 			expect(actions).toEqual([]);
 			expect(mockFederatedVotingProtocol.processVote).not.toHaveBeenCalled();
+			expect(
+				context.getState().livenessDisruptingNodes.has(node.publicKey)
+			).toBe(true);
+			expect(context.getState().safetyDisruptingNodes.has(node.publicKey)).toBe(
+				false
+			);
 		});
 	});
 
@@ -313,6 +325,12 @@ describe('FederatedVotingContext', () => {
 			const actions = context.gossip(node.publicKey, payload, blacklist);
 
 			expect(actions.length).toBe(0);
+			expect(
+				context.getState().livenessDisruptingNodes.has(node.publicKey)
+			).toBe(true);
+			expect(context.getState().safetyDisruptingNodes.has(node.publicKey)).toBe(
+				false
+			);
 		});
 	});
 	describe('ForgeMessage handling', () => {
@@ -327,6 +345,10 @@ describe('FederatedVotingContext', () => {
 
 			const events = context.drainEvents();
 			expect(events.find((e) => e instanceof ForgedMessageSent)).toBeDefined();
+			expect(context.getState().safetyDisruptingNodes.has('sender')).toBe(true);
+			expect(context.getState().livenessDisruptingNodes.has('sender')).toBe(
+				true
+			);
 		});
 	});
 });

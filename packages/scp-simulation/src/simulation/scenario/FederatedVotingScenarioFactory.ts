@@ -6,12 +6,13 @@ import acceptingSafetyScenario from './data/accepting-not-enough-safety.json';
 import acceptingLivenessScenario from './data/accepting-not-enough-liveness.json';
 import acceptingLivenessGossipScenario from './data/accepting-not-enough-liveness-gossip-fix.json';
 import networkSplitIllBehavedNode from './data/network-split-ill-behaved-node.json';
-import networkSplitProtectedSecondTier from './data/network-split-protected-second-tier.json';
-import networkStuckBecauseNodes from './data/network-stuck-because-nodes.json';
-import networkStuckBecauseVotes from './data/network-stuck-because-votes.json';
+import networkSplitPartial from './data/network-split-partial.json';
 import networkSafeIllBehavedNode from './data/network-safe-ill-behaved-node.json';
+import votingStuckBecauseVotes from './data/voting-stuck-because-votes.json';
+import votingStuckBecauseNodeCrashAndVotes from './data/voting-stuck-because-node-crash-and-votes.json';
+import votingSucceededDespiteNodeCrash from './data/voting-succeeded-despite-node-crash.json';
 import overlayRing from './data/overlay-ring.json';
-import overlayPartition from './data/overlay-partition.json';
+import votingStuckOverlayPartition from './data/voting-stuck-overlay-partition.json';
 
 export class FederatedVotingScenarioFactory {
 	constructor(private scenarioSerializer: ScenarioSerializer) {}
@@ -70,16 +71,17 @@ export class FederatedVotingScenarioFactory {
 	loadAll(): Scenario[] {
 		return [
 			FederatedVotingScenarioFactory.createBasicConsensus(),
-			this.loadJSONScenario(networkStuckBecauseVotes),
-			this.loadJSONScenario(networkStuckBecauseNodes),
+			this.loadJSONScenario(votingStuckBecauseVotes),
+			this.loadJSONScenario(votingStuckBecauseNodeCrashAndVotes),
+			this.loadJSONScenario(votingStuckOverlayPartition),
+			this.loadJSONScenario(votingSucceededDespiteNodeCrash),
 			this.loadJSONScenario(acceptingSafetyScenario),
 			this.loadJSONScenario(acceptingLivenessScenario),
 			this.loadJSONScenario(acceptingLivenessGossipScenario),
 			this.loadJSONScenario(networkSplitIllBehavedNode),
-			this.loadJSONScenario(networkSplitProtectedSecondTier),
+			this.loadJSONScenario(networkSplitPartial),
 			this.loadJSONScenario(networkSafeIllBehavedNode),
-			this.loadJSONScenario(overlayRing),
-			this.loadJSONScenario(overlayPartition)
+			this.loadJSONScenario(overlayRing)
 		];
 	}
 }

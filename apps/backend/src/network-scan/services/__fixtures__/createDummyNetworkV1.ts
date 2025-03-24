@@ -1,8 +1,4 @@
-import {
-	NetworkV1,
-	NodeV1,
-	OrganizationV1
-} from 'shared';
+import { NetworkV1, NodeV1, OrganizationV1 } from 'shared';
 import { NetworkStatisticsV1 } from 'shared';
 
 export function createDummyNetworkV1(
@@ -47,6 +43,7 @@ export function createDummyNetworkStatisticsV1(): NetworkStatisticsV1 {
 		topTierOrgsSize: 1,
 		topTierSize: 1,
 		transitiveQuorumSetSize: 1,
-		minSplittingSetCountrySize: 1
+		minSplittingSetCountrySize: 1,
+		nrOfConnectableNodes: 1
 	};
 }

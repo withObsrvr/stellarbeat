@@ -56,16 +56,8 @@ const itemsPerPage = 5;
 const selectedNodeId = computed(() => federatedVotingStore.selectedNodeId);
 
 const intersections = computed(() => {
-  const allIntersections =
-    federatedVotingStore.networkAnalysis.minimalQuorumIntersections;
-
-  if (!selectedNodeId.value) {
-    return allIntersections;
-  }
-
-  // Filter intersections to only include those containing the selected node
-  return allIntersections.filter((intersection) =>
-    intersection.includes(selectedNodeId.value!),
+  return federatedVotingStore.networkAnalysis.quorumIntersections.sort(
+    (a, b) => a.length - b.length,
   );
 });
 

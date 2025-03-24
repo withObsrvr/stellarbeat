@@ -53,30 +53,6 @@ export class Simulation {
 		return events;
 	}
 
-	getDisruptedNodes(): string[] {
-		//todo: this should not belong to the simulation
-		const disruptedNodes: Set<string> = new Set();
-		let stepIterator: SimulationStep | null = this.initialStep;
-		while (
-			stepIterator !== this.currentStep.nextStep &&
-			stepIterator !== null
-		) {
-			stepIterator.protocolActions
-				.filter((action) => action.isDisrupted)
-				.forEach((action) => {
-					disruptedNodes.add(action.publicKey);
-				});
-			stepIterator.userActions
-				.filter((action) => action instanceof ForgeMessage)
-				.forEach((action) => {
-					disruptedNodes.add(action.publicKey);
-				});
-			stepIterator = stepIterator.nextStep;
-		}
-
-		return Array.from(disruptedNodes);
-	}
-
 	getLatestEvents(): Event[] {
 		return this.currentStep.previousEvents;
 	}

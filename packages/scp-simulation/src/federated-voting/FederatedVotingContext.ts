@@ -20,6 +20,8 @@ import { Broadcast } from './action/protocol/Broadcast';
 
 export interface FederatedVotingContextState {
 	protocolStates: FederatedVotingProtocolState[];
+	safetyDisruptingNodes: Set<string>;
+	livenessDisruptingNodes: Set<string>;
 }
 
 export class FederatedVotingContext
@@ -27,7 +29,9 @@ export class FederatedVotingContext
 	implements Context
 {
 	private state: FederatedVotingContextState = {
-		protocolStates: []
+		protocolStates: [],
+		safetyDisruptingNodes: new Set<string>(),
+		livenessDisruptingNodes: new Set<string>()
 	};
 
 	constructor(
@@ -38,8 +42,9 @@ export class FederatedVotingContext
 	}
 
 	reset(): void {
-		//todo: could we make this class purer?
 		this.state.protocolStates = [];
+		this.state.livenessDisruptingNodes.clear();
+		this.state.safetyDisruptingNodes.clear();
 		this.overlay.reset();
 		this.drainEvents(); // Clear the collected events
 	}
@@ -200,6 +205,8 @@ export class FederatedVotingContext
 	}
 
 	forgeMessage(message: Message): ProtocolAction[] {
+		this.state.safetyDisruptingNodes.add(message.sender);
+		this.state.livenessDisruptingNodes.add(message.sender);
 		const action = this.overlay.sendMessage(message, true);
 		this.registerEvents(this.overlay.drainEvents());
 
@@ -211,6 +218,10 @@ export class FederatedVotingContext
 		payload: Payload,
 		neighborBlackList: PublicKey[]
 	): ProtocolAction[] {
+		if (neighborBlackList.length > 0) {
+			this.state.livenessDisruptingNodes.add(broadcaster);
+		}
+
 		const actions = this.overlay.broadcast(
 			broadcaster,
 			payload,
@@ -226,6 +237,9 @@ export class FederatedVotingContext
 		payload: Payload,
 		neighborBlackList: PublicKey[]
 	): ProtocolAction[] {
+		if (neighborBlackList.length > 0) {
+			this.state.livenessDisruptingNodes.add(gossiper);
+		}
 		const actions = this.overlay.gossip(gossiper, payload, neighborBlackList);
 		this.registerEvents(this.overlay.drainEvents());
 
@@ -233,6 +247,10 @@ export class FederatedVotingContext
 	}
 
 	receiveMessage(message: Message, isDisrupted: boolean): ProtocolAction[] {
+		if (isDisrupted) {
+			this.state.livenessDisruptingNodes.add(message.receiver);
+		}
+
 		const nodeFederatedVotingState = this.getProtocolState(message.receiver);
 		if (!nodeFederatedVotingState) {
 			console.log('Node not found'); //todo: throw error?
