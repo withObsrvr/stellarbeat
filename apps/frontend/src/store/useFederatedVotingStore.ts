@@ -369,6 +369,17 @@ class FederatedVotingStore implements SimulationObserver {
     this.simulationBridge.cancelPendingUserAction(action);
   }
 
+  public disruptAction(
+    action: ProtocolAction,
+    blacklistedNeighbors: string[] = [],
+  ): void {
+    this.simulationBridge.disruptAction(action, blacklistedNeighbors);
+  }
+
+  public undisruptAction(action: ProtocolAction): void {
+    this.simulationBridge.undisruptAction(action);
+  }
+
   public executeStep() {
     this.simulationBridge.executeStep();
   }

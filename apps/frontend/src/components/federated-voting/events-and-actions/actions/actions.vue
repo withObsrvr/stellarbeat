@@ -145,7 +145,11 @@ function handleEventAction(action: ProtocolAction) {
       disruptModal.value.show();
     }
   } else {
-    action.isDisrupted = !action.isDisrupted;
+    if (action.isDisrupted) {
+      federatedVotingStore.undisruptAction(action);
+    } else {
+      federatedVotingStore.disruptAction(action);
+    }
   }
 }
 
@@ -166,19 +170,12 @@ function saveDisruptSelection() {
   if (!currentAction.value) return;
 
   if (selectedNeighbors.value.length > 0) {
-    //TODO: this should go through the store for reactivity.
-    //We should not be modifying the action directly
-
-    currentAction.value.isDisrupted = true;
-    currentAction.value.blackListNeighbors(selectedNeighbors.value);
+    federatedVotingStore.disruptAction(
+      currentAction.value,
+      selectedNeighbors.value,
+    );
   } else {
-    // No neighbors selected, disable disruption completely
-    currentAction.value.isDisrupted = false;
-
-    // Clear the blacklist if the action has that method
-    if ("blackListNeighbors" in currentAction.value) {
-      currentAction.value.blackListNeighbors([]);
-    }
+    federatedVotingStore.undisruptAction(currentAction.value);
   }
 }
 

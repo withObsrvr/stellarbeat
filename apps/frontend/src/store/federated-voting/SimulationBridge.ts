@@ -13,6 +13,8 @@ import {
   Message,
   Event,
   SimulationStep,
+  Broadcast,
+  Gossip,
 } from "scp-simulation";
 
 // Observer interface
@@ -262,6 +264,35 @@ export class SimulationBridge {
     return this.pendingUserActions().filter(
       (action) => action instanceof VoteOnStatement,
     ) as VoteOnStatement[];
+  }
+
+  /**
+   * Disrupt a protocol action with specific blacklisted neighbors
+   */
+  public disruptAction(
+    action: ProtocolAction,
+    blacklistedNeighbors: string[] = [],
+  ): void {
+    if (action instanceof Broadcast || action instanceof Gossip) {
+      action.isDisrupted = true;
+      action.blackListNeighbors(blacklistedNeighbors);
+    } else {
+      action.isDisrupted = true;
+    }
+    this.notifyObservers(false);
+  }
+
+  /**
+   * Undisrupt a protocol action
+   */
+  public undisruptAction(action: ProtocolAction): void {
+    if (action instanceof Broadcast || action instanceof Gossip) {
+      action.isDisrupted = false;
+      action.blackListNeighbors([]);
+    } else {
+      action.isDisrupted = false;
+    }
+    this.notifyObservers(false);
   }
 
   /**
