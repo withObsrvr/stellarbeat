@@ -1,12 +1,9 @@
 import { computed, reactive, UnwrapRef } from "vue";
 import {
-  FederatedVotingContext,
-  FederatedVotingContextFactory,
   Simulation,
   AddNode,
   UpdateQuorumSet,
   UserAction,
-  FederatedVotingProtocolState,
   QuorumSet,
   Vote,
   VoteOnStatement,
@@ -15,16 +12,14 @@ import {
   RemoveConnection,
   Message,
   ForgeMessage,
-  FederatedVotingScenarioFactory,
   ScenarioLoader,
   Scenario,
-  ScenarioSerializer,
-  SimulationStepListSerializer,
-  SimulationStepSerializer,
 } from "scp-simulation";
-import { FederatedVotingContextState } from "scp-simulation/lib/federated-voting/FederatedVotingContext";
 import { findAllIntactNodes } from "@/components/federated-voting/analysis/DSetAnalysis";
 import { NetworkAnalysis } from "@/components/federated-voting/analysis/NetworkAnalysis";
+import { FederatedVotingContextBridge } from "./federated-voting/FederatedVotingContextBridge";
+import { OverlayBridge } from "./federated-voting/OverlayBridge";
+import { ScenarioManager } from "./federated-voting/ScenarioManager";
 
 export interface FederatedNode {
   publicKey: string;
@@ -43,11 +38,11 @@ interface State {
   overlayUpdate: number;
   selectedScenario: Scenario;
   selectedNodeId: string | null;
-  protocolContext: FederatedVotingContext;
-  protocolContextState: FederatedVotingContextState;
   networkAnalysis: NetworkAnalysis;
   nodes: FederatedNode[];
   overlayConnections: { publicKey: string; connections: string[] }[];
+  overlayIsFullyConnected: boolean;
+  overlayIsGossipEnabled: boolean;
   latestSimulationStepWentForwards: boolean;
   simulation: Simulation;
   safetyDisruptingNodes: string[];
@@ -57,84 +52,94 @@ interface State {
 
 class FederatedVotingStore {
   readonly scenarios: Scenario[];
-  private readonly _state: UnwrapRef<State>;
+  private _state: UnwrapRef<State>;
   private _networkStructureHash: string = "";
   private _overlayConnectionsHash: string = "";
   private scenarioLoader = new ScenarioLoader();
-  private scenarioSerializer = new ScenarioSerializer(
-    new SimulationStepListSerializer(new SimulationStepSerializer()),
-  );
-  private scenarioFactory = new FederatedVotingScenarioFactory(
-    this.scenarioSerializer,
-  );
+  private protocolContext: FederatedVotingContextBridge;
+  private overlay: OverlayBridge;
+  private scenarioManager = new ScenarioManager();
 
   constructor() {
-    this.scenarios = this.registerScenarios();
-    this._state = reactive(this.createState(this.scenarios[0]));
-    const result = this.scenarioLoader.loadScenario(
-      this._state.selectedScenario,
+    this.scenarios = this.scenarioManager.getAllScenarios();
+    const loadedScenario = this.scenarioLoader.loadScenario(this.scenarios[0]);
+    this.protocolContext = new FederatedVotingContextBridge(
+      loadedScenario.protocolContext,
     );
-    this._state.protocolContext = result.protocolContext;
-    this._state.protocolContextState = result.protocolContext.getState();
-    this._state.simulation = result.simulation;
-    this.updateNetwork();
-  }
-
-  private registerScenarios() {
-    return this.scenarioFactory.loadAll();
-  }
-
-  private createState(scenario: Scenario): State {
-    return {
+    this.overlay = new OverlayBridge(loadedScenario.protocolContext);
+    this._state = reactive({
       simulationUpdate: 0,
       networkStructureUpdate: 0,
-      latestSimulationStepWentForwards: false,
-      selectedScenario: scenario,
-      selectedNodeId: null,
-      protocolContext: FederatedVotingContextFactory.create(),
-      protocolContextState: {} as FederatedVotingContextState, // temporary placeholder until constructor load
-      networkAnalysis: {} as NetworkAnalysis,
-      nodes: [] as FederatedNode[],
-      simulation: {} as Simulation, // temporary placeholder until constructor load
-      overlayConnections: [],
       overlayUpdate: 0,
+      selectedScenario: this.scenarios[0],
+      selectedNodeId: null,
+      networkAnalysis: NetworkAnalysis.analyze([]),
+      nodes: [],
+      overlayConnections: [],
+      overlayIsFullyConnected: false,
+      overlayIsGossipEnabled: false,
+      latestSimulationStepWentForwards: true,
+      simulation: loadedScenario.simulation,
       safetyDisruptingNodes: [],
       livenessDisruptingNodes: [],
       intactNodes: [],
-    };
+    });
+
+    this.updateState();
   }
 
-  private calculateNetworkStructureHash(): string {
-    const sortedNodes = [...this.nodes].sort((a, b) =>
-      a.publicKey.localeCompare(b.publicKey),
-    );
-    return sortedNodes
-      .map((node) => {
-        const trustedNodesSorted = [...node.trustedNodes].sort().join(",");
-        return `${node.publicKey}:${node.trustThreshold}:[${trustedNodesSorted}]`;
-      })
-      .join("|");
+  /*************
+   * UPDATE STATE
+   **************/
+  private updateState() {
+    this.updateNodes();
+    this.checkAndRecalculateNetworkAnalysis();
+    this.updateOverlayState();
+    this.updateDisruptingAndIntactNodes();
   }
 
-  private calculateOverlayConnectionsHash(
-    connections: {
-      publicKey: string;
-      connections: string[];
-    }[],
-  ): string {
-    const sortedConnections = [...connections].sort((a, b) =>
-      a.publicKey.localeCompare(b.publicKey),
+  private updateDisruptingAndIntactNodes() {
+    const result = this.protocolContext.getDisruptingNodes(
+      this.simulation.pendingUserActions(),
+      this.simulation.pendingProtocolActions(),
     );
-    return sortedConnections
-      .map((connection) => {
-        const sortedConnections = [...connection.connections].sort().join(",");
-        return `${connection.publicKey}:[${sortedConnections}]`;
-      })
-      .join("|");
+
+    this._state.livenessDisruptingNodes = result.livenessDisruptingNodes;
+    this._state.safetyDisruptingNodes = result.safetyDisruptingNodes;
+
+    this._state.intactNodes = findAllIntactNodes(
+      this.nodes.map((node) => node.publicKey),
+      new Set(this.disruptingNodes),
+      this._state.networkAnalysis.dSets,
+    );
+  }
+
+  private updateNodes() {
+    this._state.nodes = this.protocolContext.getFederatedNodes(
+      this._state.simulation.pendingUserActions(),
+    );
+  }
+
+  private updateOverlayState() {
+    this._state.overlayIsFullyConnected = this.overlay.isFullyConnected;
+    this._state.overlayIsGossipEnabled = this.overlay.isGossipEnabled;
+    const connections = this.overlay.createConnections(
+      this.nodes,
+      this._state.simulation.pendingUserActions(),
+    );
+
+    const hash = this.overlay.calculateOverlayConnectionsHash(connections);
+    if (hash !== this._overlayConnectionsHash) {
+      this._overlayConnectionsHash = hash;
+      this._state.overlayConnections = connections;
+      this._state.overlayUpdate++;
+    }
   }
 
   private checkAndRecalculateNetworkAnalysis(): void {
-    const newHash = this.calculateNetworkStructureHash();
+    const newHash = this.protocolContext.calculateNetworkTrustStructureHash(
+      this.nodes,
+    );
     if (newHash !== this._networkStructureHash) {
       this._networkStructureHash = newHash;
       this._state.networkStructureUpdate++;
@@ -142,6 +147,77 @@ class FederatedVotingStore {
     }
   }
 
+  /*************
+   * SCENARIO
+   **************/
+
+  public modifyScenario(
+    scenarioId: string,
+    overlayIsFullyConnected: boolean,
+    overlayIsGossipEnabled: boolean,
+  ) {
+    const modifiedScenario = this.scenarioManager.getModifiedScenario(
+      scenarioId,
+      overlayIsFullyConnected,
+      overlayIsGossipEnabled,
+    );
+
+    if (!modifiedScenario) {
+      console.error(`Scenario with id ${scenarioId} not found`);
+      return;
+    }
+
+    this.loadSimulationWithScenario(modifiedScenario);
+  }
+
+  public selectScenario(scenarioId: string): void {
+    const scenario = this.scenarioManager.getScenario(scenarioId);
+    if (!scenario) {
+      console.error(`Scenario with id ${scenarioId} not found`);
+      return;
+    }
+
+    this.loadSimulationWithScenario(scenario);
+  }
+
+  private loadSimulationWithScenario(scenario: Scenario) {
+    const result = this.scenarioLoader.loadScenario(scenario);
+
+    this._state.selectedScenario = scenario;
+
+    this.protocolContext.replaceContext(result.protocolContext);
+    this.overlay.replaceContext(result.protocolContext);
+
+    this._state.simulation = result.simulation;
+    this._state.simulationUpdate++;
+    this._state.overlayUpdate++;
+    this._state.networkStructureUpdate++;
+    this.updateState();
+  }
+
+  exportScenario() {
+    return this.scenarioManager.exportScenarioToJSON(
+      this.selectedScenario,
+      this.overlayIsFullyConnected,
+      this.overlayIsGossipEnabled,
+      this.simulation.getInitialStep(),
+    );
+  }
+
+  importScenario(json: object) {
+    const scenario = this.scenarioManager.createScenarioFromJSON(json);
+    const existingIndex = this.scenarios.findIndex((s) => s.id === scenario.id);
+    if (existingIndex !== -1) {
+      this.scenarios.splice(existingIndex, 1, scenario);
+    } else {
+      this.scenarios.push(scenario);
+    }
+    this.selectScenario(scenario.id);
+  }
+
+  /*************
+   * GETTERS
+   **************/
   get simulationStepDurationInSeconds(): number {
     return 2;
   }
@@ -170,141 +246,6 @@ class FederatedVotingStore {
     return this.nodes.find((node) => node.publicKey === this.selectedNodeId);
   });
 
-  private updateNetwork() {
-    this.updateNodes();
-    this.checkAndRecalculateNetworkAnalysis();
-    this.updateOverlayConnections();
-    this.updateDisruptingNodes();
-  }
-
-  private updateDisruptingNodes() {
-    console.log("updateDisruptingNodes");
-    this._state.safetyDisruptingNodes = Array.from(
-      this._state.protocolContextState.safetyDisruptingNodes,
-    );
-    this._state.livenessDisruptingNodes = Array.from(
-      this._state.protocolContextState.livenessDisruptingNodes,
-    );
-
-    console.log(this._state.protocolContextState);
-
-    this._state.simulation.pendingProtocolActions().forEach((action) => {
-      if (action.isDisrupted) {
-        this._state.livenessDisruptingNodes.push(action.publicKey);
-      }
-    });
-    this._state.simulation.pendingUserActions().forEach((action) => {
-      if (action instanceof ForgeMessage) {
-        this._state.safetyDisruptingNodes.push(action.message.sender);
-      }
-    });
-
-    this._state.intactNodes = findAllIntactNodes(
-      this.nodes.map((node) => node.publicKey),
-      new Set(this.disruptingNodes),
-      this._state.networkAnalysis.dSets,
-    );
-  }
-
-  private updateNodes() {
-    let nodes: FederatedNode[] =
-      this._state.protocolContextState.protocolStates.map((state) =>
-        this.mapStateToFederatedNode(state as FederatedVotingProtocolState),
-      );
-
-    nodes = nodes.concat(
-      this.simulation
-        .pendingUserActions()
-        .filter((action) => action instanceof AddNode)
-        .map((action) => {
-          return {
-            publicKey: action.publicKey,
-            trustedNodes: action.quorumSet.validators.slice(),
-            trustThreshold: action.quorumSet.threshold,
-            voted: null,
-            accepted: null,
-            confirmed: null,
-            phase: "unknown",
-            processedVotes: [],
-          };
-        }),
-    );
-
-    const nodesToRemove = this.simulation
-      .pendingUserActions()
-      .filter((action) => action instanceof RemoveNode)
-      .map((action) => action.publicKey);
-
-    nodes = nodes.filter((node) => !nodesToRemove.includes(node.publicKey));
-
-    this.simulation
-      .pendingUserActions()
-      .filter((action) => action instanceof UpdateQuorumSet)
-      .forEach((action) => {
-        const node = nodes.find((node) => node.publicKey === action.publicKey);
-        if (!node) {
-          return;
-        }
-        node.trustedNodes = action.quorumSet.validators.slice();
-        node.trustThreshold = action.quorumSet.threshold;
-      });
-
-    this._state.nodes = nodes;
-  }
-
-  private updateOverlayConnections() {
-    let connections: { publicKey: string; connections: string[] }[] = [];
-    if (this.overlayIsFullyConnected) {
-      connections = this.nodes.map((node) => {
-        return {
-          publicKey: node.publicKey,
-          connections: this.nodes
-            .filter((n) => n.publicKey !== node.publicKey)
-            .map((n) => n.publicKey),
-        };
-      });
-    } else {
-      connections = this._state.protocolContext.overlayConnections;
-    }
-
-    // Apply pending user actions
-    this.nodes.forEach((node) => {
-      let connection = connections.find(
-        (connection) => connection.publicKey === node.publicKey,
-      );
-      if (!connection) {
-        connection = { publicKey: node.publicKey, connections: [] };
-        connections.push(connection);
-      } //make sure every node has a connection object to add to
-      this.simulation.pendingUserActions().forEach((action) => {
-        if (action instanceof AddConnection && action.a === node.publicKey) {
-          connection.connections.push(action.b);
-        }
-        if (action instanceof RemoveConnection && action.a === node.publicKey) {
-          connection.connections = connection.connections.filter(
-            (c) => c !== action.b,
-          );
-        }
-        if (
-          action instanceof RemoveConnection &&
-          action.b === connection.publicKey
-        ) {
-          //todo: handle bidirectional connections better
-          connection.connections = connection.connections.filter(
-            (c) => c !== action.a,
-          );
-        }
-      });
-    });
-
-    const hash = this.calculateOverlayConnectionsHash(connections);
-    if (hash !== this._overlayConnectionsHash) {
-      this._overlayConnectionsHash = hash;
-      this._state.overlayConnections = connections;
-      this._state.overlayUpdate++;
-    }
-  }
-
   get nodes() {
     return this._state.nodes;
   }
@@ -314,31 +255,7 @@ class FederatedVotingStore {
   }
 
   public getNodeWithoutPreviewChanges(publicKey: string): FederatedNode | null {
-    const state = this._state.protocolContextState.protocolStates.find(
-      (state) => state.node.publicKey === publicKey,
-    );
-
-    if (!state) {
-      return null;
-    }
-
-    //todo: why do we loose the type info?
-    return this.mapStateToFederatedNode(state as FederatedVotingProtocolState);
-  }
-
-  private mapStateToFederatedNode(
-    state: FederatedVotingProtocolState,
-  ): FederatedNode {
-    return {
-      publicKey: state.node.publicKey,
-      trustedNodes: state.node.quorumSet.validators.slice(),
-      trustThreshold: state.node.quorumSet.threshold,
-      voted: state.voted ? state.voted.toString() : null,
-      accepted: state.accepted ? state.accepted.toString() : null,
-      confirmed: state.confirmed ? state.confirmed.toString() : null,
-      phase: state.phase,
-      processedVotes: state.processedVotes,
-    };
+    return this.protocolContext.getFederatedNode(publicKey);
   }
 
   get illBehavedNodes() {
@@ -363,53 +280,13 @@ class FederatedVotingStore {
     return this._state.intactNodes;
   }
 
-  public selectScenario(
-    scenarioId: string,
-    overlayIsFullyConnected?: boolean,
-    overlayIsGossipEnabled?: boolean,
-  ): void {
-    const scenarios = this.scenarioFactory.loadAll(); //make sure we have the load a fresh, unedited, scenario
-    let scenario = scenarios.find((s) => s.id === scenarioId);
-    if (!scenario) {
-      console.error(`Scenario with id ${scenarioId} not found`);
-      return;
-    }
-    if (
-      overlayIsFullyConnected !== undefined ||
-      overlayIsGossipEnabled !== undefined
-    ) {
-      scenario = new Scenario(
-        scenario.id,
-        scenario.name,
-        scenario.description,
-        overlayIsFullyConnected ?? scenario.isOverlayFullyConnected,
-        overlayIsGossipEnabled ?? scenario.isOverlayGossipEnabled,
-        scenario.initialSimulationStep,
-      );
-    }
-    //replace scenario in this.scenarios
-    const index = this.scenarios.findIndex((s) => s.id === scenario.id);
-    if (index !== -1) {
-      this.scenarios.splice(index, 1, scenario);
-    } else {
-      this.scenarios.push(scenario);
-    }
-    this._state.selectedScenario = scenario;
-    const result = this.scenarioLoader.loadScenario(scenario);
-
-    this._state.protocolContext = result.protocolContext;
-    this._state.protocolContextState = this._state.protocolContext.getState();
-    this._state.simulation = result.simulation;
-    this._state.simulationUpdate++;
-    this._state.overlayUpdate++;
-    this._state.networkStructureUpdate++;
-    this.updateNetwork();
-  }
-
-  //SIMULATION ACTIONS
   public getLatestEvents() {
     return this.simulation.getLatestEvents();
   }
+
+  /*********************
+   * SIMULATION ACTIONS
+   *********************/
 
   public updateNodeTrust(
     publicKey: string,
@@ -434,7 +311,7 @@ class FederatedVotingStore {
       ),
     );
 
-    this.updateNetwork();
+    this.updateState();
   }
 
   addConnection(a: string, b: string) {
@@ -454,11 +331,7 @@ class FederatedVotingStore {
   public addNode(publicKey: string, trustedNodes: string[], threshold: number) {
     this.cancelNodeRemoval(publicKey);
 
-    if (
-      this._state.protocolContextState.protocolStates.find(
-        (state) => state.node.publicKey === publicKey,
-      )
-    ) {
+    if (this.protocolContext.containsNode(publicKey)) {
       return; //already there
     }
 
@@ -466,7 +339,7 @@ class FederatedVotingStore {
       new AddNode(publicKey, new QuorumSet(threshold, trustedNodes, [])),
     );
 
-    this.updateNetwork();
+    this.updateState();
   }
 
   private cancelNodeRemoval(publicKey: string) {
@@ -479,7 +352,7 @@ class FederatedVotingStore {
 
     if (pendingRemoval) {
       this.simulation.cancelPendingUserAction(pendingRemoval);
-      this.updateNetwork();
+      this.updateState();
     }
   }
 
@@ -492,21 +365,17 @@ class FederatedVotingStore {
 
     if (pendingAdd) {
       this.simulation.cancelPendingUserAction(pendingAdd);
-      this.updateNetwork();
+      this.updateState();
     }
   }
 
   public removeNode(publicKey: string) {
     this.cancelNodeAdd(publicKey);
-    if (
-      !this._state.protocolContextState.protocolStates.find(
-        (state) => state.node.publicKey === publicKey,
-      )
-    ) {
+    if (!this.protocolContext.containsNode(publicKey)) {
       return; //not there, no need to remove
     }
     this.simulation.addUserAction(new RemoveNode(publicKey));
-    this.updateNetwork();
+    this.updateState();
   }
 
   public cancelNodeTrustUpdate(publicKey: string) {
@@ -519,20 +388,20 @@ class FederatedVotingStore {
 
     if (pendingUpdate) {
       this.simulation.cancelPendingUserAction(pendingUpdate);
-      this.updateNetwork();
+      this.updateState();
     }
   }
 
   public cancelPendingUserAction(action: UserAction) {
     this.simulation.cancelPendingUserAction(action);
     if (action.immediateExecution) {
-      this.updateNetwork();
+      this.updateState();
     }
   }
 
   private simulationUpdated(forwardDirection: boolean = true) {
     this._state.latestSimulationStepWentForwards = forwardDirection;
-    this.updateNetwork();
+    this.updateState();
     this._state.simulationUpdate++;
   }
 
@@ -640,41 +509,11 @@ class FederatedVotingStore {
   }
 
   get overlayIsFullyConnected(): boolean {
-    return this._state.protocolContext.overlayIsFullyConnected;
+    return this._state.overlayIsFullyConnected;
   }
 
   get overlayIsGossipEnabled(): boolean {
-    return this._state.protocolContext.overlayIsGossipEnabled;
-  }
-
-  exportScenario() {
-    const scenarioSerializer = new ScenarioSerializer(
-      new SimulationStepListSerializer(new SimulationStepSerializer()),
-    );
-
-    const scenarioToExport = new Scenario(
-      this.selectedScenario.id,
-      this.selectedScenario.name,
-      this.selectedScenario.description,
-      this.overlayIsFullyConnected,
-      this.overlayIsGossipEnabled,
-      this.simulation.getInitialStep(), //we create a new scenario with the current state
-    );
-    return scenarioSerializer.toJSON(scenarioToExport);
-  }
-
-  importScenario(json: object) {
-    const scenarioSerializer = new ScenarioSerializer(
-      new SimulationStepListSerializer(new SimulationStepSerializer()),
-    );
-    const scenario = scenarioSerializer.fromJSON(json);
-    const existingIndex = this.scenarios.findIndex((s) => s.id === scenario.id);
-    if (existingIndex !== -1) {
-      this.scenarios.splice(existingIndex, 1, scenario);
-    } else {
-      this.scenarios.push(scenario);
-    }
-    this.selectScenario(scenario.id);
+    return this._state.overlayIsGossipEnabled;
   }
 }
 

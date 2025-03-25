@@ -115,10 +115,8 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { polygonHull } from "d3-polygon";
-import {
-  FederatedNode,
-  federatedVotingStore,
-} from "@/store/useFederatedVotingStore";
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import { FederatedNode } from "@/store/federated-voting/FederatedNode";
 import FbasGraphNode, { Node } from "./trust-graph-node.vue";
 import FbasGraphLink, { Link } from "./trust-graph-link.vue";
 import AnimatedMessage from "./animated-message.vue";

@@ -9,7 +9,7 @@ import {
 } from "d3-force";
 import { Node } from "./trust-graph-node.vue";
 import { Link } from "./trust-graph-link.vue";
-import { FederatedNode } from "@/store/useFederatedVotingStore";
+import { FederatedNode } from "@/store/federated-voting/FederatedNode";
 import { ProtocolEvent } from "scp-simulation";
 
 export class TrustGraphService {

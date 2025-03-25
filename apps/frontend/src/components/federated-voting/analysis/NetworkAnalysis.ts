@@ -5,7 +5,7 @@ import {
   findQuorums,
   NodeID,
 } from "./DSetAnalysis";
-import { FederatedNode } from "@/store/useFederatedVotingStore";
+import { FederatedNode } from "@/store/federated-voting/FederatedNode";
 
 type PublicKey = string;
 

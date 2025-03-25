@@ -153,14 +153,6 @@ const importModal = ref<BModal | null>(null);
 const importJsonText = ref("");
 const importError = ref("");
 
-function reloadScenario() {
-  federatedVotingStore.selectScenario(
-    selectedScenarioId.value,
-    isFullyConnected.value,
-    isGossipEnabled.value,
-  );
-}
-
 function resetScenario() {
   federatedVotingStore.selectScenario(selectedScenarioId.value);
 }
@@ -180,7 +172,11 @@ function hideModal() {
 }
 
 function saveSettings() {
-  reloadScenario();
+  federatedVotingStore.modifyScenario(
+    selectedScenarioId.value,
+    isFullyConnected.value,
+    isGossipEnabled.value,
+  );
   hideModal();
 }
 

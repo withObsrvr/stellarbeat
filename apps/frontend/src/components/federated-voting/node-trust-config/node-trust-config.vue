@@ -125,10 +125,8 @@
 
 <script setup lang="ts">
 import { ref, computed, ComputedRef, onBeforeMount, watch } from "vue";
-import {
-  FederatedNode,
-  federatedVotingStore,
-} from "@/store/useFederatedVotingStore";
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import { FederatedNode } from "@/store/federated-voting/FederatedNode";
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import InfoButton from "../info-box/info-button.vue";
 import NodeTrustConfigInfo from "./node-trust-config-info.vue";
