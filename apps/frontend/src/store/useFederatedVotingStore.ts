@@ -1,36 +1,21 @@
 import { computed, reactive, UnwrapRef } from "vue";
 import {
-  Simulation,
-  AddNode,
-  UpdateQuorumSet,
   UserAction,
-  QuorumSet,
-  Vote,
-  VoteOnStatement,
-  RemoveNode,
-  AddConnection,
-  RemoveConnection,
   Message,
-  ForgeMessage,
   ScenarioLoader,
   Scenario,
+  ProtocolAction,
 } from "scp-simulation";
 import { findAllIntactNodes } from "@/components/federated-voting/analysis/DSetAnalysis";
 import { NetworkAnalysis } from "@/components/federated-voting/analysis/NetworkAnalysis";
 import { FederatedVotingContextBridge } from "./federated-voting/FederatedVotingContextBridge";
 import { OverlayBridge } from "./federated-voting/OverlayBridge";
 import { ScenarioManager } from "./federated-voting/ScenarioManager";
-
-export interface FederatedNode {
-  publicKey: string;
-  trustedNodes: string[];
-  trustThreshold: number;
-  voted: string | null;
-  accepted: string | null;
-  confirmed: string | null;
-  phase: string;
-  processedVotes: Vote[];
-}
+import {
+  SimulationBridge,
+  SimulationObserver,
+} from "./federated-voting/SimulationBridge";
+import { FederatedNode } from "./federated-voting/FederatedNode";
 
 interface State {
   simulationUpdate: number;
@@ -43,14 +28,19 @@ interface State {
   overlayConnections: { publicKey: string; connections: string[] }[];
   overlayIsFullyConnected: boolean;
   overlayIsGossipEnabled: boolean;
-  latestSimulationStepWentForwards: boolean;
-  simulation: Simulation;
   safetyDisruptingNodes: string[];
   livenessDisruptingNodes: string[];
   intactNodes: string[];
+  latestEvents: Event[];
+  fullEventLog: Event[][];
+  hasNextStepAvailable: boolean;
+  hasPreviousStepAvailable: boolean;
+  latestSimulationStepWentForward: boolean;
+  pendingUserActions: UserAction[];
+  pendingProtocolActions: ProtocolAction[];
 }
 
-class FederatedVotingStore {
+class FederatedVotingStore implements SimulationObserver {
   readonly scenarios: Scenario[];
   private _state: UnwrapRef<State>;
   private _networkStructureHash: string = "";
@@ -58,6 +48,7 @@ class FederatedVotingStore {
   private scenarioLoader = new ScenarioLoader();
   private protocolContext: FederatedVotingContextBridge;
   private overlay: OverlayBridge;
+  private simulationBridge: SimulationBridge;
   private scenarioManager = new ScenarioManager();
 
   constructor() {
@@ -67,6 +58,9 @@ class FederatedVotingStore {
       loadedScenario.protocolContext,
     );
     this.overlay = new OverlayBridge(loadedScenario.protocolContext);
+    this.simulationBridge = new SimulationBridge(loadedScenario.simulation);
+    this.simulationBridge.addObserver(this);
+
     this._state = reactive({
       simulationUpdate: 0,
       networkStructureUpdate: 0,
@@ -78,30 +72,33 @@ class FederatedVotingStore {
       overlayConnections: [],
       overlayIsFullyConnected: false,
       overlayIsGossipEnabled: false,
-      latestSimulationStepWentForwards: true,
+      latestSimulationStepWentForward: true,
       simulation: loadedScenario.simulation,
       safetyDisruptingNodes: [],
       livenessDisruptingNodes: [],
       intactNodes: [],
+      latestEvents: [],
+      fullEventLog: [[]],
+      hasNextStepAvailable: false,
+      hasPreviousStepAvailable: false,
+      pendingUserActions: [],
+      pendingProtocolActions: [],
     });
 
-    this.updateState();
+    this.updateState(true);
   }
 
   /*************
    * UPDATE STATE
    **************/
-  private updateState() {
-    this.updateNodes();
-    this.checkAndRecalculateNetworkAnalysis();
-    this.updateOverlayState();
-    this.updateDisruptingAndIntactNodes();
+  private updateState(simulationStepExecuted: boolean) {
+    this.updateSimulationState(simulationStepExecuted);
   }
 
   private updateDisruptingAndIntactNodes() {
     const result = this.protocolContext.getDisruptingNodes(
-      this.simulation.pendingUserActions(),
-      this.simulation.pendingProtocolActions(),
+      this._state.pendingUserActions,
+      this._state.pendingProtocolActions,
     );
 
     this._state.livenessDisruptingNodes = result.livenessDisruptingNodes;
@@ -114,9 +111,9 @@ class FederatedVotingStore {
     );
   }
 
-  private updateNodes() {
+  private updateContextState() {
     this._state.nodes = this.protocolContext.getFederatedNodes(
-      this._state.simulation.pendingUserActions(),
+      this._state.pendingUserActions,
     );
   }
 
@@ -125,7 +122,7 @@ class FederatedVotingStore {
     this._state.overlayIsGossipEnabled = this.overlay.isGossipEnabled;
     const connections = this.overlay.createConnections(
       this.nodes,
-      this._state.simulation.pendingUserActions(),
+      this._state.pendingUserActions,
     );
 
     const hash = this.overlay.calculateOverlayConnectionsHash(connections);
@@ -145,6 +142,30 @@ class FederatedVotingStore {
       this._state.networkStructureUpdate++;
       this._state.networkAnalysis = NetworkAnalysis.analyze(this.nodes);
     }
+  }
+
+  private updateSimulationState(stepExecuted: boolean) {
+    if (stepExecuted) {
+      this._state.latestEvents =
+        this.simulationBridge.getLatestEvents() as Event[];
+      this._state.fullEventLog =
+        this.simulationBridge.getFullEventLog() as Event[][];
+      this._state.latestSimulationStepWentForward =
+        this.simulationBridge.latestSimulationStepWentForward;
+    }
+    this._state.hasNextStepAvailable = this.simulationBridge.hasNextStep();
+    this._state.hasPreviousStepAvailable =
+      this.simulationBridge.hasPreviousStep();
+    this._state.pendingUserActions = this.simulationBridge.pendingUserActions();
+    this._state.pendingProtocolActions =
+      this.simulationBridge.pendingProtocolActions();
+
+    this._state.simulationUpdate++;
+
+    this.updateContextState();
+    this.checkAndRecalculateNetworkAnalysis();
+    this.updateOverlayState();
+    this.updateDisruptingAndIntactNodes();
   }
 
   /*************
@@ -187,12 +208,11 @@ class FederatedVotingStore {
 
     this.protocolContext.replaceContext(result.protocolContext);
     this.overlay.replaceContext(result.protocolContext);
-
-    this._state.simulation = result.simulation;
+    this.simulationBridge.replaceSimulation(result.simulation);
     this._state.simulationUpdate++;
     this._state.overlayUpdate++;
     this._state.networkStructureUpdate++;
-    this.updateState();
+    this.updateState(true);
   }
 
   exportScenario() {
@@ -200,7 +220,7 @@ class FederatedVotingStore {
       this.selectedScenario,
       this.overlayIsFullyConnected,
       this.overlayIsGossipEnabled,
-      this.simulation.getInitialStep(),
+      this.simulationBridge.getInitialStep(),
     );
   }
 
@@ -263,8 +283,13 @@ class FederatedVotingStore {
   }
 
   get disruptingNodes() {
-    return this._state.livenessDisruptingNodes.concat(
-      this._state.safetyDisruptingNodes,
+    return Array.from(
+      //delete duplicates
+      new Set(
+        this._state.livenessDisruptingNodes.concat(
+          this._state.safetyDisruptingNodes,
+        ),
+      ),
     );
   }
 
@@ -281,7 +306,19 @@ class FederatedVotingStore {
   }
 
   public getLatestEvents() {
-    return this.simulation.getLatestEvents();
+    return this._state.latestEvents;
+  }
+
+  public hasNextStep() {
+    return this._state.hasNextStepAvailable;
+  }
+
+  public hasPreviousStep() {
+    return this._state.hasPreviousStepAvailable;
+  }
+
+  get fullEventLog() {
+    return this._state.fullEventLog;
   }
 
   /*********************
@@ -293,145 +330,102 @@ class FederatedVotingStore {
     trustedNodes: string[],
     threshold: number,
   ) {
-    const pendingUpdate = this.simulation
-      .pendingUserActions()
-      .find(
-        (action) =>
-          action instanceof UpdateQuorumSet && action.publicKey === publicKey,
-      );
-
-    if (pendingUpdate) {
-      this.simulation.cancelPendingUserAction(pendingUpdate);
-    }
-
-    this.simulation.addUserAction(
-      new UpdateQuorumSet(
-        publicKey,
-        new QuorumSet(threshold, trustedNodes, []),
-      ),
-    );
-
-    this.updateState();
+    this.simulationBridge.updateNodeTrust(publicKey, trustedNodes, threshold);
   }
 
   addConnection(a: string, b: string) {
-    const addConnection = new AddConnection(a, b);
-    this.simulation.addUserAction(addConnection);
+    this.simulationBridge.addConnection(a, b);
   }
 
   removeConnection(a: string, b: string) {
-    const removeConnection = new RemoveConnection(a, b);
-    this.simulation.addUserAction(removeConnection);
+    this.simulationBridge.removeConnection(a, b);
   }
 
   public forgeMessage(message: Message) {
-    this.simulation.addUserAction(new ForgeMessage(message));
+    this.simulationBridge.forgeMessage(message);
   }
 
   public addNode(publicKey: string, trustedNodes: string[], threshold: number) {
-    this.cancelNodeRemoval(publicKey);
-
     if (this.protocolContext.containsNode(publicKey)) {
-      return; //already there
+      return; // Already there
     }
 
-    this.simulation.addUserAction(
-      new AddNode(publicKey, new QuorumSet(threshold, trustedNodes, [])),
-    );
-
-    this.updateState();
-  }
-
-  private cancelNodeRemoval(publicKey: string) {
-    const pendingRemoval = this.simulation
-      .pendingUserActions()
-      .find(
-        (action) =>
-          action instanceof RemoveNode && action.publicKey === publicKey,
-      );
-
-    if (pendingRemoval) {
-      this.simulation.cancelPendingUserAction(pendingRemoval);
-      this.updateState();
-    }
-  }
-
-  private cancelNodeAdd(publicKey: string) {
-    const pendingAdd = this.simulation
-      .pendingUserActions()
-      .find(
-        (action) => action instanceof AddNode && action.publicKey === publicKey,
-      );
-
-    if (pendingAdd) {
-      this.simulation.cancelPendingUserAction(pendingAdd);
-      this.updateState();
-    }
+    this.simulationBridge.addNode(publicKey, trustedNodes, threshold);
   }
 
   public removeNode(publicKey: string) {
-    this.cancelNodeAdd(publicKey);
     if (!this.protocolContext.containsNode(publicKey)) {
-      return; //not there, no need to remove
+      return; // Not there, no need to remove
     }
-    this.simulation.addUserAction(new RemoveNode(publicKey));
-    this.updateState();
+
+    this.simulationBridge.removeNode(publicKey);
   }
 
   public cancelNodeTrustUpdate(publicKey: string) {
-    const pendingUpdate = this.simulation
-      .pendingUserActions()
-      .find(
-        (action) =>
-          action instanceof UpdateQuorumSet && action.publicKey === publicKey,
-      );
-
-    if (pendingUpdate) {
-      this.simulation.cancelPendingUserAction(pendingUpdate);
-      this.updateState();
-    }
+    this.simulationBridge.cancelNodeTrustUpdate(publicKey);
   }
 
   public cancelPendingUserAction(action: UserAction) {
-    this.simulation.cancelPendingUserAction(action);
-    if (action.immediateExecution) {
-      this.updateState();
-    }
-  }
-
-  private simulationUpdated(forwardDirection: boolean = true) {
-    this._state.latestSimulationStepWentForwards = forwardDirection;
-    this.updateState();
-    this._state.simulationUpdate++;
+    this.simulationBridge.cancelPendingUserAction(action);
   }
 
   public executeStep() {
-    this.simulation.executeStep();
-    this.simulationUpdated(true);
+    this.simulationBridge.executeStep();
   }
 
   public reset() {
-    this.simulation.goToFirstStep();
-    this.simulationUpdated(false);
+    this.simulationBridge.reset();
   }
 
   public goBackOneStep() {
-    this.simulation.goBackOneStep();
-    this.simulationUpdated(false);
+    this.simulationBridge.goBackOneStep();
   }
 
-  public hasNextStep() {
-    return this.simulation.hasNextStep();
+  public vote(publicKey: string, vote: string) {
+    this.simulationBridge.vote(publicKey, vote);
   }
 
-  public hasPreviousStep() {
-    return this.simulation.hasPreviousStep();
+  public cancelPendingVote(publicKey: string) {
+    this.simulationBridge.cancelPendingVote(publicKey);
   }
 
-  get fullEventLog() {
-    return this._state.simulation.getFullEventLog();
+  public getPendingVotes() {
+    return this.simulationBridge.getPendingVotes();
   }
 
+  get simulationUpdate(): number {
+    return this._state.simulationUpdate;
+  }
+
+  get overlayUpdate(): number {
+    return this._state.overlayUpdate;
+  }
+
+  get latestSimulationStepWentForwards(): boolean {
+    return this._state.latestSimulationStepWentForward;
+  }
+
+  get overlayIsFullyConnected(): boolean {
+    return this._state.overlayIsFullyConnected;
+  }
+
+  get overlayIsGossipEnabled(): boolean {
+    return this._state.overlayIsGossipEnabled;
+  }
+
+  get pendingUserActions(): UserAction[] {
+    return this._state.pendingUserActions;
+  }
+
+  get pendingProtocolActions(): ProtocolAction[] {
+    return this._state.pendingProtocolActions;
+  }
+
+  onSimulationChanged(stepExecuted: boolean): void {
+    this.updateState(stepExecuted);
+  }
+
+  //TODO: should be somewhere else
   public consensusReached = computed(() => {
     const wellBehavedNodes = this.nodes.filter(
       (node) => this.illBehavedNodes.indexOf(node.publicKey) === -1,
@@ -462,59 +456,8 @@ class FederatedVotingStore {
   });
 
   public isStuck = computed(() => {
-    return !this.simulation.hasNextStep() && !this.consensusReached.value;
+    return !this._state.hasNextStepAvailable && !this.consensusReached.value;
   });
-
-  public vote(publicKey: string, vote: string) {
-    this.cancelPendingVote(publicKey);
-    const action = new VoteOnStatement(publicKey, vote);
-    this.simulation.addUserAction(action);
-  }
-
-  public cancelPendingVote(publicKey: string) {
-    const vote = this.simulation
-      .pendingUserActions()
-      .find(
-        (action) =>
-          action instanceof VoteOnStatement && action.publicKey === publicKey,
-      );
-
-    if (vote) {
-      this.simulation.cancelPendingUserAction(vote);
-    }
-  }
-
-  public getPendingVotes() {
-    return this.simulation
-      .pendingUserActions()
-      .filter(
-        (action) => action instanceof VoteOnStatement,
-      ) as VoteOnStatement[];
-  }
-
-  get simulation(): Simulation {
-    return this._state.simulation as Simulation;
-  }
-
-  get simulationUpdate(): number {
-    return this._state.simulationUpdate;
-  }
-
-  get overlayUpdate(): number {
-    return this._state.overlayUpdate;
-  }
-
-  get latestSimulationStepWentForwards(): boolean {
-    return this._state.latestSimulationStepWentForwards;
-  }
-
-  get overlayIsFullyConnected(): boolean {
-    return this._state.overlayIsFullyConnected;
-  }
-
-  get overlayIsGossipEnabled(): boolean {
-    return this._state.overlayIsGossipEnabled;
-  }
 }
 
 export const federatedVotingStore = new FederatedVotingStore();

@@ -107,11 +107,7 @@ import {
   UserAction,
 } from "scp-simulation";
 import { ref, computed, watch, nextTick } from "vue";
-import {
-  BIconExclamationTriangle,
-  BIconExclamationTriangleFill,
-  BModal,
-} from "bootstrap-vue";
+import { BModal } from "bootstrap-vue";
 import ForgeMessages from "./forge-messages.vue";
 
 const actionsList = ref<HTMLElement | null>(null);
@@ -170,6 +166,9 @@ function saveDisruptSelection() {
   if (!currentAction.value) return;
 
   if (selectedNeighbors.value.length > 0) {
+    //TODO: this should go through the store for reactivity.
+    //We should not be modifying the action directly
+
     currentAction.value.isDisrupted = true;
     currentAction.value.blackListNeighbors(selectedNeighbors.value);
   } else {
@@ -217,9 +216,10 @@ function mapSubType(subType: string) {
 
 const actionsFilter = ref("");
 const actions = computed(() => {
+  console.log("actions computed");
   return [
-    ...federatedVotingStore.simulation.pendingUserActions(),
-    ...federatedVotingStore.simulation.pendingProtocolActions(),
+    ...federatedVotingStore.pendingUserActions,
+    ...federatedVotingStore.pendingProtocolActions,
   ].filter((action) =>
     props.publicKey !== null ? action.publicKey === props.publicKey : true,
   );
