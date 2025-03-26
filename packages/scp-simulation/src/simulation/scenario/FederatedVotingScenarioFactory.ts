@@ -9,7 +9,8 @@ import networkSplitIllBehavedNode from './data/network-split-ill-behaved-node.js
 import networkSplitPartial from './data/network-split-partial.json';
 import networkSafeIllBehavedNode from './data/network-safe-ill-behaved-node.json';
 import votingStuckBecauseVotes from './data/voting-stuck-because-votes.json';
-import votingStuckBecauseNodeCrashAndVotes from './data/voting-stuck-because-node-crash-and-votes.json';
+import votingStuckBecauseNodeCrashes from './data/voting-stuck-because-node-crashes.json';
+import votingStuckForBefouledNode from './data/voting-stuck-for-befouled-node.json';
 import votingSucceededDespiteNodeCrash from './data/voting-succeeded-despite-node-crash.json';
 import overlayRing from './data/overlay-ring.json';
 import votingStuckOverlayPartition from './data/voting-stuck-overlay-partition.json';
@@ -72,9 +73,10 @@ export class FederatedVotingScenarioFactory {
 		return [
 			FederatedVotingScenarioFactory.createBasicConsensus(),
 			this.loadJSONScenario(votingStuckBecauseVotes),
-			this.loadJSONScenario(votingStuckBecauseNodeCrashAndVotes),
-			this.loadJSONScenario(votingStuckOverlayPartition),
 			this.loadJSONScenario(votingSucceededDespiteNodeCrash),
+			this.loadJSONScenario(votingStuckBecauseNodeCrashes),
+			this.loadJSONScenario(votingStuckForBefouledNode),
+			this.loadJSONScenario(votingStuckOverlayPartition),
 			this.loadJSONScenario(acceptingSafetyScenario),
 			this.loadJSONScenario(acceptingLivenessScenario),
 			this.loadJSONScenario(acceptingLivenessGossipScenario),

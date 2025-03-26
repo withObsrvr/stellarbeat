@@ -258,15 +258,6 @@ export class SimulationBridge {
   }
 
   /**
-   * Get all pending votes
-   */
-  public getPendingVotes(): VoteOnStatement[] {
-    return this.pendingUserActions().filter(
-      (action) => action instanceof VoteOnStatement,
-    ) as VoteOnStatement[];
-  }
-
-  /**
    * Disrupt a protocol action with specific blacklisted neighbors
    */
   public disruptAction(

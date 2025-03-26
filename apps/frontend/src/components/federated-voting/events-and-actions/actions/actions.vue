@@ -213,7 +213,6 @@ function mapSubType(subType: string) {
 
 const actionsFilter = ref("");
 const actions = computed(() => {
-  console.log("actions computed");
   return [
     ...federatedVotingStore.pendingUserActions,
     ...federatedVotingStore.pendingProtocolActions,

@@ -3,21 +3,7 @@
     <div class="card-header consensus-topology-header">
       <div class="card-header-content">
         <BreadCrumbs root="Consensus Topology"></BreadCrumbs>
-        <div>
-          <span
-            v-if="federatedVotingStore.networkAnalysis.hasQuorumIntersection"
-            v-tooltip="'Quorum intersection'"
-            class="badge badge-success ms-2 mr-2"
-            >Quorum Intersection</span
-          >
-          <span
-            v-else
-            v-tooltip="'No quorum intersection'"
-            class="badge badge-danger ms-2 mr-2"
-          >
-            No Quorum Intersection
-          </span>
-        </div>
+        <NetworkAnalysisBadges />
       </div>
       <button
         class="btn btn-sm btn-secondary ml-4"
@@ -171,6 +157,7 @@ import VBlockingSetsTab from "./v-blocking-sets.vue";
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import ConsensusTopologyInfo from "./consensus-topology-info.vue";
 import QuorumIntersections from "./quorum-intersections.vue";
+import NetworkAnalysisBadges from "../network-analysis-badges.vue";
 
 // Tab management
 const activeTab = ref("quorums");

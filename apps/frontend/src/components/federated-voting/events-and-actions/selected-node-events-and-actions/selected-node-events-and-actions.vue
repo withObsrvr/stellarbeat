@@ -5,7 +5,7 @@
       <div class="d-flex align-items-center">
         <div class="labels">
           <span
-            v-if="federatedVotingStore.isStuck.value"
+            v-if="federatedVotingStore.isVoteStuck.value"
             class="badge badge-danger ms-2"
           >
             Stuck

@@ -105,4 +105,22 @@ export class NetworkAnalysis {
       quorumIntersections,
     );
   }
+
+  hasQuorumIntersectionOfWellBehavedNodes(illBehavedNodes: NodeID[]): boolean {
+    return this.quorumIntersections.every((intersection) => {
+      if (intersection.some((node) => !illBehavedNodes.includes(node))) {
+        return true;
+      }
+      return false;
+    });
+  }
+
+  hasQuorumAvailabilityOfWellbehavedNodes(illBehavedNodes: NodeID[]): boolean {
+    return this.minimalQuorums.some((quorum) => {
+      if (Array.from(quorum).every((node) => !illBehavedNodes.includes(node))) {
+        return true;
+      }
+      return false;
+    });
+  }
 }

@@ -19,7 +19,7 @@
             Network Split
           </span>
           <span
-            v-else-if="federatedVotingStore.isStuck.value"
+            v-else-if="federatedVotingStore.isVoteStuck.value"
             class="badge badge-danger ms-2"
           >
             Vote Stuck

@@ -5,6 +5,7 @@ import {
   ScenarioLoader,
   Scenario,
   ProtocolAction,
+  VoteOnStatement,
 } from "scp-simulation";
 import { findAllIntactNodes } from "@/components/federated-voting/analysis/DSetAnalysis";
 import { NetworkAnalysis } from "@/components/federated-voting/analysis/NetworkAnalysis";
@@ -83,6 +84,7 @@ class FederatedVotingStore implements SimulationObserver {
       hasPreviousStepAvailable: false,
       pendingUserActions: [],
       pendingProtocolActions: [],
+      pendingVotes: [],
     });
 
     this.updateState(true);
@@ -232,7 +234,7 @@ class FederatedVotingStore implements SimulationObserver {
     } else {
       this.scenarios.push(scenario);
     }
-    this.selectScenario(scenario.id);
+    this.loadSimulationWithScenario(scenario);
   }
 
   /*************
@@ -400,8 +402,10 @@ class FederatedVotingStore implements SimulationObserver {
     this.simulationBridge.cancelPendingVote(publicKey);
   }
 
-  public getPendingVotes() {
-    return this.simulationBridge.getPendingVotes();
+  public getPendingVotes(): VoteOnStatement[] {
+    return this._state.pendingUserActions.filter(
+      (action) => action instanceof VoteOnStatement,
+    ) as VoteOnStatement[];
   }
 
   get simulationUpdate(): number {
@@ -438,14 +442,19 @@ class FederatedVotingStore implements SimulationObserver {
 
   //TODO: should be somewhere else
   public consensusReached = computed(() => {
-    const wellBehavedNodes = this.nodes.filter(
-      (node) => this.illBehavedNodes.indexOf(node.publicKey) === -1,
+    const intactNodes = this.nodes.filter(
+      (node) => this.intactNodes.indexOf(node.publicKey) !== -1,
     );
-    if (!wellBehavedNodes.every((node) => node.confirmed)) {
+
+    if (intactNodes.length === 0) {
       return false;
     }
 
-    const confirmedValues = wellBehavedNodes
+    if (intactNodes.filter((node) => node.confirmed).length === 0) {
+      return false;
+    }
+
+    const confirmedValues = intactNodes
       .filter((state) => state.confirmed)
       .map((state) => state.confirmed);
 
@@ -466,7 +475,7 @@ class FederatedVotingStore implements SimulationObserver {
     return confirmedValues.size > 1;
   });
 
-  public isStuck = computed(() => {
+  public isVoteStuck = computed(() => {
     return !this._state.hasNextStepAvailable && !this.consensusReached.value;
   });
 }

@@ -136,6 +136,8 @@ const handleKeydown = (event: KeyboardEvent) => {
     return;
   }
 
+  event.preventDefault();
+
   if (event.key === "n") {
     if (federatedVotingStore.hasNextStep()) {
       executeNextStep();
