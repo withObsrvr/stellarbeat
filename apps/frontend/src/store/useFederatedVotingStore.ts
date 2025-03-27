@@ -154,6 +154,7 @@ class FederatedVotingStore implements SimulationObserver {
         this.simulationBridge.getFullEventLog() as Event[][];
       this._state.latestSimulationStepWentForward =
         this.simulationBridge.latestSimulationStepWentForward;
+      this._state.simulationUpdate++;
     }
     this._state.hasNextStepAvailable = this.simulationBridge.hasNextStep();
     this._state.hasPreviousStepAvailable =
@@ -161,8 +162,6 @@ class FederatedVotingStore implements SimulationObserver {
     this._state.pendingUserActions = this.simulationBridge.pendingUserActions();
     this._state.pendingProtocolActions =
       this.simulationBridge.pendingProtocolActions();
-
-    this._state.simulationUpdate++;
 
     this.updateContextState();
     this.checkAndRecalculateNetworkAnalysis();
