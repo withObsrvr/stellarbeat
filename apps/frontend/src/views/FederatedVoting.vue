@@ -77,11 +77,14 @@ import FederatedVotingInfo from "@/components/federated-voting/federated-voting-
 import { BIconInfoCircle } from "bootstrap-vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { onMounted } from "vue";
+import useMetaTags from "@/composables/useMetaTags";
 
 // Define props to receive route parameters
 const props = defineProps<{
   scenarioId?: string;
 }>();
+
+useMetaTags("Federated Voting Simulation", "Federated Voting Simulation tool");
 
 onMounted(() => {
   if (props.scenarioId) {
