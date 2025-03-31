@@ -14,6 +14,7 @@ import votingStuckForBefouledNode from './data/voting-stuck-for-befouled-node.js
 import votingSucceededDespiteNodeCrash from './data/voting-succeeded-despite-node-crash.json';
 import overlayRing from './data/overlay-ring.json';
 import votingStuckOverlayPartition from './data/voting-stuck-overlay-partition.json';
+import confirmingIsEnoughLiveness from './data/confirming-is-enough-liveness.json';
 
 export class FederatedVotingScenarioFactory {
 	constructor(private scenarioSerializer: ScenarioSerializer) {}
@@ -77,9 +78,10 @@ export class FederatedVotingScenarioFactory {
 			this.loadJSONScenario(votingStuckBecauseNodeCrashes),
 			this.loadJSONScenario(votingStuckForBefouledNode),
 			this.loadJSONScenario(votingStuckOverlayPartition),
-			this.loadJSONScenario(acceptingSafetyScenario),
 			this.loadJSONScenario(acceptingLivenessScenario),
 			this.loadJSONScenario(acceptingLivenessGossipScenario),
+			this.loadJSONScenario(confirmingIsEnoughLiveness),
+			this.loadJSONScenario(acceptingSafetyScenario),
 			this.loadJSONScenario(networkSplitIllBehavedNode),
 			this.loadJSONScenario(networkSplitPartial),
 			this.loadJSONScenario(networkSafeIllBehavedNode),
