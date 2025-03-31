@@ -2,6 +2,7 @@
   <div id="app" class="page full">
     <div class="flex-fill">
       <navbar
+        v-if="!isFederatedVotingRoute"
         :brand-tagline="store.appConfig.brandTagline"
         :brand-name="store.appConfig.brandName"
         :brand-logo="{
@@ -18,7 +19,10 @@
             {{ errorMessage }}
           </div>
           <div
-            v-if="['fbas', 'fbas2'].includes(store.networkContext.networkId)"
+            v-if="
+              ['fbas', 'fbas2'].includes(store.networkContext.networkId) &&
+              !isFederatedVotingRoute
+            "
             class="alert alert-info mb-0"
             role="alert"
           >
@@ -133,6 +137,13 @@ const timeTravelDate = computed(() => {
 
 const privacyLink = import.meta.env.VUE_APP_PRIVACY_LINK;
 const termsLink = import.meta.env.VUE_APP_TERMS_LINK;
+
+const isFederatedVotingRoute = computed(() => {
+  return (
+    route.name === "federated-voting" ||
+    (route.path && route.path.includes("/federated-voting"))
+  );
+});
 
 onBeforeMount(async () => {
   await store.updateNetwork(networkId.value, timeTravelDate.value);
