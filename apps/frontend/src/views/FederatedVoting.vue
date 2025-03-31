@@ -75,6 +75,26 @@ import ConsensusTopology from "@/components/federated-voting/consensus-topology/
 import { infoBoxStore } from "@/components/federated-voting/info-box/useInfoBoxStore";
 import FederatedVotingInfo from "@/components/federated-voting/federated-voting-info.vue";
 import { BIconInfoCircle } from "bootstrap-vue";
+import { federatedVotingStore } from "@/store/useFederatedVotingStore";
+import { onMounted } from "vue";
+
+// Define props to receive route parameters
+const props = defineProps<{
+  scenarioId?: string;
+}>();
+
+onMounted(() => {
+  if (props.scenarioId) {
+    // Check if the requested scenario exists
+    const scenarioExists = federatedVotingStore.scenarios.some(
+      (scenario) => scenario.id === props.scenarioId,
+    );
+
+    if (scenarioExists) {
+      federatedVotingStore.selectScenario(props.scenarioId);
+    }
+  }
+});
 
 function showInfo() {
   infoBoxStore.show(FederatedVotingInfo);

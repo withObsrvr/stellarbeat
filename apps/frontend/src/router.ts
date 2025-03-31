@@ -89,11 +89,12 @@ export function createRouter() {
       },
       {
         name: "federated-voting",
-        path: "/federated-voting",
+        path: "/federated-voting/:scenarioId?",
         component: () =>
           import(
             /* webpackChunkName: "federated-voting" */ "@/views/FederatedVoting.vue"
           ),
+        props: true,
       },
       {
         path: "/notify",

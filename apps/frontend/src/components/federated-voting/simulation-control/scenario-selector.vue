@@ -136,11 +136,28 @@ import {
 } from "bootstrap-vue";
 import { BModal, BDropdown, BDropdownItem } from "bootstrap-vue";
 import { computed, ref } from "vue";
+import { useRouter, useRoute } from "vue-router/composables";
+
+const router = useRouter();
+const route = useRoute();
 
 const selectedScenarioId = computed({
   get: () => federatedVotingStore.selectedScenario.id,
   set: (value: string) => {
     federatedVotingStore.selectScenario(value);
+
+    // Update URL if needed
+    if (route.params.scenarioId !== value) {
+      router
+        .push({
+          name: "federated-voting",
+          params: { scenarioId: value },
+          query: route.query,
+        })
+        .catch((err) => {
+          console.error("Navigation error:", err);
+        });
+    }
   },
 });
 
