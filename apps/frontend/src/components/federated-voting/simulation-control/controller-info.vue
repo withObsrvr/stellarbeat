@@ -84,6 +84,13 @@
           <strong>Stuck</strong>: Shows what happens when consensus cannot be
           reached
         </li>
+        <li>
+          Read about the different scenarios
+          <a
+            href="https://medium.com/stellarbeatio/federated-voting-part-3-scenarios-learn-about-a-stellar-consensus-protocol-scp-building-block-5f185485d772"
+            >here</a
+          >
+        </li>
       </ul>
     </div>
 
