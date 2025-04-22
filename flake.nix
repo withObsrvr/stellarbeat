@@ -11,7 +11,14 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         nodejs = pkgs.nodejs_20;
-        pnpm = pkgs.nodePackages.pnpm.override { nodejs = nodejs; };
+        # Pin pnpm to version 9.15.0
+        pnpm = (pkgs.nodePackages.pnpm.override { nodejs = nodejs; }).overrideAttrs (old: {
+          version = "9.15.0";
+          src = pkgs.fetchurl {
+            url = "https://registry.npmjs.org/pnpm/-/pnpm-9.15.0.tgz";
+            hash = "sha256-9vJqB3ZvY7ZvY7ZvY7ZvY7ZvY7ZvY7ZvY7ZvY7ZvY7ZvY=";
+          };
+        });
       in
       {
         devShells.default = pkgs.mkShell {
@@ -25,6 +32,8 @@
           ];
 
           shellHook = ''
+            # Ensure we're using the correct pnpm version
+            export PATH="${pnpm}/bin:$PATH"
             export NODE_OPTIONS="--max_old_space_size=4096"
             export PATH="$PWD/node_modules/.bin:$PATH"
             
@@ -34,6 +43,8 @@
             fi
             
             echo "Stellarbeat development environment ready!"
+            echo "Using pnpm version: $(pnpm -v)"
+            echo "Using Node.js version: $(node -v)"
             echo "Run 'pnpm install' to install dependencies"
           '';
         };
@@ -49,6 +60,7 @@
 
           buildPhase = ''
             export HOME=$TMPDIR
+            export PATH="${pnpm}/bin:$PATH"
             pnpm install --frozen-lockfile
             pnpm build
           '';
