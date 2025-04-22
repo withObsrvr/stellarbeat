@@ -41,6 +41,9 @@
             if [ ! -f "apps/backend/.env" ]; then
               cp apps/backend/.env.dist apps/backend/.env
             fi
+
+            # Build shared packages first
+            pnpm --filter shared build
             
             echo "Stellarbeat development environment ready!"
             echo "Using pnpm version: $(pnpm -v)"
@@ -61,7 +64,14 @@
           buildPhase = ''
             export HOME=$TMPDIR
             export PATH="${pnpm}/bin:$PATH"
+            
+            # Install dependencies
             pnpm install --frozen-lockfile
+            
+            # Build shared packages first
+            pnpm --filter shared build
+            
+            # Build the rest of the project
             pnpm build
           '';
 

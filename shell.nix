@@ -32,6 +32,9 @@ pkgs.mkShell {
     if [ ! -f "apps/backend/.env" ]; then
       cp apps/backend/.env.dist apps/backend/.env
     fi
+
+    # Build shared packages first
+    pnpm --filter shared build
     
     echo "Stellarbeat development environment ready!"
     echo "Using pnpm version: $(pnpm -v)"
