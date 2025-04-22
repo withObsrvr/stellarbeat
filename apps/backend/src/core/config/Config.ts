@@ -85,7 +85,11 @@ export class DefaultConfig implements Config {
 		public horizonUrl: Url,
 		public ipStackAccessKey: string,
 		public crawlerConfig: CrawlerConfiguration
-	) {}
+	) {
+		if (process.env.BACKEND_PORT) {
+			this.apiPort = parseInt(process.env.BACKEND_PORT);
+		}
+	}
 }
 
 export function getConfigFromEnv(): Result<Config, Error> {
