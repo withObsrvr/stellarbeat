@@ -34,7 +34,11 @@ pkgs.mkShell {
     fi
 
     # Build shared packages first
-    pnpm --filter shared build
+    cd packages/shared
+    pnpm install
+    pnpm run build
+    pnpm run post-build
+    cd ../..
     
     echo "Stellarbeat development environment ready!"
     echo "Using pnpm version: $(pnpm -v)"
