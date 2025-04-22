@@ -37,10 +37,19 @@
             export NODE_OPTIONS="--max_old_space_size=4096"
             export PATH="$PWD/node_modules/.bin:$PATH"
             
-            # Create .env files if they don't exist
+            # Set up environment files
             if [ ! -f "apps/backend/.env" ]; then
-              cp apps/backend/.env.dist apps/backend/.env
+              cp apps/backend/.env apps/backend/.env
             fi
+            if [ ! -f "apps/frontend/.env" ]; then
+              cp apps/frontend/.env apps/frontend/.env
+            fi
+
+            # Load environment variables
+            set -a
+            source apps/backend/.env
+            source apps/frontend/.env
+            set +a
 
             # Build shared packages first
             cd packages/shared
@@ -52,6 +61,7 @@
             echo "Stellarbeat development environment ready!"
             echo "Using pnpm version: $(pnpm -v)"
             echo "Using Node.js version: $(node -v)"
+            echo "Environment variables loaded from .env files"
             echo "Run 'pnpm install' to install dependencies"
           '';
         };
