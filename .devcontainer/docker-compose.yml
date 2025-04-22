@@ -13,8 +13,8 @@ services:
       context: .
       dockerfile: Containerfile # Refers to the Containerfile used to build your custom dev environment
     environment:
-      DATABASE_TEST_URL: postgresql://user:password@pgsql-test:5432/mydb # Database connection string
-      DATABASE_DEV_URL: postgresql://user:password@pgsql-dev:5432/mydb # Database connection string
+      DATABASE_TEST_URL: postgresql://user:password@pgsql-test:25432/mydb # Database connection string
+      DATABASE_DEV_URL: postgresql://user:password@pgsql-dev:25432/mydb # Database connection string
     depends_on:
       - pgsql-test # Make sure the PostgreSQL service starts first
       - pgsql-dev
@@ -32,7 +32,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: mydb
     ports:
-      - 5433:5432 
+      - 25433:5432 
     
   pgsql-dev:
     image: docker.io/library/postgres:latest
@@ -42,4 +42,4 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: mydb
     ports:
-      - 5432:5432 # Expose PostgreSQL on port 5432
+      - 25432:5432 # Expose PostgreSQL on port 5432
