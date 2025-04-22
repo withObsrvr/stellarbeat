@@ -50,6 +50,8 @@ const setup = async (): Promise<{ config: Config; kernel: Kernel }> => {
 	}
 
 	const config = configResult.value;
+	console.log('Debug: Environment PORT=', process.env.PORT);
+	console.log('Debug: Config apiPort=', config.apiPort);
 	const kernel = await Kernel.getInstance(config);
 
 	return {
