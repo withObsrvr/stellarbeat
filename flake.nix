@@ -31,9 +31,6 @@
             pkgs.wasm-pack
           ];
 
-          # Allow network access
-          __noChroot = true;
-
           shellHook = ''
             # Ensure we're using the correct pnpm version
             export PATH="${pnpm}/bin:$PATH"
