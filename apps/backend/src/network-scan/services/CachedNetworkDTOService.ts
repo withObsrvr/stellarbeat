@@ -26,23 +26,37 @@ export class CachedNetworkDTOService {
 
 	public async getLatestNetworkDTO(): Promise<Result<NetworkV1 | null, Error>> {
 		try {
-			const scanTime =
-				await this.networkScanRepository.findLatestSuccessfulScanTime();
+			console.log('Debug: CachedNetworkDTOService.getLatestNetworkDTO called');
+			const scanTime = await this.networkScanRepository.findLatestSuccessfulScanTime();
+			console.log('Debug: Latest successful scan time:', scanTime);
 
-			if (!scanTime) return ok(null);
+			if (!scanTime) {
+				console.log('Debug: No scan time found');
+				return ok(null);
+			}
 
-			if (this.cache.has(scanTime.toISOString()))
+			if (this.cache.has(scanTime.toISOString())) {
+				console.log('Debug: Found network in cache');
 				return ok(this.cache.get(scanTime.toISOString()) as NetworkV1);
+			}
 
-			const latestNetworkDTO =
-				await this.networkDTORepository.getLatestNetworkDTO();
-			if (latestNetworkDTO.isErr()) return latestNetworkDTO;
+			console.log('Debug: Getting latest network DTO from repository');
+			const latestNetworkDTO = await this.networkDTORepository.getLatestNetworkDTO();
+			if (latestNetworkDTO.isErr()) {
+				console.log('Debug: Error getting latest network DTO:', latestNetworkDTO.error);
+				return latestNetworkDTO;
+			}
 
-			if (latestNetworkDTO.value !== null)
+			if (latestNetworkDTO.value !== null) {
+				console.log('Debug: Caching network DTO');
 				this.cache.set(scanTime.toISOString(), latestNetworkDTO.value);
+			} else {
+				console.log('Debug: Latest network DTO is null');
+			}
 
 			return latestNetworkDTO;
 		} catch (e) {
+			console.log('Debug: Error in getLatestNetworkDTO:', e);
 			return err(mapUnknownToError(e));
 		}
 	}
