@@ -6,6 +6,7 @@ import { Logger } from '../../../core/services/Logger';
 import { NodeRepository } from '../../domain/node/NodeRepository';
 import { GeoDataService } from '../../domain/node/scan/GeoDataService';
 import NodeGeoDataLocation from '../../domain/node/NodeGeoDataLocation';
+import { NETWORK_TYPES } from '../di/di-types';
 
 // noinspection JSIgnoredPromiseFromCall
 run();
@@ -14,7 +15,7 @@ async function run() {
     const kernel = await Kernel.getInstance();
     const logger = kernel.container.get<Logger>('Logger');
     const exceptionLogger = kernel.container.get<ExceptionLogger>('ExceptionLogger');
-    const nodeRepository = kernel.container.get<NodeRepository>('NodeRepository');
+    const nodeRepository = kernel.container.get<NodeRepository>(NETWORK_TYPES.NodeRepository);
     const geoDataService = kernel.container.get<GeoDataService>('GeoDataService');
 
     try {
