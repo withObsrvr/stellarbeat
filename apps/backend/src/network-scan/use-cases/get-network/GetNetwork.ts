@@ -15,13 +15,21 @@ export class GetNetwork {
 	) {}
 
 	async execute(dto: GetNetworkDTO): Promise<Result<NetworkV1 | null, Error>> {
+		console.log('Debug: GetNetwork.execute called with dto:', dto);
 		let networkOrError: Result<NetworkV1 | null, Error>;
-		if (dto.at === undefined)
+		if (dto.at === undefined) {
+			console.log('Debug: Getting latest network DTO');
 			networkOrError = await this.networkDTOService.getLatestNetworkDTO();
-		else networkOrError = await this.networkDTOService.getNetworkDTOAt(dto.at);
+		} else {
+			console.log('Debug: Getting network DTO at:', dto.at);
+			networkOrError = await this.networkDTOService.getNetworkDTOAt(dto.at);
+		}
 
 		if (networkOrError.isErr()) {
+			console.log('Debug: Error getting network:', networkOrError.error);
 			this.exceptionLogger.captureException(networkOrError.error);
+		} else {
+			console.log('Debug: Network result:', networkOrError.value ? 'found' : 'not found');
 		}
 
 		return networkOrError;

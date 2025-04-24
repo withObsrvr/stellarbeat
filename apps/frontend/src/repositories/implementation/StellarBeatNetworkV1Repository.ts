@@ -13,6 +13,7 @@ export class StellarBeatNetworkV1Repository implements NetworkRepository {
         params["at"] = at.toISOString();
       }
       const url = new URL(this.apiBaseUrl + "/v1");
+      console.log('Debug: API URL being used:', url.toString());
       Object.keys(params).forEach((key) =>
         url.searchParams.append(key, params[key] as string),
       );
