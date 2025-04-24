@@ -1,1 +1,95 @@
- 
+name: Trunk-Based CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run tests
+        run: pnpm test
+
+  deploy-staging:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Staging
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        env:
+          GITHUB_REPO_URL: ${{ github.repositoryUrl }}
+          DOMAIN: ${{ secrets.STAGING_DOMAIN }}
+        run: |
+          doctl apps create --spec .do/app.staging.yaml
+      - name: Wait for Staging Deployment
+        run: |
+          echo "Waiting for staging deployment to complete..."
+          sleep 300
+      - name: Run Staging Tests
+        run: |
+          # Add your staging environment tests here
+          # For example, run API tests against staging endpoints
+          echo "Running staging tests..."
+
+  deploy-integration:
+    needs: [test, deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Integration
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        env:
+          GITHUB_REPO_URL: ${{ github.repositoryUrl }}
+          DOMAIN: ${{ secrets.INTEGRATION_DOMAIN }}
+        run: |
+          doctl apps create --spec .do/app.integration.yaml
+      - name: Wait for Integration Deployment
+        run: |
+          echo "Waiting for integration deployment to complete..."
+          sleep 300
+      - name: Run Integration Tests
+        run: |
+          # Add your integration tests here
+          echo "Running integration tests..."
+
+  deploy-production:
+    needs: [test, deploy-staging, deploy-integration]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Production
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        env:
+          GITHUB_REPO_URL: ${{ github.repositoryUrl }}
+          DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
+        run: |
+          doctl apps create --spec .do/app.production.yaml
+      - name: Wait for Production Deployment
+        run: |
+          echo "Waiting for production deployment to complete..."
+          sleep 300
+      - name: Run Production Smoke Tests
+        run: |
+          # Add your production smoke tests here
+          echo "Running production smoke tests..." 

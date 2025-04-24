@@ -2,7 +2,7 @@ name: stellarbeat-staging
 services:
   - name: frontend
     git:
-      branch: staging
+      branch: main
       repo_clone_url: ${GITHUB_REPO_URL}
     source_dir: apps/frontend
     dockerfile_path: Dockerfile
@@ -18,10 +18,12 @@ services:
         value: https://api-staging.${DOMAIN}
       - key: VITE_WS_URL
         value: wss://api-staging.${DOMAIN}
+      - key: FEATURE_FLAGS
+        value: '{"experimentalFeatures": false, "betaFeatures": false}'
 
   - name: backend
     git:
-      branch: staging
+      branch: main
       repo_clone_url: ${GITHUB_REPO_URL}
     source_dir: apps/backend
     dockerfile_path: Dockerfile
@@ -41,10 +43,12 @@ services:
       - key: JWT_SECRET
         scope: RUN_TIME
         type: SECRET
+      - key: FEATURE_FLAGS
+        value: '{"experimentalFeatures": false, "betaFeatures": false}'
 
   - name: network-scanner
     git:
-      branch: staging
+      branch: main
       repo_clone_url: ${GITHUB_REPO_URL}
     source_dir: apps/backend
     dockerfile_path: Dockerfile.network-scanner
@@ -56,10 +60,12 @@ services:
       - key: DATABASE_URL
         scope: RUN_TIME
         type: SECRET
+      - key: FEATURE_FLAGS
+        value: '{"experimentalFeatures": false, "betaFeatures": false}'
 
   - name: history-scanner
     git:
-      branch: staging
+      branch: main
       repo_clone_url: ${GITHUB_REPO_URL}
     source_dir: apps/history-scanner
     dockerfile_path: Dockerfile
@@ -71,10 +77,12 @@ services:
       - key: DATABASE_URL
         scope: RUN_TIME
         type: SECRET
+      - key: FEATURE_FLAGS
+        value: '{"experimentalFeatures": false, "betaFeatures": false}'
 
   - name: users
     git:
-      branch: staging
+      branch: main
       repo_clone_url: ${GITHUB_REPO_URL}
     source_dir: apps/users
     dockerfile_path: Dockerfile
@@ -94,6 +102,8 @@ services:
       - key: JWT_SECRET
         scope: RUN_TIME
         type: SECRET
+      - key: FEATURE_FLAGS
+        value: '{"experimentalFeatures": false, "betaFeatures": false}'
 
 databases:
   - engine: PG
