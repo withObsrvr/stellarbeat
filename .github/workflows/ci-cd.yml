@@ -27,10 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Deploy to Staging
+      - name: Setup doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Deploy to Staging
         env:
           GITHUB_REPO_URL: ${{ github.repositoryUrl }}
           DOMAIN: ${{ secrets.STAGING_DOMAIN }}
@@ -52,10 +53,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Deploy to Integration
+      - name: Setup doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Deploy to Integration
         env:
           GITHUB_REPO_URL: ${{ github.repositoryUrl }}
           DOMAIN: ${{ secrets.INTEGRATION_DOMAIN }}
@@ -76,10 +78,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Deploy to Production
+      - name: Setup doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Deploy to Production
         env:
           GITHUB_REPO_URL: ${{ github.repositoryUrl }}
           DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
