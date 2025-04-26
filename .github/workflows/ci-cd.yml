@@ -1,0 +1,147 @@
+name: Trunk-Based CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: stellarbeat_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: stellarbeat_test
+      NODE_ENV: test
+      DATABASE_TEST_URL: postgres://postgres:postgres@localhost:5432/stellarbeat_test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.15.0
+          run_install: false
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm build
+      - name: Run tests
+        run: pnpm tu
+
+  deploy-staging:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.15.0
+          run_install: false
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm build
+      - name: Setup doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Deploy to Staging
+        env:
+          GITHUB_REPO_URL: ${{ github.repositoryUrl }}
+          DOMAIN: ${{ secrets.STAGING_DOMAIN }}
+        run: |
+          doctl apps create --spec .do/app.staging.yaml
+      - name: Wait for Staging Deployment
+        run: |
+          echo "Waiting for staging deployment to complete..."
+          sleep 300
+      - name: Run Staging Tests
+        run: |
+          # Add your staging environment tests here
+          # For example, run API tests against staging endpoints
+          echo "Running staging tests..."
+
+  deploy-integration:
+    needs: [test, deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.15.0
+          run_install: false
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm build
+      - name: Setup doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Deploy to Integration
+        env:
+          GITHUB_REPO_URL: ${{ github.repositoryUrl }}
+          DOMAIN: ${{ secrets.INTEGRATION_DOMAIN }}
+        run: |
+          doctl apps create --spec .do/app.integration.yaml
+      - name: Wait for Integration Deployment
+        run: |
+          echo "Waiting for integration deployment to complete..."
+          sleep 300
+      - name: Run Integration Tests
+        run: |
+          # Add your integration tests here
+          echo "Running integration tests..."
+
+  deploy-production:
+    needs: [test, deploy-staging, deploy-integration]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.15.0
+          run_install: false
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm build
+      - name: Setup doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Deploy to Production
+        env:
+          GITHUB_REPO_URL: ${{ github.repositoryUrl }}
+          DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
+        run: |
+          doctl apps create --spec .do/app.production.yaml
+      - name: Wait for Production Deployment
+        run: |
+          echo "Waiting for production deployment to complete..."
+          sleep 300
+      - name: Run Production Smoke Tests
+        run: |
+          # Add your production smoke tests here
+          echo "Running production smoke tests..." 

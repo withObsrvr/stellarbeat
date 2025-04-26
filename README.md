@@ -222,7 +222,7 @@ pnpm build
 
 ## eslint monorepo configuration
 
-Eslint is defined at the top level using the esling.config.mjs file. Every
+Eslint is defined at the top level using the eslint.config.mjs file. Every
 project needs to be defined here to enable linting.
 
 run linting:

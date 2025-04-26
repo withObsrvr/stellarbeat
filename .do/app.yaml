@@ -1,0 +1,102 @@
+name: stellarbeat
+services:
+  - name: frontend
+    git:
+      branch: main
+      repo_clone_url: ${GITHUB_REPO_URL}
+    source_dir: apps/frontend
+    dockerfile_path: Dockerfile
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xs
+    routes:
+      - path: /
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_API_URL
+        value: https://api.${DOMAIN}
+      - key: VITE_WS_URL
+        value: wss://api.${DOMAIN}
+
+  - name: backend
+    git:
+      branch: main
+      repo_clone_url: ${GITHUB_REPO_URL}
+    source_dir: apps/backend
+    dockerfile_path: Dockerfile
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xs
+    routes:
+      - path: /api
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: JWT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+
+  - name: network-scanner
+    git:
+      branch: main
+      repo_clone_url: ${GITHUB_REPO_URL}
+    source_dir: apps/backend
+    dockerfile_path: Dockerfile.network-scanner
+    instance_count: 1
+    instance_size_slug: basic-xs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+
+  - name: history-scanner
+    git:
+      branch: main
+      repo_clone_url: ${GITHUB_REPO_URL}
+    source_dir: apps/history-scanner
+    dockerfile_path: Dockerfile
+    instance_count: 1
+    instance_size_slug: basic-xs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+
+  - name: users
+    git:
+      branch: main
+      repo_clone_url: ${GITHUB_REPO_URL}
+    source_dir: apps/users
+    dockerfile_path: Dockerfile
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xs
+    routes:
+      - path: /users
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: JWT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+
+databases:
+  - engine: PG
+    name: stellarbeat-db
+    production: false
+    version: "15" 
