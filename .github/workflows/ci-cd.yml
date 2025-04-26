@@ -32,6 +32,7 @@ jobs:
       DB_PASSWORD: postgres
       DB_DATABASE: stellarbeat_test
       NODE_ENV: test
+      DATABASE_TEST_URL: postgres://postgres:postgres@localhost:5432/stellarbeat_test
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
