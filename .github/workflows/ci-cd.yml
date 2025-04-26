@@ -11,6 +11,27 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: stellarbeat_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: stellarbeat_test
+      NODE_ENV: test
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
@@ -19,10 +40,10 @@ jobs:
           run_install: false
       - name: Install dependencies
         run: |
-          pnpm install  
+          pnpm install
           pnpm build
       - name: Run tests
-        run: pnpm test:unit
+        run: pnpm tu
 
   deploy-staging:
     needs: test
@@ -36,8 +57,8 @@ jobs:
           run_install: false
       - name: Install dependencies
         run: |
-          pnpm install -r --frozen-lockfile
-          pnpm -r build
+          pnpm install
+          pnpm build
       - name: Setup doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -70,8 +91,8 @@ jobs:
           run_install: false
       - name: Install dependencies
         run: |
-          pnpm install -r --frozen-lockfile
-          pnpm -r build
+          pnpm install
+          pnpm build
       - name: Setup doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -103,8 +124,8 @@ jobs:
           run_install: false
       - name: Install dependencies
         run: |
-          pnpm install -r --frozen-lockfile
-          pnpm -r build
+          pnpm install
+          pnpm build
       - name: Setup doctl
         uses: digitalocean/action-doctl@v2
         with:
