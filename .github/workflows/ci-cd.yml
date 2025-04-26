@@ -20,6 +20,15 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
+          pnpm install -r --frozen-lockfile
+          pnpm link --global
+          pnpm link --global shared
+          pnpm link --global http-helper
+          pnpm link --global custom-error
+          pnpm link --global exception-logger
+          pnpm link --global job-monitor
+          pnpm link --global logger
+          pnpm link --global history-scanner-dto
       - name: Run tests
         run: pnpm test:unit
 
@@ -36,6 +45,15 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
+          pnpm install -r --frozen-lockfile
+          pnpm link --global
+          pnpm link --global shared
+          pnpm link --global http-helper
+          pnpm link --global custom-error
+          pnpm link --global exception-logger
+          pnpm link --global job-monitor
+          pnpm link --global logger
+          pnpm link --global history-scanner-dto
       - name: Setup doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -69,6 +87,15 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
+          pnpm install -r --frozen-lockfile
+          pnpm link --global
+          pnpm link --global shared
+          pnpm link --global http-helper
+          pnpm link --global custom-error
+          pnpm link --global exception-logger
+          pnpm link --global job-monitor
+          pnpm link --global logger
+          pnpm link --global history-scanner-dto
       - name: Setup doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -101,6 +128,15 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
+          pnpm install -r --frozen-lockfile
+          pnpm link --global
+          pnpm link --global shared
+          pnpm link --global http-helper
+          pnpm link --global custom-error
+          pnpm link --global exception-logger
+          pnpm link --global job-monitor
+          pnpm link --global logger
+          pnpm link --global history-scanner-dto
       - name: Setup doctl
         uses: digitalocean/action-doctl@v2
         with:
