@@ -6,3 +6,10 @@ dist/
 tsconfig.tsbuildinfo
 .pnpm-store/
 *.session.sql
+
+*.auto.tfvars
+.envrc
+.secrets
+terraform/environments/*/terraform.tfvars
+terraform/environments/*/.terraform
+terraform/environments/*/.terraform.lock.hcl

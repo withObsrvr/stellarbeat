@@ -24,6 +24,7 @@ export default class Kernel {
 	}
 
 	static async getInstance(config?: Config) {
+		console.log('DEBUG: Kernel getInstance called');
 		if (!Kernel.instance) {
 			if (!config) {
 				const configResult = getConfigFromEnv();
@@ -35,6 +36,7 @@ export default class Kernel {
 			}
 			Kernel.instance = new Kernel();
 			Kernel.instance.config = config;
+			console.log('DEBUG: Kernel instance created');
 			await Kernel.instance.initializeContainer(config);
 		}
 
@@ -70,13 +72,18 @@ export default class Kernel {
 	}
 
 	async loadDatabase(config: Config, isTest: boolean) {
-		if (isTest) await TestingAppDataSource.initialize();
-		else await AppDataSource.initialize();
-		this.container
-			.bind<DataSource>(DataSource)
-			.toDynamicValue(() => {
-				return isTest ? TestingAppDataSource : AppDataSource;
-			})
-			.inSingletonScope();
+		try {
+			if (isTest) await TestingAppDataSource.initialize();
+			else await AppDataSource.initialize();
+			this.container
+				.bind<DataSource>(DataSource)
+				.toDynamicValue(() => {
+					return isTest ? TestingAppDataSource : AppDataSource;
+				})
+				.inSingletonScope();
+		} catch (error) {
+			console.error("Failed to initialize database connection:", error);
+			throw error;
+		}
 	}
 }

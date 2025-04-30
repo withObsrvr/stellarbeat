@@ -1,8 +1,8 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 # Set working directory
 WORKDIR /app
@@ -18,30 +18,41 @@ COPY apps/users/package.json ./apps/users/
 COPY packages/ ./packages/
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install 
 
 # Copy source code
-COPY apps/users/ ./apps/users/
+COPY apps/ ./apps/
+
+
+# Build everything
+# RUN pnpm build
+
+RUN pnpm build:ts && \
+    pnpm --filter shared run post-build && \
+    pnpm --filter users run post-build
 
 # Build the application
 RUN pnpm --filter users build
 
 # Production stage
-FROM node:20-alpine
+FROM node:20
 
 WORKDIR /app
 
-# Copy built files from builder
-COPY --from=builder /app/apps/users/lib ./lib
-COPY --from=builder /app/apps/users/package.json ./
+# Copy built files and users package.json
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/users/lib ./apps/users/lib
+COPY --from=builder /app/apps/users/node_modules ./apps/users/node_modules
+COPY --from=builder /app/apps/users/package.json ./apps/users/package.json
 
-# Set environment variables
+
+# # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=7000
+
 
 # Expose the port
-EXPOSE 3000
+EXPOSE 7000
 
 # Start the application
-CMD ["node", "lib/index.js"] 
+CMD ["node", "apps/users/lib/index.js"] 

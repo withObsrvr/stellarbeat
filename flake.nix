@@ -19,6 +19,23 @@
             sha256 = "0a7xy0qwixjfs9035yfzvbvcwk1g03s1j1k8aiip1njglcqzxa09";
           };
         });
+
+        # Docker image for users service
+        usersDockerImage = pkgs.dockerTools.buildImage {
+          name = "stellarbeat-users";
+          tag = "latest";
+          config = {
+            Cmd = [ "node" "apps/users/lib/index.js" ];
+            WorkingDir = "/app";
+            Env = [
+              "NODE_ENV=production"
+              "PORT=7000"
+            ];
+            ExposedPorts = {
+              "7000/tcp" = {};
+            };
+          };
+        };
       in
       {
         devShells.default = pkgs.mkShell {
@@ -57,6 +74,9 @@
             pnpm run build
             pnpm run post-build
             cd ../..
+            
+            # Set custom prompt
+            export PS1="\[\033[1;32m\][nix:stellarbeat]\[\033[0m\] \[\033[1;34m\]\w\[\033[0m\] \[\033[1;36m\]\$\[\033[0m\] "
             
             echo "Stellarbeat development environment ready!"
             echo "Using pnpm version: $(pnpm -v)"
@@ -97,5 +117,8 @@
             cp -r . $out/
           '';
         };
+
+        # Add Docker images to packages
+        packages.users-docker = usersDockerImage;
       });
 } 
