@@ -18,7 +18,7 @@ module "app_platform" {
   app_name   = "stellarbeat-staging"
   region     = var.region
   repo_url   = var.repo_url
-  git_branch = "feature/tmosley/add-terraform-deploy"
+  git_branch = var.git_branch
 
   environment   = "staging"
   instance_size = "basic-xs"
