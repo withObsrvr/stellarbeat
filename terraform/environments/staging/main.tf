@@ -46,7 +46,7 @@ module "app_platform" {
     VUE_APP_PUBLIC_API_URL              = "https://stellarbeat-staging-yw468.ondigitalocean.app/api"
     VUE_APP_TEST_API_URL                = "https://stellarbeat-staging-yw468.ondigitalocean.app/testnet-api" # Path to testnet API
     VUE_APP_BLOG_URL                    = "https://www.withobsrvr.com/blog"
-    VUE_APP_API_DOC_URL                 = "https://stellarbeat-staging-yw468.ondigitalocean.app/api/docs"
+    VUE_APP_API_DOC_URL                 = "https://stellarbeat-staging-yw468.ondigitalocean.app/api/docs/"
     VUE_APP_BRAND_NAME                  = "Stellarbeat"
     VUE_APP_BRAND_TAGLINE               = "Stellar Network Explorer"
     VUE_APP_BRAND_DESCRIPTION           = "Stellarbeat is a network explorer for the Stellar network. It provides a list of all nodes and organizations. It tracks various metrics and provides a history of changes. It also allows you to simulate different network conditions and topologies"
