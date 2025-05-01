@@ -73,14 +73,49 @@ export default class Kernel {
 
 	async loadDatabase(config: Config, isTest: boolean) {
 		try {
-			if (isTest) await TestingAppDataSource.initialize();
-			else await AppDataSource.initialize();
-			this.container
-				.bind<DataSource>(DataSource)
-				.toDynamicValue(() => {
-					return isTest ? TestingAppDataSource : AppDataSource;
-				})
-				.inSingletonScope();
+			console.log("Initializing database connection...");
+			
+			// Add retries for database connection
+			let retries = 5;
+			let lastError;
+			
+			while (retries > 0) {
+				try {
+					// Try to initialize the database
+					if (isTest) {
+						await TestingAppDataSource.initialize();
+					} else {
+						await AppDataSource.initialize();
+					}
+					
+					console.log("Database connection established successfully");
+					
+					// Bind the datasource to the container
+					this.container
+						.bind<DataSource>(DataSource)
+						.toDynamicValue(() => {
+							return isTest ? TestingAppDataSource : AppDataSource;
+						})
+						.inSingletonScope();
+					
+					// If we got here, we succeeded
+					return;
+				} catch (error) {
+					lastError = error;
+					console.error(`Database connection attempt failed (${retries} retries left):`, error);
+					retries--;
+					
+					if (retries > 0) {
+						// Wait for a few seconds before retrying
+						console.log(`Waiting 5 seconds before retrying...`);
+						await new Promise(resolve => setTimeout(resolve, 5000));
+					}
+				}
+			}
+			
+			// If we got here, all retries failed
+			console.error("All database connection attempts failed");
+			throw lastError;
 		} catch (error) {
 			console.error("Failed to initialize database connection:", error);
 			throw error;

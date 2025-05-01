@@ -73,7 +73,7 @@
           <div class="nav-item d-lg-flex pr-0">
             <div class="d-flex">
               <a
-                href="https://github.com/stellarbeat"
+                href="https://github.com/withObsrvr/stellarbeat"
                 class="btn btn-sm bt btn-secondary gray"
                 target="_blank"
                 rel="noopener"

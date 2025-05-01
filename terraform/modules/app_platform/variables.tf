@@ -6,6 +6,7 @@ variable "app_name" {
 variable "region" {
   description = "DigitalOcean region"
   type        = string
+  default     = "nyc3"
 }
 
 variable "repo_url" {
@@ -38,8 +39,25 @@ variable "backend_instance_count" {
   type        = number
 }
 
+variable "testnet_backend_instance_count" {
+  description = "Number of backend instances for testnet"
+  type        = number
+  default     = 0
+}
+
 variable "scanner_instance_count" {
-  description = "Number of scanner instances"
+  description = "Number of scanner instances for mainnet"
+  type        = number
+}
+
+variable "testnet_scanner_instance_count" {
+  description = "Number of scanner instances for testnet"
+  type        = number
+  default     = 0
+}
+
+variable "history_scanner_instance_count" {
+  description = "Number of history scanner instances"
   type        = number
 }
 
@@ -73,8 +91,22 @@ variable "backend_env" {
   sensitive   = true
 }
 
+variable "testnet_backend_env" {
+  description = "Environment variables for testnet backend service"
+  type        = map(string)
+  default     = {}
+  sensitive   = true
+}
+
 variable "network_scanner_env" {
-  description = "Environment variables for network scanner service"
+  description = "Environment variables for mainnet network scanner service"
+  type        = map(string)
+  default     = {}
+  sensitive   = true
+}
+
+variable "testnet_scanner_env" {
+  description = "Environment variables for testnet network scanner service"
   type        = map(string)
   default     = {}
   sensitive   = true
@@ -92,4 +124,4 @@ variable "users_env" {
   type        = map(string)
   default     = {}
   sensitive   = true
-} 
+}

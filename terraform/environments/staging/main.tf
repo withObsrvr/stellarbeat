@@ -23,10 +23,13 @@ module "app_platform" {
   environment   = "staging"
   instance_size = "basic-xs"
 
-  frontend_instance_count = 0
-  backend_instance_count  = 1
-  scanner_instance_count  = 0
-  users_instance_count    = 0
+  frontend_instance_count        = 1
+  backend_instance_count         = 1
+  testnet_backend_instance_count = 1
+  scanner_instance_count         = 1
+  testnet_scanner_instance_count = 1
+  history_scanner_instance_count = 0
+  users_instance_count           = 0
 
   database_production = false
 
@@ -37,14 +40,28 @@ module "app_platform" {
 
   # Frontend environment variables
   frontend_env = {
-    API_URL  = "https://api-staging.stellarbeat.com"
-    API_KEY  = var.staging_api_key
-    NODE_ENV = "staging"
+    API_URL                             = "https://stellarbeat-staging-yw468.ondigitalocean.app/api"
+    API_KEY                             = var.staging_api_key
+    NODE_ENV                            = "staging"
+    VUE_APP_PUBLIC_API_URL              = "https://stellarbeat-staging-yw468.ondigitalocean.app/api"
+    VUE_APP_TEST_API_URL                = "https://stellarbeat-staging-yw468.ondigitalocean.app/testnet-api" # Path to testnet API
+    VUE_APP_BLOG_URL                    = "https://www.withobsrvr.com/blog"
+    VUE_APP_API_DOC_URL                 = "https://stellarbeat-staging-yw468.ondigitalocean.app/api/docs"
+    VUE_APP_BRAND_NAME                  = "Stellarbeat"
+    VUE_APP_BRAND_TAGLINE               = "Stellar Network Explorer"
+    VUE_APP_BRAND_DESCRIPTION           = "Stellarbeat is a network explorer for the Stellar network. It provides a list of all nodes and organizations. It tracks various metrics and provides a history of changes. It also allows you to simulate different network conditions and topologies"
+    VUE_APP_BRAND_LOGO_SRC              = "logo.png"
+    VUE_APP_BRAND_LOGO_ALT              = "Stellarbeat with Obsrvr"
+    VUE_APP_BRAND_EMAIL                 = "hello@withobsrvr.com"
+    VUE_APP_PUBLIC_ENABLE_NOTIFY        = 1
+    VUE_APP_PUBLIC_ENABLE_HISTORY       = 1
+    VUE_APP_PUBLIC_ENABLE_HORIZON       = 1
+    VUE_APP_PUBLIC_ENABLE_CONFIG_EXPORT = 1
+    VUE_APP_ENABLE_DEMO_NETWORKS        = 1
   }
 
   # Backend environment variables
   backend_env = {
-    ACTIVE_DATABASE_URL           = var.active_database_url
     JWT_SECRET                    = var.staging_jwt_secret
     NODE_ENV                      = "staging"
     IPSTACK_ACCESS_KEY            = var.ipstack_access_key
@@ -88,9 +105,8 @@ module "app_platform" {
     TYPEORM_MIGRATIONS_RUN        = "false"
   }
 
-  # Network Scanner environment variables
+  # Network Scanner environment variables for mainnet
   network_scanner_env = {
-    ACTIVE_DATABASE_URL          = var.active_database_url
     API_KEY                      = var.staging_api_key
     NODE_ENV                     = "staging"
     IPSTACK_ACCESS_KEY           = var.ipstack_access_key
@@ -104,23 +120,67 @@ module "app_platform" {
     NETWORK_STELLAR_CORE_VERSION = var.network_stellar_core_version
     NETWORK_QUORUM_SET           = var.network_quorum_set
     NETWORK_KNOWN_PEERS          = var.network_known_peers
+    CRAWLER_MAX_CONNECTIONS      = var.crawler_max_connections
+    CRAWLER_MAX_CRAWL_TIME       = var.crawler_max_crawl_time
+    CRAWLER_BLACKLIST            = var.crawler_blacklist
+  }
+
+  # Network Scanner environment variables for testnet
+  testnet_scanner_env = {
+    API_KEY                      = var.staging_api_key
+    NODE_ENV                     = "staging"
+    IPSTACK_ACCESS_KEY           = var.ipstack_access_key
+    HORIZON_URL                  = var.testnet_horizon_url
+    NETWORK_PASSPHRASE           = var.testnet_network_passphrase
+    NETWORK_ID                   = var.testnet_network_id
+    NETWORK_NAME                 = var.testnet_network_name
+    NETWORK_OVERLAY_VERSION      = var.testnet_network_overlay_version
+    NETWORK_LEDGER_VERSION       = var.testnet_network_ledger_version
+    NETWORK_OVERLAY_MIN_VERSION  = var.testnet_network_overlay_min_version
+    NETWORK_STELLAR_CORE_VERSION = var.testnet_network_stellar_core_version
+    NETWORK_QUORUM_SET           = var.testnet_network_quorum_set
+    NETWORK_KNOWN_PEERS          = var.testnet_network_known_peers
+    CRAWLER_MAX_CONNECTIONS      = var.crawler_max_connections
+    CRAWLER_MAX_CRAWL_TIME       = var.crawler_max_crawl_time
+    CRAWLER_BLACKLIST            = var.crawler_blacklist
   }
 
   # History Scanner environment variables
   history_scanner_env = {
-    ACTIVE_DATABASE_URL = var.active_database_url
-    API_KEY             = var.staging_api_key
-    NODE_ENV            = "staging"
+    API_KEY  = var.staging_api_key
+    NODE_ENV = "staging"
   }
 
   # Users service environment variables
   users_env = {
-    ACTIVE_DATABASE_URL = var.active_database_url
-    JWT_SECRET          = var.staging_jwt_secret
-    NODE_ENV            = "staging"
-    MAILGUN_SECRET      = var.mailgun_secret
-    MAILGUN_DOMAIN      = var.mailgun_domain
-    MAILGUN_FROM        = var.mailgun_from
-    MAILGUN_BASE_URL    = var.mailgun_base_url
+    JWT_SECRET       = var.staging_jwt_secret
+    NODE_ENV         = "staging"
+    MAILGUN_SECRET   = var.mailgun_secret
+    MAILGUN_DOMAIN   = var.mailgun_domain
+    MAILGUN_FROM     = var.mailgun_from
+    MAILGUN_BASE_URL = var.mailgun_base_url
+  }
+
+  # Testnet Backend environment variables
+  testnet_backend_env = {
+    JWT_SECRET                   = var.staging_jwt_secret
+    NODE_ENV                     = "staging"
+    IPSTACK_ACCESS_KEY           = var.ipstack_access_key
+    HORIZON_URL                  = var.testnet_horizon_url
+    NETWORK_PASSPHRASE           = var.testnet_network_passphrase
+    NETWORK_ID                   = var.testnet_network_id
+    NETWORK_NAME                 = var.testnet_network_name
+    NETWORK_OVERLAY_VERSION      = var.testnet_network_overlay_version
+    NETWORK_LEDGER_VERSION       = var.testnet_network_ledger_version
+    NETWORK_OVERLAY_MIN_VERSION  = var.testnet_network_overlay_min_version
+    NETWORK_STELLAR_CORE_VERSION = var.testnet_network_stellar_core_version
+    NETWORK_QUORUM_SET           = var.testnet_network_quorum_set
+    NETWORK_KNOWN_PEERS          = var.testnet_network_known_peers
+    CRAWLER_MAX_CONNECTIONS      = var.crawler_max_connections
+    CRAWLER_MAX_CRAWL_TIME       = var.crawler_max_crawl_time
+    CRAWLER_BLACKLIST            = var.crawler_blacklist
+    BACKEND_PORT                 = var.backend_port
+    USER_AGENT                   = var.user_agent
+    TYPEORM_MIGRATIONS_RUN       = "false"
   }
 }

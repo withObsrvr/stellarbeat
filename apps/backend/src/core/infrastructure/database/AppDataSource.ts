@@ -15,16 +15,15 @@ const AppDataSource = new DataSource({
 	url: process.env.ACTIVE_DATABASE_URL,
 	entities: ['lib/**/entities/*.js', 'lib/**/domain/**/!(*.test)*.js'],
 	migrations: ['lib/**/migrations/*.js'],
+	// Enable migrations since we're using the doadmin user
 	migrationsRun: process.env.TYPEORM_MIGRATIONS_RUN !== 'false',
-	ssl: process.env.NODE_ENV !== 'development',
-	extra:
-		process.env.NODE_ENV !== 'development'
-			? {
-					ssl: {
-						rejectUnauthorized: false
-					}
-			  }
-			: undefined,
+	ssl: true,
+	// Always disable SSL verification for DigitalOcean managed databases
+	extra: {
+		ssl: {
+			rejectUnauthorized: false
+		}
+	},
 	poolSize: process.env.DATABASE_POOL_SIZE
 		? parseInt(process.env.DATABASE_POOL_SIZE)
 		: 10

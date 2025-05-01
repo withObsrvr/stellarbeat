@@ -11,11 +11,11 @@
   },
   "servers": [
     {
-      "url": "https://api.stellarbeat.io",
+      "url": "https://stellarbeat-staging-yw468.ondigitalocean.app/api",
       "description": "Api for Stellar public network"
     },
     {
-      "url": "https://api-testnet.stellarbeat.io",
+      "url": "https://stellarbeat-staging-yw468.ondigitalocean.app/testnet-api",
       "description": "Api for Stellar testnet"
     }
   ],
