@@ -1,21 +1,21 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "description": "Api's used and provided by [https://stellarbeat.io](https://stellarbeat.io).",
-    "title": "Stellarbeat.io API",
+    "description": "Api's used and provided by Stellarbeat with Obsrvr",
+    "title": "Stellarbeat API",
     "contact": {
-      "name": "Stellarbeat",
-      "email": "info@stellarbeat.io"
+      "name": "Obsrvr",
+      "email": "hello@withobsrvr.com"
     },
     "version": "v1"
   },
   "servers": [
     {
-      "url": "https://api.stellarbeat.io",
+      "url": "https://stellarbeat-staging-yw468.ondigitalocean.app/api",
       "description": "Api for Stellar public network"
     },
     {
-      "url": "https://api-testnet.stellarbeat.io",
+      "url": "https://stellarbeat-staging-yw468.ondigitalocean.app/testnet-api",
       "description": "Api for Stellar testnet"
     }
   ],

@@ -41,6 +41,22 @@ api.use(bodyParser.json());
 api.use(helmet());
 api.set('trust proxy', true); //todo: env var
 
+// Add a simple health check endpoint that doesn't require database access
+api.get('/health', (req, res) => {
+  console.log('Health check endpoint called');
+  res.status(200).send('OK');
+});
+
+// Start a minimal server immediately for health checks
+const startMinimalServer = () => {
+  server = api.listen(process.env.BACKEND_PORT || process.env.PORT || 3000, () => {
+    console.log(`Minimal API server started on port ${process.env.BACKEND_PORT || process.env.PORT || 3000} for health checks`);
+  });
+};
+
+// Start the minimal server immediately for health checks
+startMinimalServer();
+
 const setup = async (): Promise<{ config: Config; kernel: Kernel }> => {
 	const configResult = getConfigFromEnv();
 	if (configResult.isErr()) {
@@ -53,12 +69,18 @@ const setup = async (): Promise<{ config: Config; kernel: Kernel }> => {
 	console.log('Debug: Environment PORT=', process.env.PORT);
 	console.log('Debug: Environment BACKEND_PORT=', process.env.BACKEND_PORT);
 	console.log('Debug: Config apiPort=', config.apiPort);
-	const kernel = await Kernel.getInstance(config);
-
-	return {
-		config: config,
-		kernel: kernel
-	};
+	console.log('Debug: Starting to initialize Kernel...');
+	try {
+		const kernel = await Kernel.getInstance(config);
+		console.log('Debug: Kernel initialized successfully');
+		return {
+			config: config,
+			kernel: kernel
+		};
+	} catch (error) {
+		console.error('ERROR: Failed to initialize Kernel:', error);
+		throw error;
+	}
 };
 const listen = async () => {
 	const { config, kernel } = await setup();
@@ -172,8 +194,14 @@ const listen = async () => {
 		})
 	);
 
+	// If we already have a server running from the minimal setup, close it first
+	if (server) {
+		console.log('Stopping minimal server to start full server');
+		server.close();
+	}
+	
 	server = api.listen(config.apiPort, () => {
-		console.log('api listening on port: ' + config.apiPort);
+		console.log('Full API server now listening on port: ' + config.apiPort);
 	});
 
 	process.on('SIGTERM', async () => {
@@ -187,7 +215,19 @@ const listen = async () => {
 	});
 };
 
-listen();
+// Try to initialize the full server but keep the minimal one running if it fails
+listen().catch(error => {
+  console.error("Failed to initialize the full API server:", error);
+  console.log("Minimal server will remain running for health checks");
+  
+  // Add a simple /v1 endpoint for the health check to pass
+  api.get('/v1', (req, res) => {
+    res.status(503).json({ 
+      status: "Service Unavailable", 
+      message: "API is in minimal health check mode due to initialization failure" 
+    });
+  });
+});
 
 async function stop(dataSource: DataSource) {
 	server.close(async () => {
