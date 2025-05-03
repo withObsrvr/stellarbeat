@@ -408,3 +408,9 @@ variable "consumer_name" {
   type        = string
   default     = "consumer"
 }
+
+variable "users_port" {
+  description = "Port for the users service"
+  type        = number
+  default     = 7000
+}
