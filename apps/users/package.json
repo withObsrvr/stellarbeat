@@ -3,6 +3,7 @@
 	"description": "Users email service",
 	"scripts": {
 		"build": "tsc --declaration",
+		"post-build": "cp ormconfig.js ../../ormconfig.cjs",
 		"build-and-start": "pnpm build; node lib/index.js",
 		"start": "node lib/index.js",
 		"test": "pnpm build; node lib/__tests__/all.test.js"

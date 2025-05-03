@@ -3,7 +3,7 @@ import { User } from './User';
 import { config } from 'dotenv';
 import { Encryption } from './Encryption';
 import { Hasher } from './Hasher';
-import { Server } from 'net';
+import { createConnection, Server } from 'net';
 import basicAuth from 'express-basic-auth';
 import { HttpError, MailgunService } from './MailgunService';
 import * as Sentry from '@sentry/node';
@@ -238,32 +238,10 @@ api.post(
 );
 
 async function listen() {
-	try {
-		console.log('Attempting to connect to database...');
-		// Explicitly define the connection options instead of relying on ormconfig
-		await createConnections([{
-			type: 'postgres',
-			synchronize: false,
-			logging: process.env.NODE_ENV === 'development',
-			url: process.env.DATABASE_URL,
-			entities: [User],
-			migrations: [__dirname + '/migrations/*.js'],
-			migrationsRun: true,
-			ssl: true,
-			extra: {
-				ssl: {
-					rejectUnauthorized: false
-				}
-			}
-		}]);
-		console.log('Successfully connected to database');
-		server = api.listen(port, () =>
-			console.log('api listening on port: ' + port)
-		);
-	} catch (error) {
-		console.error('Failed to connect to database:', error);
-		throw error;
-	}
+	await createConnections();
+	server = api.listen(port, () =>
+		console.log('api listening on port: ' + port)
+	);
 }
 
 listen();
