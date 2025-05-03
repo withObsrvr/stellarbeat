@@ -51,10 +51,13 @@ let server: Server;
 api.use(helmet());
 api.use(express.json());
 
-// Health check endpoint
+
+// Add a simple health check endpoint that doesn't require database access
 api.get('/health', (req, res) => {
-    res.status(200).json({ status: 'ok' });
-});
+	console.log('Health check endpoint called');
+	res.status(200).send('OK');
+  });
+  
 api.use(
 	basicAuth({
 		users: users
