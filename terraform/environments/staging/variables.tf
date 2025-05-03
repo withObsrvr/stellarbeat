@@ -202,10 +202,37 @@ variable "staging_api_key" {
   sensitive   = true
 }
 
+variable "staging_api_url" {
+  description = "API URL for Staging"
+  type        = string
+}
+variable "staging_url" {
+  description = "URL for Staging"
+  type        = string
+}
+
 variable "staging_jwt_secret" {
   description = "JWT Secret"
   type        = string
   sensitive   = true
+}
+
+variable "coordinator_api_username" {
+  description = "Coordinator username"
+  type        = string
+  default     = "admin"
+}
+
+variable "coordinator_api_password" {
+  description = "Coordinator password"
+  type        = string
+  default     = "password"
+}
+
+variable "history_scanner_user_agent" {
+  description = "User agent for the history scanner"
+  type        = string
+  default     = "stellarbeat-history-scanner"
 }
 
 variable "frontend_instance_count" {
@@ -358,4 +385,26 @@ variable "mailgun_from" {
 variable "mailgun_base_url" {
   description = "Mailgun base URL"
   type        = string
+}
+
+
+variable "encryption_secret" {
+  description = "value of encryption_secret"
+  type        = string
+}
+
+variable "hash_secret" {
+  description = "value of hash_secret"
+  type        = string
+}
+
+variable "consumer_secret" {
+  description = "value of consumer_secret"
+  type        = string
+}
+
+variable "consumer_name" {
+  description = "value of consumer_name"
+  type        = string
+  default     = "consumer"
 }

@@ -50,6 +50,11 @@ const api = express();
 let server: Server;
 api.use(helmet());
 api.use(express.json());
+
+// Health check endpoint
+api.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
 api.use(
 	basicAuth({
 		users: users
