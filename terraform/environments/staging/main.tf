@@ -182,6 +182,7 @@ module "app_platform" {
     HASH_SECRET       = var.hash_secret
     CONSUMER_SECRET   = var.consumer_secret
     CONSUMER_NAME     = var.consumer_name
+    PORT              = var.users_port
   }
 
   # Testnet Backend environment variables

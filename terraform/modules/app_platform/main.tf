@@ -32,6 +32,12 @@ resource "digitalocean_database_db" "stellarbeat_testnet_db" {
   name       = "stellarbeat_testnet"
 }
 
+# Create users database
+resource "digitalocean_database_db" "stellarbeat_users_db" {
+  cluster_id = digitalocean_database_cluster.stellarbeat_db.id
+  name       = "stellarbeat_users"
+}
+
 # We'll use the default doadmin user which already has all necessary permissions
 # No need to create a separate user or grant permissions
 
@@ -846,8 +852,14 @@ resource "digitalocean_app" "stellarbeat" {
         # Use database connection string with doadmin user (already has all necessary permissions)
         env {
           key   = "DATABASE_URL"
-          value = "postgres://${digitalocean_database_cluster.stellarbeat_db.user}:${digitalocean_database_cluster.stellarbeat_db.password}@${digitalocean_database_cluster.stellarbeat_db.host}:${digitalocean_database_cluster.stellarbeat_db.port}/${digitalocean_database_db.stellarbeat_db.name}?sslmode=no-verify"
+          value = "postgres://${digitalocean_database_cluster.stellarbeat_db.user}:${digitalocean_database_cluster.stellarbeat_db.password}@${digitalocean_database_cluster.stellarbeat_db.host}:${digitalocean_database_cluster.stellarbeat_db.port}/${digitalocean_database_db.stellarbeat_users_db.name}?sslmode=no-verify"
           type  = "SECRET"
+        }
+
+        env {
+          key   = "PORT"
+          value = lookup(var.users_env, "PORT", "7000")
+          type  = "GENERAL"
         }
 
         # JWT Secret if provided
@@ -926,7 +938,7 @@ resource "digitalocean_app" "stellarbeat" {
           http_path = "/health"
         }
 
-        build_command = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run post-build && pnpm --filter users build"
+        build_command = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users post-build"
         run_command   = "node apps/users/lib/index.js"
       }
     }
