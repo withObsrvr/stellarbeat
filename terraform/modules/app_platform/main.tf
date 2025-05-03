@@ -229,6 +229,20 @@ resource "digitalocean_app" "stellarbeat" {
           type  = "SECRET"
         }
 
+        # History Scan API Username if provided
+        env {
+          key   = "HISTORY_SCAN_API_USERNAME"
+          value = lookup(var.backend_env, "HISTORY_SCAN_API_USERNAME", "")
+          type  = "SECRET"
+        }
+
+        # History Scan API Password if provided
+        env {
+          key   = "HISTORY_SCAN_API_PASSWORD"
+          value = lookup(var.backend_env, "HISTORY_SCAN_API_PASSWORD", "")
+          type  = "SECRET"
+        }
+
         # JWT Secret if provided
         env {
           key   = "JWT_SECRET"
@@ -634,6 +648,34 @@ resource "digitalocean_app" "stellarbeat" {
           type  = "SECRET"
         }
 
+        # User Agent if provided
+        env {
+          key   = "USER_AGENT"
+          value = lookup(var.history_scanner_env, "USER_AGENT", "")
+          type  = "GENERAL"
+        }
+
+        # Coordinator API Base URL if provided
+        env {
+          key   = "COORDINATOR_API_BASE_URL"
+          value = lookup(var.history_scanner_env, "COORDINATOR_API_BASE_URL", "")
+          type  = "GENERAL"
+        }
+
+        # Coordinator API Username if provided
+        env {
+          key   = "COORDINATOR_API_USERNAME"
+          value = lookup(var.history_scanner_env, "COORDINATOR_API_USERNAME", "")
+          type  = "GENERAL"
+        }
+
+        # Coordinator API Password if provided
+        env {
+          key   = "COORDINATOR_API_PASSWORD"
+          value = lookup(var.history_scanner_env, "COORDINATOR_API_PASSWORD", "")
+          type  = "SECRET"
+        }
+
         build_command = "pnpm build"
         run_command   = "pnpm start:scan-history"
       }
@@ -803,7 +845,7 @@ resource "digitalocean_app" "stellarbeat" {
 
         # Use database connection string with doadmin user (already has all necessary permissions)
         env {
-          key   = "ACTIVE_DATABASE_URL"
+          key   = "DATABASE_URL"
           value = "postgres://${digitalocean_database_cluster.stellarbeat_db.user}:${digitalocean_database_cluster.stellarbeat_db.password}@${digitalocean_database_cluster.stellarbeat_db.host}:${digitalocean_database_cluster.stellarbeat_db.port}/${digitalocean_database_db.stellarbeat_db.name}?sslmode=no-verify"
           type  = "SECRET"
         }
@@ -840,6 +882,41 @@ resource "digitalocean_app" "stellarbeat" {
         env {
           key   = "MAILGUN_FROM"
           value = lookup(var.users_env, "MAILGUN_FROM", "")
+          type  = "GENERAL"
+        }
+
+        # Sentry DSN if provided
+        env {
+          key   = "SENTRY_DSN"
+          value = lookup(var.users_env, "SENTRY_DSN", "")
+          type  = "SECRET"
+        }
+
+        # Consumer Secret if provided
+        env {
+          key   = "CONSUMER_SECRET"
+          value = lookup(var.users_env, "CONSUMER_SECRET", "")
+          type  = "SECRET"
+        }
+
+        # Encryption Secret if provided
+        env {
+          key   = "ENCRYPTION_SECRET"
+          value = lookup(var.users_env, "ENCRYPTION_SECRET", "")
+          type  = "SECRET"
+        }
+
+        # Hash Secret if provided
+        env {
+          key   = "HASH_SECRET"
+          value = lookup(var.users_env, "HASH_SECRET", "")
+          type  = "SECRET"
+        }
+
+        # Consumer Name if provided
+        env {
+          key   = "CONSUMER_NAME"
+          value = lookup(var.users_env, "CONSUMER_NAME", "")
           type  = "GENERAL"
         }
 

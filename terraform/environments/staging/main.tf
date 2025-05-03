@@ -27,9 +27,9 @@ module "app_platform" {
   backend_instance_count         = 1
   testnet_backend_instance_count = 1
   scanner_instance_count         = 1
-  testnet_scanner_instance_count = 1
+  testnet_scanner_instance_count = 0
   history_scanner_instance_count = 0
-  users_instance_count           = 0
+  users_instance_count           = 1
 
   database_production = false
 
@@ -103,6 +103,8 @@ module "app_platform" {
     USER_AGENT                    = var.user_agent
     ENABLE_S3_BACKUP              = var.enable_s3_backup
     TYPEORM_MIGRATIONS_RUN        = "false"
+    HISTORY_SCAN_API_USERNAME     = var.coordinator_api_username
+    HISTORY_SCAN_API_PASSWORD     = var.coordinator_api_password
   }
 
   # Network Scanner environment variables for mainnet
@@ -149,16 +151,37 @@ module "app_platform" {
   history_scanner_env = {
     API_KEY  = var.staging_api_key
     NODE_ENV = "staging"
+
+
+    # Required Backend API Settings
+    COORDINATOR_API_BASE_URL = var.staging_api_url
+    COORDINATOR_API_USERNAME = var.coordinator_api_username
+    COORDINATOR_API_PASSWORD = var.coordinator_api_password
+
+    # Optional Settings 
+    USER_AGENT                       = var.history_scanner_user_agent
+    LOG_LEVEL                        = "info"
+    HISTORY_MAX_FILE_MS              = 60000
+    HISTORY_SLOW_ARCHIVE_MAX_LEDGERS = 1000
+
+    # Optional Sentry Configuration
+    ENABLE_SENTRY = false
+    SENTRY_DSN    = var.sentry_dsn
   }
 
   # Users service environment variables
   users_env = {
-    JWT_SECRET       = var.staging_jwt_secret
-    NODE_ENV         = "staging"
-    MAILGUN_SECRET   = var.mailgun_secret
-    MAILGUN_DOMAIN   = var.mailgun_domain
-    MAILGUN_FROM     = var.mailgun_from
-    MAILGUN_BASE_URL = var.mailgun_base_url
+    JWT_SECRET        = var.staging_jwt_secret
+    NODE_ENV          = "staging"
+    MAILGUN_SECRET    = var.mailgun_secret
+    MAILGUN_DOMAIN    = var.mailgun_domain
+    MAILGUN_FROM      = var.mailgun_from
+    MAILGUN_BASE_URL  = var.mailgun_base_url
+    SENTRY_DSN        = var.sentry_dsn
+    ENCRYPTION_SECRET = var.encryption_secret
+    HASH_SECRET       = var.hash_secret
+    CONSUMER_SECRET   = var.consumer_secret
+    CONSUMER_NAME     = var.consumer_name
   }
 
   # Testnet Backend environment variables
