@@ -938,8 +938,8 @@ resource "digitalocean_app" "stellarbeat" {
           http_path = "/health"
         }
 
-        build_command = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users post-build"
-        run_command   = "node apps/users/lib/index.js"
+        build_command = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
+        run_command   = "pnpm --filter users start"
       }
     }
 

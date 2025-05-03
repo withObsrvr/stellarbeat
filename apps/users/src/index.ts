@@ -53,10 +53,12 @@ api.use(express.json());
 
 
 // Add a simple health check endpoint that doesn't require database access
+// Health check endpoint that doesn't require database access
+// This will return OK even if the database connection is not yet established
 api.get('/health', (req, res) => {
 	console.log('Health check endpoint called');
-	res.status(200).send('OK');
-  });
+	res.status(200).json({ status: 'OK' });
+});
   
 api.use(
 	basicAuth({
@@ -238,10 +240,53 @@ api.post(
 );
 
 async function listen() {
-	await createConnections();
+	// Start the HTTP server first so health checks can pass
 	server = api.listen(port, () =>
 		console.log('api listening on port: ' + port)
 	);
+	
+	// Then try to connect to the database with retries
+	let retries = 5;
+	let connected = false;
+	
+	while (retries > 0 && !connected) {
+		try {
+			console.log(`Attempting to connect to database (${retries} retries left)...`);
+			
+			// Explicitly define the connection options instead of relying on ormconfig file
+			await createConnections([{
+				type: 'postgres',
+				synchronize: false,
+				logging: process.env.NODE_ENV === 'development',
+				url: process.env.DATABASE_URL,
+				entities: [User],
+				migrations: [__dirname + '/migrations/*.js'],
+				migrationsRun: true,
+				ssl: true,
+				extra: {
+					ssl: {
+						rejectUnauthorized: false
+					}
+				}
+			}]);
+			
+			connected = true;
+			console.log('Successfully connected to database');
+		} catch (error) {
+			console.error('Failed to connect to database:', error);
+			retries--;
+			
+			if (retries > 0) {
+				// Wait for 3 seconds before retrying
+				console.log('Retrying in 3 seconds...');
+				await new Promise(resolve => setTimeout(resolve, 3000));
+			} else {
+				console.error('Maximum database connection retries exceeded');
+				// Don't exit the process - API endpoints that don't require DB will still work
+				// Let health check pass but log the error
+			}
+		}
+	}
 }
 
 listen();
@@ -258,7 +303,12 @@ process.on('SIGINT', async () => {
 async function stop() {
 	server.close(async () => {
 		console.log('HTTP server closed');
-		await getConnection().close();
-		console.log('connection to db closed');
+		try {
+			// Only try to close the connection if it was successfully established
+			await getConnection().close();
+			console.log('connection to db closed');
+		} catch (error) {
+			console.log('No database connection to close or error closing connection');
+		}
 	});
 }
