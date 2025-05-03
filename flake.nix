@@ -61,11 +61,15 @@
             if [ ! -f "apps/frontend/.env" ]; then
               cp apps/frontend/.env apps/frontend/.env
             fi
+            if [ ! -f "apps/users/.env" ]; then
+              cp apps/users/.env apps/users/.env
+            fi
 
             # Load environment variables
             set -a
             source apps/backend/.env
             source apps/frontend/.env
+            source apps/users/.env
             set +a
 
             # Build shared packages first
