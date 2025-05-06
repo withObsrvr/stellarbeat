@@ -277,6 +277,12 @@ variable "git_branch" {
   default     = "main"
 }
 
+variable "domain_name" {
+  description = "Domain name for the application"
+  type        = string
+  default     = "stellarbeat-staging.withobsrvr.com"
+}
+
 variable "notifications_enabled" {
   description = "Enable notifications"
   type        = bool

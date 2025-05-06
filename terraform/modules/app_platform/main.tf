@@ -46,6 +46,9 @@ resource "digitalocean_app" "stellarbeat" {
   spec {
     name   = var.app_name
     region = var.region
+    domain {
+      name = var.domain_name
+    }
 
     # Frontend Service - conditionally deployed based on instance count
     dynamic "service" {
