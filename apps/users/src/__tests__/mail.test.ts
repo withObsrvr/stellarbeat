@@ -16,7 +16,7 @@ const mailgunService = new MailgunService(
 );
 
 async function sendMessage(){
-    const result = await mailgunService.sendMessage('notify-test@stellarbeat.io',
+    const result = await mailgunService.sendMessage('notify-test@withobsrvr.com',
         '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n' +
         '<html xmlns="http://www.w3.org/1999/xhtml" style="font-family: \'Helvetica Neue\', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">\n' +
         '<head>\n' +
