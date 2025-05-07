@@ -232,7 +232,7 @@ variable "coordinator_api_password" {
 variable "history_scanner_user_agent" {
   description = "User agent for the history scanner"
   type        = string
-  default     = "stellarbeat-history-scanner"
+  default     = "radar-history-scanner"
 }
 
 variable "frontend_instance_count" {
