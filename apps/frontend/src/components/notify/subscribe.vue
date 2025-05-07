@@ -177,12 +177,10 @@ import {
 import { computed, type ComputedRef, onMounted, type Ref, ref } from "vue";
 import useStore from "@/store/useStore";
 
-// We're now using string format "type:id" instead of objects
-// Keeping this type definition as a comment for reference
-// type EventSourceId = {
-//   type: string;
-//   id: string;
-// };
+type EventSourceId = {
+  type: string;
+  id: string;
+};
 
 type SelectNode = {
   name: string;
@@ -252,24 +250,32 @@ function resetForm() {
   consented.value = "not_accepted";
 }
 
-function getSelectedEventSourceIds(): string[] {
-  const eventSourceIds: string[] = [];
+function getSelectedEventSourceIds(): EventSourceId[] {
+  const eventSourceIds: EventSourceId[] = [];
   if (networkSubscription.value) {
-    const networkId = store.network.id
-      ? store.network.id
-      : "Public Global Stellar Network ; September 2015";
-    eventSourceIds.push(`network:${networkId}`);
+    eventSourceIds.push({
+      type: "network",
+      id: store.network.id
+        ? store.network.id
+        : "Public Global Stellar Network ; September 2015",
+    });
   }
 
   if (selectedNodes.value !== null) {
     selectedNodes.value.forEach((node: SelectNode) => {
-      eventSourceIds.push(`node:${node.publicKey}`);
+      eventSourceIds.push({
+        type: "node",
+        id: node.publicKey,
+      });
     });
   }
 
   if (selectedOrganizations.value !== null) {
     selectedOrganizations.value.forEach((org: SelectedOrganization) => {
-      eventSourceIds.push(`organization:${org.id}`);
+      eventSourceIds.push({
+        type: "organization",
+        id: org.id,
+      });
     });
   }
 
@@ -284,19 +290,6 @@ async function onSubscribe(event: Event) {
   if (!emailAddressState.value || consented.value === "not_accepted") return;
   try {
     requesting.value = true;
-    
-    // Get event source IDs in object format
-    const objectEventSourceIds = getSelectedEventSourceIds();
-    
-    // Convert to string format that works with the API
-    const stringEventSourceIds = objectEventSourceIds.map(item => 
-      `${item.type}:${item.id}`
-    );
-    
-    // Log for debugging
-    console.log("Original format:", objectEventSourceIds);
-    console.log("Converted format:", stringEventSourceIds);
-    
     const response = await fetch(
       import.meta.env.VUE_APP_PUBLIC_API_URL + "/v1/subscription",
       {
@@ -306,16 +299,10 @@ async function onSubscribe(event: Event) {
         },
         body: JSON.stringify({
           emailAddress: emailAddress.value,
-          eventSourceIds: stringEventSourceIds, // Use string format
+          eventSourceIds: getSelectedEventSourceIds(),
         }),
       },
     );
-    
-    // Log response for debugging
-    console.log("Response status:", response.status);
-    const responseData = await response.clone().json().catch(() => null);
-    console.log("Response data:", responseData);
-    
     if (!response.ok) {
       requesting.value = false;
       submitError.value = true;
@@ -324,7 +311,6 @@ async function onSubscribe(event: Event) {
     requesting.value = false;
     resetForm();
   } catch (e) {
-    console.error("Subscription error:", e);
     requesting.value = false;
     submitError.value = true;
   }
@@ -337,9 +323,6 @@ async function onUnsubscribe(event: Event) {
   if (!emailAddressState.value || consented.value === "not_accepted") return;
   try {
     requesting.value = true;
-    
-    console.log("Sending unsubscribe request for:", emailAddress.value);
-    
     const response = await fetch(
       import.meta.env.VUE_APP_PUBLIC_API_URL +
         "/v1/subscription/request-unsubscribe",
@@ -353,12 +336,6 @@ async function onUnsubscribe(event: Event) {
         }),
       },
     );
-    
-    // Log response for debugging
-    console.log("Unsubscribe response status:", response.status);
-    const responseData = await response.clone().json().catch(() => null);
-    console.log("Unsubscribe response data:", responseData);
-    
     if (!response.ok) {
       requesting.value = false;
       submitError.value = true;
@@ -367,7 +344,6 @@ async function onUnsubscribe(event: Event) {
     requesting.value = false;
     resetForm();
   } catch (e) {
-    console.error("Unsubscribe error:", e);
     requesting.value = false;
     submitError.value = true;
   }
