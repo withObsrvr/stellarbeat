@@ -238,6 +238,13 @@ resource "digitalocean_app" "stellarbeat" {
           type  = "SECRET"
         }
 
+        # Use database connection string with doadmin user (already has all necessary permissions)
+        env {
+          key   = "DATABASE_TEST_URL"
+          value = "postgres://${digitalocean_database_cluster.stellarbeat_db.user}:${digitalocean_database_cluster.stellarbeat_db.password}@${digitalocean_database_cluster.stellarbeat_db.host}:${digitalocean_database_cluster.stellarbeat_db.port}/${digitalocean_database_db.stellarbeat_db.name}?sslmode=no-verify"
+          type  = "SECRET"
+        }
+
         # History Scan API Username if provided
         env {
           key   = "HISTORY_SCAN_API_USERNAME"

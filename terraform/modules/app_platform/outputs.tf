@@ -10,12 +10,12 @@ output "app_url" {
 
 output "frontend_url" {
   description = "The URL of the frontend service"
-  value       = "${digitalocean_app.stellarbeat.live_url}/frontend"
+  value       = "${digitalocean_app.stellarbeat.live_url}/"
 }
 
 output "backend_url" {
   description = "The URL of the backend service"
-  value       = "${digitalocean_app.stellarbeat.live_url}/backend"
+  value       = "${digitalocean_app.stellarbeat.live_url}/api/v1"
 }
 
 output "network_scanner_url" {

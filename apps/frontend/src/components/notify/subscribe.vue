@@ -177,10 +177,12 @@ import {
 import { computed, type ComputedRef, onMounted, type Ref, ref } from "vue";
 import useStore from "@/store/useStore";
 
-type EventSourceId = {
-  type: string;
-  id: string;
-};
+// We're now using string format "type:id" instead of objects
+// Keeping this type definition as a comment for reference
+// type EventSourceId = {
+//   type: string;
+//   id: string;
+// };
 
 type SelectNode = {
   name: string;
@@ -250,32 +252,24 @@ function resetForm() {
   consented.value = "not_accepted";
 }
 
-function getSelectedEventSourceIds(): EventSourceId[] {
-  const eventSourceIds: EventSourceId[] = [];
+function getSelectedEventSourceIds(): string[] {
+  const eventSourceIds: string[] = [];
   if (networkSubscription.value) {
-    eventSourceIds.push({
-      type: "network",
-      id: store.network.id
-        ? store.network.id
-        : "Public Global Stellar Network ; September 2015",
-    });
+    const networkId = store.network.id
+      ? store.network.id
+      : "Public Global Stellar Network ; September 2015";
+    eventSourceIds.push(`network:${networkId}`);
   }
 
   if (selectedNodes.value !== null) {
     selectedNodes.value.forEach((node: SelectNode) => {
-      eventSourceIds.push({
-        type: "node",
-        id: node.publicKey,
-      });
+      eventSourceIds.push(`node:${node.publicKey}`);
     });
   }
 
   if (selectedOrganizations.value !== null) {
     selectedOrganizations.value.forEach((org: SelectedOrganization) => {
-      eventSourceIds.push({
-        type: "organization",
-        id: org.id,
-      });
+      eventSourceIds.push(`organization:${org.id}`);
     });
   }
 
