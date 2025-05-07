@@ -12,7 +12,7 @@ variable "region" {
 variable "domain_name" {
   description = "DigitalOcean domain name"
   type        = string
-  default     = "radar.withobsrvr.com"
+  default     = "radar-staging.withobsrvr.com"
 }
 
 variable "repo_url" {
