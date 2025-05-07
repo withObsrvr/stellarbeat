@@ -338,6 +338,26 @@ resource "digitalocean_app" "stellarbeat" {
           type  = "GENERAL"
         }
 
+        # User Service Base URL if provided
+        env {
+          key   = "USER_SERVICE_BASE_URL"
+          value = lookup(var.backend_env, "USER_SERVICE_BASE_URL", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "USER_SERVICE_USERNAME"
+          value = lookup(var.backend_env, "USER_SERVICE_USERNAME", "")
+          type  = "GENERAL"
+        }
+
+        # User Service Password if provided
+        env {
+          key   = "USER_SERVICE_PASSWORD"
+          value = lookup(var.backend_env, "USER_SERVICE_PASSWORD", "")
+          type  = "SECRET"
+        }
+
         http_port = lookup(var.backend_env, "BACKEND_PORT", 3000)
 
         health_check {
@@ -799,6 +819,26 @@ resource "digitalocean_app" "stellarbeat" {
           key   = "NETWORK_KNOWN_PEERS"
           value = lookup(var.testnet_backend_env, "NETWORK_KNOWN_PEERS", "54.166.220.249:11625,44.223.45.116:11625,54.159.138.198:11625")
           type  = "GENERAL"
+        }
+
+        # User Service Base URL if provided
+        env {
+          key   = "USER_SERVICE_BASE_URL"
+          value = lookup(var.testnet_backend_env, "USER_SERVICE_BASE_URL", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "USER_SERVICE_USERNAME"
+          value = lookup(var.testnet_backend_env, "USER_SERVICE_USERNAME", "")
+          type  = "GENERAL"
+        }
+
+        # User Service Password if provided
+        env {
+          key   = "USER_SERVICE_PASSWORD"
+          value = lookup(var.testnet_backend_env, "USER_SERVICE_PASSWORD", "")
+          type  = "SECRET"
         }
 
         env {

@@ -204,6 +204,9 @@ module "app_platform" {
     CRAWLER_MAX_CONNECTIONS      = var.crawler_max_connections
     CRAWLER_MAX_CRAWL_TIME       = var.crawler_max_crawl_time
     CRAWLER_BLACKLIST            = var.crawler_blacklist
+    USER_SERVICE_BASE_URL        = var.user_service_base_url
+    USER_SERVICE_USERNAME        = var.user_service_username
+    USER_SERVICE_PASSWORD        = var.user_service_password
     BACKEND_PORT                 = var.backend_port
     USER_AGENT                   = var.user_agent
     TYPEORM_MIGRATIONS_RUN       = "false"
