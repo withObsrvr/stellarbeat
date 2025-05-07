@@ -280,7 +280,7 @@ variable "git_branch" {
 variable "domain_name" {
   description = "Domain name for the application"
   type        = string
-  default     = "stellarbeat-staging.withobsrvr.com"
+  default     = "radar-staging.withobsrvr.com"
 }
 
 variable "notifications_enabled" {
