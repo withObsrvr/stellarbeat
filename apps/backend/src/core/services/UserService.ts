@@ -80,11 +80,7 @@ export class UserService implements IUserService {
 			this.baseUrl = this.baseUrl.slice(0, -1);
 		}
 
-		// When deployed behind a proxy in DigitalOcean App Platform, the /users path is already included in the baseUrl,
-		// but it's stripped from the request path before it reaches the users service.
-		// We need to add /user (not /users/user) to correctly access the user endpoint.
-		const endpoint = this.baseUrl.includes('/users') ? '/user' : '/user';
-		const userResourceUrlResult = Url.create(this.baseUrl + endpoint);
+		const userResourceUrlResult = Url.create(this.baseUrl + '/user');
 		if (userResourceUrlResult.isErr()) throw userResourceUrlResult.error;
 
 		this.userResourceUrl = userResourceUrlResult.value;
