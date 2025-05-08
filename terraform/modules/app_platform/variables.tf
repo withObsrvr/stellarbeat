@@ -9,6 +9,12 @@ variable "region" {
   default     = "nyc3"
 }
 
+variable "domain_name" {
+  description = "DigitalOcean domain name"
+  type        = string
+  default     = "radar-staging.withobsrvr.com"
+}
+
 variable "repo_url" {
   description = "Git repository URL"
   type        = string

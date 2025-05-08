@@ -15,10 +15,11 @@ provider "digitalocean" {
 module "app_platform" {
   source = "../../modules/app_platform"
 
-  app_name   = "stellarbeat-staging"
-  region     = var.region
-  repo_url   = var.repo_url
-  git_branch = var.git_branch
+  app_name    = "radar-staging"
+  region      = var.region
+  repo_url    = var.repo_url
+  domain_name = var.domain_name
+  git_branch  = var.git_branch
 
   environment   = "staging"
   instance_size = "basic-xs"
@@ -27,8 +28,8 @@ module "app_platform" {
   backend_instance_count         = 1
   testnet_backend_instance_count = 1
   scanner_instance_count         = 1
-  testnet_scanner_instance_count = 0
-  history_scanner_instance_count = 0
+  testnet_scanner_instance_count = 1
+  history_scanner_instance_count = 1
   users_instance_count           = 1
 
   database_production = false
@@ -40,18 +41,18 @@ module "app_platform" {
 
   # Frontend environment variables
   frontend_env = {
-    API_URL                             = "https://stellarbeat-staging-yw468.ondigitalocean.app/api"
+    API_URL                             = "https://radar-staging.withobsrvr.com/api"
     API_KEY                             = var.staging_api_key
     NODE_ENV                            = "staging"
-    VUE_APP_PUBLIC_API_URL              = "https://stellarbeat-staging-yw468.ondigitalocean.app/api"
-    VUE_APP_TEST_API_URL                = "https://stellarbeat-staging-yw468.ondigitalocean.app/testnet-api" # Path to testnet API
+    VUE_APP_PUBLIC_API_URL              = "https://radar-staging.withobsrvr.com/api"
+    VUE_APP_TEST_API_URL                = "https://radar-staging.withobsrvr.com/testnet-api" # Path to testnet API
     VUE_APP_BLOG_URL                    = "https://www.withobsrvr.com/blog"
-    VUE_APP_API_DOC_URL                 = "https://stellarbeat-staging-yw468.ondigitalocean.app/api/docs/"
-    VUE_APP_BRAND_NAME                  = "Stellarbeat"
+    VUE_APP_API_DOC_URL                 = "https://radar-staging.withobsrvr.com/api/docs/"
+    VUE_APP_BRAND_NAME                  = "Radar"
     VUE_APP_BRAND_TAGLINE               = "Stellar Network Explorer"
-    VUE_APP_BRAND_DESCRIPTION           = "Stellarbeat is a network explorer for the Stellar network. It provides a list of all nodes and organizations. It tracks various metrics and provides a history of changes. It also allows you to simulate different network conditions and topologies"
+    VUE_APP_BRAND_DESCRIPTION           = "Radar is a network explorer for the Stellar network. It provides a list of all nodes and organizations. It tracks various metrics and provides a history of changes. It also allows you to simulate different network conditions and topologies"
     VUE_APP_BRAND_LOGO_SRC              = "logo.png"
-    VUE_APP_BRAND_LOGO_ALT              = "Stellarbeat with Obsrvr"
+    VUE_APP_BRAND_LOGO_ALT              = "Radar powered by Obsrvr"
     VUE_APP_BRAND_EMAIL                 = "hello@withobsrvr.com"
     VUE_APP_PUBLIC_ENABLE_NOTIFY        = 1
     VUE_APP_PUBLIC_ENABLE_HISTORY       = 1
@@ -203,6 +204,9 @@ module "app_platform" {
     CRAWLER_MAX_CONNECTIONS      = var.crawler_max_connections
     CRAWLER_MAX_CRAWL_TIME       = var.crawler_max_crawl_time
     CRAWLER_BLACKLIST            = var.crawler_blacklist
+    USER_SERVICE_BASE_URL        = var.user_service_base_url
+    USER_SERVICE_USERNAME        = var.user_service_username
+    USER_SERVICE_PASSWORD        = var.user_service_password
     BACKEND_PORT                 = var.backend_port
     USER_AGENT                   = var.user_agent
     TYPEORM_MIGRATIONS_RUN       = "false"

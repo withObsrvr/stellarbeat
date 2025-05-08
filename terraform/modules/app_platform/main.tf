@@ -7,7 +7,7 @@ terraform {
 }
 
 # Create a database cluster
-resource "digitalocean_database_cluster" "stellarbeat_db" {
+resource "digitalocean_database_cluster" "radar_db" {
   name    = "${var.app_name}-db"
   engine  = "pg"
   version = "15"
@@ -21,31 +21,34 @@ resource "digitalocean_database_cluster" "stellarbeat_db" {
 # and rely on DigitalOcean's internal network for security
 
 # Create main database
-resource "digitalocean_database_db" "stellarbeat_db" {
-  cluster_id = digitalocean_database_cluster.stellarbeat_db.id
-  name       = "stellarbeat"
+resource "digitalocean_database_db" "radar_db" {
+  cluster_id = digitalocean_database_cluster.radar_db.id
+  name       = "radar"
 }
 
 # Create testnet database
-resource "digitalocean_database_db" "stellarbeat_testnet_db" {
-  cluster_id = digitalocean_database_cluster.stellarbeat_db.id
-  name       = "stellarbeat_testnet"
+resource "digitalocean_database_db" "radar_testnet_db" {
+  cluster_id = digitalocean_database_cluster.radar_db.id
+  name       = "radar_testnet"
 }
 
 # Create users database
-resource "digitalocean_database_db" "stellarbeat_users_db" {
-  cluster_id = digitalocean_database_cluster.stellarbeat_db.id
-  name       = "stellarbeat_users"
+resource "digitalocean_database_db" "radar_users_db" {
+  cluster_id = digitalocean_database_cluster.radar_db.id
+  name       = "radar_users"
 }
 
 # We'll use the default doadmin user which already has all necessary permissions
 # No need to create a separate user or grant permissions
 
 # Create app deployment
-resource "digitalocean_app" "stellarbeat" {
+resource "digitalocean_app" "radar" {
   spec {
     name   = var.app_name
     region = var.region
+    domain {
+      name = var.domain_name
+    }
 
     # Frontend Service - conditionally deployed based on instance count
     dynamic "service" {
@@ -231,7 +234,14 @@ resource "digitalocean_app" "stellarbeat" {
         # Use database connection string with doadmin user (already has all necessary permissions)
         env {
           key   = "ACTIVE_DATABASE_URL"
-          value = "postgres://${digitalocean_database_cluster.stellarbeat_db.user}:${digitalocean_database_cluster.stellarbeat_db.password}@${digitalocean_database_cluster.stellarbeat_db.host}:${digitalocean_database_cluster.stellarbeat_db.port}/${digitalocean_database_db.stellarbeat_db.name}?sslmode=no-verify"
+          value = "postgres://${digitalocean_database_cluster.radar_db.user}:${digitalocean_database_cluster.radar_db.password}@${digitalocean_database_cluster.radar_db.host}:${digitalocean_database_cluster.radar_db.port}/${digitalocean_database_db.radar_db.name}?sslmode=no-verify"
+          type  = "SECRET"
+        }
+
+        # Use database connection string with doadmin user (already has all necessary permissions)
+        env {
+          key   = "DATABASE_TEST_URL"
+          value = "postgres://${digitalocean_database_cluster.radar_db.user}:${digitalocean_database_cluster.radar_db.password}@${digitalocean_database_cluster.radar_db.host}:${digitalocean_database_cluster.radar_db.port}/${digitalocean_database_db.radar_db.name}?sslmode=no-verify"
           type  = "SECRET"
         }
 
@@ -335,6 +345,40 @@ resource "digitalocean_app" "stellarbeat" {
           type  = "GENERAL"
         }
 
+        # User Service Base URL if provided
+        env {
+          key   = "USER_SERVICE_BASE_URL"
+          value = lookup(var.backend_env, "USER_SERVICE_BASE_URL", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "USER_SERVICE_USERNAME"
+          value = lookup(var.backend_env, "USER_SERVICE_USERNAME", "")
+          type  = "GENERAL"
+        }
+
+        # User Service Password if provided
+        env {
+          key   = "USER_SERVICE_PASSWORD"
+          value = lookup(var.backend_env, "USER_SERVICE_PASSWORD", "")
+          type  = "SECRET"
+        }
+
+        # Notifications enabled if provided
+        env {
+          key   = "NOTIFICATIONS_ENABLED"
+          value = lookup(var.backend_env, "NOTIFICATIONS_ENABLED", "")
+          type  = "GENERAL"
+        }
+
+        # Frontend Base URL if provided
+        env {
+          key   = "FRONTEND_BASE_URL"
+          value = lookup(var.backend_env, "FRONTEND_BASE_URL", "")
+          type  = "GENERAL"
+        }
+
         http_port = lookup(var.backend_env, "BACKEND_PORT", 3000)
 
         health_check {
@@ -373,7 +417,7 @@ resource "digitalocean_app" "stellarbeat" {
         # Use database connection string with doadmin user (already has all necessary permissions)
         env {
           key   = "ACTIVE_DATABASE_URL"
-          value = "postgres://${digitalocean_database_cluster.stellarbeat_db.user}:${digitalocean_database_cluster.stellarbeat_db.password}@${digitalocean_database_cluster.stellarbeat_db.host}:${digitalocean_database_cluster.stellarbeat_db.port}/${digitalocean_database_db.stellarbeat_db.name}?sslmode=no-verify"
+          value = "postgres://${digitalocean_database_cluster.radar_db.user}:${digitalocean_database_cluster.radar_db.password}@${digitalocean_database_cluster.radar_db.host}:${digitalocean_database_cluster.radar_db.port}/${digitalocean_database_db.radar_db.name}?sslmode=no-verify"
           type  = "SECRET"
         }
 
@@ -504,7 +548,7 @@ resource "digitalocean_app" "stellarbeat" {
         # Use database connection string with doadmin user (already has all necessary permissions) - point to testnet database
         env {
           key   = "ACTIVE_DATABASE_URL"
-          value = "postgres://${digitalocean_database_cluster.stellarbeat_db.user}:${digitalocean_database_cluster.stellarbeat_db.password}@${digitalocean_database_cluster.stellarbeat_db.host}:${digitalocean_database_cluster.stellarbeat_db.port}/${digitalocean_database_db.stellarbeat_testnet_db.name}?sslmode=no-verify"
+          value = "postgres://${digitalocean_database_cluster.radar_db.user}:${digitalocean_database_cluster.radar_db.password}@${digitalocean_database_cluster.radar_db.host}:${digitalocean_database_cluster.radar_db.port}/${digitalocean_database_db.radar_testnet_db.name}?sslmode=no-verify"
           type  = "SECRET"
         }
 
@@ -643,7 +687,7 @@ resource "digitalocean_app" "stellarbeat" {
         # Use database connection string with doadmin user (already has all necessary permissions)
         env {
           key   = "ACTIVE_DATABASE_URL"
-          value = "postgres://${digitalocean_database_cluster.stellarbeat_db.user}:${digitalocean_database_cluster.stellarbeat_db.password}@${digitalocean_database_cluster.stellarbeat_db.host}:${digitalocean_database_cluster.stellarbeat_db.port}/${digitalocean_database_db.stellarbeat_db.name}?sslmode=no-verify"
+          value = "postgres://${digitalocean_database_cluster.radar_db.user}:${digitalocean_database_cluster.radar_db.password}@${digitalocean_database_cluster.radar_db.host}:${digitalocean_database_cluster.radar_db.port}/${digitalocean_database_db.radar_db.name}?sslmode=no-verify"
           type  = "SECRET"
         }
 
@@ -714,7 +758,7 @@ resource "digitalocean_app" "stellarbeat" {
         # Use database connection string with doadmin user (already has all necessary permissions) - point to testnet database
         env {
           key   = "ACTIVE_DATABASE_URL"
-          value = "postgres://${digitalocean_database_cluster.stellarbeat_db.user}:${digitalocean_database_cluster.stellarbeat_db.password}@${digitalocean_database_cluster.stellarbeat_db.host}:${digitalocean_database_cluster.stellarbeat_db.port}/${digitalocean_database_db.stellarbeat_testnet_db.name}?sslmode=no-verify"
+          value = "postgres://${digitalocean_database_cluster.radar_db.user}:${digitalocean_database_cluster.radar_db.password}@${digitalocean_database_cluster.radar_db.host}:${digitalocean_database_cluster.radar_db.port}/${digitalocean_database_db.radar_testnet_db.name}?sslmode=no-verify"
           type  = "SECRET"
         }
 
@@ -798,6 +842,26 @@ resource "digitalocean_app" "stellarbeat" {
           type  = "GENERAL"
         }
 
+        # User Service Base URL if provided
+        env {
+          key   = "USER_SERVICE_BASE_URL"
+          value = lookup(var.testnet_backend_env, "USER_SERVICE_BASE_URL", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "USER_SERVICE_USERNAME"
+          value = lookup(var.testnet_backend_env, "USER_SERVICE_USERNAME", "")
+          type  = "GENERAL"
+        }
+
+        # User Service Password if provided
+        env {
+          key   = "USER_SERVICE_PASSWORD"
+          value = lookup(var.testnet_backend_env, "USER_SERVICE_PASSWORD", "")
+          type  = "SECRET"
+        }
+
         env {
           key   = "BACKEND_PORT"
           value = lookup(var.testnet_backend_env, "BACKEND_PORT", "3000")
@@ -852,7 +916,7 @@ resource "digitalocean_app" "stellarbeat" {
         # Use database connection string with doadmin user (already has all necessary permissions)
         env {
           key   = "DATABASE_URL"
-          value = "postgres://${digitalocean_database_cluster.stellarbeat_db.user}:${digitalocean_database_cluster.stellarbeat_db.password}@${digitalocean_database_cluster.stellarbeat_db.host}:${digitalocean_database_cluster.stellarbeat_db.port}/${digitalocean_database_db.stellarbeat_users_db.name}?sslmode=no-verify"
+          value = "postgres://${digitalocean_database_cluster.radar_db.user}:${digitalocean_database_cluster.radar_db.password}@${digitalocean_database_cluster.radar_db.host}:${digitalocean_database_cluster.radar_db.port}/${digitalocean_database_db.radar_users_db.name}?sslmode=no-verify"
           type  = "SECRET"
         }
 
@@ -938,8 +1002,8 @@ resource "digitalocean_app" "stellarbeat" {
           http_path = "/health"
         }
 
-        build_command = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users post-build"
-        run_command   = "node apps/users/lib/index.js"
+        build_command = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
+        run_command   = "pnpm --filter users start"
       }
     }
 
