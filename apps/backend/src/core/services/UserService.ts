@@ -81,7 +81,6 @@ export class UserService implements IUserService {
 		}
 
 		const userResourceUrlResult = Url.create(this.baseUrl + '/user');
-		console.log('Debug: UserResourceUrl:', userResourceUrlResult);
 		if (userResourceUrlResult.isErr()) throw userResourceUrlResult.error;
 
 		this.userResourceUrl = userResourceUrlResult.value;
