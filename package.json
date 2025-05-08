@@ -1,8 +1,8 @@
 {
-	"name": "stellarbeat",
+	"name": "radar",
 	"private": true,
 	"version": "0.1.0",
-	"description": "stellarbeat project monorepo",
+	"description": "OBSRVR Radar - Stellar Network Explorer",
 	"scripts": {
 		"build:ts": "tsc --build",
 		"build:ts:force": "tsc --build --force",
@@ -27,8 +27,13 @@
 		"start:scan-network": "pnpm --filter backend run scan-network",
 		"start:scan-history": "pnpm --filter history-scanner run scan-history"
 	},
-	"keywords": [],
-	"author": "pieterjan84",
+	"keywords": ["stellar", "network", "explorer", "blockchain", "radar"],
+	"author": "OBSRVR",
+	"contributors": [
+		{"name": "pieterjan84",
+		 "url": "https://github.com/pieterjan84"},
+		"OBSRVR"
+	],
 	"license": "MIT",
 	"engines": {
 		"node": "20.x",
