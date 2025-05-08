@@ -102,7 +102,6 @@ module "app_platform" {
     DATABASE_TEST_URL             = var.database_test_url
     BACKEND_PORT                  = var.backend_port
     USER_AGENT                    = var.user_agent
-    ENABLE_S3_BACKUP              = var.enable_s3_backup
     TYPEORM_MIGRATIONS_RUN        = "true"
     HISTORY_SCAN_API_USERNAME     = var.coordinator_api_username
     HISTORY_SCAN_API_PASSWORD     = var.coordinator_api_password
