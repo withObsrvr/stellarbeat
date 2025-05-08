@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "description": "Api's used and provided by Stellarbeat with Obsrvr",
-    "title": "Stellarbeat API",
+    "description": "API's used and provided by Rada",
+    "title": "Radar API",
     "contact": {
       "name": "Obsrvr",
       "email": "hello@withobsrvr.com"
@@ -11,11 +11,11 @@
   },
   "servers": [
     {
-      "url": "https://stellarbeat-staging-yw468.ondigitalocean.app/api",
+      "url": "https://radar.withobsrvr.com/api",
       "description": "Api for Stellar public network"
     },
     {
-      "url": "https://stellarbeat-staging-yw468.ondigitalocean.app/testnet-api",
+      "url": "https://radar.withobsrvr.com/testnet-api",
       "description": "Api for Stellar testnet"
     }
   ],
@@ -60,7 +60,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://stellarbeat-staging-yw468.ondigitalocean.app/schemas/network.json"
+                  "$ref": "https://radar.withobsrvr.com/schemas/network.json"
                 }
               }
             }
@@ -96,7 +96,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://stellarbeat-staging-yw468.ondigitalocean.app/schemas/node-snapshot.json"
+                    "$ref": "https://radar.withobsrvr.com/schemas/node-snapshot.json"
                   }
                 }
               }
@@ -133,7 +133,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://stellarbeat-staging-yw468.ondigitalocean.app/schemas/organization-snapshot.json"
+                    "$ref": "https://radar.withobsrvr.com/schemas/organization-snapshot.json"
                   }
                 }
               }
@@ -170,7 +170,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://stellarbeat-staging-yw468.ondigitalocean.app/schemas/node.json"
+                    "$ref": "https://radar.withobsrvr.com/schemas/node.json"
                   }
                 }
               }
@@ -214,7 +214,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://stellarbeat-staging-yw468.ondigitalocean.app/schemas/node.json"
+                  "$ref": "https://radar.withobsrvr.com/schemas/node.json"
                 }
               }
             }
@@ -262,7 +262,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://stellarbeat-staging-yw468.ondigitalocean.app/schemas/node-snapshot.json"
+                    "$ref": "https://radar.withobsrvr.com/schemas/node-snapshot.json"
                   }
                 }
               }
@@ -287,7 +287,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://stellarbeat-staging-yw468.ondigitalocean.app/schemas/organization.json"
+                    "$ref": "https://radar.withobsrvr.com/schemas/organization.json"
                   }
                 }
               }
@@ -331,7 +331,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://stellarbeat-staging-yw468.ondigitalocean.app/schemas/organization.json"
+                  "$ref": "https://radar.withobsrvr.com/schemas/organization.json"
                 }
               }
             }
@@ -379,7 +379,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://stellarbeat-staging-yw468.ondigitalocean.app/schemas/organization-snapshot.json"
+                    "$ref": "https://radar.withobsrvr.com/schemas/organization-snapshot.json"
                   }
                 }
               }
@@ -413,7 +413,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://stellarbeat-staging-yw468.ondigitalocean.app/schemas/history-archive-scan.json"
+                  "$ref": "https://radar.withobsrvr.com/schemas/history-archive-scan.json"
                 }
               }
             }

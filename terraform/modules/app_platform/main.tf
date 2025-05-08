@@ -372,6 +372,13 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
+        # Frontend Base URL if provided
+        env {
+          key   = "FRONTEND_BASE_URL"
+          value = lookup(var.backend_env, "FRONTEND_BASE_URL", "")
+          type  = "GENERAL"
+        }
+
         http_port = lookup(var.backend_env, "BACKEND_PORT", 3000)
 
         health_check {
