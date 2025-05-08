@@ -25,7 +25,7 @@
                 <div class="nav-item pr-0" style="cursor: default">
                   <nav-network-selector />
                   <a
-                    href="https://github.com/stellarbeat"
+                    href="https://github.com/withObsrvr/stellarbeat"
                     class="btn btn-sm btn-outline-primary"
                     target="_blank"
                     rel="noopener"

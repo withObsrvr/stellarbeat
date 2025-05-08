@@ -49,7 +49,7 @@
                     <li class="sb-nav-item">
                       <nav-link
                         v-b-modal.networkProps
-                        :title="'Stellarbeat configuration'"
+                        :title="'Radar configuration'"
                         :show-icon="true"
                         icon="info-circle"
                       ></nav-link>
@@ -57,7 +57,7 @@
                         id="networkProps"
                         lazy
                         size="lg"
-                        title="Stellarbeat configuration"
+                        title="Radar configuration"
                         ok-only
                         ok-title="Close"
                       >

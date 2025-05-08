@@ -29,10 +29,10 @@
             WorkingDir = "/app";
             Env = [
               "NODE_ENV=production"
-              "PORT=7000"
+              "PORT=3000"
             ];
             ExposedPorts = {
-              "7000/tcp" = {};
+              "3000/tcp" = {};
             };
           };
         };
