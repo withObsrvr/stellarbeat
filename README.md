@@ -1,16 +1,17 @@
-[![Known Vulnerabilities](https://snyk.io/test/github/stellarbeat/stellarbeat/badge.svg)](https://snyk.io/test/github/stellarbeat/stellarbeat)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-# Monorepo for Stellarbeat project
+# OBSRVR Radar (formerly Stellarbeat)
 
 ## About
 
-Stellarbeat is a monitoring and analytics platform for the Stellar network and
+OBSRVR Radar is a monitoring and analytics platform for the Stellar network and
 its validators and organizations. It collects and visualizes network data with
 the ability to time-travel, has simulation options, provides REST APIs for
 integration, implements email notifications, scans validator history archives
 for errors and provides educational tools to aid in understanding the Stellar
 Consensus Protocol.
+
+> **Note:** Formerly known as StellarBeat, the project is now in the care of OBSRVR, which continues to build on its solid foundation with updated branding and ongoing improvements.
 
 ## Architecture
 
