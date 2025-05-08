@@ -48,11 +48,11 @@ module "app_platform" {
     VUE_APP_TEST_API_URL                = "https://radar-staging.withobsrvr.com/testnet-api" # Path to testnet API
     VUE_APP_BLOG_URL                    = "https://www.withobsrvr.com/blog"
     VUE_APP_API_DOC_URL                 = "https://radar-staging.withobsrvr.com/api/docs/"
-    VUE_APP_BRAND_NAME                  = "Radar"
+    VUE_APP_BRAND_NAME                  = "OBSRVR Radar"
     VUE_APP_BRAND_TAGLINE               = "Stellar Network Explorer"
-    VUE_APP_BRAND_DESCRIPTION           = "Radar is a network explorer for the Stellar network. It provides a list of all nodes and organizations. It tracks various metrics and provides a history of changes. It also allows you to simulate different network conditions and topologies"
+    VUE_APP_BRAND_DESCRIPTION           = "OBSRVR Radar is a network explorer for the Stellar network. It provides a list of all nodes and organizations. It tracks various metrics and provides a history of changes. It also allows you to simulate different network conditions and topologies"
     VUE_APP_BRAND_LOGO_SRC              = "logo.png"
-    VUE_APP_BRAND_LOGO_ALT              = "Radar powered by Obsrvr"
+    VUE_APP_BRAND_LOGO_ALT              = "Radar powered by OBSRVR"
     VUE_APP_BRAND_EMAIL                 = "hello@withobsrvr.com"
     VUE_APP_PUBLIC_ENABLE_NOTIFY        = 1
     VUE_APP_PUBLIC_ENABLE_HISTORY       = 1
