@@ -365,6 +365,13 @@ resource "digitalocean_app" "radar" {
           type  = "SECRET"
         }
 
+        # Notifications enabled if provided
+        env {
+          key   = "NOTIFICATIONS_ENABLED"
+          value = lookup(var.backend_env, "NOTIFICATIONS_ENABLED", "")
+          type  = "GENERAL"
+        }
+
         http_port = lookup(var.backend_env, "BACKEND_PORT", 3000)
 
         health_check {
