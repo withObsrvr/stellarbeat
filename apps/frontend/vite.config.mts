@@ -75,5 +75,11 @@ export default defineConfig({
         includePaths: ["src"],
       },
     },
+    postcss: {
+      plugins: {
+        tailwindcss: {},
+        autoprefixer: {},
+      },
+    },
   },
 });

@@ -95,6 +95,8 @@
         </div>
       </div>
     </footer>
+    <!-- Tailwind Footer Example -->
+    <tailwind-footer v-if="!store.isLoading"></tailwind-footer>
   </div>
 </template>
 
@@ -102,6 +104,7 @@
 import Navbar from "@/components/layout/Navbar.vue";
 import Github from "@/components/organization/logo/github.vue";
 import CustomNetwork from "@/components/network/tools/modify-network.vue";
+import TailwindFooter from "@/components/layout/TailwindFooter.vue";
 import { isString } from "shared";
 import useStore from "@/store/useStore";
 import { computed, nextTick, onBeforeMount, ref, watch } from "vue";
