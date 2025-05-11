@@ -2,7 +2,7 @@ import App from "./App.vue";
 import Vue from "vue";
 import { createRouter } from "./router";
 import "./assets/custom.scss";
-import "./assets/tailwind.css"; // Import Tailwind CSS
+// Tailwind CSS is imported separately through inline styles
 import "./assets/global.css";
 import Multiselect from "vue-multiselect";
 import * as Sentry from "@sentry/vue";
