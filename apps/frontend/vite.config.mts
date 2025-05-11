@@ -76,10 +76,10 @@ export default defineConfig({
       },
     },
     postcss: {
-      plugins: {
-        tailwindcss: {},
-        autoprefixer: {},
-      },
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer')
+      ],
     },
   },
 });
