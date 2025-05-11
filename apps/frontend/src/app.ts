@@ -3,6 +3,7 @@ import Vue from "vue";
 import { createRouter } from "./router";
 import "./assets/custom.scss";
 import "./assets/global.css";
+import "./assets/tailwind.css";
 import Multiselect from "vue-multiselect";
 import * as Sentry from "@sentry/vue";
 import "popper.js";

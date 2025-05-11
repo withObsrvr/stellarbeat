@@ -41,6 +41,7 @@
     "vue-router": "^3.6.5"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.6",
     "@types/bootstrap": "^5.2.10",
     "@types/d3-drag": "^3.0.7",
     "@types/d3-force": "^3.0.10",
