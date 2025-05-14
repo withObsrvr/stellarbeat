@@ -1,6 +1,6 @@
-# Stellarbeat frontend
+# Obsrvr Radar frontend (formerly Stellarbeat)
 
-The Stellarbeat frontend provides an intuitive web dashboard for monitoring and analyzing the Stellar network. Built with Vue.js (currently on v2.7, with Vue 3 migration in progress)
+The Obsrvr Radar frontend provides an intuitive web dashboard for monitoring and analyzing the Stellar network. Built with Vue.js (currently on v2.7, with Vue 3 migration in progress)
 
 ## Features
 - Network visualizations and analytics

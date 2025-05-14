@@ -1,4 +1,3 @@
- 
 const { createNode } = require('../lib');
 const getConfigFromEnv = require('../lib').getConfigFromEnv;
 const http = require('http');
@@ -25,7 +24,7 @@ async function connect() {
 		port = parseInt(portArg);
 	}
 
-	const nodes = await fetchData('https://api.stellarbeat.io/v1/nodes');
+	const nodes = await fetchData('https://radar.withobsrvr.com/api/v1/nodes');
 	const nodeNames = new Map(
 		nodes.map((node) => {
 			return [node.publicKey, node.name ?? node.publicKey];
@@ -60,5 +59,3 @@ function fetchData(url) {
 		});
 	});
 }
-
-

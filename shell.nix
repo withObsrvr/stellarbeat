@@ -49,7 +49,7 @@ pkgs.mkShell {
     pnpm run post-build
     cd ../..
     
-    echo "Stellarbeat development environment ready!"
+    echo "Radar development environment ready!"
     echo "Using pnpm version: $(pnpm -v)"
     echo "Using Node.js version: $(node -v)"
     echo "Environment variables loaded from .env files"

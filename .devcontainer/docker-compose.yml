@@ -1,12 +1,12 @@
-version: "3"
+version: '3'
 
 x-podman:
   in_pod: false
 
 services:
-  stellarbeat:
-    user: "node"
-    userns_mode: "keep-id"
+  radar:
+    user: 'node'
+    userns_mode: 'keep-id'
     security_opt:
       - label=disable
     build:
@@ -20,7 +20,7 @@ services:
       - pgsql-dev
     command: /bin/sh -c "while sleep 1000; do :; done"
     ports:
-      - 8080:8080 
+      - 8080:8080
     volumes:
       - ..:/workspace
 
@@ -32,8 +32,8 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: mydb
     ports:
-      - 25433:5432 
-    
+      - 25433:5432
+
   pgsql-dev:
     image: docker.io/library/postgres:latest
     restart: always

@@ -41,7 +41,7 @@ describe('Config', () => {
 			expect(result.value).toMatchObject({
 				nodeEnv: 'development',
 				enableSentry: false,
-				userAgent: 'stellarbeat-history-scanner',
+				userAgent: 'radar-history-scanner',
 				logLevel: 'info',
 				historyMaxFileMs: 60000,
 				historySlowArchiveMaxLedgers: 1000

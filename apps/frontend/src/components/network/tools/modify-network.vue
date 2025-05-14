@@ -15,18 +15,18 @@
     <template #default>
       <ul class="schema-list">
         <li>
-          <a href="https://stellarbeat.io/schemas/network.json" target="_blank"
+          <a href="https://radar.withobsrvr.com/schemas/network.json" target="_blank"
             >Network schema</a
           >
         </li>
         <li>
-          <a href="https://stellarbeat.io/schemas/node.json" target="_blank"
+          <a href="https://radar.withobsrvr.com/schemas/node.json" target="_blank"
             >Node schema</a
           >
         </li>
         <li>
           <a
-            href="https://stellarbeat.io/schemas/organization.json"
+            href="https://radar.withobsrvr.com/schemas/organization.json"
             target="_blank"
             >Organization schema</a
           >

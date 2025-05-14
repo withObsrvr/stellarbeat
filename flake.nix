@@ -1,5 +1,5 @@
 {
-  description = "Stellarbeat development environment";
+  description = "Radar development environment";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -22,7 +22,7 @@
 
         # Docker image for users service
         usersDockerImage = pkgs.dockerTools.buildImage {
-          name = "stellarbeat-users";
+          name = "radar-users";
           tag = "latest";
           config = {
             Cmd = [ "node" "apps/users/lib/index.js" ];
@@ -80,9 +80,9 @@
             cd ../..
             
             # Set custom prompt
-            export PS1="\[\033[1;32m\][nix:stellarbeat]\[\033[0m\] \[\033[1;34m\]\w\[\033[0m\] \[\033[1;36m\]\$\[\033[0m\] "
+            export PS1="\[\033[1;32m\][nix:radar]\[\033[0m\] \[\033[1;34m\]\w\[\033[0m\] \[\033[1;36m\]\$\[\033[0m\] "
             
-            echo "Stellarbeat development environment ready!"
+            echo "Radar development environment ready!"
             echo "Using pnpm version: $(pnpm -v)"
             echo "Using Node.js version: $(node -v)"
             echo "Environment variables loaded from .env files"
@@ -91,7 +91,7 @@
         };
 
         packages.default = pkgs.stdenv.mkDerivation {
-          name = "stellarbeat";
+          name = "radar";
           src = ./.;
 
           buildInputs = [

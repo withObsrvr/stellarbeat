@@ -1,6 +1,6 @@
-# Stellarbeat Backend
+# Radar Backend (formerly Stellarbeat)
 
-Backend for the Stellarbeat platform that monitors and analyzes the Stellar
+Backend for the Radar platform that monitors and analyzes the Stellar
 network validators and organizations. It uses a database (pgsql recomended) for
 storage. And it exposes a REST API for all the necessary functions.
 
@@ -133,5 +133,5 @@ running in development
 
 ## history
 
-Code from https://github.com/stellarbeat/js-stellarbeat-backend was moved to
+Code from https://github.com/stellarbeat/stellarbeat was forked to
 this monorepo. For history consult this archive.

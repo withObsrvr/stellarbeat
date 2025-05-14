@@ -1,7 +1,7 @@
 {
-	"name": "stellarbeat",
+	"name": "radar",
 	"dockerComposeFile": "docker-compose.yml",
-	"service": "stellarbeat",
+	"service": "radar",
 	"remoteUser": "node",
 	"containerUser": "node",
 	"workspaceFolder": "/workspace"
