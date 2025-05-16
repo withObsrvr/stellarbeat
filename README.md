@@ -84,6 +84,37 @@ for easy deployment on Heroku.
 For history scanning think carefully about network traffic and costs when
 choosing a provider.
 
+### CI/CD Pipeline
+
+The project uses GitHub Actions for continuous integration and deployment. The workflow is defined in `.github/workflows/ci-cd.yml`. 
+
+#### GitHub Environments
+
+The CI/CD pipeline uses GitHub Environments to manage deployment environments:
+- `obsrvr-radar-staging` - For staging deployments 
+- `obsrvr-radar-integration` - For integration deployments
+- `obsrvr-radar-production` - For production deployments
+
+Each environment can have its own secrets, environment variables, and deployment protection rules.
+
+#### Required Secrets
+
+To ensure the CI/CD pipeline works correctly, the following secrets need to be added to your GitHub repository:
+
+1. Repository Secrets (used by all environments):
+   - `AWS_ACCESS_KEY_ID` - AWS access key with S3 permissions
+   - `AWS_SECRET_ACCESS_KEY` - Corresponding AWS secret key
+   - `AWS_REGION` - Region where your S3 bucket is located (e.g., "us-east-2")
+
+2. Environment-specific Secrets:
+   - `DIGITALOCEAN_ACCESS_TOKEN` - Your DigitalOcean API token
+   - Environment Domains:
+     - `STAGING_DOMAIN` - Domain for staging environment
+     - `INTEGRATION_DOMAIN` - Domain for integration environment
+     - `PRODUCTION_DOMAIN` - Domain for production environment
+
+These secrets are used for Terraform state management, deploying to DigitalOcean, and configuring environment-specific settings.
+
 ## Devcontainer development
 
 For easy development a devcontainer configuration is provided in the
