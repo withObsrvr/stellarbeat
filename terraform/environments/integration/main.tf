@@ -19,7 +19,7 @@ module "app_platform" {
   repo_url   = var.repo_url
   git_branch = "main"
 
-  environment = "integration"
+  environment   = "integration"
   instance_size = "basic-xs"
 
   frontend_instance_count = 1
