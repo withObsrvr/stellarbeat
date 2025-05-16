@@ -121,7 +121,7 @@ This command starts the scanning process. It will:
 | Variable     | Description                    | Default                       |
 | ------------ | ------------------------------ | ----------------------------- |
 | `NODE_ENV`   | Environment name               | `development`                 |
-| `USER_AGENT` | User agent string for requests | `stellarbeat-history-scanner` |
+| `USER_AGENT` | User agent string for requests | `radar-history-scanner` |
 | `LOG_LEVEL`  | Logging verbosity              | `info`                        |
 
 Copy `.env.dist` to `.env` and configure these variables for your environment.

@@ -26,13 +26,13 @@ export default class Config {
   networkContexts: Map<NetworkId, NetworkContext> = new Map();
   apiDocUrl?: string;
   blogUrl?: string;
-  brandName = "Stellarbeat";
+  brandName = "Obsrvr Radar";
   brandTagline = "Stellar network explorer";
   brandDescription =
-    "Stellarbeat is a network explorer for the Stellar network. It provides a list of all nodes and organizations. It tracks various metrics and provides a history of changes. And it allows you to simulate different network conditions and topologies";
+    "Obsrvr Radar is a network explorer for the Stellar network. It provides a list of all nodes and organizations. It tracks various metrics and provides a history of changes. And it allows you to simulate different network conditions and topologies";
   brandLogoSrc = "logo.svg"; //assets folder
-  brandLogoAlt = "https://stellarbeat.io";
-  brandEmail = "info@stellarbeat.io";
+  brandLogoAlt = "https://radar.withobsrvr.com";
+  brandEmail = "hello@withobsrvr.com";
 
   constructor() {
     this.blogUrl = import.meta.env["VUE_APP_BLOG_URL"];

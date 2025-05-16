@@ -17,22 +17,20 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: stellarbeat_test
+          POSTGRES_DB: radar_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
           --health-retries 5
     env:
       DB_HOST: localhost
       DB_PORT: 5432
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
-      DB_DATABASE: stellarbeat_test
+      DB_DATABASE: radar_test
       NODE_ENV: test
-      DATABASE_TEST_URL: postgres://postgres:postgres@localhost:5432/stellarbeat_test
+      DATABASE_TEST_URL: postgres://postgres:postgres@localhost:5432/radar_test
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
@@ -144,4 +142,4 @@ jobs:
       - name: Run Production Smoke Tests
         run: |
           # Add your production smoke tests here
-          echo "Running production smoke tests..." 
+          echo "Running production smoke tests..."

@@ -107,7 +107,7 @@ const listen = async () => {
 	const swaggerOptions = {
 		customCss: '.swagger-ui .topbar { display: none }',
 		explorer: true,
-		customSiteTitle: 'Stellarbeat API doc'
+		customSiteTitle: 'Obsrvr Radar API doc'
 	};
 
 	api.get(

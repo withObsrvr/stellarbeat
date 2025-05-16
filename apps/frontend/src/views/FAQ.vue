@@ -5,7 +5,7 @@
     </div>
     <div class="card">
       <div class="card-body">
-        <h3>How does Stellarbeat work?</h3>
+        <h3>How does Obsrvr Radar work?</h3>
         <p>
           Every 3 minutes we crawl the Stellar public network to gather all
           available nodes and pickup scp messages to determine if a node is
