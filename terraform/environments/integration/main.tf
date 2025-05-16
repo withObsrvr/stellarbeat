@@ -24,21 +24,21 @@ module "app_platform" {
 
   frontend_instance_count = 1
   backend_instance_count  = 1
-  scanner_instance_count = 1
-  users_instance_count   = 1
+  scanner_instance_count  = 1
+  users_instance_count    = 1
 
   database_production = false
 
   feature_flags = {
     experimentalFeatures = true
-    betaFeatures        = false
+    betaFeatures         = false
   }
 
   # Frontend environment variables
   frontend_env = {
-    API_URL      = "https://api-integration.stellarbeat.com"
-    API_KEY      = var.integration_api_key
-    NODE_ENV     = "integration"
+    API_URL  = "https://api-integration.stellarbeat.com"
+    API_KEY  = var.integration_api_key
+    NODE_ENV = "integration"
   }
 
   # Backend environment variables
@@ -68,4 +68,4 @@ module "app_platform" {
     JWT_SECRET   = var.integration_jwt_secret
     NODE_ENV     = "integration"
   }
-} 
+}

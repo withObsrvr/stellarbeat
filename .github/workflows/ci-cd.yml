@@ -63,9 +63,27 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # Run general terraform format check
-      - name: Terraform Format
-        run: terraform fmt -check -recursive
+      # Format terraform files and commit changes if needed
+      - name: Terraform Format Fix
+        run: terraform fmt -recursive
+        
+      # Check if formatting caused any changes
+      - name: Check for formatting changes
+        id: git-check
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "::set-output name=changes::true"
+            git config --global user.name "GitHub Actions Bot"
+            git config --global user.email "actions@github.com"
+            git add .
+            git commit -m "Apply terraform formatting changes"
+            # Only push if this is a PR
+            if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+              git push
+            fi
+          else
+            echo "::set-output name=changes::false"
+          fi
 
       # Test Staging Environment
       - name: Terraform Init - Staging
