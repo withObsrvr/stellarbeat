@@ -26,4 +26,4 @@ output "history_scanner_url" {
 output "users_url" {
   description = "URL of the production users service"
   value       = module.app_platform.users_url
-} 
+}
