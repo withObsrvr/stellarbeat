@@ -190,7 +190,7 @@ jobs:
         run: terraform plan -input=false -no-color -out=tf-plan-staging
 
       - name: Save Staging Plan Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: terraform-plan-staging
           path: ./terraform/environments/staging/tf-plan-staging
@@ -310,7 +310,7 @@ jobs:
         run: terraform plan -input=false -no-color -out=tf-plan-production
 
       - name: Save Production Plan Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: terraform-plan-production
           path: ./terraform/environments/production/tf-plan-production
@@ -364,7 +364,7 @@ jobs:
 
       # Download the terraform plan artifact
       - name: Download Terraform Plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v2
         with:
           name: terraform-plan-staging
           path: ./terraform/environments/staging
@@ -405,7 +405,7 @@ jobs:
 
       # Download the terraform plan artifact
       - name: Download Terraform Plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v2
         with:
           name: terraform-plan-production
           path: ./terraform/environments/production
