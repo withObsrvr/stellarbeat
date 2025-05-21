@@ -217,11 +217,11 @@ jobs:
 
           # Environment specific
           environment              = "production"
-          api_key          = "${{ secrets.STAGING_API_KEY }}"
-          jwt_secret       = "${{ secrets.STAGING_JWT_SECRET }}"
-          url              = "${{ secrets.STAGING_DOMAIN }}"
-          api_url          = "https://${{ secrets.STAGING_DOMAIN }}"
-          domain_name              = "${{ secrets.STAGING_DOMAIN }}"
+          app_api_key          = "${{ secrets.APP_API_KEY }}"
+          app_jwt_secret       = "${{ secrets.APP_JWT_SECRET }}"
+          app_url              = "${{ secrets.APP_URL }}"
+          app_api_url          = "https://${{ secrets.APP_URL }}"
+          domain_name              = "${{ secrets.APP_URL }}"
 
           # Service credentials
           ipstack_access_key       = "${{ secrets.IPSTACK_ACCESS_KEY }}"
