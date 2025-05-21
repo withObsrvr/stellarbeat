@@ -102,18 +102,48 @@ Each environment can have its own secrets, environment variables, and deployment
 To ensure the CI/CD pipeline works correctly, the following secrets need to be added to your GitHub repository:
 
 1. Repository Secrets (used by all environments):
-   - `AWS_ACCESS_KEY_ID` - AWS access key with S3 permissions
-   - `AWS_SECRET_ACCESS_KEY` - Corresponding AWS secret key
-   - `AWS_REGION` - Region where your S3 bucket is located (e.g., "us-east-2")
+   - **AWS Credentials:**
+     - `AWS_ACCESS_KEY_ID` - AWS access key with S3 permissions
+     - `AWS_SECRET_ACCESS_KEY` - Corresponding AWS secret key
+     - `AWS_REGION` - Region where your S3 bucket is located (e.g., "us-east-2")
+     - `AWS_BUCKET_NAME` - S3 bucket name for backups
+   
+   - **DigitalOcean Credentials:**
+     - `DIGITALOCEAN_ACCESS_TOKEN` - Your DigitalOcean API token
+   
+   - **Shared Service Credentials:**
+     - `IPSTACK_ACCESS_KEY` - API key for IP geolocation service
+     - `NETWORK_KNOWN_PEERS` - Comma-separated list of known network peers
+     - `MAILGUN_SECRET` - Mailgun API key
+     - `MAILGUN_DOMAIN` - Mailgun domain
+     - `MAILGUN_FROM` - Email sender address
+     - `MAILGUN_BASE_URL` - Mailgun API base URL
+     - `ENCRYPTION_SECRET` - Secret for data encryption
+     - `HASH_SECRET` - Secret for data hashing
+     - `CONSUMER_SECRET` - API consumer secret
+     - `SENTRY_DSN` - Sentry error tracking DSN
+     - `DEADMAN_URL` - DeadMan's Snitch URL
 
-2. Environment-specific Secrets:
-   - `DIGITALOCEAN_ACCESS_TOKEN` - Your DigitalOcean API token
-   - Environment Domains:
-     - `STAGING_DOMAIN` - Domain for staging environment
-     - `INTEGRATION_DOMAIN` - Domain for integration environment
-     - `PRODUCTION_DOMAIN` - Domain for production environment
+2. Environment-specific Secrets (in GitHub Environments):
 
-These secrets are used for Terraform state management, deploying to DigitalOcean, and configuring environment-specific settings.
+   **Staging Environment:**
+   - `STAGING_DOMAIN` - Domain for staging environment
+   - `STAGING_API_KEY` - API key for staging environment
+   - `STAGING_JWT_SECRET` - JWT secret for staging environment
+   
+   **Integration Environment:**
+   - `INTEGRATION_DOMAIN` - Domain for integration environment
+   - `INTEGRATION_API_KEY` - API key for integration environment
+   - `INTEGRATION_JWT_SECRET` - JWT secret for integration environment
+   - `INTEGRATION_DATABASE_URL` - Database connection URL
+   
+   **Production Environment:**
+   - `PRODUCTION_DOMAIN` - Domain for production environment
+   - `PRODUCTION_API_KEY` - API key for production environment
+   - `PRODUCTION_JWT_SECRET` - JWT secret for production environment
+   - `PRODUCTION_DATABASE_URL` - Database connection URL
+
+The CI/CD workflow automatically creates Terraform variable files (terraform.auto.tfvars) with these secrets for secure testing and deployment.
 
 ## Devcontainer development
 

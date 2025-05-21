@@ -63,27 +63,18 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # Format terraform files and commit changes if needed
-      - name: Terraform Format Fix
-        run: terraform fmt -recursive
-        
-      # Check if formatting caused any changes
-      - name: Check for formatting changes
-        id: git-check
+      # Check terraform formatting but continue if there are issues
+      - name: Terraform Format Check
+        id: fmt-check
+        continue-on-error: true
+        run: terraform fmt -check -recursive
+
+      # If format check fails, output a helpful message
+      - name: Show formatting error
+        if: steps.fmt-check.outcome == 'failure'
         run: |
-          if [[ -n $(git status --porcelain) ]]; then
-            echo "::set-output name=changes::true"
-            git config --global user.name "GitHub Actions Bot"
-            git config --global user.email "actions@github.com"
-            git add .
-            git commit -m "Apply terraform formatting changes"
-            # Only push if this is a PR
-            if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-              git push
-            fi
-          else
-            echo "::set-output name=changes::false"
-          fi
+          echo "::warning::Terraform formatting issues detected."
+          echo "::warning::To fix, run 'terraform fmt -recursive' locally, then commit and push."
 
       # Test Staging Environment
       - name: Terraform Init - Staging
@@ -97,11 +88,105 @@ jobs:
         working-directory: ./terraform/environments/staging
         run: terraform validate
 
+      - name: Create tfvars file for Staging
+        working-directory: ./terraform/environments/staging
+        run: |
+          cat > terraform.auto.tfvars <<EOF
+          # Core credentials
+          do_token                 = "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}"
+          git_branch               = "main"
+          region                   = "${{ vars.REGION || 'nyc3' }}"
+          aws_access_key           = "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          aws_secret_access_key    = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          aws_region               = "${{ secrets.AWS_REGION }}"
+          aws_bucket_name          = "${{ secrets.AWS_BUCKET_NAME || 'stellarbeat-backup' }}"
+          repo_url                 = "${{ github.server_url }}/${{ github.repository }}.git"
+
+          # Environment specific
+          environment              = "staging"
+          staging_api_key          = "${{ secrets.STAGING_API_KEY }}"
+          staging_jwt_secret       = "${{ secrets.STAGING_JWT_SECRET }}"
+          staging_url              = "${{ secrets.STAGING_DOMAIN }}"
+          staging_api_url          = "https://${{ secrets.STAGING_DOMAIN }}"
+          domain_name              = "${{ secrets.STAGING_DOMAIN }}"
+
+          # Service credentials
+          ipstack_access_key       = "${{ secrets.IPSTACK_ACCESS_KEY }}"
+          mailgun_secret           = "${{ secrets.MAILGUN_SECRET }}"
+          mailgun_domain           = "${{ secrets.MAILGUN_DOMAIN || 'mail.example.com' }}"
+          mailgun_from             = "${{ secrets.MAILGUN_FROM || 'noreply@example.com' }}"
+          mailgun_base_url         = "${{ secrets.MAILGUN_BASE_URL || 'https://api.mailgun.net' }}"
+          encryption_secret        = "${{ secrets.ENCRYPTION_SECRET }}"
+          hash_secret              = "${{ secrets.HASH_SECRET }}"
+          consumer_secret          = "${{ secrets.CONSUMER_SECRET }}"
+          consumer_name            = "${{ secrets.CONSUMER_NAME || '' }}"
+
+          # Database configuration
+          database_pool_size       = ${{ vars.DATABASE_POOL_SIZE || 10 }}
+          database_test_url        = "${{ secrets.DATABASE_TEST_URL }}"
+
+          # Service configuration
+          enable_s3_backup         = false
+          enable_heart_beat        = false
+          enable_sentry            = false
+          notifications_enabled    = false
+          debug                    = ${{ secrets.DEBUG || 'false' }}
+          sentry_dsn               = "${{ secrets.SENTRY_DSN || '' }}"
+          sentry_environment       = "staging"
+          deadman_url              = "${{ secrets.DEADMAN_URL || '' }}"
+
+          # API credentials
+          coordinator_api_username = "${{ secrets.COORDINATOR_API_USERNAME || '' }}"
+          coordinator_api_password = "${{ secrets.COORDINATOR_API_PASSWORD || '' }}"
+          history_scan_api_username = "${{ secrets.HISTORY_SCAN_API_USERNAME || '' }}"
+          history_scan_api_password = "${{ secrets.HISTORY_SCAN_API_PASSWORD || '' }}"
+          user_service_username    = "${{ secrets.USER_SERVICE_USERNAME || '' }}"
+          user_service_password    = "${{ secrets.USER_SERVICE_PASSWORD || '' }}"
+
+          # Infrastructure settings
+          instance_size            = "${{ secrets.INSTANCE_SIZE || 'basic-xs' }}"
+          frontend_instance_count  = 1
+          backend_instance_count   = 1
+          scanner_instance_count   = 1
+          history_scanner_instance_count = 1
+          users_instance_count     = 1
+
+          # Service configuration
+          backend_port             = 3000
+          user_agent               = "radar-agent"
+          history_scanner_user_agent = "radar-history-scanner"
+          crawler_max_connections  = 25
+          crawler_max_crawl_time   = 900000
+          crawler_blacklist        = "${{ secrets.CRAWLER_BLACKLIST || '' }}"
+          network_scan_loop_interval_ms = 180000
+          user_service_base_url    = "${{ secrets.USER_SERVICE_BASE_URL || 'http://localhost:7000' }}"
+          frontend_base_url        = "${{ secrets.FRONTEND_BASE_URL || 'http://localhost:3000' }}"
+          users_port               = 7000
+          horizon_url             = "${{ secrets.HORIZON_URL || 'https://horizon.stellar.org' }}"
+          network_passphrase        = "${{ secrets.NETWORK_PASSPHRASE || 'Public Global Stellar Network ; September 2015' }}"
+          network_id               = "${{ secrets.NETWORK_ID || 'public' }}"
+          network_name             = "${{ secrets.NETWORK_NAME || 'Public Stellar Network' }}"
+          network_overlay_version   = "${{ secrets.NETWORK_OVERLAY_VERSION || 37 }}"
+          network_ledger_version       = "${{ secrets.NETWORK_LEDGER_VERSION || 22 }}"
+          network_overlay_min_version   = "${{ secrets.NETWORK_OVERLAY_MIN_VERSION || 35 }}"
+          network_stellar_core_version   = "${{ secrets.NETWORK_STELLAR_CORE_VERSION || '22.2.0' }}"
+          network_quorum_set   = "${{ secrets.NETWORK_QUORUM_SET || '' }}"
+          testnet_horizon_url             = "${{ secrets.TESTNET_HORIZON_URL || 'https://horizon-testnet.stellar.org' }}"
+          testnet_network_passphrase        = "${{ secrets.TESTNET_NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015' }}"
+          testnet_network_id               = "${{ secrets.TESTNET_NETWORK_ID || 'testnet' }}"
+          testnet_network_name             = "${{ secrets.TESTNET_NETWORK_NAME || 'Stellar Testnet' }}"
+          testnet_network_overlay_version   = "${{ secrets.TESTNET_NETWORK_OVERLAY_VERSION || 37 }}"
+          testnet_network_ledger_version       = "${{ secrets.TESTNET_NETWORK_LEDGER_VERSION || 22 }}"
+          testnet_network_overlay_min_version   = "${{ secrets.TESTNET_NETWORK_OVERLAY_MIN_VERSION || 35 }}"
+          testnet_network_stellar_core_version   = "${{ secrets.TESTNET_NETWORK_STELLAR_CORE_VERSION || '22.2.0' }}"
+          testnet_network_quorum_set   = "${{ secrets.TESTNET_NETWORK_QUORUM_SET || '' }}"
+          testnet_network_known_peers = "${{ secrets.TESTNET_NETWORK_KNOWN_PEERS || '54.166.220.249:11625,44.223.45.116:11625,54.159.138.198:11625' }}"
+
+          EOF
+
       - name: Terraform Plan - Staging
         working-directory: ./terraform/environments/staging
         run: terraform plan -input=false -no-color
-        env:
-          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       # Test Integration Environment
       - name: Terraform Init - Integration
@@ -112,11 +197,44 @@ jobs:
         working-directory: ./terraform/environments/integration
         run: terraform validate
 
+      - name: Create tfvars file for Integration
+        working-directory: ./terraform/environments/integration
+        run: |
+          cat > terraform.auto.tfvars <<EOF
+          # Core credentials
+          do_token                 = "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}"
+          git_branch               = "main"
+          region                   = "${{ secrets.REGION || 'nyc3' }}"
+          aws_access_key           = "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          aws_secret_access_key    = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          aws_region               = "${{ secrets.AWS_REGION }}"
+          aws_bucket_name          = "${{ secrets.AWS_BUCKET_NAME || 'stellarbeat-backup' }}"
+          repo_url                 = "${{ github.server_url }}/${{ github.repository }}.git"
+
+          # Environment specific
+          environment              = "integration"
+          integration_api_key      = "${{ secrets.INTEGRATION_API_KEY }}"
+          integration_jwt_secret   = "${{ secrets.INTEGRATION_JWT_SECRET }}"
+          integration_database_url = "${{ secrets.INTEGRATION_DATABASE_URL }}"
+          domain_name              = "${{ secrets.INTEGRATION_DOMAIN }}"
+
+          # Network peers
+          network_known_peers      = "${{ secrets.NETWORK_KNOWN_PEERS || '54.166.220.249:11625,44.223.45.116:11625,54.159.138.198:11625' }}"
+
+          # Service credentials
+          ipstack_access_key       = "${{ secrets.IPSTACK_ACCESS_KEY }}"
+
+          # Infrastructure settings
+          instance_size            = "basic-xs"
+          frontend_instance_count  = 1
+          backend_instance_count   = 1
+          scanner_instance_count   = 1
+          users_instance_count     = 1
+          EOF
+
       - name: Terraform Plan - Integration
         working-directory: ./terraform/environments/integration
         run: terraform plan -input=false -no-color -backend=false
-        env:
-          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       # Test Production Environment
       - name: Terraform Init - Production
@@ -127,11 +245,40 @@ jobs:
         working-directory: ./terraform/environments/production
         run: terraform validate
 
+      - name: Create tfvars file for Production
+        working-directory: ./terraform/environments/production
+        run: |
+          cat > terraform.auto.tfvars <<EOF
+          do_token                 = "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}"
+          aws_access_key           = "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          aws_secret_access_key    = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          aws_region               = "${{ secrets.AWS_REGION }}"
+          aws_bucket_name          = "${{ secrets.AWS_BUCKET_NAME || 'stellarbeat-backup' }}"
+          repo_url                 = "${{ github.server_url }}/${{ github.repository }}.git"
+          production_api_key       = "${{ secrets.PRODUCTION_API_KEY || 'dummy-key-for-testing' }}"
+          production_jwt_secret    = "${{ secrets.PRODUCTION_JWT_SECRET || 'dummy-secret-for-testing' }}"
+          production_database_url  = "${{ secrets.PRODUCTION_DATABASE_URL  }}"
+          domain_name              = "${{ secrets.PRODUCTION_DOMAIN }}"
+          network_known_peers      = "${{ secrets.NETWORK_KNOWN_PEERS || '54.166.220.249:11625,44.223.45.116:11625,54.159.138.198:11625' }}"
+          ipstack_access_key       = "${{ secrets.IPSTACK_ACCESS_KEY || 'dummy-key-for-testing' }}"
+          mailgun_secret           = "${{ secrets.MAILGUN_SECRET || 'dummy-key-for-testing' }}"
+          mailgun_domain           = "${{ secrets.MAILGUN_DOMAIN || 'mail.example.com' }}"
+          mailgun_from             = "${{ secrets.MAILGUN_FROM || 'noreply@example.com' }}"
+          mailgun_base_url         = "${{ secrets.MAILGUN_BASE_URL || 'https://api.mailgun.net' }}"
+          encryption_secret        = "${{ secrets.ENCRYPTION_SECRET || 'dummy-secret-for-testing' }}"
+          hash_secret              = "${{ secrets.HASH_SECRET || 'dummy-secret-for-testing' }}"
+          consumer_secret          = "${{ secrets.CONSUMER_SECRET || 'dummy-secret-for-testing' }}"
+          sentry_dsn               = "${{ secrets.SENTRY_DSN || '' }}"
+          deadman_url              = "${{ secrets.DEADMAN_URL || '' }}"
+          enable_s3_backup         = true
+          enable_heart_beat        = true
+          enable_sentry            = true
+          notifications_enabled    = true
+          EOF
+
       - name: Terraform Plan - Production
         working-directory: ./terraform/environments/production
         run: terraform plan -input=false -no-color -backend=false
-        env:
-          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       # Perform a security scan of the terraform code using checkov
       - name: Run Checkov action
