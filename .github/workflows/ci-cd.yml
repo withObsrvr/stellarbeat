@@ -104,10 +104,10 @@ jobs:
 
           # Environment specific
           environment              = "staging"
-          staging_api_key          = "${{ secrets.STAGING_API_KEY }}"
-          staging_jwt_secret       = "${{ secrets.STAGING_JWT_SECRET }}"
-          staging_url              = "${{ secrets.STAGING_DOMAIN }}"
-          staging_api_url          = "https://${{ secrets.STAGING_DOMAIN }}"
+          app_api_key          = "${{ secrets.STAGING_API_KEY }}"
+          app_jwt_secret       = "${{ secrets.STAGING_JWT_SECRET }}"
+          app_url              = "${{ secrets.STAGING_DOMAIN }}"
+          app_api_url          = "https://${{ secrets.STAGING_DOMAIN }}"
           domain_name              = "${{ secrets.STAGING_DOMAIN }}"
 
           # Service credentials
