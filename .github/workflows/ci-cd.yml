@@ -187,7 +187,14 @@ jobs:
 
       - name: Terraform Plan - Staging
         working-directory: ./terraform/environments/staging
-        run: terraform plan -input=false -no-color
+        run: terraform plan -input=false -no-color -out=tf-plan-staging
+
+      - name: Save Staging Plan Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-plan-staging
+          path: ./terraform/environments/staging/tf-plan-staging
+          retention-days: 1
 
       # Test Production Environment
       - name: Terraform Init - Production
@@ -237,6 +244,7 @@ jobs:
           # Database configuration
           database_pool_size       = ${{ vars.DATABASE_POOL_SIZE || 10 }}
           database_test_url        = "${{ secrets.DATABASE_TEST_URL }}"
+          database_production      = true
 
           # Service configuration
           enable_s3_backup         = ${{ secrets.ENABLE_S3_BACKUP || 'false' }}
@@ -258,7 +266,7 @@ jobs:
 
           # Infrastructure settings
           instance_size            = "${{ secrets.INSTANCE_SIZE || 'basic-xs' }}"
-          frontend_instance_count  = 1
+          frontend_instance_count  = 2
           backend_instance_count   = 1
           scanner_instance_count   = 1
           history_scanner_instance_count = 1
@@ -299,7 +307,14 @@ jobs:
           EOF
       - name: Terraform Plan - Production
         working-directory: ./terraform/environments/production
-        run: terraform plan -input=false -no-color
+        run: terraform plan -input=false -no-color -out=tf-plan-production
+
+      - name: Save Production Plan Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-plan-production
+          path: ./terraform/environments/production/tf-plan-production
+          retention-days: 1
 
       # Perform a security scan of the terraform code using checkov
       - name: Run Checkov action
@@ -317,10 +332,14 @@ jobs:
           category: checkov
 
   deploy-staging:
-    needs: test
+    needs: [test, terraform-unit-tests]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: obsrvr-radar-staging
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -332,91 +351,70 @@ jobs:
         run: |
           pnpm install
           pnpm build
-      - name: Setup doctl
-        uses: digitalocean/action-doctl@v2
+
+      # Set up Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # Initialize Terraform for staging
+      - name: Terraform Init - Staging
+        working-directory: ./terraform/environments/staging
+        run: |
+          terraform init -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+
+      # Download the terraform plan artifact
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v3
         with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - name: Deploy to Staging
-        env:
-          GITHUB_REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
-          DOMAIN: ${{ secrets.STAGING_DOMAIN }}
-        run: |
-          doctl apps create --spec .do/app.staging.yaml
-      - name: Wait for Staging Deployment
-        run: |
-          echo "Waiting for staging deployment to complete..."
-          sleep 300
+          name: terraform-plan-staging
+          path: ./terraform/environments/staging
+
+      # Apply the terraform plan
+      - name: Deploy to Staging with Terraform
+        working-directory: ./terraform/environments/staging
+        run: terraform apply -auto-approve tf-plan-staging
+
       - name: Run Staging Tests
         run: |
           # Add your staging environment tests here
           # For example, run API tests against staging endpoints
           echo "Running staging tests..."
 
-  deploy-integration:
-    needs: [test, deploy-staging]
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment: obsrvr-radar-integration
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9.15.0
-          run_install: false
-      - name: Install dependencies
-        run: |
-          pnpm install
-          pnpm build
-      - name: Setup doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - name: Deploy to Integration
-        env:
-          GITHUB_REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
-          DOMAIN: ${{ secrets.INTEGRATION_DOMAIN }}
-        run: |
-          doctl apps create --spec .do/app.integration.yaml
-      - name: Wait for Integration Deployment
-        run: |
-          echo "Waiting for integration deployment to complete..."
-          sleep 300
-      - name: Run Integration Tests
-        run: |
-          # Add your integration tests here
-          echo "Running integration tests..."
-
   deploy-production:
-    needs: [test, deploy-staging, deploy-integration]
+    needs: [test, terraform-unit-tests, deploy-staging]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: obsrvr-radar-production
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+
+      # Set up Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # Initialize Terraform for production
+      - name: Terraform Init - Production
+        working-directory: ./terraform/environments/production
+        run: |
+          terraform init -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+
+      # Download the terraform plan artifact
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v3
         with:
-          version: 9.15.0
-          run_install: false
-      - name: Install dependencies
-        run: |
-          pnpm install
-          pnpm build
-      - name: Setup doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - name: Deploy to Production
-        env:
-          GITHUB_REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
-          DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
-        run: |
-          doctl apps create --spec .do/app.production.yaml
-      - name: Wait for Production Deployment
-        run: |
-          echo "Waiting for production deployment to complete..."
-          sleep 300
+          name: terraform-plan-production
+          path: ./terraform/environments/production
+
+      # Apply the terraform plan
+      - name: Deploy to Production with Terraform
+        working-directory: ./terraform/environments/production
+        run: terraform apply -auto-approve tf-plan-production
+
       - name: Run Production Smoke Tests
         run: |
           # Add your production smoke tests here
