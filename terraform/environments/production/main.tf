@@ -15,14 +15,15 @@ provider "digitalocean" {
 module "app_platform" {
   source = "../../modules/app_platform"
 
-  app_name    = "radar"
-  region      = var.region
-  repo_url    = var.repo_url
-  domain_name = var.domain_name
-  git_branch  = var.git_branch
+  app_name                  = "radar"
+  region                    = var.region
+  repo_url                  = var.repo_url
+  domain_name               = var.domain_name
+  git_branch                = var.git_branch
+  database_version_postgres = var.database_version_postgres
 
   environment   = "production"
-  instance_size = "basic-xs"
+  instance_size = "professional-xs"
 
   frontend_instance_count        = 2
   backend_instance_count         = 2

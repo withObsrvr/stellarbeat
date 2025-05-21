@@ -10,7 +10,7 @@ terraform {
 resource "digitalocean_database_cluster" "radar_db" {
   name    = "${var.app_name}-db"
   engine  = "pg"
-  version = "15"
+  version = var.database_version_postgres
   # Use a larger database size for production
   size       = var.database_production ? "db-s-2vcpu-4gb" : "db-s-1vcpu-1gb"
   region     = var.region

@@ -77,6 +77,12 @@ variable "database_production" {
   type        = bool
 }
 
+variable "database_version_postgres" {
+  description = "PostgreSQL version"
+  type        = string
+  default     = "15"
+}
+
 variable "feature_flags" {
   description = "Feature flags configuration"
   type        = map(bool)

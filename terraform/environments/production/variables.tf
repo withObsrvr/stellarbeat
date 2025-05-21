@@ -12,6 +12,13 @@ variable "database_test_url" {
   type        = string
   sensitive   = true
 }
+
+variable "database_version_postgres" {
+  description = "PostgreSQL version"
+  type        = string
+  default     = "17"
+}
+
 variable "enable_s3_backup" {
   description = "Enable S3 backup"
   type        = bool
