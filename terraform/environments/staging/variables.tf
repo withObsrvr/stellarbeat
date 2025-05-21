@@ -196,22 +196,22 @@ variable "ipstack_access_key" {
   type        = string
 }
 
-variable "staging_api_key" {
+variable "app_api_key" {
   description = "API Key for Staging"
   type        = string
   sensitive   = true
 }
 
-variable "staging_api_url" {
+variable "app_api_url" {
   description = "API URL for Staging"
   type        = string
 }
-variable "staging_url" {
+variable "app_url" {
   description = "URL for Staging"
   type        = string
 }
 
-variable "staging_jwt_secret" {
+variable "app_jwt_secret" {
   description = "JWT Secret"
   type        = string
   sensitive   = true
