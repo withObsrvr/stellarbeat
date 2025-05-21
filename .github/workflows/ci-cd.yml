@@ -160,6 +160,7 @@ jobs:
           history_scanner_user_agent = "radar-history-scanner"
           crawler_max_connections  = 25
           crawler_max_crawl_time   = 900000
+          domain_name              = "radar-staging.withobsrvr.com"
           crawler_blacklist        = "${{ secrets.CRAWLER_BLACKLIST || '' }}"
           network_scan_loop_interval_ms = 180000
           user_service_base_url    = "${{ secrets.USER_SERVICE_BASE_URL || 'http://localhost:7000' }}"
@@ -231,7 +232,7 @@ jobs:
           app_jwt_secret       = "${{ secrets.APP_JWT_SECRET }}"
           app_url              = "${{ secrets.APP_URL }}"
           app_api_url          = "https://${{ secrets.APP_URL }}"
-          domain_name              = "${{ secrets.APP_URL }}"
+          domain_name              = "radar.withobsrvr.com"
 
           # Service credentials
           ipstack_access_key       = "${{ secrets.IPSTACK_ACCESS_KEY }}"
