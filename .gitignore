@@ -13,3 +13,5 @@ tsconfig.tsbuildinfo
 terraform/environments/*/terraform.tfvars
 terraform/environments/*/.terraform
 terraform/environments/*/.terraform.lock.hcl
+
+create_github_secrets.sh

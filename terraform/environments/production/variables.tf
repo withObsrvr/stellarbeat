@@ -197,17 +197,17 @@ variable "ipstack_access_key" {
 }
 
 variable "app_api_key" {
-  description = "API Key for Staging"
+  description = "API Key for App"
   type        = string
   sensitive   = true
 }
 
 variable "app_api_url" {
-  description = "API URL for Staging"
+  description = "API URL for App"
   type        = string
 }
 variable "app_url" {
-  description = "URL for Staging"
+  description = "URL for App"
   type        = string
 }
 
@@ -269,7 +269,7 @@ variable "instance_size" {
 variable "environment" {
   description = "Environment name"
   type        = string
-  default     = "staging"
+  default     = "production"
 }
 variable "git_branch" {
   description = "Git branch to deploy"
@@ -280,13 +280,13 @@ variable "git_branch" {
 variable "domain_name" {
   description = "Domain name for the application"
   type        = string
-  default     = "radar-staging.withobsrvr.com"
+  default     = "radar.withobsrvr.com"
 }
 
 variable "notifications_enabled" {
   description = "Enable notifications"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "user_service_base_url" {

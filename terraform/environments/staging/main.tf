@@ -42,7 +42,7 @@ module "app_platform" {
   # Frontend environment variables
   frontend_env = {
     API_URL                             = "https://radar-staging.withobsrvr.com/api"
-    API_KEY                             = var.staging_api_key
+    API_KEY                             = var.app_api_key
     NODE_ENV                            = "staging"
     VUE_APP_PUBLIC_API_URL              = "https://radar-staging.withobsrvr.com/api"
     VUE_APP_TEST_API_URL                = "https://radar-staging.withobsrvr.com/testnet-api" # Path to testnet API
@@ -63,7 +63,7 @@ module "app_platform" {
 
   # Backend environment variables
   backend_env = {
-    JWT_SECRET                    = var.staging_jwt_secret
+    JWT_SECRET                    = var.app_jwt_secret
     NODE_ENV                      = "staging"
     IPSTACK_ACCESS_KEY            = var.ipstack_access_key
     HORIZON_URL                   = var.horizon_url
@@ -109,7 +109,7 @@ module "app_platform" {
 
   # Network Scanner environment variables for mainnet
   network_scanner_env = {
-    API_KEY                      = var.staging_api_key
+    API_KEY                      = var.app_api_key
     NODE_ENV                     = "staging"
     IPSTACK_ACCESS_KEY           = var.ipstack_access_key
     HORIZON_URL                  = var.horizon_url
@@ -129,7 +129,7 @@ module "app_platform" {
 
   # Network Scanner environment variables for testnet
   testnet_scanner_env = {
-    API_KEY                      = var.staging_api_key
+    API_KEY                      = var.app_api_key
     NODE_ENV                     = "staging"
     IPSTACK_ACCESS_KEY           = var.ipstack_access_key
     HORIZON_URL                  = var.testnet_horizon_url
@@ -149,12 +149,12 @@ module "app_platform" {
 
   # History Scanner environment variables
   history_scanner_env = {
-    API_KEY  = var.staging_api_key
+    API_KEY  = var.app_api_key
     NODE_ENV = "staging"
 
 
     # Required Backend API Settings
-    COORDINATOR_API_BASE_URL = var.staging_api_url
+    COORDINATOR_API_BASE_URL = var.app_api_url
     COORDINATOR_API_USERNAME = var.coordinator_api_username
     COORDINATOR_API_PASSWORD = var.coordinator_api_password
 
@@ -171,7 +171,7 @@ module "app_platform" {
 
   # Users service environment variables
   users_env = {
-    JWT_SECRET        = var.staging_jwt_secret
+    JWT_SECRET        = var.app_jwt_secret
     NODE_ENV          = "staging"
     MAILGUN_SECRET    = var.mailgun_secret
     MAILGUN_DOMAIN    = var.mailgun_domain
@@ -187,7 +187,7 @@ module "app_platform" {
 
   # Testnet Backend environment variables
   testnet_backend_env = {
-    JWT_SECRET                   = var.staging_jwt_secret
+    JWT_SECRET                   = var.app_jwt_secret
     NODE_ENV                     = "staging"
     IPSTACK_ACCESS_KEY           = var.ipstack_access_key
     HORIZON_URL                  = var.testnet_horizon_url
