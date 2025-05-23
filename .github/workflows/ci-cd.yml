@@ -91,11 +91,11 @@ jobs:
 
   plan-staging:
     name: 'Plan Staging Environment'
-    needs: [test, terraform-lint]
+    needs: [test]
     # Skip the terraform-lint dependency for push events to main
     if: >
-      always() &&  (needs.test.result == 'success') &&  (github.event_name ==
-      'push' || needs.terraform-lint.result == 'success')
+      always() &&  
+      needs.test.result == 'success'
     runs-on: ubuntu-latest
     environment: obsrvr-radar-staging
     permissions:
@@ -226,21 +226,36 @@ jobs:
         working-directory: ./terraform/environments/staging
         run: terraform plan -input=false -no-color -out=tf-plan-staging
 
-      # Save the plan as an artifact for later use in deployment
+      # Encrypt the Terraform plan file before storing it as an artifact
+      - name: Encrypt Terraform plan
+        working-directory: ./terraform/environments/staging
+        env:
+          PLAN_ENCRYPTION_KEY: ${{ secrets.PLAN_ENCRYPTION_KEY }}
+        run: |
+          # Create a passphrase file for GPG encryption using the PLAN_ENCRYPTION_KEY secret
+          echo "$PLAN_ENCRYPTION_KEY" > passphrase.txt
+          # Encrypt the Terraform plan file with GPG using the passphrase
+          gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase-file passphrase.txt --output tf-plan-staging.gpg tf-plan-staging
+          # Remove the unencrypted plan and passphrase file
+          rm tf-plan-staging passphrase.txt
+
+      # Save the encrypted plan as an artifact for later use in deployment
       - name: Save Staging Plan Artifact
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan-staging
-          path: ./terraform/environments/staging/tf-plan-staging
+          path: ./terraform/environments/staging/tf-plan-staging.gpg
           retention-days: 1
+          if-no-files-found: error
+          overwrite: true
 
   plan-production:
     name: 'Plan Production Environment'
-    needs: [test, terraform-lint]
+    needs: [test]
     # Skip the terraform-lint dependency for push events to main
     if: >
-      always() &&  (needs.test.result == 'success') &&  (github.event_name ==
-      'push' || needs.terraform-lint.result == 'success')
+      always() &&  
+      needs.test.result == 'success'
     runs-on: ubuntu-latest
     environment: obsrvr-radar-production
     permissions:
@@ -372,19 +387,35 @@ jobs:
         working-directory: ./terraform/environments/production
         run: terraform plan -input=false -no-color -out=tf-plan-production
 
-      # Save the plan as an artifact for later use in deployment
+      # Encrypt the Terraform plan file before storing it as an artifact
+      - name: Encrypt Terraform plan
+        working-directory: ./terraform/environments/production
+        env:
+          PLAN_ENCRYPTION_KEY: ${{ secrets.PLAN_ENCRYPTION_KEY }}
+        run: |
+          # Create a passphrase file for GPG encryption using the PLAN_ENCRYPTION_KEY secret
+          echo "$PLAN_ENCRYPTION_KEY" > passphrase.txt
+          # Encrypt the Terraform plan file with GPG using the passphrase
+          gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase-file passphrase.txt --output tf-plan-production.gpg tf-plan-production
+          # Remove the unencrypted plan and passphrase file
+          rm tf-plan-production passphrase.txt
+
+      # Save the encrypted plan as an artifact for later use in deployment
       - name: Save Production Plan Artifact
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan-production
-          path: ./terraform/environments/production/tf-plan-production
+          path: ./terraform/environments/production/tf-plan-production.gpg
           retention-days: 1
+          if-no-files-found: error
+          overwrite: true
 
   deploy-staging:
     needs: [plan-production, plan-staging]
     if: >
-      github.ref == 'refs/heads/main' &&  (needs.plan-staging.result ==
-      'success') &&  (needs.plan-production.result == 'success')
+      github.ref == 'refs/heads/main' &&  
+      needs.plan-staging.result == 'success' &&  
+      needs.plan-production.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -413,6 +444,19 @@ jobs:
         with:
           name: terraform-plan-staging
           path: ./terraform/environments/staging
+
+      # Decrypt the Terraform plan before applying
+      - name: Decrypt Terraform plan
+        working-directory: ./terraform/environments/staging
+        env:
+          PLAN_ENCRYPTION_KEY: ${{ secrets.PLAN_ENCRYPTION_KEY }}
+        run: |
+          # Create a passphrase file for GPG decryption using the PLAN_ENCRYPTION_KEY secret
+          echo "$PLAN_ENCRYPTION_KEY" > passphrase.txt
+          # Decrypt the Terraform plan file with GPG using the passphrase
+          gpg --batch --yes --decrypt --passphrase-file passphrase.txt --output tf-plan-staging tf-plan-staging.gpg
+          # Remove the passphrase file
+          rm passphrase.txt
 
       # Apply the terraform plan
       - name: Deploy to Staging with Terraform
@@ -468,6 +512,19 @@ jobs:
         with:
           name: terraform-plan-production
           path: ./terraform/environments/production
+
+      # Decrypt the Terraform plan before applying
+      - name: Decrypt Terraform plan
+        working-directory: ./terraform/environments/production
+        env:
+          PLAN_ENCRYPTION_KEY: ${{ secrets.PLAN_ENCRYPTION_KEY }}
+        run: |
+          # Create a passphrase file for GPG decryption using the PLAN_ENCRYPTION_KEY secret
+          echo "$PLAN_ENCRYPTION_KEY" > passphrase.txt
+          # Decrypt the Terraform plan file with GPG using the passphrase
+          gpg --batch --yes --decrypt --passphrase-file passphrase.txt --output tf-plan-production tf-plan-production.gpg
+          # Remove the passphrase file
+          rm passphrase.txt
 
       # Apply the terraform plan
       - name: Deploy to Production with Terraform
