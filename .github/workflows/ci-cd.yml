@@ -374,6 +374,8 @@ jobs:
     needs: [test, plan-staging]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     environment: obsrvr-radar-staging
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
