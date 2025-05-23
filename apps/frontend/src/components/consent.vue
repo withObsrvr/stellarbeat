@@ -10,7 +10,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 id="modal-1Label" class="modal-title">
-            Welcome to Stellarbeat.io!
+            Welcome to OBSRVR Radar!
           </h5>
         </div>
         <div class="modal-body">
