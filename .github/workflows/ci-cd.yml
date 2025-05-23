@@ -91,9 +91,12 @@ jobs:
 
   plan-staging:
     name: 'Plan Staging Environment'
-    needs: [test]
-    # For PRs, require terraform-lint to complete first
-    if: github.event_name == 'pull_request' && needs.terraform-lint.result == 'success' || github.event_name == 'push'
+    needs: [test, terraform-lint]
+    # Skip the terraform-lint dependency for push events to main
+    if: >
+      always() && 
+      (needs.test.result == 'success') && 
+      (github.event_name == 'push' || needs.terraform-lint.result == 'success')
     runs-on: ubuntu-latest
     environment: obsrvr-radar-staging
     permissions:
@@ -234,9 +237,12 @@ jobs:
 
   plan-production:
     name: 'Plan Production Environment'
-    needs: [test]
-    # For PRs, require terraform-lint to complete first
-    if: github.event_name == 'pull_request' && needs.terraform-lint.result == 'success' || github.event_name == 'push'
+    needs: [test, terraform-lint]
+    # Skip the terraform-lint dependency for push events to main
+    if: >
+      always() && 
+      (needs.test.result == 'success') && 
+      (github.event_name == 'push' || needs.terraform-lint.result == 'success')
     runs-on: ubuntu-latest
     environment: obsrvr-radar-production
     permissions:
