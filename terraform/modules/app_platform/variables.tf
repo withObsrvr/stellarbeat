@@ -78,7 +78,7 @@ variable "database_production" {
 }
 
 variable "database_version_postgres" {
-  description = "PostgreSQL version"
+  description = "Postgres version"
   type        = string
   default     = "15"
 }
