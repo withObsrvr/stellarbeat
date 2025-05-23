@@ -426,7 +426,7 @@ jobs:
           echo "Running staging tests..."
 
   approve-production-deployment:
-    needs: [test, plan-production, deploy-staging]
+    needs: [deploy-staging]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
