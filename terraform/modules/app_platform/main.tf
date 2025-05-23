@@ -17,8 +17,16 @@ resource "digitalocean_database_cluster" "radar_db" {
   node_count = 1
 }
 
-# Instead of using a firewall rule, we'll use the 'sslmode=no-verify' parameter in our connection string
-# and rely on DigitalOcean's internal network for security
+# Add trusted sources (firewall rules) to restrict database access
+resource "digitalocean_database_firewall" "radar_db_firewall" {
+  cluster_id = digitalocean_database_cluster.radar_db.id
+
+  # Explicitly add the entire App Platform app as a trusted source
+  rule {
+    type  = "app"
+    value = digitalocean_app.radar.id
+  }
+}
 
 # Create main database
 resource "digitalocean_database_db" "radar_db" {
