@@ -1,12 +1,12 @@
 import {HistoryArchiveScan} from "../src";
 
 it('should map from json', function () {
-    const url = 'https://history.stellarbeat.io';
+    const url = 'https://radar.withobsrvr.com/api/v1/history';
     const startDate = '2000/01/01';
     const endDate = '2000/01/02';
     const latestVerifiedLedger = 100
     const hasError = true;
-    const errorUrl = 'https://history.stellarbeat.io/gap';
+    const errorUrl = 'https://radar.withobsrvr.com/api/v1/history';
     const errorMessage = 'message';
     const isSlow = true;
 

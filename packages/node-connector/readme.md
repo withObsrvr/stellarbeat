@@ -128,7 +128,7 @@ You can connect to any node with the example script:
 pnpm examples:connect ip port
 ```
 
-You can find ip/port of nodes on https://stellarbeat.io
+You can find ip/port of nodes on https://radar.withobsrvr.com
 
 The script connects to the node and logs the xdr stellar messages it receives to
 standard output. Using

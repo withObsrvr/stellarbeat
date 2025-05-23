@@ -11,7 +11,7 @@ app.set("x-powered-by", false);
 let cacheTime = 86400000 * 7; //7 day cache for assets
 app.use(function (req, res, next) {
   res.setHeader("X-Frame-Options", "DENY"); //https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
-  //res.setHeader('Content-Security-Policy', 'default-src \'self\' *.stellarbeat.io');//https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+  //res.setHeader('Content-Security-Policy', 'default-src \'self\' *.withobsrvr.com');//https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
   res.setHeader("X-XSS-Protection", "1"); //https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
   res.setHeader("X-Content-Type-Options", "nosniff");
   if (
