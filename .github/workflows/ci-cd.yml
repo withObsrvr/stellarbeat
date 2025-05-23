@@ -175,6 +175,7 @@ jobs:
           # API credentials
           coordinator_api_username = "${{ secrets.COORDINATOR_API_USERNAME || '' }}"
           coordinator_api_password = "${{ secrets.COORDINATOR_API_PASSWORD || '' }}"
+          coordinator_api_base_url = "${{ secrets.COORDINATOR_API_BASE_URL || 'http://localhost:7000' }}"
           history_scan_api_username = "${{ secrets.HISTORY_SCAN_API_USERNAME || '' }}"
           history_scan_api_password = "${{ secrets.HISTORY_SCAN_API_PASSWORD || '' }}"
           user_service_username    = "${{ secrets.USER_SERVICE_USERNAME || '' }}"
@@ -336,6 +337,7 @@ jobs:
           # API credentials
           coordinator_api_username = "${{ secrets.COORDINATOR_API_USERNAME || '' }}"
           coordinator_api_password = "${{ secrets.COORDINATOR_API_PASSWORD || '' }}"
+          coordinator_api_base_url = "${{ secrets.COORDINATOR_API_BASE_URL || 'http://localhost:7000' }}"
           history_scan_api_username = "${{ secrets.HISTORY_SCAN_API_USERNAME || '' }}"
           history_scan_api_password = "${{ secrets.HISTORY_SCAN_API_PASSWORD || '' }}"
           user_service_username    = "${{ secrets.USER_SERVICE_USERNAME || '' }}"
