@@ -108,7 +108,10 @@ jobs:
       # Initialize Terraform for staging
       - name: Terraform Init - Staging
         working-directory: ./terraform/environments/staging
-        run: terraform init -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        run:
+          terraform init -backend-config="access_key=${{
+          secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{
+          secrets.AWS_SECRET_ACCESS_KEY }}"
 
       # Validate the configuration
       - name: Terraform Validate - Staging
@@ -185,7 +188,7 @@ jobs:
           history_scanner_user_agent = "radar-history-scanner"
           crawler_max_connections  = 25
           crawler_max_crawl_time   = 900000
-          crawler_blacklist        = "${{ secrets.CRAWLER_BLACKLIST || '' }}"
+          crawler_blacklist        = "${{ secrets.CRAWLER_BLACKLIST || 'test' }}"
           network_scan_loop_interval_ms = 180000
           user_service_base_url    = "${{ secrets.USER_SERVICE_BASE_URL || 'http://localhost:7000' }}"
           frontend_base_url        = "${{ secrets.FRONTEND_BASE_URL || 'http://localhost:3000' }}"
@@ -246,7 +249,10 @@ jobs:
       # Initialize Terraform for production
       - name: Terraform Init - Production
         working-directory: ./terraform/environments/production
-        run: terraform init -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        run:
+          terraform init -backend-config="access_key=${{
+          secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{
+          secrets.AWS_SECRET_ACCESS_KEY }}"
 
       # Validate the configuration
       - name: Terraform Validate - Production
@@ -405,8 +411,20 @@ jobs:
           # For example, run API tests against staging endpoints
           echo "Running staging tests..."
 
-  deploy-production:
+  approve-production-deployment:
     needs: [test, plan-production, deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: obsrvr-radar-production-approval
+      url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Approval for Production Deployment
+        run: |
+          echo "Production deployment has been approved. Proceeding with deployment..."
+  
+  deploy-production:
+    needs: [approve-production-deployment]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: obsrvr-radar-production
