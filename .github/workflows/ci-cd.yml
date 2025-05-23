@@ -144,7 +144,7 @@ jobs:
           app_api_key          = "${{ secrets.STAGING_API_KEY }}"
           app_jwt_secret       = "${{ secrets.STAGING_JWT_SECRET }}"
           app_url              = "${{ secrets.STAGING_DOMAIN }}"
-          app_api_url          = "https://${{ secrets.STAGING_DOMAIN }}"
+          app_api_url          = "${{ secrets.STAGING_DOMAIN }}"
           domain_name              = "radar-staging.withobsrvr.com"
 
           # Service credentials
@@ -304,7 +304,7 @@ jobs:
           app_api_key          = "${{ secrets.APP_API_KEY }}"
           app_jwt_secret       = "${{ secrets.APP_JWT_SECRET }}"
           app_url              = "${{ secrets.APP_URL }}"
-          app_api_url          = "https://${{ secrets.APP_URL }}"
+          app_api_url          = "${{ secrets.APP_URL }}"
           domain_name              = "radar.withobsrvr.com"
 
           # Service credentials
