@@ -144,7 +144,7 @@ jobs:
           app_api_key          = "${{ secrets.STAGING_API_KEY }}"
           app_jwt_secret       = "${{ secrets.STAGING_JWT_SECRET }}"
           app_url              = "${{ secrets.STAGING_DOMAIN }}"
-          app_api_url          = "https://${{ secrets.STAGING_DOMAIN }}"
+          app_api_url          = "${{ secrets.STAGING_DOMAIN }}"
           domain_name              = "radar-staging.withobsrvr.com"
 
           # Service credentials
@@ -175,6 +175,7 @@ jobs:
           # API credentials
           coordinator_api_username = "${{ secrets.COORDINATOR_API_USERNAME || '' }}"
           coordinator_api_password = "${{ secrets.COORDINATOR_API_PASSWORD || '' }}"
+          coordinator_api_base_url = "${{ secrets.COORDINATOR_API_BASE_URL || 'http://localhost:7000' }}"
           history_scan_api_username = "${{ secrets.HISTORY_SCAN_API_USERNAME || '' }}"
           history_scan_api_password = "${{ secrets.HISTORY_SCAN_API_PASSWORD || '' }}"
           user_service_username    = "${{ secrets.USER_SERVICE_USERNAME || '' }}"
@@ -304,7 +305,7 @@ jobs:
           app_api_key          = "${{ secrets.APP_API_KEY }}"
           app_jwt_secret       = "${{ secrets.APP_JWT_SECRET }}"
           app_url              = "${{ secrets.APP_URL }}"
-          app_api_url          = "https://${{ secrets.APP_URL }}"
+          app_api_url          = "${{ secrets.APP_URL }}"
           domain_name              = "radar.withobsrvr.com"
 
           # Service credentials
@@ -336,6 +337,7 @@ jobs:
           # API credentials
           coordinator_api_username = "${{ secrets.COORDINATOR_API_USERNAME || '' }}"
           coordinator_api_password = "${{ secrets.COORDINATOR_API_PASSWORD || '' }}"
+          coordinator_api_base_url = "${{ secrets.COORDINATOR_API_BASE_URL || 'http://localhost:7000' }}"
           history_scan_api_username = "${{ secrets.HISTORY_SCAN_API_USERNAME || '' }}"
           history_scan_api_password = "${{ secrets.HISTORY_SCAN_API_PASSWORD || '' }}"
           user_service_username    = "${{ secrets.USER_SERVICE_USERNAME || '' }}"
