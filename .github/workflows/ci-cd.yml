@@ -94,9 +94,8 @@ jobs:
     needs: [test, terraform-lint]
     # Skip the terraform-lint dependency for push events to main
     if: >
-      always() && 
-      (needs.test.result == 'success') && 
-      (github.event_name == 'push' || needs.terraform-lint.result == 'success')
+      always() &&  (needs.test.result == 'success') &&  (github.event_name ==
+      'push' || needs.terraform-lint.result == 'success')
     runs-on: ubuntu-latest
     environment: obsrvr-radar-staging
     permissions:
@@ -240,9 +239,8 @@ jobs:
     needs: [test, terraform-lint]
     # Skip the terraform-lint dependency for push events to main
     if: >
-      always() && 
-      (needs.test.result == 'success') && 
-      (github.event_name == 'push' || needs.terraform-lint.result == 'success')
+      always() &&  (needs.test.result == 'success') &&  (github.event_name ==
+      'push' || needs.terraform-lint.result == 'success')
     runs-on: ubuntu-latest
     environment: obsrvr-radar-production
     permissions:
@@ -383,8 +381,10 @@ jobs:
           retention-days: 1
 
   deploy-staging:
-    needs: [test, plan-staging]
-    if: github.ref == 'refs/heads/main'
+    needs: [plan-production, plan-staging]
+    if: >
+      github.ref == 'refs/heads/main' &&  (needs.plan-staging.result ==
+      'success') &&  (needs.plan-production.result == 'success')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -431,12 +431,14 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: obsrvr-radar-production-approval
-      url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      url:
+        ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{
+        github.run_id }}
     steps:
       - name: Approval for Production Deployment
         run: |
           echo "Production deployment has been approved. Proceeding with deployment..."
-  
+
   deploy-production:
     needs: [approve-production-deployment]
     if: github.ref == 'refs/heads/main'
