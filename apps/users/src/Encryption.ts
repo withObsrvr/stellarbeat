@@ -9,8 +9,8 @@ import {
 export class Encryption {
 	constructor(protected secret: Buffer) {
 		// Verify the secret is the correct length for sodium-native
-		if (this.secret.length !== 32) {
-			throw new Error(`Encryption secret must be exactly 32 bytes when decoded from base64. Current length: ${this.secret.length}`);
+		if (this.secret.length !== crypto_secretbox_KEYBYTES) {
+			throw new Error(`Encryption secret must be exactly ${crypto_secretbox_KEYBYTES} bytes when decoded from base64. Current length: ${this.secret.length}`);
 		}
 	}
 
