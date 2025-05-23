@@ -248,7 +248,6 @@ jobs:
           retention-days: 1
           if-no-files-found: error
           overwrite: true
-          visibility: private
 
   plan-production:
     name: 'Plan Production Environment'
@@ -410,7 +409,6 @@ jobs:
           retention-days: 1
           if-no-files-found: error
           overwrite: true
-          visibility: private
 
   deploy-staging:
     needs: [plan-production, plan-staging]
