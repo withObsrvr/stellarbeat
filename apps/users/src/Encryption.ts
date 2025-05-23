@@ -3,7 +3,8 @@ import {
 	crypto_secretbox_NONCEBYTES,
 	crypto_secretbox_MACBYTES,
 	crypto_secretbox_easy,
-	crypto_secretbox_open_easy
+	crypto_secretbox_open_easy,
+	crypto_secretbox_KEYBYTES
 } from 'sodium-native';
 
 export class Encryption {
