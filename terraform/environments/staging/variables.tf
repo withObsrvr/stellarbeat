@@ -229,6 +229,12 @@ variable "coordinator_api_password" {
   default     = "password"
 }
 
+variable "database_version_postgres" {
+  description = "Database Postgres version"
+  type        = string
+  default     = "15"
+}
+
 variable "history_scanner_user_agent" {
   description = "User agent for the history scanner"
   type        = string

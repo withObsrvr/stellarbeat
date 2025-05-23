@@ -3,11 +3,17 @@ import {
 	crypto_secretbox_NONCEBYTES,
 	crypto_secretbox_MACBYTES,
 	crypto_secretbox_easy,
-	crypto_secretbox_open_easy
+	crypto_secretbox_open_easy,
+	crypto_secretbox_KEYBYTES
 } from 'sodium-native';
 
 export class Encryption {
-	constructor(protected secret: Buffer) {}
+	constructor(protected secret: Buffer) {
+		// Verify the secret is the correct length for sodium-native
+		if (this.secret.length !== crypto_secretbox_KEYBYTES) {
+			throw new Error(`Encryption secret must be exactly ${crypto_secretbox_KEYBYTES} bytes when decoded from base64. Current length: ${this.secret.length}`);
+		}
+	}
 
 	encrypt(message: Buffer): {
 		cipher: Buffer;

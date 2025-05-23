@@ -124,9 +124,11 @@ pnpm start
 
 Be sure to set:
 
-ENCRYPTION_SECRET (base64-encoded)
-HASH_SECRET (base64-encoded)
-MAILGUN_SECRET, MAILGUN_FROM, MAILGUN_BASE_URL for sending emails
-CONSUMER_NAME, CONSUMER_SECRET for Basic Auth
+- ENCRYPTION_SECRET (base64-encoded 32-byte key, generate with `openssl rand -base64 32`)
+- HASH_SECRET (base64-encoded 32-byte key, generate with `openssl rand -base64 32`)
+- MAILGUN_SECRET, MAILGUN_FROM, MAILGUN_BASE_URL for sending emails
+- CONSUMER_NAME, CONSUMER_SECRET for Basic Auth
+
+See the full [cryptographic secrets documentation](/docs/cryptographic-secrets.md) for more details.
 
 Logs and tests can be found in all.test.ts.

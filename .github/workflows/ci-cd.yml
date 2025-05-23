@@ -45,24 +45,17 @@ jobs:
       - name: Run tests
         run: pnpm tu
 
-  terraform-unit-tests:
-    name: 'Terraform Unit Tests'
+  terraform-lint:
+    name: 'Terraform Lint and Format'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write
-    # Global environment variables used for all terraform operations
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-
     steps:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+      # Install the latest version of Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -79,7 +72,40 @@ jobs:
           echo "::warning::Terraform formatting issues detected."
           echo "::warning::To fix, run 'terraform fmt -recursive' locally, then commit and push."
 
-      # Test Staging Environment
+      # Perform a security scan of the terraform code using checkov
+      - name: Run Checkov action
+        id: checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          framework: terraform
+
+      # Upload results to GitHub Advanced Security
+      - name: Upload SARIF file
+        if: success() || failure()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+          category: checkov
+
+  plan-staging:
+    name: 'Plan Staging Environment'
+    needs: terraform-lint
+    runs-on: ubuntu-latest
+    environment: obsrvr-radar-staging
+    permissions:
+      contents: read
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # Initialize Terraform for staging
       - name: Terraform Init - Staging
         working-directory: ./terraform/environments/staging
         run:
@@ -87,10 +113,12 @@ jobs:
           secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{
           secrets.AWS_SECRET_ACCESS_KEY }}"
 
+      # Validate the configuration
       - name: Terraform Validate - Staging
         working-directory: ./terraform/environments/staging
         run: terraform validate
 
+      # Create tfvars file for staging from environment secrets
       - name: Create tfvars file for Staging
         working-directory: ./terraform/environments/staging
         run: |
@@ -160,7 +188,7 @@ jobs:
           history_scanner_user_agent = "radar-history-scanner"
           crawler_max_connections  = 25
           crawler_max_crawl_time   = 900000
-          crawler_blacklist        = "${{ secrets.CRAWLER_BLACKLIST || '' }}"
+          crawler_blacklist        = "${{ secrets.CRAWLER_BLACKLIST || 'test' }}"
           network_scan_loop_interval_ms = 180000
           user_service_base_url    = "${{ secrets.USER_SERVICE_BASE_URL || 'http://localhost:7000' }}"
           frontend_base_url        = "${{ secrets.FRONTEND_BASE_URL || 'http://localhost:3000' }}"
@@ -185,13 +213,14 @@ jobs:
           testnet_network_stellar_core_version   = "${{ secrets.TESTNET_NETWORK_STELLAR_CORE_VERSION || '22.2.0' }}"
           testnet_network_quorum_set   = "${{ secrets.TESTNET_NETWORK_QUORUM_SET || '' }}"
           testnet_network_known_peers = "${{ secrets.TESTNET_NETWORK_KNOWN_PEERS || '54.166.220.249:11625,44.223.45.116:11625,54.159.138.198:11625' }}"
-
           EOF
 
+      # Create and save the Terraform plan for staging
       - name: Terraform Plan - Staging
         working-directory: ./terraform/environments/staging
         run: terraform plan -input=false -no-color -out=tf-plan-staging
 
+      # Save the plan as an artifact for later use in deployment
       - name: Save Staging Plan Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -199,7 +228,25 @@ jobs:
           path: ./terraform/environments/staging/tf-plan-staging
           retention-days: 1
 
-      # Test Production Environment
+  plan-production:
+    name: 'Plan Production Environment'
+    needs: terraform-lint
+    runs-on: ubuntu-latest
+    environment: obsrvr-radar-production
+    permissions:
+      contents: read
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # Initialize Terraform for production
       - name: Terraform Init - Production
         working-directory: ./terraform/environments/production
         run:
@@ -207,10 +254,12 @@ jobs:
           secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{
           secrets.AWS_SECRET_ACCESS_KEY }}"
 
+      # Validate the configuration
       - name: Terraform Validate - Production
         working-directory: ./terraform/environments/production
         run: terraform validate
 
+      # Create tfvars file for production from environment secrets
       - name: Create tfvars file for Production
         working-directory: ./terraform/environments/production
         run: |
@@ -256,7 +305,7 @@ jobs:
           notifications_enabled    = ${{ secrets.NOTIFICATIONS_ENABLED || 'false' }}
           debug                    = ${{ secrets.DEBUG || 'false' }}
           sentry_dsn               = "${{ secrets.SENTRY_DSN || '' }}"
-          sentry_environment       = "staging"
+          sentry_environment       = "production"
           deadman_url              = "${{ secrets.DEADMAN_URL || '' }}"
 
           # API credentials
@@ -306,12 +355,14 @@ jobs:
           testnet_network_stellar_core_version   = "${{ secrets.TESTNET_NETWORK_STELLAR_CORE_VERSION || '22.2.0' }}"
           testnet_network_quorum_set   = "${{ secrets.TESTNET_NETWORK_QUORUM_SET || '' }}"
           testnet_network_known_peers = "${{ secrets.TESTNET_NETWORK_KNOWN_PEERS || '54.166.220.249:11625,44.223.45.116:11625,54.159.138.198:11625' }}"
-
           EOF
+
+      # Create and save the Terraform plan for production
       - name: Terraform Plan - Production
         working-directory: ./terraform/environments/production
         run: terraform plan -input=false -no-color -out=tf-plan-production
 
+      # Save the plan as an artifact for later use in deployment
       - name: Save Production Plan Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -319,25 +370,12 @@ jobs:
           path: ./terraform/environments/production/tf-plan-production
           retention-days: 1
 
-      # Perform a security scan of the terraform code using checkov
-      - name: Run Checkov action
-        id: checkov
-        uses: bridgecrewio/checkov-action@v12
-        with:
-          framework: terraform
-
-      # Upload results to GitHub Advanced Security
-      - name: Upload SARIF file
-        if: success() || failure()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results.sarif
-          category: checkov
-
   deploy-staging:
-    needs: [test, terraform-unit-tests]
+    needs: [test, plan-staging]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     environment: obsrvr-radar-staging
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -346,14 +384,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9.15.0
-          run_install: false
-      - name: Install dependencies
-        run: |
-          pnpm install
-          pnpm build
 
       # Set up Terraform
       - name: Setup Terraform
@@ -383,8 +413,20 @@ jobs:
           # For example, run API tests against staging endpoints
           echo "Running staging tests..."
 
+  approve-production-deployment:
+    needs: [test, plan-production, deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: obsrvr-radar-production-approval
+      url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Approval for Production Deployment
+        run: |
+          echo "Production deployment has been approved. Proceeding with deployment..."
+  
   deploy-production:
-    needs: [test, terraform-unit-tests, deploy-staging]
+    needs: [approve-production-deployment]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: obsrvr-radar-production
