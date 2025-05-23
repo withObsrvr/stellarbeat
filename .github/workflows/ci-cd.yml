@@ -47,6 +47,8 @@ jobs:
 
   terraform-lint:
     name: 'Terraform Lint and Format'
+    # Only run on PRs, skip on push to main
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -89,7 +91,12 @@ jobs:
 
   plan-staging:
     name: 'Plan Staging Environment'
-    needs: terraform-lint
+    needs: [test, terraform-lint]
+    # Skip the terraform-lint dependency for push events to main
+    if: >
+      always() && 
+      (needs.test.result == 'success') && 
+      (github.event_name == 'push' || needs.terraform-lint.result == 'success')
     runs-on: ubuntu-latest
     environment: obsrvr-radar-staging
     permissions:
@@ -230,7 +237,12 @@ jobs:
 
   plan-production:
     name: 'Plan Production Environment'
-    needs: terraform-lint
+    needs: [test, terraform-lint]
+    # Skip the terraform-lint dependency for push events to main
+    if: >
+      always() && 
+      (needs.test.result == 'success') && 
+      (github.event_name == 'push' || needs.terraform-lint.result == 'success')
     runs-on: ubuntu-latest
     environment: obsrvr-radar-production
     permissions:
