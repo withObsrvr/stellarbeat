@@ -230,7 +230,7 @@ variable "coordinator_api_password" {
 }
 
 variable "database_version_postgres" {
-  description = "Postgres version"
+  description = "Database Postgres version"
   type        = string
   default     = "15"
 }
