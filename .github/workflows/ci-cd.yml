@@ -169,7 +169,7 @@ jobs:
           enable_s3_backup         = false
           enable_heart_beat        = false
           enable_sentry            = false
-          notifications_enabled    = false
+          notifications_enabled    = true
           debug                    = ${{ secrets.DEBUG || 'false' }}
           sentry_dsn               = "${{ secrets.SENTRY_DSN || '' }}"
           sentry_environment       = "staging"
