@@ -34,6 +34,27 @@ jobs:
       DB_DATABASE: radar_test
       NODE_ENV: test
       DATABASE_TEST_URL: postgres://postgres:postgres@localhost:5432/radar_test
+      
+      # Required for Config tests
+      IPSTACK_ACCESS_KEY: test-key
+      HORIZON_URL: https://horizon-testnet.stellar.org
+      
+      # Network configuration (required by Config.ts)
+      NETWORK_LEDGER_VERSION: 22
+      NETWORK_OVERLAY_VERSION: 37
+      NETWORK_OVERLAY_MIN_VERSION: 35
+      NETWORK_STELLAR_CORE_VERSION: 22.2.0
+      NETWORK_QUORUM_SET: '["GCGB2S2KGYARPVIA37HYZXVRM2YZUEXA6S33ZU5BUDC6THSB62LZSTYH"]'
+      NETWORK_KNOWN_PEERS: '[["localhost", 11625]]'
+      NETWORK_ID: testnet
+      NETWORK_PASSPHRASE: Test SDF Network ; September 2015
+      NETWORK_NAME: Stellar Testnet
+      
+      # S3 backup environment (for S3 tests)
+      AWS_ACCESS_KEY: test-access-key
+      AWS_SECRET_ACCESS_KEY: test-secret-key
+      AWS_BUCKET_NAME: test-bucket
+      AWS_REGION: us-east-1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
