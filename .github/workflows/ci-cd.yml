@@ -45,8 +45,14 @@ jobs:
         run: |
           pnpm install
           pnpm build
-      - name: Run tests
-        run: pnpm tu
+      - name: Run unit tests
+        run: pnpm test:unit
+      - name: Run integration tests
+        run: pnpm test:integration
+      - name: Run linting
+        run: pnpm lint
+      - name: Check TypeScript
+        run: pnpm typecheck
 
   terraform-lint:
     name: 'Terraform Lint and Format'

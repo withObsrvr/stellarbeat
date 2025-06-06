@@ -1,0 +1,194 @@
+name: Enhanced Testing Strategy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # Parallel job strategy for faster feedback
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.15.0
+          run_install: false
+      
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm build
+      
+      - name: Run unit tests with coverage
+        run: pnpm test:unit --coverage --coverageReporters=lcov
+      
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unit-tests
+          name: unit-tests
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: radar_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
+          --health-retries 5
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: radar_test
+      NODE_ENV: test
+      DATABASE_TEST_URL: postgres://postgres:postgres@localhost:5432/radar_test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.15.0
+          run_install: false
+      
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm build
+      
+      - name: Run integration tests
+        run: pnpm test:integration --coverage --coverageReporters=lcov
+      
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: integration-tests
+          name: integration-tests
+
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.15.0
+          run_install: false
+      
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm build
+      
+      - name: Run frontend unit tests
+        run: pnpm test:unit:frontend --coverage
+      
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./apps/frontend/coverage/lcov.info
+          flags: frontend-tests
+          name: frontend-tests
+
+  lint-and-format:
+    name: Linting and Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.15.0
+          run_install: false
+      
+      - name: Install dependencies
+        run: pnpm install
+      
+      - name: Run ESLint
+        run: pnpm lint
+      
+      - name: Check TypeScript
+        run: pnpm typecheck
+      
+      - name: Check formatting
+        run: pnpm format:check
+
+  security-tests:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run npm audit
+        run: npm audit --audit-level moderate
+      
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: typescript, javascript
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.15.0
+          run_install: false
+      
+      - name: Install dependencies
+        run: pnpm install
+      
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  # Gate job that requires all tests to pass
+  test-gate:
+    name: All Tests Passed
+    needs: [unit-tests, integration-tests, frontend-tests, lint-and-format, security-tests]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          if [[ "${{ needs.unit-tests.result }}" != "success" ]]; then
+            echo "Unit tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.integration-tests.result }}" != "success" ]]; then
+            echo "Integration tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.frontend-tests.result }}" != "success" ]]; then
+            echo "Frontend tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.lint-and-format.result }}" != "success" ]]; then
+            echo "Linting/formatting failed"
+            exit 1
+          fi
+          if [[ "${{ needs.security-tests.result }}" != "success" ]]; then
+            echo "Security tests failed"
+            exit 1
+          fi
+          echo "All tests passed!"
