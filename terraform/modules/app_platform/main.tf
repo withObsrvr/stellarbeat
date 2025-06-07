@@ -524,6 +524,67 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
+        # Notification-related environment variables
+        env {
+          key   = "NOTIFICATIONS_ENABLED"
+          value = lookup(var.network_scanner_env, "NOTIFICATIONS_ENABLED", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "USER_SERVICE_BASE_URL"
+          value = lookup(var.network_scanner_env, "USER_SERVICE_BASE_URL", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "USER_SERVICE_USERNAME"
+          value = lookup(var.network_scanner_env, "USER_SERVICE_USERNAME", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "USER_SERVICE_PASSWORD"
+          value = lookup(var.network_scanner_env, "USER_SERVICE_PASSWORD", "")
+          type  = "SECRET"
+        }
+
+        env {
+          key   = "FRONTEND_BASE_URL"
+          value = lookup(var.network_scanner_env, "FRONTEND_BASE_URL", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "NETWORK_SCAN_LOOP_INTERVAL_MS"
+          value = lookup(var.network_scanner_env, "NETWORK_SCAN_LOOP_INTERVAL_MS", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "DEADMAN_URL"
+          value = lookup(var.network_scanner_env, "DEADMAN_URL", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "ENABLE_HEART_BEAT"
+          value = lookup(var.network_scanner_env, "ENABLE_HEART_BEAT", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "ENABLE_SENTRY"
+          value = lookup(var.network_scanner_env, "ENABLE_SENTRY", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "SENTRY_DSN"
+          value = lookup(var.network_scanner_env, "SENTRY_DSN", "")
+          type  = "SECRET"
+        }
+
         build_command = "pnpm build"
         run_command   = "pnpm start:scan-network 1"
       }
