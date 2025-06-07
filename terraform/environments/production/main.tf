@@ -110,22 +110,32 @@ module "app_platform" {
 
   # Network Scanner environment variables for mainnet
   network_scanner_env = {
-    API_KEY                      = var.app_api_key
-    NODE_ENV                     = "production"
-    IPSTACK_ACCESS_KEY           = var.ipstack_access_key
-    HORIZON_URL                  = var.horizon_url
-    NETWORK_PASSPHRASE           = var.network_passphrase
-    NETWORK_ID                   = var.network_id
-    NETWORK_NAME                 = var.network_name
-    NETWORK_OVERLAY_VERSION      = var.network_overlay_version
-    NETWORK_LEDGER_VERSION       = var.network_ledger_version
-    NETWORK_OVERLAY_MIN_VERSION  = var.network_overlay_min_version
-    NETWORK_STELLAR_CORE_VERSION = var.network_stellar_core_version
-    NETWORK_QUORUM_SET           = var.network_quorum_set
-    NETWORK_KNOWN_PEERS          = var.network_known_peers
-    CRAWLER_MAX_CONNECTIONS      = var.crawler_max_connections
-    CRAWLER_MAX_CRAWL_TIME       = var.crawler_max_crawl_time
-    CRAWLER_BLACKLIST            = var.crawler_blacklist
+    API_KEY                       = var.app_api_key
+    NODE_ENV                      = "production"
+    IPSTACK_ACCESS_KEY            = var.ipstack_access_key
+    HORIZON_URL                   = var.horizon_url
+    NETWORK_PASSPHRASE            = var.network_passphrase
+    NETWORK_ID                    = var.network_id
+    NETWORK_NAME                  = var.network_name
+    NETWORK_OVERLAY_VERSION       = var.network_overlay_version
+    NETWORK_LEDGER_VERSION        = var.network_ledger_version
+    NETWORK_OVERLAY_MIN_VERSION   = var.network_overlay_min_version
+    NETWORK_STELLAR_CORE_VERSION  = var.network_stellar_core_version
+    NETWORK_QUORUM_SET            = var.network_quorum_set
+    NETWORK_KNOWN_PEERS           = var.network_known_peers
+    CRAWLER_MAX_CONNECTIONS       = var.crawler_max_connections
+    CRAWLER_MAX_CRAWL_TIME        = var.crawler_max_crawl_time
+    CRAWLER_BLACKLIST             = var.crawler_blacklist
+    NOTIFICATIONS_ENABLED         = var.notifications_enabled
+    USER_SERVICE_BASE_URL         = var.user_service_base_url
+    USER_SERVICE_USERNAME         = var.user_service_username
+    USER_SERVICE_PASSWORD         = var.user_service_password
+    FRONTEND_BASE_URL             = var.frontend_base_url
+    NETWORK_SCAN_LOOP_INTERVAL_MS = var.network_scan_loop_interval_ms
+    DEADMAN_URL                   = var.deadman_url
+    ENABLE_HEART_BEAT             = var.enable_heart_beat
+    ENABLE_SENTRY                 = var.enable_sentry
+    SENTRY_DSN                    = var.sentry_dsn
   }
 
   # Network Scanner environment variables for testnet
