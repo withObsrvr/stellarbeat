@@ -357,7 +357,7 @@ variable "user_service_password" {
 variable "network_scan_loop_interval_ms" {
   description = "Network scan loop interval in milliseconds"
   type        = number
-  default     = 180000
+  default     = 300000
 }
 
 variable "history_scan_api_username" {
