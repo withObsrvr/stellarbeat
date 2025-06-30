@@ -335,7 +335,7 @@ jobs:
           app_api_key          = "${{ secrets.APP_API_KEY }}"
           app_jwt_secret       = "${{ secrets.APP_JWT_SECRET }}"
           app_url              = "${{ secrets.APP_URL }}"
-          app_api_url          = "${{ secrets.APP_URL }}"
+          app_api_url          = "${{ secrets.APP_API_URL }}"
           domain_name              = "radar.withobsrvr.com"
 
           # Service credentials
