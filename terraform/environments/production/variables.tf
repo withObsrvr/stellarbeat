@@ -3,7 +3,7 @@
 variable "database_pool_size" {
   description = "Database connection pool size"
   type        = number
-  default     = 10
+  default     = 25
 
 }
 
@@ -322,7 +322,7 @@ variable "user_agent" {
 variable "crawler_max_connections" {
   description = "Maximum connections for the crawler"
   type        = number
-  default     = 25
+  default     = 50
 }
 
 variable "crawler_max_crawl_time" {
