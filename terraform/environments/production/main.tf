@@ -23,7 +23,7 @@ module "app_platform" {
   database_version_postgres = var.database_version_postgres
 
   environment   = "production"
-  instance_size = "professional-xs"
+  instance_size = "professional-s"
 
   frontend_instance_count        = 2
   backend_instance_count         = 2
