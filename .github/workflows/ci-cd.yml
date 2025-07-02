@@ -212,8 +212,8 @@ jobs:
           user_service_password    = "${{ secrets.USER_SERVICE_PASSWORD || '' }}"
 
           # Infrastructure settings
-          instance_size            = "${{ secrets.INSTANCE_SIZE || 'basic-xs' }}"
-          history_scanner_instance_size = "${{ secrets.HISTORY_SCANNER_INSTANCE_SIZE || 'basic-s' }}"
+          instance_size            = "${{ secrets.INSTANCE_SIZE || 'apps-s-1vcpu-1gb' }}"
+          history_scanner_instance_size = "${{ secrets.HISTORY_SCANNER_INSTANCE_SIZE || 'apps-d-2vcpu-8gb' }}"
           frontend_instance_count  = 1
           backend_instance_count   = 1
           scanner_instance_count   = 1
@@ -375,8 +375,8 @@ jobs:
           user_service_password    = "${{ secrets.USER_SERVICE_PASSWORD || '' }}"
 
           # Infrastructure settings
-          instance_size            = "${{ secrets.INSTANCE_SIZE || 'basic-xs' }}"
-          history_scanner_instance_size = "${{ secrets.HISTORY_SCANNER_INSTANCE_SIZE || 'professional-m' }}"
+          instance_size            = "${{ secrets.INSTANCE_SIZE || 'apps-s-1vcpu-2gb' }}"
+          history_scanner_instance_size = "${{ secrets.HISTORY_SCANNER_INSTANCE_SIZE || 'apps-d-4vcpu-16gb' }}"
           frontend_instance_count  = 2
           backend_instance_count   = 1
           scanner_instance_count   = 1
