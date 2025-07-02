@@ -22,8 +22,9 @@ module "app_platform" {
   git_branch                = var.git_branch
   database_version_postgres = var.database_version_postgres
 
-  environment   = "production"
-  instance_size = "professional-s"
+  environment                    = "production"
+  instance_size                  = "professional-s"
+  history_scanner_instance_size  = "professional-m"
 
   frontend_instance_count        = 2
   backend_instance_count         = 2

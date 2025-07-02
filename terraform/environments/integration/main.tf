@@ -19,8 +19,9 @@ module "app_platform" {
   repo_url   = var.repo_url
   git_branch = "main"
 
-  environment   = "integration"
-  instance_size = "basic-xs"
+  environment                    = "integration"
+  instance_size                  = "basic-xs"
+  history_scanner_instance_size  = "basic-s"
 
   frontend_instance_count = 1
   backend_instance_count  = 1

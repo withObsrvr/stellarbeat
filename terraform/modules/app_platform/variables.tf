@@ -35,6 +35,11 @@ variable "instance_size" {
   type        = string
 }
 
+variable "history_scanner_instance_size" {
+  description = "Instance size slug for history scanner"
+  type        = string
+}
+
 variable "frontend_instance_count" {
   description = "Number of frontend instances"
   type        = number
