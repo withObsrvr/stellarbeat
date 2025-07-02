@@ -21,16 +21,16 @@ module "app_platform" {
   domain_name = var.domain_name
   git_branch  = var.git_branch
 
-  environment                    = "staging"
-  instance_size                  = "basic-xs"
-  history_scanner_instance_size  = "basic-s"
+  environment                   = "staging"
+  instance_size                 = "basic-xs"
+  history_scanner_instance_size = "basic-s"
 
   frontend_instance_count        = 1
   backend_instance_count         = 1
   testnet_backend_instance_count = 1
-  scanner_instance_count         = 0
+  scanner_instance_count         = 1
   testnet_scanner_instance_count = 0
-  history_scanner_instance_count = 0
+  history_scanner_instance_count = 1
   users_instance_count           = 1
 
   database_production = false
