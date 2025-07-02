@@ -213,6 +213,7 @@ jobs:
 
           # Infrastructure settings
           instance_size            = "${{ secrets.INSTANCE_SIZE || 'basic-xs' }}"
+          history_scanner_instance_size = "${{ secrets.HISTORY_SCANNER_INSTANCE_SIZE || 'basic-s' }}"
           frontend_instance_count  = 1
           backend_instance_count   = 1
           scanner_instance_count   = 1
@@ -375,6 +376,7 @@ jobs:
 
           # Infrastructure settings
           instance_size            = "${{ secrets.INSTANCE_SIZE || 'basic-xs' }}"
+          history_scanner_instance_size = "${{ secrets.HISTORY_SCANNER_INSTANCE_SIZE || 'professional-m' }}"
           frontend_instance_count  = 2
           backend_instance_count   = 1
           scanner_instance_count   = 1

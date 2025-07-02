@@ -21,8 +21,9 @@ module "app_platform" {
   domain_name = var.domain_name
   git_branch  = var.git_branch
 
-  environment   = "staging"
-  instance_size = "basic-xs"
+  environment                    = "staging"
+  instance_size                  = "basic-xs"
+  history_scanner_instance_size  = "basic-s"
 
   frontend_instance_count        = 1
   backend_instance_count         = 1
