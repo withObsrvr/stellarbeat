@@ -38,7 +38,6 @@ variable "instance_size" {
 variable "history_scanner_instance_size" {
   description = "Instance size slug for history scanner"
   type        = string
-  default     = "professional-s"
 }
 
 variable "frontend_instance_count" {
