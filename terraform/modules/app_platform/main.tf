@@ -735,7 +735,7 @@ resource "digitalocean_app" "radar" {
       content {
         name               = "history-scanner"
         instance_count     = var.history_scanner_instance_count
-        instance_size_slug = var.history_scanner_instance_size != null ? var.history_scanner_instance_size : var.instance_size
+        instance_size_slug = coalesce(var.history_scanner_instance_size, var.instance_size)
 
         git {
           repo_clone_url = var.repo_url
