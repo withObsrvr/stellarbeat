@@ -23,8 +23,8 @@ module "app_platform" {
   database_version_postgres = var.database_version_postgres
 
   environment                    = "production"
-  instance_size                  = "professional-s"
-  history_scanner_instance_size  = "professional-m"
+  instance_size                  = "apps-s-1vcpu-2gb"
+  history_scanner_instance_size  = "apps-d-4vcpu-16gb"
 
   frontend_instance_count        = 2
   backend_instance_count         = 2
