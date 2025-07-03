@@ -63,6 +63,10 @@ describe('NodeV1DTOMapper', () => {
 			activeInScp: true,
 			connectivityError: true,
 			stellarCoreVersionBehind: true,
+			trustCentralityScore: 0,
+			pageRankScore: 0,
+			trustRank: 0,
+			lastTrustCalculation: null,
 			statistics: {
 				has24HourStats: true,
 				has30DayStats: true,

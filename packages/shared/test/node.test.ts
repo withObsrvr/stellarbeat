@@ -96,6 +96,10 @@ nodeObject.historyArchiveHasError = true;
 nodeObject.connectivityError = true;
 nodeObject.stellarCoreVersionBehind = true;
 nodeObject.lag = 30;
+nodeObject.trustCentralityScore = 0;
+nodeObject.pageRankScore = 0;
+nodeObject.trustRank = 0;
+nodeObject.lastTrustCalculation = null;
 
 test('nodeToJson', () => {
 	expect(JSON.parse(JSON.stringify(node))).toEqual(nodeObject);
