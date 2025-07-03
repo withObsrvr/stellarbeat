@@ -14,6 +14,7 @@ export interface IndexNode {
 	stellarCoreVersion: string;
 	dateDiscovered: Date;
 	validating30DaysPercentage: number;
+	trustCentralityScore?: number;
 }
 
 export class NodeIndex {
@@ -25,12 +26,17 @@ export class NodeIndex {
 		//index two digits after comma
 		const result = new Map<string, number>();
 		nodes.forEach((node) => {
+			// Use pre-calculated trust score if available, otherwise fall back to old calculation
+			const trustScore = node.trustCentralityScore !== undefined 
+				? node.trustCentralityScore / 100  // Convert 0-100 scale to 0-1 scale
+				: TrustIndex.get(node.publicKey, trustGraph);
+
 			const indexRaw =
 				(TypeIndex.get(node.hasUpToDateHistoryArchive, node.isValidating) +
 					ActiveIndex.get(node.isActive30DaysPercentage) +
 					ValidatingIndex.get(node.validating30DaysPercentage) +
 					VersionIndex.get(node.stellarCoreVersion, currentStellarCoreVersion) +
-					TrustIndex.get(node.publicKey, trustGraph) +
+					trustScore +
 					AgeIndex.get(node.dateDiscovered)) /
 				6;
 

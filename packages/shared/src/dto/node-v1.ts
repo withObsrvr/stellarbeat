@@ -52,6 +52,10 @@ export interface NodeV1 {
 	connectivityError: boolean;
 	stellarCoreVersionBehind: boolean;
 	lag: number | null;
+	trustCentralityScore: number;
+	pageRankScore: number;
+	trustRank: number;
+	lastTrustCalculation: string | null;
 }
 
 export const NodeV1Schema: JSONSchemaType<NodeV1> = {
@@ -156,7 +160,27 @@ export const NodeV1Schema: JSONSchemaType<NodeV1> = {
 		},
 		stellarCoreVersionBehind: {
 			type: 'boolean'
-		}
+		},
+		trustCentralityScore: {
+			type: 'number',
+			default: 0,
+			description: 'Trust centrality score (0-100) based on PageRank with organizational diversity'
+		},
+		pageRankScore: {
+			type: 'number',
+			default: 0,
+			description: 'Base PageRank score (0-100) in the trust graph'
+		},
+		trustRank: {
+			type: 'number',
+			default: 0,
+			description: 'Ranking position based on trust centrality score (1 = highest)'
+		},
+		lastTrustCalculation: nullable({
+			type: 'string',
+			format: 'date-time',
+			description: 'Timestamp of the last trust calculation'
+		})
 	},
 	type: 'object',
 	required: [
@@ -187,7 +211,14 @@ export const NodeV1Schema: JSONSchemaType<NodeV1> = {
 		'quorumSet',
 		'statistics',
 		'geoData',
-		'homeDomain'
+		'homeDomain',
+		'connectivityError',
+		'stellarCoreVersionBehind',
+		'lag',
+		'trustCentralityScore',
+		'pageRankScore',
+		'trustRank',
+		'lastTrustCalculation'
 	],
 	definitions: {
 		NodeGeoDataV1: {

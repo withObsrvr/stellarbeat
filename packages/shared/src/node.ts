@@ -36,6 +36,10 @@ export class Node {
 	public connectivityError = false;
 	public stellarCoreVersionBehind = false;
 	public lag: number | null = null;
+	public trustCentralityScore: number = 0;
+	public pageRankScore: number = 0;
+	public trustRank: number = 0;
+	public lastTrustCalculation: Date | null = null;
 
 	constructor(publicKey: string, ip = '127.0.0.1', port = 11625) {
 		this.ip = ip;
@@ -98,7 +102,11 @@ export class Node {
 			historyArchiveHasError: this.historyArchiveHasError,
 			connectivityError: this.connectivityError,
 			stellarCoreVersionBehind: this.stellarCoreVersionBehind,
-			lag: this.lag
+			lag: this.lag,
+			trustCentralityScore: this.trustCentralityScore,
+			pageRankScore: this.pageRankScore,
+			trustRank: this.trustRank,
+			lastTrustCalculation: this.lastTrustCalculation?.toISOString() || null
 		};
 	}
 
@@ -127,11 +135,16 @@ export class Node {
 			'quorumSet',
 			'statistics',
 			'dateDiscovered',
-			'dateUpdated'
+			'dateUpdated',
+			'lastTrustCalculation'
 		]);
 
 		node.dateDiscovered = new Date(nodeV1DTO.dateDiscovered);
 		node.dateUpdated = new Date(nodeV1DTO.dateUpdated);
+		
+		if (nodeV1DTO.lastTrustCalculation) {
+			node.lastTrustCalculation = new Date(nodeV1DTO.lastTrustCalculation);
+		}
 
 		return node;
 	}

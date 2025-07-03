@@ -64,7 +64,11 @@ export class NodeV1DTOMapper {
 			organizationId: organizationId ?? null,
 			connectivityError: measurement?.connectivityError ?? false,
 			stellarCoreVersionBehind: measurement?.stellarCoreVersionBehind ?? false,
-			lag: measurement?.lag ?? null
+			lag: measurement?.lag ?? null,
+			trustCentralityScore: measurement?.trustCentralityScore ?? 0,
+			pageRankScore: measurement?.pageRankScore ?? 0,
+			trustRank: measurement?.trustRank ?? 0,
+			lastTrustCalculation: measurement?.lastTrustCalculation?.toISOString() ?? null
 		};
 	}
 

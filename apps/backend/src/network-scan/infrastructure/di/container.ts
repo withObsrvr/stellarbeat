@@ -105,6 +105,7 @@ import OrganizationMeasurementDay from '../../domain/organization/OrganizationMe
 import NodeMeasurementDay from '../../domain/node/NodeMeasurementDay';
 import NetworkMeasurementDay from '../../domain/network/NetworkMeasurementDay';
 import { CachedNetworkDTOService } from '../../services/CachedNetworkDTOService';
+import { TrustRankCalculator } from '../../domain/trust/TrustRankCalculator';
 
 export function load(container: Container, config: Config) {
 	container
@@ -329,6 +330,7 @@ function loadDomain(container: Container, config: Config) {
 	container.bind(NetworkScanner).toSelf();
 	container.bind(NodeScanner).toSelf();
 	container.bind(OrganizationScanner).toSelf();
+	container.bind(TrustRankCalculator).toSelf();
 }
 
 function loadUseCases(container: Container) {

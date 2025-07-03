@@ -20,8 +20,8 @@ module "app_platform" {
   git_branch = "main"
 
   environment                    = "integration"
-  instance_size                  = "basic-xs"
-  history_scanner_instance_size  = "basic-s"
+  instance_size                  = "apps-s-1vcpu-1gb"
+  history_scanner_instance_size  = "apps-d-2vcpu-8gb"
 
   frontend_instance_count = 1
   backend_instance_count  = 1
