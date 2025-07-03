@@ -2,7 +2,7 @@ import { NodeScannerIndexerStep } from '../NodeScannerIndexerStep';
 import { NodeScan } from '../NodeScan';
 import { createDummyNode } from '../../__fixtures__/createDummyNode';
 import { StellarCoreVersion } from '../../../network/StellarCoreVersion';
-import { ITrustRankCalculator } from '../../trust/TrustRankCalculator';
+import { ITrustRankCalculator } from '../../../trust/TrustRankCalculator';
 import 'reflect-metadata';
 import NodeMeasurement from '../../NodeMeasurement';
 

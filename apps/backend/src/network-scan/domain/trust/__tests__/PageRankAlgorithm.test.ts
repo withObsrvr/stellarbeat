@@ -1,5 +1,5 @@
 import { PageRankAlgorithm } from '../PageRankAlgorithm';
-import { TrustGraph, Vertex } from 'shared';
+import { TrustGraph, Vertex, Edge, StronglyConnectedComponentsFinder, NetworkTransitiveQuorumSetFinder } from 'shared';
 import { DEFAULT_PAGERANK_CONFIG, PageRankConfiguration } from '../TrustMetrics';
 
 describe('PageRankAlgorithm', () => {
@@ -32,7 +32,10 @@ describe('PageRankAlgorithm', () => {
 
 		it('should handle empty graph', () => {
 			// Arrange
-			const graph = new TrustGraph();
+			const graph = new TrustGraph(
+				new StronglyConnectedComponentsFinder(),
+				new NetworkTransitiveQuorumSetFinder()
+			);
 			
 			// Act
 			const result = pageRankAlgorithm.calculatePageRank(graph, DEFAULT_PAGERANK_CONFIG);
@@ -45,8 +48,11 @@ describe('PageRankAlgorithm', () => {
 
 		it('should handle single node graph', () => {
 			// Arrange
-			const graph = new TrustGraph();
-			const vertex = new Vertex('single');
+			const graph = new TrustGraph(
+				new StronglyConnectedComponentsFinder(),
+				new NetworkTransitiveQuorumSetFinder()
+			);
+			const vertex = new Vertex('single', 'Single Node', 1);
 			graph.addVertex(vertex);
 			
 			// Act
@@ -215,59 +221,68 @@ describe('PageRankAlgorithm', () => {
 
 	// Helper functions
 	function createSimpleGraph(): TrustGraph {
-		const graph = new TrustGraph();
-		const vertex1 = new Vertex('node1');
-		const vertex2 = new Vertex('node2');
-		const vertex3 = new Vertex('node3');
+		const graph = new TrustGraph(
+			new StronglyConnectedComponentsFinder(),
+			new NetworkTransitiveQuorumSetFinder()
+		);
+		const vertex1 = new Vertex('node1', 'Node 1', 1);
+		const vertex2 = new Vertex('node2', 'Node 2', 1);
+		const vertex3 = new Vertex('node3', 'Node 3', 1);
 		
 		graph.addVertex(vertex1);
 		graph.addVertex(vertex2);
 		graph.addVertex(vertex3);
 		
 		// Create a simple cycle: 1 -> 2 -> 3 -> 1
-		graph.addEdge(vertex1, vertex2);
-		graph.addEdge(vertex2, vertex3);
-		graph.addEdge(vertex3, vertex1);
+		graph.addEdge(new Edge(vertex1, vertex2));
+		graph.addEdge(new Edge(vertex2, vertex3));
+		graph.addEdge(new Edge(vertex3, vertex1));
 		
 		return graph;
 	}
 
 	function createComplexGraph(): TrustGraph {
-		const graph = new TrustGraph();
+		const graph = new TrustGraph(
+			new StronglyConnectedComponentsFinder(),
+			new NetworkTransitiveQuorumSetFinder()
+		);
 		const vertices = [];
 		
 		// Create 5 vertices
 		for (let i = 1; i <= 5; i++) {
-			const vertex = new Vertex(`node${i}`);
+			const vertex = new Vertex(`node${i}`, `Node ${i}`, 1);
 			vertices.push(vertex);
 			graph.addVertex(vertex);
 		}
 		
 		// Create a more complex trust structure
-		graph.addEdge(vertices[0], vertices[1]); // 1 -> 2
-		graph.addEdge(vertices[0], vertices[2]); // 1 -> 3
-		graph.addEdge(vertices[1], vertices[2]); // 2 -> 3
-		graph.addEdge(vertices[1], vertices[3]); // 2 -> 4
-		graph.addEdge(vertices[2], vertices[4]); // 3 -> 5
-		graph.addEdge(vertices[3], vertices[0]); // 4 -> 1 (creates cycle)
-		graph.addEdge(vertices[4], vertices[0]); // 5 -> 1
+		graph.addEdge(new Edge(vertices[0], vertices[1])); // 1 -> 2
+		graph.addEdge(new Edge(vertices[0], vertices[2])); // 1 -> 3
+		graph.addEdge(new Edge(vertices[1], vertices[2])); // 2 -> 3
+		graph.addEdge(new Edge(vertices[1], vertices[3])); // 2 -> 4
+		graph.addEdge(new Edge(vertices[2], vertices[4])); // 3 -> 5
+		graph.addEdge(new Edge(vertices[3], vertices[0])); // 4 -> 1 (creates cycle)
+		graph.addEdge(new Edge(vertices[4], vertices[0])); // 5 -> 1
 		
 		return graph;
 	}
 
 	function createDisconnectedGraph(): TrustGraph {
-		const graph = new TrustGraph();
+		const graph = new TrustGraph(
+			new StronglyConnectedComponentsFinder(),
+			new NetworkTransitiveQuorumSetFinder()
+		);
 		
 		// Component 1: two connected nodes
-		const vertex1 = new Vertex('node1');
-		const vertex2 = new Vertex('node2');
+		const vertex1 = new Vertex('node1', 'Node 1', 1);
+		const vertex2 = new Vertex('node2', 'Node 2', 1);
 		graph.addVertex(vertex1);
 		graph.addVertex(vertex2);
-		graph.addEdge(vertex1, vertex2);
+		graph.addEdge(new Edge(vertex1, vertex2));
 		
 		// Component 2: two isolated nodes
-		const vertex3 = new Vertex('node3');
-		const vertex4 = new Vertex('node4');
+		const vertex3 = new Vertex('node3', 'Node 3', 1);
+		const vertex4 = new Vertex('node4', 'Node 4', 1);
 		graph.addVertex(vertex3);
 		graph.addVertex(vertex4);
 		// No edges between components
