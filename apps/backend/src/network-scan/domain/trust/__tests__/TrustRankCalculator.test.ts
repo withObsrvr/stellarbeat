@@ -1,6 +1,6 @@
 import { TrustRankCalculator } from '../TrustRankCalculator';
 import { PageRankAlgorithm } from '../PageRankAlgorithm';
-import { TrustGraph, Vertex } from 'shared';
+import { TrustGraph, Vertex, Edge, StronglyConnectedComponentsFinder, NetworkTransitiveQuorumSetFinder } from 'shared';
 import { NodeTrustData, DEFAULT_PAGERANK_CONFIG } from '../TrustMetrics';
 
 describe('TrustRankCalculator', () => {
@@ -186,7 +186,10 @@ describe('TrustRankCalculator', () => {
 
 		it('should handle empty trust graph', () => {
 			// Arrange
-			const trustGraph = new TrustGraph();
+			const trustGraph = new TrustGraph(
+				new StronglyConnectedComponentsFinder(),
+				new NetworkTransitiveQuorumSetFinder()
+			);
 			const nodeData = new Map<string, NodeTrustData>();
 			
 			mockPageRankAlgorithm.calculatePageRank.mockReturnValue({
@@ -259,19 +262,22 @@ describe('TrustRankCalculator', () => {
 
 	// Helper functions
 	function createSimpleTrustGraph(): TrustGraph {
-		const graph = new TrustGraph();
-		const vertex1 = new Vertex('node1');
-		const vertex2 = new Vertex('node2');
-		const vertex3 = new Vertex('node3');
+		const graph = new TrustGraph(
+			new StronglyConnectedComponentsFinder(),
+			new NetworkTransitiveQuorumSetFinder()
+		);
+		const vertex1 = new Vertex('node1', 'Node 1', 1);
+		const vertex2 = new Vertex('node2', 'Node 2', 1);
+		const vertex3 = new Vertex('node3', 'Node 3', 1);
 		
 		graph.addVertex(vertex1);
 		graph.addVertex(vertex2);
 		graph.addVertex(vertex3);
 		
 		// Create some trust relationships
-		graph.addEdge(vertex1, vertex2);
-		graph.addEdge(vertex1, vertex3);
-		graph.addEdge(vertex2, vertex3);
+		graph.addEdge(new Edge(vertex1, vertex2));
+		graph.addEdge(new Edge(vertex1, vertex3));
+		graph.addEdge(new Edge(vertex2, vertex3));
 		
 		return graph;
 	}
@@ -285,11 +291,14 @@ describe('TrustRankCalculator', () => {
 	}
 
 	function createDiverseTrustGraph(): TrustGraph {
-		const graph = new TrustGraph();
-		const vertex1 = new Vertex('node1');
-		const vertex2 = new Vertex('node2');
-		const vertex3 = new Vertex('node3');
-		const vertex4 = new Vertex('node4');
+		const graph = new TrustGraph(
+			new StronglyConnectedComponentsFinder(),
+			new NetworkTransitiveQuorumSetFinder()
+		);
+		const vertex1 = new Vertex('node1', 'Node 1', 1);
+		const vertex2 = new Vertex('node2', 'Node 2', 1);
+		const vertex3 = new Vertex('node3', 'Node 3', 1);
+		const vertex4 = new Vertex('node4', 'Node 4', 1);
 		
 		graph.addVertex(vertex1);
 		graph.addVertex(vertex2);
@@ -297,13 +306,13 @@ describe('TrustRankCalculator', () => {
 		graph.addVertex(vertex4);
 		
 		// Node1 receives trust from multiple organizations
-		graph.addEdge(vertex2, vertex1); // org2 -> org1
-		graph.addEdge(vertex3, vertex1); // org3 -> org1
-		graph.addEdge(vertex4, vertex1); // org4 -> org1
+		graph.addEdge(new Edge(vertex2, vertex1)); // org2 -> org1
+		graph.addEdge(new Edge(vertex3, vertex1)); // org3 -> org1
+		graph.addEdge(new Edge(vertex4, vertex1)); // org4 -> org1
 		
 		// Node2 receives trust from single organization
-		graph.addEdge(vertex3, vertex2); // org3 -> org2
-		graph.addEdge(vertex4, vertex2); // org4 -> org2 (same as node3's org)
+		graph.addEdge(new Edge(vertex3, vertex2)); // org3 -> org2
+		graph.addEdge(new Edge(vertex4, vertex2)); // org4 -> org2 (same as node3's org)
 		
 		return graph;
 	}
