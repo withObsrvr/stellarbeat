@@ -114,6 +114,20 @@ export class Node {
 		return `Node (key: ${this.key}, publicKey: ${this.publicKey})`;
 	}
 
+	/**
+	 * Helper function to parse numeric fields that may come as strings from the API
+	 */
+	private static parseNumericField(
+		value: number | string, 
+		defaultValue: number, 
+		parseFunction: (value: string) => number
+	): number {
+		if (typeof value === 'string') {
+			return parseFunction(value) || defaultValue;
+		}
+		return value || defaultValue;
+	}
+
 	static fromNodeV1DTO(nodeV1DTO: NodeV1): Node {
 		const node = new Node(nodeV1DTO.publicKey);
 
@@ -146,15 +160,9 @@ export class Node {
 		node.dateUpdated = new Date(nodeV1DTO.dateUpdated);
 		
 		// Convert trust scores from strings to numbers (API returns strings for decimal values)
-		node.trustCentralityScore = typeof nodeV1DTO.trustCentralityScore === 'string' 
-			? parseFloat(nodeV1DTO.trustCentralityScore) || 0 
-			: nodeV1DTO.trustCentralityScore || 0;
-		node.pageRankScore = typeof nodeV1DTO.pageRankScore === 'string' 
-			? parseFloat(nodeV1DTO.pageRankScore) || 0 
-			: nodeV1DTO.pageRankScore || 0;
-		node.trustRank = typeof nodeV1DTO.trustRank === 'string' 
-			? parseInt(nodeV1DTO.trustRank) || 0 
-			: nodeV1DTO.trustRank || 0;
+		node.trustCentralityScore = Node.parseNumericField(nodeV1DTO.trustCentralityScore, 0, parseFloat);
+		node.pageRankScore = Node.parseNumericField(nodeV1DTO.pageRankScore, 0, parseFloat);
+		node.trustRank = Node.parseNumericField(nodeV1DTO.trustRank, 0, (value) => parseInt(value, 10));
 		
 		if (nodeV1DTO.lastTrustCalculation) {
 			node.lastTrustCalculation = new Date(nodeV1DTO.lastTrustCalculation);
