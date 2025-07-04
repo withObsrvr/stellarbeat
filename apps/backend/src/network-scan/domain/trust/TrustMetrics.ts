@@ -1,0 +1,30 @@
+export interface TrustMetrics {
+	trustCentralityScore: number;
+	pageRankScore: number;
+	trustRank: number;
+	lastTrustCalculation: Date;
+}
+
+export interface PageRankConfiguration {
+	dampingFactor: number;
+	maxIterations: number;
+	convergenceThreshold: number;
+}
+
+export const DEFAULT_PAGERANK_CONFIG: PageRankConfiguration = {
+	dampingFactor: 0.85,
+	maxIterations: 100,
+	convergenceThreshold: 1e-6
+};
+
+export interface NodeTrustData {
+	organizationId?: string | null;
+	isValidator: boolean;
+}
+
+export interface TrustCalculationResult {
+	trustMetrics: Map<string, TrustMetrics>;
+	convergenceAchieved: boolean;
+	iterationsUsed: number;
+	calculationTimestamp: Date;
+}

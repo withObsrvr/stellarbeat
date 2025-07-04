@@ -69,6 +69,18 @@ export default class NodeSnapShot extends Snapshot {
 	@Column('timestamptz', { nullable: true })
 	public lastIpChange: Date | null = null;
 
+	@Column('decimal', { precision: 12, scale: 8, nullable: true, default: 0 })
+	public trustCentralityScore: number = 0;
+
+	@Column('decimal', { precision: 12, scale: 8, nullable: true, default: 0 })
+	public pageRankScore: number = 0;
+
+	@Column('integer', { nullable: true, default: 0 })
+	public trustRank: number = 0;
+
+	@Column('timestamptz', { nullable: true })
+	public lastTrustCalculation: Date | null = null;
+
 	//typeOrm does not fill in constructor parameters. should be fixed in a later version.
 	constructor(startDate: Date, ip: string, port: number) {
 		super(startDate);
@@ -139,6 +151,10 @@ export default class NodeSnapShot extends Snapshot {
 		copy.nodeDetails = this.nodeDetails;
 		copy.quorumSet = this.quorumSet;
 		copy.geoData = this.geoData;
+		copy.trustCentralityScore = this.trustCentralityScore;
+		copy.pageRankScore = this.pageRankScore;
+		copy.trustRank = this.trustRank;
+		copy.lastTrustCalculation = this.lastTrustCalculation;
 
 		return copy;
 	}

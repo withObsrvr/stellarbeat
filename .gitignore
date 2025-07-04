@@ -16,3 +16,4 @@ terraform/environments/*/.terraform.lock.hcl
 
 create_github_secrets.sh
 create_github_secrets_staging.sh
+.nix-postgres/

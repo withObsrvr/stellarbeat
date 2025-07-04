@@ -12,6 +12,7 @@ export class NodeIndexer {
 	) {
 		return NodeIndex.calculateIndexes(
 			nodes.map((node) => {
+				const latestMeasurement = node.latestMeasurement();
 				return {
 					publicKey: node.publicKey.value,
 					stellarCoreVersion: node.versionStr ?? 'unknown',
@@ -24,9 +25,10 @@ export class NodeIndexer {
 						measurement30DayAverages.find(
 							(measurement) => measurement.publicKey === node.publicKey.value
 						)?.activeAvg ?? 0,
-					isValidating: node.latestMeasurement()?.isValidating ?? false,
+					isValidating: latestMeasurement?.isValidating ?? false,
 					hasUpToDateHistoryArchive:
-						node.latestMeasurement()?.isFullValidator ?? false
+						latestMeasurement?.isFullValidator ?? false,
+					trustCentralityScore: latestMeasurement?.trustCentralityScore
 				};
 			}),
 			TrustGraphFactory.create(nodes),

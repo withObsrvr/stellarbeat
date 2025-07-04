@@ -68,7 +68,7 @@ export class NodeScanner {
 		nodeScan.updateStellarCoreVersionBehindStatus(stellarCoreVersion);
 
 		this.logger.info('calculating indexes');
-		this.indexerStep.execute(
+		await this.indexerStep.execute(
 			nodeScan,
 			measurement30DayAverages,
 			stellarCoreVersion

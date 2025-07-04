@@ -46,6 +46,18 @@ export default class NodeMeasurement implements Measurement {
 	@Column('smallint', { default: null, name: 'lag', nullable: true })
 	private _lag: number | null = null;
 
+	@Column('decimal', { precision: 12, scale: 8, nullable: true, default: 0 })
+	trustCentralityScore: number = 0;
+
+	@Column('decimal', { precision: 12, scale: 8, nullable: true, default: 0 })
+	pageRankScore: number = 0;
+
+	@Column('integer', { nullable: true, default: 0 })
+	trustRank: number = 0;
+
+	@Column('timestamptz', { nullable: true })
+	lastTrustCalculation: Date | null = null;
+
 	//todo: remove Node constructor parameter and make ValueObject
 	constructor(time: Date, node: Node) {
 		this.time = time;

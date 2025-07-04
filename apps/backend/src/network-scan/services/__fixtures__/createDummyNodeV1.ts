@@ -44,6 +44,10 @@ export function createDummyNodeV1(
 		historyArchiveHasError: true,
 		connectivityError: false,
 		stellarCoreVersionBehind: false,
-		lag: 10
+		lag: 10,
+		trustCentralityScore: 0,
+		pageRankScore: 0,
+		trustRank: 0,
+		lastTrustCalculation: null
 	};
 }
