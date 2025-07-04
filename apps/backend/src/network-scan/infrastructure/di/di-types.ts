@@ -24,5 +24,6 @@ export const NETWORK_TYPES = {
 	NetworkConfigurationRepository: Symbol('NetworkConfigurationRepository'),
 	NetworkConfig: Symbol('NetworkConfig'),
 	networkId: Symbol('networkId'),
-	networkName: Symbol('networkName')
+	networkName: Symbol('networkName'),
+	NodeOrganizationMappingService: Symbol('NodeOrganizationMappingService')
 };

@@ -7,22 +7,25 @@ import { TrustRankCalculator, ITrustRankCalculator } from '../../trust/TrustRank
 import { TrustGraphFactory } from './TrustGraphFactory';
 import { NodeTrustData } from '../../trust/TrustMetrics';
 import Node from '../Node';
+import { NodeOrganizationMappingService } from '../NodeOrganizationMappingService';
+import { NETWORK_TYPES } from '../../../infrastructure/di/di-types';
 import 'reflect-metadata';
 
 @injectable()
 export class NodeScannerIndexerStep {
 	constructor(
-		@inject(TrustRankCalculator) private trustRankCalculator: ITrustRankCalculator
+		@inject(TrustRankCalculator) private trustRankCalculator: ITrustRankCalculator,
+		@inject(NETWORK_TYPES.NodeOrganizationMappingService) private nodeOrganizationMappingService: NodeOrganizationMappingService
 	) {}
 
-	public execute(
+	public async execute(
 		nodeScan: NodeScan,
 		measurement30DayAverages: NodeMeasurementAverage[],
 		stellarCoreVersion: StellarCoreVersion
-	): void {
+	): Promise<void> {
 		// Calculate trust metrics for all nodes
 		const trustGraph = TrustGraphFactory.create(nodeScan.nodes);
-		const nodeData = this.buildNodeTrustData(nodeScan.nodes);
+		const nodeData = await this.buildNodeTrustData(nodeScan.nodes);
 		
 		const trustResult = this.trustRankCalculator.calculateTrustMetrics(
 			trustGraph,
@@ -53,14 +56,16 @@ export class NodeScannerIndexerStep {
 		);
 	}
 
-	private buildNodeTrustData(nodes: Node[]): Map<string, NodeTrustData> {
+	private async buildNodeTrustData(nodes: Node[]): Promise<Map<string, NodeTrustData>> {
 		const nodeData = new Map<string, NodeTrustData>();
+		const nodeOrganizationMap = await this.nodeOrganizationMappingService.mapNodesToOrganizations(nodes);
 		
 		nodes.forEach(node => {
 			const latestMeasurement = node.latestMeasurement();
+			const organizationId = nodeOrganizationMap.get(node.publicKey.value);
 			
 			nodeData.set(node.publicKey.value, {
-				organizationId: null, // TODO: Implement organization mapping
+				organizationId: organizationId?.value || null,
 				isValidator: latestMeasurement?.isValidating || false
 			});
 		});

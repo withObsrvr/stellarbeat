@@ -3,6 +3,7 @@ import { NodeScan } from '../NodeScan';
 import { createDummyNode } from '../../__fixtures__/createDummyNode';
 import { StellarCoreVersion } from '../../../network/StellarCoreVersion';
 import { ITrustRankCalculator } from '../../../trust/TrustRankCalculator';
+import { NodeOrganizationMappingService } from '../../NodeOrganizationMappingService';
 import 'reflect-metadata';
 import NodeMeasurement from '../../NodeMeasurement';
 
@@ -15,19 +16,22 @@ describe('NodeScannerIndexerStep', () => {
 			calculationTimestamp: new Date()
 		})
 	};
-	const step = new NodeScannerIndexerStep(mockTrustRankCalculator);
+	const mockNodeOrganizationMappingService: jest.Mocked<NodeOrganizationMappingService> = {
+		mapNodesToOrganizations: jest.fn().mockResolvedValue(new Map())
+	};
+	const step = new NodeScannerIndexerStep(mockTrustRankCalculator, mockNodeOrganizationMappingService);
 	const stellarCoreVersion = StellarCoreVersion.create('13.0.0');
 	if (stellarCoreVersion.isErr()) throw new Error('stellarCoreVersion is Err');
 	beforeEach(() => {
 		jest.clearAllMocks();
 	});
 
-	it('should update with indexer info', function () {
+	it('should update with indexer info', async function () {
 		const nodeScan = new NodeScan(new Date(), [createDummyNode()]);
 		nodeScan.nodes[0].addMeasurement(
 			new NodeMeasurement(new Date(), nodeScan.nodes[0])
 		);
-		step.execute(nodeScan, [], stellarCoreVersion.value);
+		await step.execute(nodeScan, [], stellarCoreVersion.value);
 		expect(nodeScan.nodes[0].latestMeasurement()?.index).toBeGreaterThan(0);
 	});
 });
