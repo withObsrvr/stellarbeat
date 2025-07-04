@@ -26,8 +26,10 @@ const network = store.network;
 const fields = computed(() => {
   const fields = [{ key: "name", label: "Node", sortable: true }];
 
-  if (!store.isSimulation)
+  if (!store.isSimulation) {
     fields.push({ key: "index", label: "index", sortable: true });
+    fields.push({ key: "trustScore", label: "Trust", sortable: true });
+  }
 
   fields.push({
     key: "action",
@@ -47,6 +49,13 @@ const nodes = computed(() => {
       publicKey: validator.publicKey,
       index: validator.index,
       validating: validator.isValidating,
+      // Trust metrics
+      trustCentralityScore: validator.trustCentralityScore,
+      pageRankScore: validator.pageRankScore,
+      trustRank: validator.trustRank,
+      lastTrustCalculation: validator.lastTrustCalculation || undefined,
+      organizationalDiversity: 0, // TODO: Calculate organizational diversity
+      incomingTrustCount: 0, // TODO: Calculate incoming trust count
     };
     return mappedNode;
   });

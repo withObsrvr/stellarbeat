@@ -10,6 +10,11 @@ export default class ViewVertex {
   isTrustedBySelectedVertex = false;
   selected = false;
   isFailing = false;
+  // Trust properties
+  trustCentralityScore = 0;
+  pageRankScore = 0;
+  trustRank = 0;
+  organizationalDiversity = 0;
 
   constructor(
     key: string,

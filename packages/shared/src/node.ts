@@ -145,6 +145,17 @@ export class Node {
 		node.dateDiscovered = new Date(nodeV1DTO.dateDiscovered);
 		node.dateUpdated = new Date(nodeV1DTO.dateUpdated);
 		
+		// Convert trust scores from strings to numbers (API returns strings for decimal values)
+		node.trustCentralityScore = typeof nodeV1DTO.trustCentralityScore === 'string' 
+			? parseFloat(nodeV1DTO.trustCentralityScore) || 0 
+			: nodeV1DTO.trustCentralityScore || 0;
+		node.pageRankScore = typeof nodeV1DTO.pageRankScore === 'string' 
+			? parseFloat(nodeV1DTO.pageRankScore) || 0 
+			: nodeV1DTO.pageRankScore || 0;
+		node.trustRank = typeof nodeV1DTO.trustRank === 'string' 
+			? parseInt(nodeV1DTO.trustRank) || 0 
+			: nodeV1DTO.trustRank || 0;
+		
 		if (nodeV1DTO.lastTrustCalculation) {
 			node.lastTrustCalculation = new Date(nodeV1DTO.lastTrustCalculation);
 		}

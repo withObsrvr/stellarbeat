@@ -1,0 +1,468 @@
+// Trust Visualization CSS Classes
+// Phase 2 Implementation - Global trust styling
+
+// Trust Color Variables
+$trust-high: #004d4d;
+$trust-high-stroke: #00696b;
+$trust-good: #1997c6;
+$trust-good-stroke: #1480a3;
+$trust-medium: #5bb3d6;
+$trust-medium-stroke: #4894b8;
+$trust-low: #cce7f0;
+$trust-low-stroke: #b3d9e8;
+$trust-minimal: #e6f3f7;
+$trust-minimal-stroke: #d4ecf2;
+$trust-warning: #ffd700;
+$trust-warning-stroke: #ff8c00;
+$trust-caution: #ffc107;
+$trust-caution-stroke: #fd7e14;
+
+// Trust Level Color Classes
+.trust-high {
+  color: $trust-high;
+  background-color: $trust-high;
+  border-color: $trust-high-stroke;
+}
+
+.trust-good {
+  color: $trust-good;
+  background-color: $trust-good;
+  border-color: $trust-good-stroke;
+}
+
+.trust-medium {
+  color: $trust-medium;
+  background-color: $trust-medium;
+  border-color: $trust-medium-stroke;
+}
+
+.trust-low {
+  color: $trust-low;
+  background-color: $trust-low;
+  border-color: $trust-low-stroke;
+}
+
+.trust-minimal {
+  color: $trust-minimal;
+  background-color: $trust-minimal;
+  border-color: $trust-minimal-stroke;
+}
+
+.trust-warning {
+  color: $trust-warning;
+  background-color: $trust-warning;
+  border-color: $trust-warning-stroke;
+}
+
+.trust-caution {
+  color: $trust-caution;
+  background-color: $trust-caution;
+  border-color: $trust-caution-stroke;
+}
+
+// Trust Text Color Classes
+.trust-text-high { color: $trust-high; }
+.trust-text-good { color: $trust-good; }
+.trust-text-medium { color: $trust-medium; }
+.trust-text-low { color: $trust-low; }
+.trust-text-minimal { color: $trust-minimal; }
+.trust-text-warning { color: $trust-warning; }
+.trust-text-caution { color: $trust-caution; }
+
+// Trust Background Color Classes
+.trust-bg-high { background-color: $trust-high; color: white; }
+.trust-bg-good { background-color: $trust-good; color: white; }
+.trust-bg-medium { background-color: $trust-medium; color: white; }
+.trust-bg-low { background-color: $trust-low; color: #333; }
+.trust-bg-minimal { background-color: $trust-minimal; color: #333; }
+.trust-bg-warning { background-color: $trust-warning; color: #333; }
+.trust-bg-caution { background-color: $trust-caution; color: #333; }
+
+// Trust Border Color Classes
+.trust-border-high { border-color: $trust-high-stroke; }
+.trust-border-good { border-color: $trust-good-stroke; }
+.trust-border-medium { border-color: $trust-medium-stroke; }
+.trust-border-low { border-color: $trust-low-stroke; }
+.trust-border-minimal { border-color: $trust-minimal-stroke; }
+.trust-border-warning { border-color: $trust-warning-stroke; }
+.trust-border-caution { border-color: $trust-caution-stroke; }
+
+// Trust Score Progress Bars
+.trust-progress {
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  
+  .trust-progress-bar {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 4px;
+    
+    &.trust-high { background-color: $trust-high; }
+    &.trust-good { background-color: $trust-good; }
+    &.trust-medium { background-color: $trust-medium; }
+    &.trust-low { background-color: $trust-low; }
+    &.trust-minimal { background-color: $trust-minimal; }
+    &.trust-warning { background-color: $trust-warning; }
+    &.trust-caution { background-color: $trust-caution; }
+  }
+}
+
+// Trust Badges
+.trust-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  font-weight: 500;
+  
+  &.trust-badge-gold {
+    background-color: #ffd700;
+    color: #000;
+    border: 1px solid #ffc107;
+  }
+  
+  &.trust-badge-silver {
+    background-color: #c0c0c0;
+    color: #000;
+    border: 1px solid #6c757d;
+  }
+  
+  &.trust-badge-warning {
+    background-color: #dc3545;
+    color: #fff;
+    border: 1px solid #dc3545;
+  }
+  
+  &.trust-badge-caution {
+    background-color: #ffc107;
+    color: #000;
+    border: 1px solid #ffc107;
+  }
+  
+  &.trust-badge-diversity {
+    background-color: #17a2b8;
+    color: #fff;
+    border: 1px solid #17a2b8;
+  }
+  
+  // Hover effects
+  &:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+  }
+}
+
+// Trust Level Indicators
+.trust-level-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  .trust-level-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    
+    &.trust-high { background-color: $trust-high; }
+    &.trust-good { background-color: $trust-good; }
+    &.trust-medium { background-color: $trust-medium; }
+    &.trust-low { background-color: $trust-low; }
+    &.trust-minimal { background-color: $trust-minimal; }
+    &.trust-warning { background-color: $trust-warning; }
+    &.trust-caution { background-color: $trust-caution; }
+  }
+  
+  .trust-level-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+}
+
+// Trust Filter Components
+.trust-filter-controls {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+  
+  .filter-group {
+    margin-bottom: 1rem;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    label {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      display: block;
+    }
+    
+    .filter-input {
+      width: 100%;
+    }
+  }
+  
+  .trust-range-slider {
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #6c757d;
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+// Trust Analysis Widgets
+.trust-analysis-widget {
+  .trust-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    .metric-label {
+      font-weight: 500;
+      color: #495057;
+    }
+    
+    .metric-value {
+      font-weight: 600;
+      color: #212529;
+    }
+  }
+  
+  .trust-distribution-chart {
+    height: 200px;
+    margin: 1rem 0;
+  }
+  
+  .top-nodes-list {
+    .top-node-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      margin-bottom: 0.25rem;
+      background-color: #f8f9fa;
+      
+      &:hover {
+        background-color: #e9ecef;
+      }
+      
+      .node-name {
+        font-weight: 500;
+        color: #495057;
+      }
+      
+      .node-trust-score {
+        font-weight: 600;
+        color: #212529;
+      }
+    }
+  }
+}
+
+// Trust Warnings and Alerts
+.trust-warning-alert {
+  border-left: 4px solid $trust-warning;
+  padding: 0.75rem;
+  background-color: rgba($trust-warning, 0.1);
+  border-radius: 0.25rem;
+  
+  .warning-icon {
+    color: $trust-warning;
+    margin-right: 0.5rem;
+  }
+  
+  .warning-text {
+    font-weight: 500;
+    color: #856404;
+  }
+}
+
+.trust-error-alert {
+  border-left: 4px solid #dc3545;
+  padding: 0.75rem;
+  background-color: rgba(#dc3545, 0.1);
+  border-radius: 0.25rem;
+  
+  .error-icon {
+    color: #dc3545;
+    margin-right: 0.5rem;
+  }
+  
+  .error-text {
+    font-weight: 500;
+    color: #721c24;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .trust-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.3rem;
+  }
+  
+  .trust-filter-controls {
+    padding: 0.75rem;
+  }
+  
+  .trust-level-indicator {
+    .trust-level-circle {
+      width: 10px;
+      height: 10px;
+    }
+    
+    .trust-level-text {
+      font-size: 0.75rem;
+    }
+  }
+  
+  .trust-analysis-widget {
+    .trust-metric {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+  }
+}
+
+// High Contrast Mode
+@media (prefers-contrast: high) {
+  .trust-progress {
+    border: 1px solid #000;
+    
+    .trust-progress-bar {
+      border: 1px solid #000;
+    }
+  }
+  
+  .trust-badge {
+    border-width: 2px;
+  }
+  
+  .trust-level-indicator .trust-level-circle {
+    border: 2px solid #000;
+  }
+}
+
+// Dark Mode Support
+@media (prefers-color-scheme: dark) {
+  .trust-filter-controls {
+    background-color: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+  
+  .trust-analysis-widget {
+    .trust-metric {
+      border-color: #4a5568;
+      
+      .metric-label,
+      .metric-value {
+        color: #e2e8f0;
+      }
+    }
+    
+    .top-nodes-list .top-node-item {
+      background-color: #2d3748;
+      
+      &:hover {
+        background-color: #4a5568;
+      }
+      
+      .node-name,
+      .node-trust-score {
+        color: #e2e8f0;
+      }
+    }
+  }
+  
+  .trust-progress {
+    background-color: #2d3748;
+  }
+}
+
+// Animation Classes
+.trust-pulse {
+  animation: trust-pulse 2s ease-in-out infinite alternate;
+}
+
+.trust-glow {
+  animation: trust-glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes trust-pulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes trust-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(25, 151, 198, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(25, 151, 198, 0.8);
+  }
+}
+
+// Utility Classes
+.trust-clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.trust-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.trust-loading {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+    animation: trust-shimmer 1.5s infinite;
+  }
+}
+
+@keyframes trust-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

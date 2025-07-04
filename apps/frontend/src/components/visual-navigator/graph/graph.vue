@@ -141,8 +141,12 @@
                 startPropagationAnimation(vertex.key);
               "
             >
-              <circle :r="5" :class="getVertexClassObject(vertex)">
-                <title>{{ vertex.label }}</title>
+              <circle 
+                :r="getVertexRadius(vertex)" 
+                :class="getVertexClassObject(vertex)"
+                :style="getVertexStyle(vertex)"
+              >
+                <title>{{ getVertexTooltip(vertex) }}</title>
               </circle>
               <g>
                 <rect
@@ -194,6 +198,7 @@ import {
   watch,
 } from "vue";
 import { useTruncate } from "@/composables/useTruncate";
+import { TrustStyleCalculator } from "@/utils/TrustStyleCalculator";
 
 const props = defineProps({
   centerVertex: {
@@ -333,6 +338,8 @@ function getVertexTextClass(vertex: ViewVertex) {
 }
 
 function getVertexClassObject(vertex: ViewVertex) {
+  const trustColorClass = TrustStyleCalculator.getTrustColorClass(vertex.trustCentralityScore);
+  
   return {
     active: !vertex.isFailing,
     selected: vertex.selected,
@@ -343,7 +350,37 @@ function getVertexClassObject(vertex: ViewVertex) {
       !vertex.selected &&
       !highlightVertexAsIncoming(vertex),
     transitive: vertex.isPartOfTransitiveQuorumSet,
+    // Trust-based classes
+    [trustColorClass]: true,
+    'trust-warning': TrustStyleCalculator.getTrustWarningClass({
+      trustCentralityScore: vertex.trustCentralityScore
+    } as any) === 'trust-warning',
+    'trust-caution': TrustStyleCalculator.getTrustWarningClass({
+      trustCentralityScore: vertex.trustCentralityScore
+    } as any) === 'trust-caution',
   };
+}
+
+function getVertexRadius(vertex: ViewVertex): number {
+  const baseRadius = 5;
+  return TrustStyleCalculator.calculateNodeRadius(vertex.trustCentralityScore, baseRadius);
+}
+
+function getVertexStyle(vertex: ViewVertex): Record<string, string> {
+  if (vertex.isFailing) {
+    return {}; // Keep failing nodes with default red color
+  }
+  
+  return {
+    fill: TrustStyleCalculator.getTrustProgressColor(vertex.trustCentralityScore),
+  };
+}
+
+function getVertexTooltip(vertex: ViewVertex): string {
+  const trustLevel = TrustStyleCalculator.getTrustLevelDescription(vertex.trustCentralityScore);
+  const trustScore = TrustStyleCalculator.formatTrustScore(vertex.trustCentralityScore);
+  
+  return `${vertex.label}\nTrust Score: ${trustScore}\nTrust Level: ${trustLevel}`;
 }
 
 function highlightVertexAsOutgoing(vertex: ViewVertex) {
@@ -631,5 +668,71 @@ text {
   stroke: $graph-primary;
   stroke-width: 0.5px;
   stroke-opacity: 0.5;
+}
+
+// Trust-based color classes
+circle.trust-high {
+  fill: #004d4d !important;
+  stroke: #00696b;
+}
+
+circle.trust-good {
+  fill: #1997c6 !important;
+  stroke: #1480a3;
+}
+
+circle.trust-medium {
+  fill: #5bb3d6 !important;
+  stroke: #4894b8;
+}
+
+circle.trust-low {
+  fill: #cce7f0 !important;
+  stroke: #b3d9e8;
+}
+
+circle.trust-minimal {
+  fill: #e6f3f7 !important;
+  stroke: #d4ecf2;
+}
+
+circle.trust-warning {
+  fill: #ffd700 !important;
+  stroke: #ff8c00;
+  stroke-width: 2px;
+}
+
+circle.trust-caution {
+  fill: #ffc107 !important;
+  stroke: #fd7e14;
+  stroke-width: 1.8px;
+}
+
+// Ensure failing nodes override trust colors
+circle.failing {
+  fill: $red !important;
+  stroke: darken($red, 10%) !important;
+}
+
+// Ensure selected nodes have appropriate styling
+circle.selected {
+  stroke: $yellow !important;
+  stroke-width: 2.5px !important;
+  opacity: 0.8;
+}
+
+// Trust level indicators with animation
+circle.trust-high,
+circle.trust-good {
+  animation: trust-pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes trust-pulse {
+  0% {
+    stroke-opacity: 0.8;
+  }
+  100% {
+    stroke-opacity: 1;
+  }
 }
 </style>

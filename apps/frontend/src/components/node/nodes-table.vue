@@ -75,7 +75,73 @@
           >
             Warning
           </b-badge>
+          
+          <!-- Trust warning indicators -->
+          <b-badge 
+            v-if="hasZeroTrust(data.item)" 
+            v-tooltip="'No incoming trust from other organizations'"
+            variant="danger" 
+            class="ml-1"
+          >
+            <b-icon-exclamation-triangle />
+          </b-badge>
+          
+          <b-badge 
+            v-else-if="hasLowDiversity(data.item)" 
+            v-tooltip="'Low organizational diversity in trust connections'"
+            variant="warning" 
+            class="ml-1"
+          >
+            <b-icon-info-circle />
+          </b-badge>
+          
+          <b-badge 
+            v-else-if="hasBelowAverageTrust(data.item)" 
+            v-tooltip="'Trust score below network average'"
+            variant="info" 
+            class="ml-1"
+          >
+            <b-icon-question-circle />
+          </b-badge>
         </div>
+      </template>
+      
+      <template #cell(trustScore)="data">
+        <div class="d-flex align-items-center">
+          <div class="trust-score-bar mr-2">
+            <div 
+              class="trust-score-fill"
+              :style="{ 
+                width: `${Math.min(100, data.item.trustCentralityScore || 0)}%`,
+                backgroundColor: getTrustProgressColor(data.item.trustCentralityScore || 0)
+              }"
+            ></div>
+          </div>
+          <span class="trust-score-text">
+            {{ formatTrustScore(data.item.trustCentralityScore) }}
+          </span>
+        </div>
+      </template>
+
+      <template #cell(trustRank)="data">
+        <span class="trust-rank">
+          {{ formatTrustRank(data.item.trustRank) }}
+        </span>
+      </template>
+
+      <template #cell(trustedBy)="data">
+        <span class="trusted-by">
+          {{ data.item.incomingTrustCount || 0 }} 
+          <small class="text-muted">connections</small>
+        </span>
+      </template>
+
+      <template #cell(trustQuality)="data">
+        <trust-quality-badge 
+          :node="getNodeObject(data.item)" 
+          :organizational-diversity="data.item.organizationalDiversity || 0"
+          :network-average="networkAverageTrust"
+        />
       </template>
       <template #cell(organization)="data">
         <router-link
@@ -130,14 +196,20 @@ import { computed, ref, toRefs, withDefaults } from "vue";
 import {
   BBadge,
   BIconShield,
+  BIconExclamationTriangle,
+  BIconInfoCircle,
+  BIconQuestionCircle,
   BPagination,
   BTable,
   type BvTableFieldArray,
 } from "bootstrap-vue";
 import NodeActions from "@/components/node/sidebar/node-actions.vue";
+import TrustQualityBadge from "@/components/trust/trust-quality-badge.vue";
 import useStore from "@/store/useStore";
 import { useTruncate } from "@/composables/useTruncate";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
+import { TrustStyleCalculator } from "@/utils/TrustStyleCalculator";
+import { Node } from "shared";
 
 export interface Props {
   filter?: string;
@@ -187,5 +259,160 @@ export type TableNode = {
   isValidator?: boolean;
   index?: number;
   validating: boolean;
+  // Trust metrics
+  trustCentralityScore?: number;
+  pageRankScore?: number;
+  trustRank?: number;
+  organizationalDiversity?: number;
+  incomingTrustCount?: number;
+  lastTrustCalculation?: Date;
+};
+
+// Trust-related computed properties and methods
+const networkAverageTrust = computed(() => {
+  const trustScores = nodes.value
+    .map(node => node.trustCentralityScore || 0)
+    .filter(score => score > 0);
+  
+  if (trustScores.length === 0) return 50;
+  
+  return trustScores.reduce((sum, score) => sum + score, 0) / trustScores.length;
+});
+
+// Trust helper functions
+const hasZeroTrust = (node: TableNode): boolean => {
+  return TrustStyleCalculator.hasZeroTrust(getNodeObject(node));
+};
+
+const hasLowDiversity = (node: TableNode): boolean => {
+  return TrustStyleCalculator.hasLowDiversity(
+    getNodeObject(node), 
+    node.organizationalDiversity || 0
+  );
+};
+
+const hasBelowAverageTrust = (node: TableNode): boolean => {
+  return TrustStyleCalculator.hasBelowAverageTrust(
+    getNodeObject(node), 
+    networkAverageTrust.value
+  );
+};
+
+const formatTrustScore = (score: number | undefined): string => {
+  return TrustStyleCalculator.formatTrustScore(score || 0);
+};
+
+const formatTrustRank = (rank: number | undefined): string => {
+  return TrustStyleCalculator.formatTrustRank(rank || 0);
+};
+
+const getTrustProgressColor = (score: number): string => {
+  return TrustStyleCalculator.getTrustProgressColor(score);
+};
+
+const getNodeObject = (tableNode: TableNode): Node => {
+  // Convert TableNode to Node object for trust calculations
+  const node = network.getNodeByPublicKey(tableNode.publicKey);
+  if (node) {
+    // Ensure trust properties are available
+    node.trustCentralityScore = tableNode.trustCentralityScore || 0;
+    node.pageRankScore = tableNode.pageRankScore || 0;
+    node.trustRank = tableNode.trustRank || 0;
+    node.lastTrustCalculation = tableNode.lastTrustCalculation || null;
+    return node;
+  }
+  
+  // Create a minimal Node-like object for trust calculations
+  return {
+    trustCentralityScore: tableNode.trustCentralityScore || 0,
+    pageRankScore: tableNode.pageRankScore || 0,
+    trustRank: tableNode.trustRank || 0,
+    lastTrustCalculation: tableNode.lastTrustCalculation || null
+  } as unknown as Node;
 };
 </script>
+
+<style scoped>
+/* Trust score bar styling */
+.trust-score-bar {
+  width: 60px;
+  height: 6px;
+  background-color: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.trust-score-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.trust-score-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #495057;
+  min-width: 35px;
+  text-align: right;
+}
+
+/* Trust rank styling */
+.trust-rank {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+/* Trusted by styling */
+.trusted-by {
+  font-size: 0.875rem;
+  color: #495057;
+}
+
+/* Trust badge styling in table */
+.ml-1 {
+  margin-left: 0.25rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .trust-score-bar {
+    width: 40px;
+    height: 4px;
+  }
+  
+  .trust-score-text {
+    font-size: 0.75rem;
+    min-width: 30px;
+  }
+  
+  .trust-rank,
+  .trusted-by {
+    font-size: 0.75rem;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .trust-score-bar {
+    border: 1px solid #000;
+  }
+  
+  .trust-score-fill {
+    border: 1px solid #000;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .trust-score-bar {
+    background-color: #2d3748;
+  }
+  
+  .trust-score-text,
+  .trust-rank,
+  .trusted-by {
+    color: #e2e8f0;
+  }
+}
+</style>

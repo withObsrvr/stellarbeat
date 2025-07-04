@@ -50,6 +50,7 @@ const fields = computed(() => {
     return [
       { key: "name", label: "Quorumset validator", sortable: true },
       { key: "index", label: "index", sortable: true },
+      { key: "trustScore", label: "Trust", sortable: true },
       {
         key: "validating24Hour",
         label: "24H validating",
@@ -92,6 +93,13 @@ const validators: ComputedRef<TableNode[]> = computed(() => {
         isp: validator.isp || undefined,
         publicKey: validator.publicKey,
         validating: validator.isValidating,
+        // Trust metrics
+        trustCentralityScore: validator.trustCentralityScore,
+        pageRankScore: validator.pageRankScore,
+        trustRank: validator.trustRank,
+        lastTrustCalculation: validator.lastTrustCalculation || undefined,
+        organizationalDiversity: 0, // TODO: Calculate organizational diversity
+        incomingTrustCount: 0, // TODO: Calculate incoming trust count
       };
       return mappedNode;
     });
