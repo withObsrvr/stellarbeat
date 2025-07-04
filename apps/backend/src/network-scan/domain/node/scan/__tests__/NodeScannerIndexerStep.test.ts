@@ -18,7 +18,7 @@ describe('NodeScannerIndexerStep', () => {
 	};
 	const mockNodeOrganizationMappingService = {
 		mapNodesToOrganizations: jest.fn().mockResolvedValue(new Map())
-	} as jest.Mocked<NodeOrganizationMappingService>;
+	} as unknown as jest.Mocked<NodeOrganizationMappingService>;
 	const step = new NodeScannerIndexerStep(mockTrustRankCalculator, mockNodeOrganizationMappingService);
 	const stellarCoreVersion = StellarCoreVersion.create('13.0.0');
 	if (stellarCoreVersion.isErr()) throw new Error('stellarCoreVersion is Err');
