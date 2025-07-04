@@ -16,15 +16,9 @@ describe('NodeScannerIndexerStep', () => {
 			calculationTimestamp: new Date()
 		})
 	};
-	const mockNodeOrganizationMappingService: jest.Mocked<NodeOrganizationMappingService> = {
-		mapNodesToOrganizations: jest.fn().mockResolvedValue(new Map()),
-		organizationRepository: {
-			findActiveAtTimePoint: jest.fn(),
-			findActive: jest.fn(),
-			findByHomeDomains: jest.fn(),
-			save: jest.fn()
-		} as any
-	};
+	const mockNodeOrganizationMappingService = {
+		mapNodesToOrganizations: jest.fn().mockResolvedValue(new Map())
+	} as jest.Mocked<NodeOrganizationMappingService>;
 	const step = new NodeScannerIndexerStep(mockTrustRankCalculator, mockNodeOrganizationMappingService);
 	const stellarCoreVersion = StellarCoreVersion.create('13.0.0');
 	if (stellarCoreVersion.isErr()) throw new Error('stellarCoreVersion is Err');
