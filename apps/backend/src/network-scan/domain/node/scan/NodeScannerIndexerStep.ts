@@ -57,11 +57,10 @@ export class NodeScannerIndexerStep {
 		const nodeData = new Map<string, NodeTrustData>();
 		
 		nodes.forEach(node => {
-			const organizationId = node.organizationId ? node.organizationId.value : null;
 			const latestMeasurement = node.latestMeasurement();
 			
 			nodeData.set(node.publicKey.value, {
-				organizationId,
+				organizationId: null, // TODO: Implement organization mapping
 				isValidator: latestMeasurement?.isValidating || false
 			});
 		});
