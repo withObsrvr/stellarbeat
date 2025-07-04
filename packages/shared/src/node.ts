@@ -136,7 +136,10 @@ export class Node {
 			'statistics',
 			'dateDiscovered',
 			'dateUpdated',
-			'lastTrustCalculation'
+			'lastTrustCalculation',
+			'trustCentralityScore',
+			'pageRankScore',
+			'trustRank'
 		]);
 
 		node.dateDiscovered = new Date(nodeV1DTO.dateDiscovered);

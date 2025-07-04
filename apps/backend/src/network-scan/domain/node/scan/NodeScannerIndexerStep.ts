@@ -6,6 +6,7 @@ import { NodeIndexer } from './NodeIndexer';
 import { TrustRankCalculator, ITrustRankCalculator } from '../../trust/TrustRankCalculator';
 import { TrustGraphFactory } from './TrustGraphFactory';
 import { NodeTrustData } from '../../trust/TrustMetrics';
+import Node from '../Node';
 import 'reflect-metadata';
 
 @injectable()
@@ -52,7 +53,7 @@ export class NodeScannerIndexerStep {
 		);
 	}
 
-	private buildNodeTrustData(nodes: any[]): Map<string, NodeTrustData> {
+	private buildNodeTrustData(nodes: Node[]): Map<string, NodeTrustData> {
 		const nodeData = new Map<string, NodeTrustData>();
 		
 		nodes.forEach(node => {
