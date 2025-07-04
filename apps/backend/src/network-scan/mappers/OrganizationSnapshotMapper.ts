@@ -14,7 +14,7 @@ export class OrganizationSnapshotMapper {
 	): OrganizationDTO {
 		const organization = new OrganizationDTO(
 			organizationSnapshot.organization.organizationId.value,
-			organizationSnapshot.name || ''
+			organizationSnapshot.name || organizationSnapshot.organization.organizationId.value
 		);
 
 		organization.dateDiscovered =

@@ -36,6 +36,100 @@
             };
           };
         };
+
+        # PostgreSQL setup script
+        setupPostgres = pkgs.writeShellScriptBin "setup-postgres" ''
+          #!/bin/bash
+          
+          # Create directories for PostgreSQL data
+          mkdir -p .nix-postgres/{dev,test}
+          
+          # Initialize dev database if not exists
+          if [ ! -d ".nix-postgres/dev/data" ]; then
+            echo "🔧 Initializing PostgreSQL dev database..."
+            ${pkgs.postgresql_15}/bin/initdb -D .nix-postgres/dev/data --auth=trust --no-locale --encoding=UTF8
+          fi
+          
+          # Initialize test database if not exists
+          if [ ! -d ".nix-postgres/test/data" ]; then
+            echo "🔧 Initializing PostgreSQL test database..."
+            ${pkgs.postgresql_15}/bin/initdb -D .nix-postgres/test/data --auth=trust --no-locale --encoding=UTF8
+          fi
+          
+          # Start dev PostgreSQL (port 25432)
+          if ! ${pkgs.postgresql_15}/bin/pg_ctl status -D .nix-postgres/dev/data >/dev/null 2>&1; then
+            echo "🚀 Starting PostgreSQL dev server on port 25432..."
+            ${pkgs.postgresql_15}/bin/pg_ctl -D .nix-postgres/dev/data -l .nix-postgres/dev/logfile start -o "-p 25432 -k $PWD/.nix-postgres/dev"
+            sleep 2
+            
+            # Create databases and user
+            ${pkgs.postgresql_15}/bin/createdb -h localhost -p 25432 stellarbeat 2>/dev/null || true
+            ${pkgs.postgresql_15}/bin/createdb -h localhost -p 25432 stellarbeat_users 2>/dev/null || true
+            ${pkgs.postgresql_15}/bin/psql -h localhost -p 25432 -d postgres -c "CREATE USER \"user\" WITH PASSWORD 'password';" 2>/dev/null || true
+            ${pkgs.postgresql_15}/bin/psql -h localhost -p 25432 -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE stellarbeat TO \"user\";" 2>/dev/null || true
+            ${pkgs.postgresql_15}/bin/psql -h localhost -p 25432 -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE stellarbeat_users TO \"user\";" 2>/dev/null || true
+          fi
+          
+          # Start test PostgreSQL (port 25433)
+          if ! ${pkgs.postgresql_15}/bin/pg_ctl status -D .nix-postgres/test/data >/dev/null 2>&1; then
+            echo "🚀 Starting PostgreSQL test server on port 25433..."
+            ${pkgs.postgresql_15}/bin/pg_ctl -D .nix-postgres/test/data -l .nix-postgres/test/logfile start -o "-p 25433 -k $PWD/.nix-postgres/test"
+            sleep 2
+            
+            # Create test database and user
+            ${pkgs.postgresql_15}/bin/createdb -h localhost -p 25433 stellarbeat_test 2>/dev/null || true
+            ${pkgs.postgresql_15}/bin/psql -h localhost -p 25433 -d postgres -c "CREATE USER \"user\" WITH PASSWORD 'password';" 2>/dev/null || true
+            ${pkgs.postgresql_15}/bin/psql -h localhost -p 25433 -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE stellarbeat_test TO \"user\";" 2>/dev/null || true
+          fi
+          
+          echo "✅ PostgreSQL databases are ready!"
+          echo "   Dev:  postgresql://user:password@localhost:25432/stellarbeat"
+          echo "   Dev:  postgresql://user:password@localhost:25432/stellarbeat_users"
+          echo "   Test: postgresql://user:password@localhost:25433/stellarbeat_test"
+        '';
+
+        # PostgreSQL stop script
+        stopPostgres = pkgs.writeShellScriptBin "stop-postgres" ''
+          #!/bin/bash
+          
+          echo "🛑 Stopping PostgreSQL servers..."
+          
+          # Stop dev server
+          if ${pkgs.postgresql_15}/bin/pg_ctl status -D .nix-postgres/dev/data >/dev/null 2>&1; then
+            ${pkgs.postgresql_15}/bin/pg_ctl -D .nix-postgres/dev/data stop
+            echo "   Dev server stopped"
+          fi
+          
+          # Stop test server
+          if ${pkgs.postgresql_15}/bin/pg_ctl status -D .nix-postgres/test/data >/dev/null 2>&1; then
+            ${pkgs.postgresql_15}/bin/pg_ctl -D .nix-postgres/test/data stop
+            echo "   Test server stopped"
+          fi
+          
+          echo "✅ All PostgreSQL servers stopped"
+        '';
+
+        # PostgreSQL status script
+        statusPostgres = pkgs.writeShellScriptBin "postgres-status" ''
+          #!/bin/bash
+          
+          echo "📊 PostgreSQL Status:"
+          
+          # Check dev server
+          if ${pkgs.postgresql_15}/bin/pg_ctl status -D .nix-postgres/dev/data >/dev/null 2>&1; then
+            echo "   Dev (port 25432):  ✅ Running"
+          else
+            echo "   Dev (port 25432):  ❌ Stopped"
+          fi
+          
+          # Check test server
+          if ${pkgs.postgresql_15}/bin/pg_ctl status -D .nix-postgres/test/data >/dev/null 2>&1; then
+            echo "   Test (port 25433): ✅ Running"
+          else
+            echo "   Test (port 25433): ❌ Stopped"
+          fi
+        '';
+
       in
       {
         devShells.default = pkgs.mkShell {
@@ -46,6 +140,10 @@
             pkgs.rustc
             pkgs.cargo
             pkgs.wasm-pack
+            # PostgreSQL management scripts
+            setupPostgres
+            stopPostgres
+            statusPostgres
           ];
 
           shellHook = ''
@@ -53,6 +151,15 @@
             export PATH="${pnpm}/bin:$PATH"
             export NODE_OPTIONS="--max_old_space_size=4096"
             export PATH="$PWD/node_modules/.bin:$PATH"
+            
+            # Set up PostgreSQL environment variables
+            export DATABASE_DEV_URL="postgresql://user:password@localhost:25432/stellarbeat"
+            export DATABASE_TEST_URL="postgresql://user:password@localhost:25433/stellarbeat_test"
+            
+            # Add .nix-postgres to .gitignore if not already there
+            if [ ! -f .gitignore ] || ! grep -q ".nix-postgres" .gitignore; then
+              echo ".nix-postgres/" >> .gitignore
+            fi
             
             # Set up environment files
             if [ ! -f "apps/backend/.env" ]; then
@@ -67,26 +174,49 @@
 
             # Load environment variables
             set -a
-            source apps/backend/.env
-            source apps/frontend/.env
-            source apps/users/.env
+            source apps/backend/.env 2>/dev/null || true
+            source apps/frontend/.env 2>/dev/null || true
+            source apps/users/.env 2>/dev/null || true
             set +a
 
             # Build shared packages first
-            cd packages/shared
-            pnpm install
-            pnpm run build
-            pnpm run post-build
-            cd ../..
+            if [ -d "packages/shared" ]; then
+              cd packages/shared
+              pnpm install
+              pnpm run build
+              pnpm run post-build
+              cd ../..
+            fi
+            
+            # Auto-start PostgreSQL databases
+            echo "🔧 Setting up PostgreSQL databases..."
+            setup-postgres
             
             # Set custom prompt
             export PS1="\[\033[1;32m\][nix:radar]\[\033[0m\] \[\033[1;34m\]\w\[\033[0m\] \[\033[1;36m\]\$\[\033[0m\] "
             
-            echo "Radar development environment ready!"
+            echo ""
+            echo "🎉 Radar development environment ready!"
             echo "Using pnpm version: $(pnpm -v)"
             echo "Using Node.js version: $(node -v)"
-            echo "Environment variables loaded from .env files"
-            echo "Run 'pnpm install' to install dependencies"
+            echo ""
+            echo "📊 Database URLs:"
+            echo "   DEV:  $DATABASE_DEV_URL"
+            echo "   TEST: $DATABASE_TEST_URL"
+            echo ""
+            echo "🔧 Available commands:"
+            echo "   setup-postgres   - Start PostgreSQL databases"
+            echo "   stop-postgres    - Stop PostgreSQL databases"
+            echo "   postgres-status  - Check database status"
+            echo ""
+            echo "💡 Run 'pnpm install' to install dependencies"
+            
+            # Cleanup function for when shell exits
+            cleanup() {
+              echo "🧹 Cleaning up PostgreSQL connections..."
+              stop-postgres
+            }
+            trap cleanup EXIT
           '';
         };
 
@@ -107,10 +237,12 @@
             pnpm install --frozen-lockfile
             
             # Build shared packages first
-            cd packages/shared
-            pnpm run build
-            pnpm run post-build
-            cd ../..
+            if [ -d "packages/shared" ]; then
+              cd packages/shared
+              pnpm run build
+              pnpm run post-build
+              cd ../..
+            fi
             
             # Build the rest of the project
             pnpm build
@@ -124,5 +256,10 @@
 
         # Add Docker images to packages
         packages.users-docker = usersDockerImage;
+        
+        # Add PostgreSQL management scripts as packages
+        packages.setup-postgres = setupPostgres;
+        packages.stop-postgres = stopPostgres;
+        packages.postgres-status = statusPostgres;
       });
-} 
+}
