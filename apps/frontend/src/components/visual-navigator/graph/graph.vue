@@ -352,12 +352,6 @@ function getVertexClassObject(vertex: ViewVertex) {
     transitive: vertex.isPartOfTransitiveQuorumSet,
     // Trust-based classes
     [trustColorClass]: true,
-    'trust-warning': TrustStyleCalculator.getTrustWarningClass({
-      trustCentralityScore: vertex.trustCentralityScore
-    } as any) === 'trust-warning',
-    'trust-caution': TrustStyleCalculator.getTrustWarningClass({
-      trustCentralityScore: vertex.trustCentralityScore
-    } as any) === 'trust-caution',
   };
 }
 

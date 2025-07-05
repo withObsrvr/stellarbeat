@@ -18,6 +18,7 @@ export class TrustStyleCalculator {
     if (trustScore >= 70) return 'trust-good';
     if (trustScore >= 50) return 'trust-medium';
     if (trustScore >= 30) return 'trust-low';
+    if (trustScore >= 10) return 'trust-minimal';
     return 'trust-minimal';
   }
 
