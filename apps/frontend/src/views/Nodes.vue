@@ -152,6 +152,11 @@ if (!store.isSimulation) {
   if (store.networkContext.enableIndex) {
     fieldsBase.push({ key: "index", label: "index", sortable: true });
   }
+
+  // Add trust visualization columns
+  fieldsBase.push({ key: "trustScore", label: "Trust Score", sortable: true });
+  fieldsBase.push({ key: "trustRank", label: "Trust Rank", sortable: true });
+  fieldsBase.push({ key: "trustQuality", label: "Trust Quality", sortable: false });
 }
 
 const fields = computed(() => {
@@ -202,6 +207,13 @@ const nodes: ComputedRef<TableNode[]> = computed(() => {
         validating: node.isValidating,
         organization: getOrganization(node),
         organizationId: node.organizationId || undefined,
+        // Trust metrics
+        trustCentralityScore: node.trustCentralityScore,
+        pageRankScore: node.pageRankScore,
+        trustRank: node.trustRank,
+        lastTrustCalculation: node.lastTrustCalculation || undefined,
+        organizationalDiversity: 0, // TODO: Calculate organizational diversity
+        incomingTrustCount: 0, // TODO: Calculate incoming trust count
       };
       return mappedNode;
     });

@@ -20,6 +20,7 @@ const fields = computed(() => {
   if (!store.isSimulation) {
     fields.push(
       "index",
+      { key: "trustScore", label: "Trust" },
       { key: "validating24Hour", label: "24H validating" },
       { key: "validating30Days", label: "30D validating" },
       "version",
@@ -49,6 +50,13 @@ const validators: ComputedRef<TableNode[]> = computed(() => {
         isp: validator.isp || undefined,
         publicKey: validator.publicKey,
         validating: validator.isValidating,
+        // Trust metrics
+        trustCentralityScore: validator.trustCentralityScore,
+        pageRankScore: validator.pageRankScore,
+        trustRank: validator.trustRank,
+        lastTrustCalculation: validator.lastTrustCalculation || undefined,
+        organizationalDiversity: 0, // TODO: Calculate organizational diversity
+        incomingTrustCount: 0, // TODO: Calculate incoming trust count
       };
       return mappedNode;
     });

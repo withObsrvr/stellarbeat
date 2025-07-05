@@ -51,6 +51,9 @@ const fields = computed(() => {
     fields.push({ key: "index", label: "Index", sortable: true });
   }
 
+  // Add trust score for this network overview
+  fields.push({ key: "trustScore", label: "Trust", sortable: true });
+
   fields.push({
     key: "action",
     label: "",
@@ -81,6 +84,13 @@ const validators = computed(() => {
         isFullValidator: node.isFullValidator,
         publicKey: node.publicKey,
         validating: node.isValidating,
+        // Trust metrics
+        trustCentralityScore: node.trustCentralityScore,
+        pageRankScore: node.pageRankScore,
+        trustRank: node.trustRank,
+        lastTrustCalculation: node.lastTrustCalculation || undefined,
+        organizationalDiversity: 0, // TODO: Calculate organizational diversity
+        incomingTrustCount: 0, // TODO: Calculate incoming trust count
       };
       return mappedNode;
     });
