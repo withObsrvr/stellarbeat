@@ -156,7 +156,6 @@ if (!store.isSimulation) {
   // Add trust visualization columns
   fieldsBase.push({ key: "trustScore", label: "Trust Score", sortable: true });
   fieldsBase.push({ key: "trustRank", label: "Trust Rank", sortable: true });
-  fieldsBase.push({ key: "trustQuality", label: "Trust Quality", sortable: false });
 }
 
 const fields = computed(() => {

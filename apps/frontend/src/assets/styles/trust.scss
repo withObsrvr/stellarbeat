@@ -1,91 +1,72 @@
 // Trust Visualization CSS Classes
 // Phase 2 Implementation - Global trust styling
 
-// Trust Color Variables
-$trust-high: #004d4d;
-$trust-high-stroke: #00696b;
-$trust-good: #1997c6;
-$trust-good-stroke: #1480a3;
-$trust-medium: #5bb3d6;
-$trust-medium-stroke: #4894b8;
-$trust-low: #64748b;
-$trust-low-stroke: #475569;
-$trust-minimal: #475569;
-$trust-minimal-stroke: #334155;
-$trust-warning: #ffd700;
-$trust-warning-stroke: #ff8c00;
-$trust-caution: #ffc107;
-$trust-caution-stroke: #fd7e14;
+// Original Node Color Variables
+$node-active: #1687b2;        // Original $blue
+$node-inactive: #f8f9fa;      // Original $gray-100  
+$node-failing: #cd201f;       // Original $red
+$node-selected: #f1c40f;      // Original $yellow
+$white: #fff;
 
-// Trust Level Color Classes
-.trust-high {
-  color: $trust-high;
-  background-color: $trust-high;
-  border-color: $trust-high-stroke;
+// Interaction state colors
+$node-trust-target: #fec601;  // Golden yellow for trust targets
+$node-trust-source: #73bfb8;  // Teal for trust sources
+
+// Node Color Classes
+.node-active {
+  fill: $node-active;
+  stroke: $white;
+  stroke-width: 1.5px;
 }
 
-.trust-good {
-  color: $trust-good;
-  background-color: $trust-good;
-  border-color: $trust-good-stroke;
+.node-inactive {
+  fill: $node-inactive;
+  stroke: $white;  
+  stroke-width: 1.5px;
 }
 
-.trust-medium {
-  color: $trust-medium;
-  background-color: $trust-medium;
-  border-color: $trust-medium-stroke;
+.node-failing {
+  fill: $node-failing;
+  stroke: $white;
+  stroke-width: 1.5px;
 }
 
-.trust-low {
-  color: $trust-low;
-  background-color: $trust-low;
-  border-color: $trust-low-stroke;
+.node-selected {
+  stroke: $node-selected;
+  stroke-width: 3px;
+  stroke-opacity: 0.6;
 }
 
-.trust-minimal {
-  color: $trust-minimal;
-  background-color: $trust-minimal;
-  border-color: $trust-minimal-stroke;
+// Interaction states
+.node-trust-target {
+  stroke: $node-trust-target;
+  stroke-opacity: 1;
+  stroke-width: 2px;
 }
 
-.trust-warning {
-  color: $trust-warning;
-  background-color: $trust-warning;
-  border-color: $trust-warning-stroke;
+.node-trust-source {
+  stroke: $node-trust-source;
+  stroke-opacity: 1;
+  stroke-width: 2px;
 }
 
-.trust-caution {
-  color: $trust-caution;
-  background-color: $trust-caution;
-  border-color: $trust-caution-stroke;
-}
+// Node Text Color Classes
+.node-text-active { color: $node-active; }
+.node-text-inactive { color: $node-inactive; }
+.node-text-failing { color: $node-failing; }
+.node-text-selected { color: $node-selected; }
 
-// Trust Text Color Classes
-.trust-text-high { color: $trust-high; }
-.trust-text-good { color: $trust-good; }
-.trust-text-medium { color: $trust-medium; }
-.trust-text-low { color: $trust-low; }
-.trust-text-minimal { color: $trust-minimal; }
-.trust-text-warning { color: $trust-warning; }
-.trust-text-caution { color: $trust-caution; }
+// Node Background Color Classes
+.node-bg-active { background-color: $node-active; color: white; }
+.node-bg-inactive { background-color: $node-inactive; color: #333; }
+.node-bg-failing { background-color: $node-failing; color: white; }
+.node-bg-selected { background-color: $node-selected; color: #333; }
 
-// Trust Background Color Classes
-.trust-bg-high { background-color: $trust-high; color: white; }
-.trust-bg-good { background-color: $trust-good; color: white; }
-.trust-bg-medium { background-color: $trust-medium; color: white; }
-.trust-bg-low { background-color: $trust-low; color: #333; }
-.trust-bg-minimal { background-color: $trust-minimal; color: #333; }
-.trust-bg-warning { background-color: $trust-warning; color: #333; }
-.trust-bg-caution { background-color: $trust-caution; color: #333; }
-
-// Trust Border Color Classes
-.trust-border-high { border-color: $trust-high-stroke; }
-.trust-border-good { border-color: $trust-good-stroke; }
-.trust-border-medium { border-color: $trust-medium-stroke; }
-.trust-border-low { border-color: $trust-low-stroke; }
-.trust-border-minimal { border-color: $trust-minimal-stroke; }
-.trust-border-warning { border-color: $trust-warning-stroke; }
-.trust-border-caution { border-color: $trust-caution-stroke; }
+// Node Border Color Classes
+.node-border-active { border-color: $node-active; }
+.node-border-inactive { border-color: $node-inactive; }
+.node-border-failing { border-color: $node-failing; }
+.node-border-selected { border-color: $node-selected; }
 
 // Trust Score Progress Bars
 .trust-progress {
@@ -99,13 +80,9 @@ $trust-caution-stroke: #fd7e14;
     transition: width 0.3s ease, background-color 0.3s ease;
     border-radius: 4px;
     
-    &.trust-high { background-color: $trust-high; }
-    &.trust-good { background-color: $trust-good; }
-    &.trust-medium { background-color: $trust-medium; }
-    &.trust-low { background-color: $trust-low; }
-    &.trust-minimal { background-color: $trust-minimal; }
-    &.trust-warning { background-color: $trust-warning; }
-    &.trust-caution { background-color: $trust-caution; }
+    &.node-active { background-color: $node-active; }
+    &.node-inactive { background-color: $node-inactive; }
+    &.node-failing { background-color: $node-failing; }
   }
 }
 
@@ -168,13 +145,9 @@ $trust-caution-stroke: #fd7e14;
     border-radius: 50%;
     flex-shrink: 0;
     
-    &.trust-high { background-color: $trust-high; }
-    &.trust-good { background-color: $trust-good; }
-    &.trust-medium { background-color: $trust-medium; }
-    &.trust-low { background-color: $trust-low; }
-    &.trust-minimal { background-color: $trust-minimal; }
-    &.trust-warning { background-color: $trust-warning; }
-    &.trust-caution { background-color: $trust-caution; }
+    &.node-active { background-color: $node-active; }
+    &.node-inactive { background-color: $node-inactive; }
+    &.node-failing { background-color: $node-failing; }
   }
   
   .trust-level-text {

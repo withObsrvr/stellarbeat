@@ -338,7 +338,7 @@ function getVertexTextClass(vertex: ViewVertex) {
 }
 
 function getVertexClassObject(vertex: ViewVertex) {
-  const trustColorClass = TrustStyleCalculator.getTrustColorClass(vertex.trustCentralityScore);
+  const nodeColorClass = TrustStyleCalculator.getTrustColorClass(vertex);
   
   return {
     active: !vertex.isFailing,
@@ -350,8 +350,8 @@ function getVertexClassObject(vertex: ViewVertex) {
       !vertex.selected &&
       !highlightVertexAsIncoming(vertex),
     transitive: vertex.isPartOfTransitiveQuorumSet,
-    // Trust-based classes
-    [trustColorClass]: true,
+    // Node color classes
+    [nodeColorClass]: true,
   };
 }
 
@@ -675,31 +675,40 @@ circle.trust-good {
   stroke: #1480a3;
 }
 
-circle.trust-medium {
-  fill: #5bb3d6 !important;
-  stroke: #4894b8;
+circle.node-active {
+  fill: #1687b2 !important;
+  stroke: #fff;
+  stroke-width: 1.5px;
 }
 
-circle.trust-low {
-  fill: #cce7f0 !important;
-  stroke: #b3d9e8;
+circle.node-inactive {
+  fill: #f8f9fa !important;
+  stroke: #fff;
+  stroke-width: 1.5px;
 }
 
-circle.trust-minimal {
-  fill: #e6f3f7 !important;
-  stroke: #d4ecf2;
+circle.node-failing {
+  fill: #cd201f !important;
+  stroke: #fff;
+  stroke-width: 1.5px;
 }
 
-circle.trust-warning {
-  fill: #ffd700 !important;
-  stroke: #ff8c00;
+circle.node-selected {
+  stroke: #f1c40f !important;
+  stroke-width: 3px;
+  stroke-opacity: 0.6;
+}
+
+circle.node-trust-target {
+  stroke: #fec601 !important;
+  stroke-opacity: 1;
   stroke-width: 2px;
 }
 
-circle.trust-caution {
-  fill: #ffc107 !important;
-  stroke: #fd7e14;
-  stroke-width: 1.8px;
+circle.node-trust-source {
+  stroke: #73bfb8 !important;
+  stroke-opacity: 1;
+  stroke-width: 2px;
 }
 
 // Ensure failing nodes override trust colors

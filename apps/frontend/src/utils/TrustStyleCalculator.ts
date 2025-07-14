@@ -11,23 +11,31 @@ export interface TrustMetrics {
 
 export class TrustStyleCalculator {
   /**
-   * Get CSS class for trust-based color coding
+   * Get CSS class for node color coding based on functional state
    */
-  static getTrustColorClass(trustScore: number): string {
-    if (trustScore >= 90) return 'trust-high';
-    if (trustScore >= 70) return 'trust-good';
-    if (trustScore >= 50) return 'trust-medium';
-    if (trustScore >= 30) return 'trust-low';
-    if (trustScore >= 10) return 'trust-minimal';
-    return 'trust-minimal';
+  static getTrustColorClass(vertex: { isFailing?: boolean; active?: boolean; overLoaded?: boolean }): string {
+    // Check failing status (available on ViewVertex)
+    if (vertex.isFailing) return 'node-failing';
+    
+    // Check node status (available on Node)
+    if ('active' in vertex && !vertex.active) return 'node-inactive';
+    if ('overLoaded' in vertex && vertex.overLoaded) return 'node-failing';
+    
+    // All active nodes use the same primary color
+    return 'node-active';
   }
 
   /**
-   * Get warning class for trust issues
+   * Get warning class for node issues
    */
-  static getTrustWarningClass(node: Node): string {
-    if (node.trustCentralityScore === 0) return 'trust-warning';
-    if (node.trustCentralityScore < 10) return 'trust-caution';
+  static getTrustWarningClass(vertex: { isFailing?: boolean; active?: boolean; overLoaded?: boolean }): string {
+    // Check failing status (available on ViewVertex)
+    if (vertex.isFailing) return 'node-failing';
+    
+    // Check node status (available on Node)
+    if ('overLoaded' in vertex && vertex.overLoaded) return 'node-failing';
+    if ('active' in vertex && !vertex.active) return 'node-failing';
+    
     return '';
   }
 
@@ -35,7 +43,7 @@ export class TrustStyleCalculator {
    * Calculate node radius based on trust score
    */
   static calculateNodeRadius(trustScore: number, baseRadius: number = 8): number {
-    const maxRadius = 16;
+    const maxRadius = 12;
     const minRadius = 4;
     
     const normalizedScore = Math.max(0, Math.min(100, trustScore));
@@ -101,11 +109,8 @@ export class TrustStyleCalculator {
    * Get trust score color for progress bars
    */
   static getTrustProgressColor(trustScore: number): string {
-    if (trustScore >= 90) return '#004d4d';
-    if (trustScore >= 70) return '#1997c6';
-    if (trustScore >= 50) return '#5bb3d6';
-    if (trustScore >= 30) return '#cce7f0';
-    return '#e6f3f7';
+    // Use original blue color for all trust progress
+    return '#1687b2';
   }
 
   /**

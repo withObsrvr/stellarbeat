@@ -136,13 +136,6 @@
         </span>
       </template>
 
-      <template #cell(trustQuality)="data">
-        <trust-quality-badge 
-          :node="getNodeObject(data.item)" 
-          :organizational-diversity="data.item.organizationalDiversity || 0"
-          :network-average="networkAverageTrust"
-        />
-      </template>
       <template #cell(organization)="data">
         <router-link
           v-if="data.item.organizationId"
@@ -204,7 +197,6 @@ import {
   type BvTableFieldArray,
 } from "bootstrap-vue";
 import NodeActions from "@/components/node/sidebar/node-actions.vue";
-import TrustQualityBadge from "@/components/trust/trust-quality-badge.vue";
 import useStore from "@/store/useStore";
 import { useTruncate } from "@/composables/useTruncate";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";

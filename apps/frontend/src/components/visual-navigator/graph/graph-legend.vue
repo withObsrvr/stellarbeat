@@ -70,19 +70,19 @@ div {
 }
 
 .quorum-graph-legend .active-node {
-  background: #1997c6;
+  background: #1687b2;
 }
 
 .quorum-graph-legend .selected-node {
-  background: yellow;
+  background: #f1c40f;
 }
 
 .quorum-graph-legend .inactive-node {
-  background: #ecebe4;
+  background: #f8f9fa;
 }
 
 .quorum-graph-legend .failing-node {
-  background: red;
+  background: #cd201f;
 }
 
 .legend-link {
