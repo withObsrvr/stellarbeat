@@ -76,33 +76,6 @@
             Warning
           </b-badge>
           
-          <!-- Trust warning indicators -->
-          <b-badge 
-            v-if="hasZeroTrust(data.item)" 
-            v-tooltip="'No incoming trust from other organizations'"
-            variant="danger" 
-            class="ml-1"
-          >
-            <b-icon-exclamation-triangle />
-          </b-badge>
-          
-          <b-badge 
-            v-else-if="hasLowDiversity(data.item)" 
-            v-tooltip="'Low organizational diversity in trust connections'"
-            variant="warning" 
-            class="ml-1"
-          >
-            <b-icon-info-circle />
-          </b-badge>
-          
-          <b-badge 
-            v-else-if="hasBelowAverageTrust(data.item)" 
-            v-tooltip="'Trust score below network average'"
-            variant="info" 
-            class="ml-1"
-          >
-            <b-icon-question-circle />
-          </b-badge>
         </div>
       </template>
       
@@ -134,6 +107,40 @@
           {{ data.item.incomingTrustCount || 0 }} 
           <small class="text-muted">connections</small>
         </span>
+      </template>
+
+      <template #cell(seededTrustScore)="data">
+        <div v-if="trustStore.isSeededViewActive" class="seeded-trust-score">
+          <div class="trust-progress">
+            <div 
+              class="trust-progress-bar" 
+              :class="getSeededTrustColorClass(data.item)"
+              :style="{ width: getSeededTrustScore(data.item) + '%' }"
+            ></div>
+          </div>
+          <span class="seeded-trust-score-text">
+            {{ formatTrustScore(getSeededTrustScore(data.item)) }}
+          </span>
+        </div>
+        <span v-else class="text-muted">-</span>
+      </template>
+
+      <template #cell(seededTrustRank)="data">
+        <span v-if="trustStore.isSeededViewActive" class="seeded-trust-rank">
+          {{ formatSeededTrustRank(data.item) }}
+        </span>
+        <span v-else class="text-muted">-</span>
+      </template>
+
+      <template #cell(distanceFromSeeds)="data">
+        <b-badge 
+          v-if="trustStore.isSeededViewActive"
+          :variant="getDistanceBadgeVariant(getDistanceFromSeeds(data.item))"
+          class="distance-badge"
+        >
+          {{ getDistanceLabel(getDistanceFromSeeds(data.item)) }}
+        </b-badge>
+        <span v-else class="text-muted">-</span>
       </template>
 
       <template #cell(organization)="data">
@@ -189,9 +196,6 @@ import { computed, ref, toRefs, withDefaults } from "vue";
 import {
   BBadge,
   BIconShield,
-  BIconExclamationTriangle,
-  BIconInfoCircle,
-  BIconQuestionCircle,
   BPagination,
   BTable,
   type BvTableFieldArray,
@@ -201,6 +205,7 @@ import useStore from "@/store/useStore";
 import { useTruncate } from "@/composables/useTruncate";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
 import { TrustStyleCalculator } from "@/utils/TrustStyleCalculator";
+import { useTrustStore } from "@/store/TrustStore";
 import { Node } from "shared";
 
 export interface Props {
@@ -227,6 +232,7 @@ const currentPage = ref(1);
 
 const store = useStore();
 const network = store.network;
+const trustStore = useTrustStore();
 
 const totalRows = computed(() => nodes.value.length);
 
@@ -272,23 +278,6 @@ const networkAverageTrust = computed(() => {
 });
 
 // Trust helper functions
-const hasZeroTrust = (node: TableNode): boolean => {
-  return TrustStyleCalculator.hasZeroTrust(getNodeObject(node));
-};
-
-const hasLowDiversity = (node: TableNode): boolean => {
-  return TrustStyleCalculator.hasLowDiversity(
-    getNodeObject(node), 
-    node.organizationalDiversity || 0
-  );
-};
-
-const hasBelowAverageTrust = (node: TableNode): boolean => {
-  return TrustStyleCalculator.hasBelowAverageTrust(
-    getNodeObject(node), 
-    networkAverageTrust.value
-  );
-};
 
 const formatTrustScore = (score: number | undefined): string => {
   return TrustStyleCalculator.formatTrustScore(score || 0);
@@ -322,6 +311,49 @@ const getNodeObject = (tableNode: TableNode): Node => {
     lastTrustCalculation: tableNode.lastTrustCalculation || null
   } as unknown as Node;
 };
+
+// Seeded trust helper functions
+const getSeededTrustScore = (tableNode: TableNode): number => {
+  const seededMetrics = trustStore.getSeededMetrics(tableNode.publicKey);
+  return seededMetrics?.seededTrustCentralityScore || 0;
+};
+
+const getSeededTrustRank = (tableNode: TableNode): number => {
+  const seededMetrics = trustStore.getSeededMetrics(tableNode.publicKey);
+  return seededMetrics?.seededTrustRank || 0;
+};
+
+const getDistanceFromSeeds = (tableNode: TableNode): number => {
+  const seededMetrics = trustStore.getSeededMetrics(tableNode.publicKey);
+  return seededMetrics?.distanceFromSeeds ?? -1;
+};
+
+const getSeededTrustColorClass = (tableNode: TableNode): string => {
+  const seededMetrics = trustStore.getSeededMetrics(tableNode.publicKey);
+  if (!seededMetrics) return 'node-inactive';
+  return TrustStyleCalculator.getSeededColorClass(seededMetrics);
+};
+
+const formatSeededTrustRank = (tableNode: TableNode): string => {
+  const rank = getSeededTrustRank(tableNode);
+  return rank > 0 ? `#${rank}` : 'N/A';
+};
+
+const getDistanceLabel = (distance: number): string => {
+  if (distance === 0) return 'Seed';
+  if (distance === 1) return '1 hop';
+  if (distance === 2) return '2 hops';
+  if (distance >= 3) return `${distance} hops`;
+  return 'Unreachable';
+};
+
+const getDistanceBadgeVariant = (distance: number): string => {
+  if (distance === 0) return 'warning'; // Orange for seeds
+  if (distance === 1) return 'info';    // Blue for direct
+  if (distance === 2) return 'secondary'; // Gray for 2nd degree
+  if (distance >= 3) return 'light';     // Light gray for distant
+  return 'dark'; // Dark for unreachable
+};
 </script>
 
 <style scoped>
@@ -343,7 +375,7 @@ const getNodeObject = (tableNode: TableNode): Node => {
 .trust-score-text {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #495057;
+  color: #212529;
   min-width: 35px;
   text-align: right;
 }
@@ -352,13 +384,13 @@ const getNodeObject = (tableNode: TableNode): Node => {
 .trust-rank {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #495057;
+  color: #212529;
 }
 
 /* Trusted by styling */
 .trusted-by {
   font-size: 0.875rem;
-  color: #495057;
+  color: #212529;
 }
 
 /* Trust badge styling in table */
@@ -395,16 +427,28 @@ const getNodeObject = (tableNode: TableNode): Node => {
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .trust-score-bar {
-    background-color: #2d3748;
-  }
-  
-  .trust-score-text,
-  .trust-rank,
-  .trusted-by {
-    color: #e2e8f0;
-  }
+
+/* Seeded trust styling */
+.seeded-trust-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.seeded-trust-score-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #ff6b35;
+}
+
+.seeded-trust-rank {
+  font-weight: 600;
+  color: #f7931e;
+}
+
+.distance-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
 }
 </style>

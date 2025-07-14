@@ -11,6 +11,19 @@ export interface PageRankConfiguration {
 	convergenceThreshold: number;
 }
 
+export interface SeededPageRankConfiguration extends PageRankConfiguration {
+	seedNodes: string[];
+	seedWeight: number;
+}
+
+export interface SeededTrustMetrics extends TrustMetrics {
+	seededTrustCentralityScore: number;
+	seededPageRankScore: number;
+	seededTrustRank: number;
+	seedOrganization: string;
+	distanceFromSeeds: number;
+}
+
 export const DEFAULT_PAGERANK_CONFIG: PageRankConfiguration = {
 	dampingFactor: 0.85,
 	maxIterations: 100,
@@ -27,4 +40,12 @@ export interface TrustCalculationResult {
 	convergenceAchieved: boolean;
 	iterationsUsed: number;
 	calculationTimestamp: Date;
+}
+
+export interface SeededTrustCalculationResult {
+	seededTrustMetrics: Map<string, SeededTrustMetrics>;
+	convergenceAchieved: boolean;
+	iterationsUsed: number;
+	calculationTimestamp: Date;
+	seedOrganization: string;
 }

@@ -156,6 +156,11 @@ if (!store.isSimulation) {
   // Add trust visualization columns
   fieldsBase.push({ key: "trustScore", label: "Trust Score", sortable: true });
   fieldsBase.push({ key: "trustRank", label: "Trust Rank", sortable: true });
+  
+  // Add seeded trust columns (will be shown/hidden based on view mode)
+  fieldsBase.push({ key: "seededTrustScore", label: "Seeded Trust Score", sortable: true });
+  fieldsBase.push({ key: "seededTrustRank", label: "Seeded Rank", sortable: true });
+  fieldsBase.push({ key: "distanceFromSeeds", label: "Distance from Seeds", sortable: true });
 }
 
 const fields = computed(() => {

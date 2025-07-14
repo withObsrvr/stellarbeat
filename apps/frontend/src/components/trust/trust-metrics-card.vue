@@ -235,7 +235,7 @@ const warningMessage = computed((): string => {
 .trust-rank-value {
   font-size: 1.25rem;
   font-weight: bold;
-  color: #495057;
+  color: #212529;
   line-height: 1;
 }
 
@@ -267,7 +267,7 @@ const warningMessage = computed((): string => {
 .trust-level-description {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #495057;
+  color: #212529;
 }
 
 .trust-breakdown {
@@ -294,7 +294,7 @@ const warningMessage = computed((): string => {
 .metric-value {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #495057;
+  color: #212529;
 }
 
 .trust-quality-assessment {

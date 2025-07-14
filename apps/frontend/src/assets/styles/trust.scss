@@ -12,6 +12,13 @@ $white: #fff;
 $node-trust-target: #fec601;  // Golden yellow for trust targets
 $node-trust-source: #73bfb8;  // Teal for trust sources
 
+// Seeded Trust Color Variables
+$node-seed: #ff6b35;           // Orange for seed nodes
+$node-direct-trust: #f7931e;   // Gold for directly trusted
+$node-second-degree: #1687b2;  // Blue for second degree
+$node-distant: #64748b;        // Gray for distant nodes
+$node-unreachable: #9ca3af;    // Light gray for unreachable
+
 // Node Color Classes
 .node-active {
   fill: $node-active;
@@ -50,11 +57,69 @@ $node-trust-source: #73bfb8;  // Teal for trust sources
   stroke-width: 2px;
 }
 
+// Seeded Trust Node Color Classes
+.node-seed {
+  fill: $node-seed;
+  stroke: $white;
+  stroke-width: 2px; // Thicker stroke for seeds
+}
+
+.node-direct-trust {
+  fill: $node-direct-trust;
+  stroke: $white;
+  stroke-width: 1.5px;
+}
+
+.node-second-degree {
+  fill: $node-second-degree;
+  stroke: $white;
+  stroke-width: 1.5px;
+}
+
+.node-distant {
+  fill: $node-distant;
+  stroke: $white;
+  stroke-width: 1px;
+}
+
+.node-unreachable {
+  fill: $node-unreachable;
+  stroke: $white;
+  stroke-width: 1px;
+  opacity: 0.7;
+}
+
+// Seeded trust level classes for high/medium/low scores
+.node-high-seeded-trust {
+  fill: #ff6b35; // Orange for high seeded trust
+  stroke: $white;
+  stroke-width: 1.5px;
+}
+
+.node-medium-seeded-trust {
+  fill: #f7931e; // Gold for medium seeded trust
+  stroke: $white;
+  stroke-width: 1.5px;
+}
+
+.node-low-seeded-trust {
+  fill: #64748b; // Gray for low seeded trust
+  stroke: $white;
+  stroke-width: 1px;
+}
+
 // Node Text Color Classes
 .node-text-active { color: $node-active; }
 .node-text-inactive { color: $node-inactive; }
 .node-text-failing { color: $node-failing; }
 .node-text-selected { color: $node-selected; }
+
+// Seeded Trust Text Colors
+.node-text-seed { color: $node-seed; }
+.node-text-direct-trust { color: $node-direct-trust; }
+.node-text-second-degree { color: $node-second-degree; }
+.node-text-distant { color: $node-distant; }
+.node-text-unreachable { color: $node-unreachable; }
 
 // Node Background Color Classes
 .node-bg-active { background-color: $node-active; color: white; }
@@ -62,11 +127,25 @@ $node-trust-source: #73bfb8;  // Teal for trust sources
 .node-bg-failing { background-color: $node-failing; color: white; }
 .node-bg-selected { background-color: $node-selected; color: #333; }
 
+// Seeded Trust Background Colors
+.node-bg-seed { background-color: $node-seed; color: white; }
+.node-bg-direct-trust { background-color: $node-direct-trust; color: white; }
+.node-bg-second-degree { background-color: $node-second-degree; color: white; }
+.node-bg-distant { background-color: $node-distant; color: white; }
+.node-bg-unreachable { background-color: $node-unreachable; color: #333; }
+
 // Node Border Color Classes
 .node-border-active { border-color: $node-active; }
 .node-border-inactive { border-color: $node-inactive; }
 .node-border-failing { border-color: $node-failing; }
 .node-border-selected { border-color: $node-selected; }
+
+// Seeded Trust Border Colors
+.node-border-seed { border-color: $node-seed; }
+.node-border-direct-trust { border-color: $node-direct-trust; }
+.node-border-second-degree { border-color: $node-second-degree; }
+.node-border-distant { border-color: $node-distant; }
+.node-border-unreachable { border-color: $node-unreachable; }
 
 // Trust Score Progress Bars
 .trust-progress {
@@ -83,6 +162,11 @@ $node-trust-source: #73bfb8;  // Teal for trust sources
     &.node-active { background-color: $node-active; }
     &.node-inactive { background-color: $node-inactive; }
     &.node-failing { background-color: $node-failing; }
+    &.node-seed { background-color: $node-seed; }
+    &.node-direct-trust { background-color: $node-direct-trust; }
+    &.node-second-degree { background-color: $node-second-degree; }
+    &.node-distant { background-color: $node-distant; }
+    &.node-unreachable { background-color: $node-unreachable; }
   }
 }
 
@@ -148,6 +232,11 @@ $node-trust-source: #73bfb8;  // Teal for trust sources
     &.node-active { background-color: $node-active; }
     &.node-inactive { background-color: $node-inactive; }
     &.node-failing { background-color: $node-failing; }
+    &.node-seed { background-color: $node-seed; }
+    &.node-direct-trust { background-color: $node-direct-trust; }
+    &.node-second-degree { background-color: $node-second-degree; }
+    &.node-distant { background-color: $node-distant; }
+    &.node-unreachable { background-color: $node-unreachable; }
   }
   
   .trust-level-text {
@@ -333,42 +422,6 @@ $node-trust-source: #73bfb8;  // Teal for trust sources
   }
 }
 
-// Dark Mode Support
-@media (prefers-color-scheme: dark) {
-  .trust-filter-controls {
-    background-color: #2d3748;
-    border-color: #4a5568;
-    color: #e2e8f0;
-  }
-  
-  .trust-analysis-widget {
-    .trust-metric {
-      border-color: #4a5568;
-      
-      .metric-label,
-      .metric-value {
-        color: #e2e8f0;
-      }
-    }
-    
-    .top-nodes-list .top-node-item {
-      background-color: #2d3748;
-      
-      &:hover {
-        background-color: #4a5568;
-      }
-      
-      .node-name,
-      .node-trust-score {
-        color: #e2e8f0;
-      }
-    }
-  }
-  
-  .trust-progress {
-    background-color: #2d3748;
-  }
-}
 
 // Animation Classes
 .trust-pulse {
@@ -396,6 +449,39 @@ $node-trust-source: #73bfb8;  // Teal for trust sources
   }
   100% {
     box-shadow: 0 0 20px rgba(25, 151, 198, 0.8);
+  }
+}
+
+// Trust flow animation for seeded view
+.trust-flow-animation {
+  stroke: $node-seed;
+  stroke-width: 2px;
+  stroke-opacity: 0.8;
+  animation: trust-flow 2s linear infinite;
+}
+
+@keyframes trust-flow {
+  0% { 
+    stroke-dasharray: 5 5; 
+    stroke-dashoffset: 0; 
+  }
+  100% { 
+    stroke-dasharray: 5 5; 
+    stroke-dashoffset: 10; 
+  }
+}
+
+// Seeded trust glow animation
+.seeded-trust-glow {
+  animation: seeded-trust-glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes seeded-trust-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(255, 107, 53, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.8);
   }
 }
 

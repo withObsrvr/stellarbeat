@@ -199,6 +199,7 @@ import {
 } from "vue";
 import { useTruncate } from "@/composables/useTruncate";
 import { TrustStyleCalculator } from "@/utils/TrustStyleCalculator";
+import { useTrustStore } from "@/store/TrustStore";
 
 const props = defineProps({
   centerVertex: {
@@ -338,7 +339,8 @@ function getVertexTextClass(vertex: ViewVertex) {
 }
 
 function getVertexClassObject(vertex: ViewVertex) {
-  const nodeColorClass = TrustStyleCalculator.getTrustColorClass(vertex);
+  const trustStore = useTrustStore();
+  const nodeColorClass = TrustStyleCalculator.getTrustColorClass(vertex, trustStore);
   
   return {
     active: !vertex.isFailing,
@@ -352,12 +354,16 @@ function getVertexClassObject(vertex: ViewVertex) {
     transitive: vertex.isPartOfTransitiveQuorumSet,
     // Node color classes
     [nodeColorClass]: true,
+    // Special seeded view classes
+    'seed-node': trustStore.isSeededViewActive && trustStore.isSeedNode(vertex.key),
+    'trust-flow': trustStore.isSeededViewActive && trustStore.hasDirectTrustFromSeeds(vertex.key),
   };
 }
 
 function getVertexRadius(vertex: ViewVertex): number {
+  const trustStore = useTrustStore();
   const baseRadius = 5;
-  return TrustStyleCalculator.calculateNodeRadius(vertex.trustCentralityScore, baseRadius);
+  return TrustStyleCalculator.getNodeRadius(vertex, trustStore, baseRadius);
 }
 
 function getVertexStyle(vertex: ViewVertex): Record<string, string> {
@@ -365,8 +371,11 @@ function getVertexStyle(vertex: ViewVertex): Record<string, string> {
     return {}; // Keep failing nodes with default red color
   }
   
+  const trustStore = useTrustStore();
+  const isSeeded = trustStore.isSeededViewActive;
+  
   return {
-    fill: TrustStyleCalculator.getTrustProgressColor(vertex.trustCentralityScore),
+    fill: TrustStyleCalculator.getTrustProgressColor(vertex.trustCentralityScore, isSeeded),
   };
 }
 
@@ -709,6 +718,70 @@ circle.node-trust-source {
   stroke: #73bfb8 !important;
   stroke-opacity: 1;
   stroke-width: 2px;
+}
+
+// Seeded trust circle styles
+circle.node-seed {
+  fill: #ff6b35 !important;
+  stroke: #fff;
+  stroke-width: 2px;
+}
+
+circle.node-direct-trust {
+  fill: #f7931e !important;
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+circle.node-second-degree {
+  fill: #1687b2 !important;
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+circle.node-distant {
+  fill: #64748b !important;
+  stroke: #fff;
+  stroke-width: 1px;
+}
+
+circle.node-unreachable {
+  fill: #9ca3af !important;
+  stroke: #fff;
+  stroke-width: 1px;
+  opacity: 0.7;
+}
+
+// Special effects for seeded view
+circle.seed-node {
+  animation: seeded-trust-glow 3s ease-in-out infinite alternate;
+}
+
+circle.trust-flow {
+  stroke: #ff6b35;
+  stroke-width: 2px;
+  stroke-opacity: 0.8;
+  animation: trust-flow 2s linear infinite;
+}
+
+@keyframes seeded-trust-glow {
+  0% {
+    filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.5));
+  }
+  100% {
+    filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.8));
+  }
+}
+
+@keyframes trust-flow {
+  0% { 
+    stroke-dasharray: 5 5; 
+    stroke-dashoffset: 0; 
+  }
+  100% { 
+    stroke-dasharray: 5 5; 
+    stroke-dashoffset: 10; 
+  }
 }
 
 // Ensure failing nodes override trust colors
