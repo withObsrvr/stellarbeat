@@ -78,6 +78,19 @@ const validators = computed(() => {
   return network.nodes
     .filter((node) => node.isValidator || store.includeAllNodes)
     .map((node) => {
+      // Calculate incoming trust count
+      const trustingNodes = network.getTrustingNodes(node);
+      const incomingTrustCount = trustingNodes.length;
+      
+      // Calculate organizational diversity
+      const trustingOrganizations = new Set<string>();
+      trustingNodes.forEach(trustingNode => {
+        if (trustingNode.organizationId) {
+          trustingOrganizations.add(trustingNode.organizationId);
+        }
+      });
+      const organizationalDiversity = trustingOrganizations.size;
+
       const mappedNode: TableNode = {
         name: node.displayName,
         index: node.index,
@@ -89,8 +102,8 @@ const validators = computed(() => {
         pageRankScore: node.pageRankScore,
         trustRank: node.trustRank,
         lastTrustCalculation: node.lastTrustCalculation || undefined,
-        organizationalDiversity: 0, // TODO: Calculate organizational diversity
-        incomingTrustCount: 0, // TODO: Calculate incoming trust count
+        organizationalDiversity,
+        incomingTrustCount,
       };
       return mappedNode;
     });

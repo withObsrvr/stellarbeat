@@ -181,6 +181,19 @@ const nodes: ComputedRef<TableNode[]> = computed(() => {
     .filter((node) => node.active || optionShowInactive.value)
     .filter((node) => node.isValidator || optionShowAllConnectableNodes.value)
     .map((node) => {
+      // Calculate incoming trust count
+      const trustingNodes = store.network.getTrustingNodes(node);
+      const incomingTrustCount = trustingNodes.length;
+      
+      // Calculate organizational diversity
+      const trustingOrganizations = new Set<string>();
+      trustingNodes.forEach(trustingNode => {
+        if (trustingNode.organizationId) {
+          trustingOrganizations.add(trustingNode.organizationId);
+        }
+      });
+      const organizationalDiversity = trustingOrganizations.size;
+
       const mappedNode: TableNode = {
         name: node.displayName,
         type: getNodeType(node),
@@ -216,8 +229,8 @@ const nodes: ComputedRef<TableNode[]> = computed(() => {
         pageRankScore: node.pageRankScore,
         trustRank: node.trustRank,
         lastTrustCalculation: node.lastTrustCalculation || undefined,
-        organizationalDiversity: 0, // TODO: Calculate organizational diversity
-        incomingTrustCount: 0, // TODO: Calculate incoming trust count
+        organizationalDiversity,
+        incomingTrustCount,
       };
       return mappedNode;
     });

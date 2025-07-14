@@ -232,9 +232,16 @@ function enhanceViewVerticesWithTrustData(viewGraph: ViewGraph, nodes: Node[]) {
       viewVertex.trustCentralityScore = node.trustCentralityScore || 0;
       viewVertex.pageRankScore = node.pageRankScore || 0;
       viewVertex.trustRank = node.trustRank || 0;
-      // Note: organizationalDiversity would need to be calculated separately
-      // For now, we'll use a basic calculation based on the node's trust connections
-      viewVertex.organizationalDiversity = 0; // TODO: Calculate organizational diversity
+      
+      // Calculate organizational diversity for this node
+      const trustingNodes = store.network.getTrustingNodes(node);
+      const trustingOrganizations = new Set<string>();
+      trustingNodes.forEach(trustingNode => {
+        if (trustingNode.organizationId) {
+          trustingOrganizations.add(trustingNode.organizationId);
+        }
+      });
+      viewVertex.organizationalDiversity = trustingOrganizations.size;
     }
   });
 }

@@ -34,6 +34,19 @@ const validators: ComputedRef<TableNode[]> = computed(() => {
   return props.organization.validators
     .map((publicKey) => store.network.getNodeByPublicKey(publicKey))
     .map((validator) => {
+      // Calculate incoming trust count for this validator
+      const trustingNodes = store.network.getTrustingNodes(validator);
+      const incomingTrustCount = trustingNodes.length;
+      
+      // Calculate organizational diversity for this validator
+      const trustingOrganizations = new Set<string>();
+      trustingNodes.forEach(trustingNode => {
+        if (trustingNode.organizationId) {
+          trustingOrganizations.add(trustingNode.organizationId);
+        }
+      });
+      const organizationalDiversity = trustingOrganizations.size;
+
       const mappedNode: TableNode = {
         isFullValidator: validator.isFullValidator,
         name: validator.displayName,
@@ -55,8 +68,8 @@ const validators: ComputedRef<TableNode[]> = computed(() => {
         pageRankScore: validator.pageRankScore,
         trustRank: validator.trustRank,
         lastTrustCalculation: validator.lastTrustCalculation || undefined,
-        organizationalDiversity: 0, // TODO: Calculate organizational diversity
-        incomingTrustCount: 0, // TODO: Calculate incoming trust count
+        organizationalDiversity,
+        incomingTrustCount,
       };
       return mappedNode;
     });
