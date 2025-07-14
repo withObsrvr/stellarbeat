@@ -162,8 +162,13 @@ export class SeededTrustRankCalculator {
 
 		// Domain pattern matching
 		if (organizationConfig.autoDiscovery.domainPattern) {
+			// Escape regex special characters except for wildcard '*', then convert '*' to '.*'
+			const escapedPattern = organizationConfig.autoDiscovery.domainPattern
+				.replace(/[.+?^${}()|[\]\\]/g, '\\$&')  // Escape regex special characters
+				.replace(/\*/g, '.*');                    // Convert wildcards to regex equivalents
+			
 			const pattern = new RegExp(
-				organizationConfig.autoDiscovery.domainPattern.replace('*', '.*'),
+				`^${escapedPattern}$`,  // Anchor to match full string
 				'i'
 			);
 
