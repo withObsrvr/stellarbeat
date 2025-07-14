@@ -52,9 +52,9 @@ export interface NodeV1 {
 	connectivityError: boolean;
 	stellarCoreVersionBehind: boolean;
 	lag: number | null;
-	trustCentralityScore: number;
-	pageRankScore: number;
-	trustRank: number;
+	trustCentralityScore: number | string;
+	pageRankScore: number | string;
+	trustRank: number | string;
 	lastTrustCalculation: string | null;
 }
 

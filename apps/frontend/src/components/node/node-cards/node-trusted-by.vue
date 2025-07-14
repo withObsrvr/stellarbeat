@@ -26,8 +26,10 @@ const network = store.network;
 const fields = computed(() => {
   const fields = [{ key: "name", label: "Node", sortable: true }];
 
-  if (!store.isSimulation)
+  if (!store.isSimulation) {
     fields.push({ key: "index", label: "index", sortable: true });
+    fields.push({ key: "trustScore", label: "Trust", sortable: true });
+  }
 
   fields.push({
     key: "action",
@@ -41,12 +43,32 @@ const fields = computed(() => {
 
 const nodes = computed(() => {
   return network.getTrustingNodes(props.node).map((validator) => {
+    // Calculate incoming trust count for this validator
+    const trustingNodes = network.getTrustingNodes(validator);
+    const incomingTrustCount = trustingNodes.length;
+    
+    // Calculate organizational diversity for this validator
+    const trustingOrganizations = new Set<string>();
+    trustingNodes.forEach(trustingNode => {
+      if (trustingNode.organizationId) {
+        trustingOrganizations.add(trustingNode.organizationId);
+      }
+    });
+    const organizationalDiversity = trustingOrganizations.size;
+
     const mappedNode: TableNode = {
       isFullValidator: validator.isFullValidator,
       name: validator.displayName,
       publicKey: validator.publicKey,
       index: validator.index,
       validating: validator.isValidating,
+      // Trust metrics
+      trustCentralityScore: validator.trustCentralityScore,
+      pageRankScore: validator.pageRankScore,
+      trustRank: validator.trustRank,
+      lastTrustCalculation: validator.lastTrustCalculation || undefined,
+      organizationalDiversity,
+      incomingTrustCount,
     };
     return mappedNode;
   });

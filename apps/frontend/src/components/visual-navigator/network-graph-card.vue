@@ -213,6 +213,37 @@ function buildNodeViewGraph(allNodes: Node[], merge: boolean) {
         .map((node) => node.publicKey),
     ),
   );
+  
+  // Enhance ViewVertex objects with trust data from original Node objects
+  enhanceViewVerticesWithTrustData(viewGraph.value, nodes);
+}
+
+function enhanceViewVerticesWithTrustData(viewGraph: ViewGraph, nodes: Node[]) {
+  // Create a map for quick lookup of nodes by public key
+  const nodeMap = new Map<string, Node>();
+  nodes.forEach(node => {
+    nodeMap.set(node.publicKey, node);
+  });
+  
+  // Enhance each ViewVertex with trust data from corresponding Node
+  viewGraph.viewVertices.forEach(viewVertex => {
+    const node = nodeMap.get(viewVertex.key);
+    if (node) {
+      viewVertex.trustCentralityScore = node.trustCentralityScore || 0;
+      viewVertex.pageRankScore = node.pageRankScore || 0;
+      viewVertex.trustRank = node.trustRank || 0;
+      
+      // Calculate organizational diversity for this node
+      const trustingNodes = store.network.getTrustingNodes(node);
+      const trustingOrganizations = new Set<string>();
+      trustingNodes.forEach(trustingNode => {
+        if (trustingNode.organizationId) {
+          trustingOrganizations.add(trustingNode.organizationId);
+        }
+      });
+      viewVertex.organizationalDiversity = trustingOrganizations.size;
+    }
+  });
 }
 
 function buildOrganizationViewGraph(allNodes: Node[], merge: boolean) {
@@ -253,6 +284,44 @@ function buildOrganizationViewGraph(allNodes: Node[], merge: boolean) {
         .map((organization) => organization.id),
     ),
   );
+  
+  // Enhance ViewVertex objects with trust data from organization nodes
+  enhanceOrganizationViewVerticesWithTrustData(viewGraph.value, organizations, allNodes);
+}
+
+function enhanceOrganizationViewVerticesWithTrustData(viewGraph: ViewGraph, organizations: Organization[], allNodes: Node[]) {
+  // Create a map for quick lookup of organizations by ID
+  const orgMap = new Map<string, Organization>();
+  organizations.forEach(org => {
+    orgMap.set(org.id, org);
+  });
+  
+  // Create a map for nodes by public key
+  const nodeMap = new Map<string, Node>();
+  allNodes.forEach(node => {
+    nodeMap.set(node.publicKey, node);
+  });
+  
+  // Enhance each ViewVertex with aggregated trust data from organization's nodes
+  viewGraph.viewVertices.forEach(viewVertex => {
+    const organization = orgMap.get(viewVertex.key);
+    if (organization) {
+      // Calculate aggregate trust metrics for organization
+      const orgNodes = organization.validators
+        .map(publicKey => nodeMap.get(publicKey))
+        .filter(node => node !== undefined) as Node[];
+      
+      if (orgNodes.length > 0) {
+        // Use the highest trust score in the organization
+        viewVertex.trustCentralityScore = Math.max(...orgNodes.map(node => node.trustCentralityScore || 0));
+        viewVertex.pageRankScore = Math.max(...orgNodes.map(node => node.pageRankScore || 0));
+        // Use the best trust rank (lowest number) in the organization
+        const trustRanks = orgNodes.map(node => node.trustRank || 999999).filter(rank => rank < 999999);
+        viewVertex.trustRank = trustRanks.length > 0 ? Math.min(...trustRanks) : 0;
+        viewVertex.organizationalDiversity = orgNodes.length; // Use validator count as diversity metric
+      }
+    }
+  });
 }
 
 const graph = ref(null);

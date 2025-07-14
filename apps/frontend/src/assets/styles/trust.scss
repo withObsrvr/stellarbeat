@@ -1,0 +1,527 @@
+// Trust Visualization CSS Classes
+// Phase 2 Implementation - Global trust styling
+
+// Original Node Color Variables
+$node-active: #1687b2;        // Original $blue
+$node-inactive: #f8f9fa;      // Original $gray-100  
+$node-failing: #cd201f;       // Original $red
+$node-selected: #f1c40f;      // Original $yellow
+$white: #fff;
+
+// Interaction state colors
+$node-trust-target: #fec601;  // Golden yellow for trust targets
+$node-trust-source: #73bfb8;  // Teal for trust sources
+
+// Seeded Trust Color Variables
+$node-seed: #ff6b35;           // Orange for seed nodes
+$node-direct-trust: #f7931e;   // Gold for directly trusted
+$node-second-degree: #1687b2;  // Blue for second degree
+$node-distant: #64748b;        // Gray for distant nodes
+$node-unreachable: #9ca3af;    // Light gray for unreachable
+
+// Node Color Classes
+.node-active {
+  fill: $node-active;
+  stroke: $white;
+  stroke-width: 1.5px;
+}
+
+.node-inactive {
+  fill: $node-inactive;
+  stroke: $white;  
+  stroke-width: 1.5px;
+}
+
+.node-failing {
+  fill: $node-failing;
+  stroke: $white;
+  stroke-width: 1.5px;
+}
+
+.node-selected {
+  stroke: $node-selected;
+  stroke-width: 3px;
+  stroke-opacity: 0.6;
+}
+
+// Interaction states
+.node-trust-target {
+  stroke: $node-trust-target;
+  stroke-opacity: 1;
+  stroke-width: 2px;
+}
+
+.node-trust-source {
+  stroke: $node-trust-source;
+  stroke-opacity: 1;
+  stroke-width: 2px;
+}
+
+// Seeded Trust Node Color Classes
+.node-seed {
+  fill: $node-seed;
+  stroke: $white;
+  stroke-width: 2px; // Thicker stroke for seeds
+}
+
+.node-direct-trust {
+  fill: $node-direct-trust;
+  stroke: $white;
+  stroke-width: 1.5px;
+}
+
+.node-second-degree {
+  fill: $node-second-degree;
+  stroke: $white;
+  stroke-width: 1.5px;
+}
+
+.node-distant {
+  fill: $node-distant;
+  stroke: $white;
+  stroke-width: 1px;
+}
+
+.node-unreachable {
+  fill: $node-unreachable;
+  stroke: $white;
+  stroke-width: 1px;
+  opacity: 0.7;
+}
+
+// Seeded trust level classes for high/medium/low scores
+.node-high-seeded-trust {
+  fill: #ff6b35; // Orange for high seeded trust
+  stroke: $white;
+  stroke-width: 1.5px;
+}
+
+.node-medium-seeded-trust {
+  fill: #f7931e; // Gold for medium seeded trust
+  stroke: $white;
+  stroke-width: 1.5px;
+}
+
+.node-low-seeded-trust {
+  fill: #64748b; // Gray for low seeded trust
+  stroke: $white;
+  stroke-width: 1px;
+}
+
+// Node Text Color Classes
+.node-text-active { color: $node-active; }
+.node-text-inactive { color: $node-inactive; }
+.node-text-failing { color: $node-failing; }
+.node-text-selected { color: $node-selected; }
+
+// Seeded Trust Text Colors
+.node-text-seed { color: $node-seed; }
+.node-text-direct-trust { color: $node-direct-trust; }
+.node-text-second-degree { color: $node-second-degree; }
+.node-text-distant { color: $node-distant; }
+.node-text-unreachable { color: $node-unreachable; }
+
+// Node Background Color Classes
+.node-bg-active { background-color: $node-active; color: white; }
+.node-bg-inactive { background-color: $node-inactive; color: #333; }
+.node-bg-failing { background-color: $node-failing; color: white; }
+.node-bg-selected { background-color: $node-selected; color: #333; }
+
+// Seeded Trust Background Colors
+.node-bg-seed { background-color: $node-seed; color: white; }
+.node-bg-direct-trust { background-color: $node-direct-trust; color: white; }
+.node-bg-second-degree { background-color: $node-second-degree; color: white; }
+.node-bg-distant { background-color: $node-distant; color: white; }
+.node-bg-unreachable { background-color: $node-unreachable; color: #333; }
+
+// Node Border Color Classes
+.node-border-active { border-color: $node-active; }
+.node-border-inactive { border-color: $node-inactive; }
+.node-border-failing { border-color: $node-failing; }
+.node-border-selected { border-color: $node-selected; }
+
+// Seeded Trust Border Colors
+.node-border-seed { border-color: $node-seed; }
+.node-border-direct-trust { border-color: $node-direct-trust; }
+.node-border-second-degree { border-color: $node-second-degree; }
+.node-border-distant { border-color: $node-distant; }
+.node-border-unreachable { border-color: $node-unreachable; }
+
+// Trust Score Progress Bars
+.trust-progress {
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  
+  .trust-progress-bar {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 4px;
+    
+    &.node-active { background-color: $node-active; }
+    &.node-inactive { background-color: $node-inactive; }
+    &.node-failing { background-color: $node-failing; }
+    &.node-seed { background-color: $node-seed; }
+    &.node-direct-trust { background-color: $node-direct-trust; }
+    &.node-second-degree { background-color: $node-second-degree; }
+    &.node-distant { background-color: $node-distant; }
+    &.node-unreachable { background-color: $node-unreachable; }
+  }
+}
+
+// Trust Badges
+.trust-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  font-weight: 500;
+  
+  &.trust-badge-gold {
+    background-color: #ffd700;
+    color: #000;
+    border: 1px solid #ffc107;
+  }
+  
+  &.trust-badge-silver {
+    background-color: #c0c0c0;
+    color: #000;
+    border: 1px solid #6c757d;
+  }
+  
+  &.trust-badge-warning {
+    background-color: #dc3545;
+    color: #fff;
+    border: 1px solid #dc3545;
+  }
+  
+  &.trust-badge-caution {
+    background-color: #ffc107;
+    color: #000;
+    border: 1px solid #ffc107;
+  }
+  
+  &.trust-badge-diversity {
+    background-color: #17a2b8;
+    color: #fff;
+    border: 1px solid #17a2b8;
+  }
+  
+  // Hover effects
+  &:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+  }
+}
+
+// Trust Level Indicators
+.trust-level-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  .trust-level-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    
+    &.node-active { background-color: $node-active; }
+    &.node-inactive { background-color: $node-inactive; }
+    &.node-failing { background-color: $node-failing; }
+    &.node-seed { background-color: $node-seed; }
+    &.node-direct-trust { background-color: $node-direct-trust; }
+    &.node-second-degree { background-color: $node-second-degree; }
+    &.node-distant { background-color: $node-distant; }
+    &.node-unreachable { background-color: $node-unreachable; }
+  }
+  
+  .trust-level-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+}
+
+// Trust Filter Components
+.trust-filter-controls {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+  
+  .filter-group {
+    margin-bottom: 1rem;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    label {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      display: block;
+    }
+    
+    .filter-input {
+      width: 100%;
+    }
+  }
+  
+  .trust-range-slider {
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #6c757d;
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+// Trust Analysis Widgets
+.trust-analysis-widget {
+  .trust-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    .metric-label {
+      font-weight: 500;
+      color: #495057;
+    }
+    
+    .metric-value {
+      font-weight: 600;
+      color: #212529;
+    }
+  }
+  
+  .trust-distribution-chart {
+    height: 200px;
+    margin: 1rem 0;
+  }
+  
+  .top-nodes-list {
+    .top-node-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      margin-bottom: 0.25rem;
+      background-color: #f8f9fa;
+      
+      &:hover {
+        background-color: #e9ecef;
+      }
+      
+      .node-name {
+        font-weight: 500;
+        color: #495057;
+      }
+      
+      .node-trust-score {
+        font-weight: 600;
+        color: #212529;
+      }
+    }
+  }
+}
+
+// Trust Warnings and Alerts
+.trust-warning-alert {
+  border-left: 4px solid $trust-warning;
+  padding: 0.75rem;
+  background-color: rgba($trust-warning, 0.1);
+  border-radius: 0.25rem;
+  
+  .warning-icon {
+    color: $trust-warning;
+    margin-right: 0.5rem;
+  }
+  
+  .warning-text {
+    font-weight: 500;
+    color: #856404;
+  }
+}
+
+.trust-error-alert {
+  border-left: 4px solid #dc3545;
+  padding: 0.75rem;
+  background-color: rgba(#dc3545, 0.1);
+  border-radius: 0.25rem;
+  
+  .error-icon {
+    color: #dc3545;
+    margin-right: 0.5rem;
+  }
+  
+  .error-text {
+    font-weight: 500;
+    color: #721c24;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .trust-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.3rem;
+  }
+  
+  .trust-filter-controls {
+    padding: 0.75rem;
+  }
+  
+  .trust-level-indicator {
+    .trust-level-circle {
+      width: 10px;
+      height: 10px;
+    }
+    
+    .trust-level-text {
+      font-size: 0.75rem;
+    }
+  }
+  
+  .trust-analysis-widget {
+    .trust-metric {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+  }
+}
+
+// High Contrast Mode
+@media (prefers-contrast: high) {
+  .trust-progress {
+    border: 1px solid #000;
+    
+    .trust-progress-bar {
+      border: 1px solid #000;
+    }
+  }
+  
+  .trust-badge {
+    border-width: 2px;
+  }
+  
+  .trust-level-indicator .trust-level-circle {
+    border: 2px solid #000;
+  }
+}
+
+
+// Animation Classes
+.trust-pulse {
+  animation: trust-pulse 2s ease-in-out infinite alternate;
+}
+
+.trust-glow {
+  animation: trust-glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes trust-pulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes trust-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(25, 151, 198, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(25, 151, 198, 0.8);
+  }
+}
+
+// Trust flow animation for seeded view
+.trust-flow-animation {
+  stroke: $node-seed;
+  stroke-width: 2px;
+  stroke-opacity: 0.8;
+  animation: trust-flow 2s linear infinite;
+}
+
+@keyframes trust-flow {
+  0% { 
+    stroke-dasharray: 5 5; 
+    stroke-dashoffset: 0; 
+  }
+  100% { 
+    stroke-dasharray: 5 5; 
+    stroke-dashoffset: 10; 
+  }
+}
+
+// Seeded trust glow animation
+.seeded-trust-glow {
+  animation: seeded-trust-glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes seeded-trust-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(255, 107, 53, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.8);
+  }
+}
+
+// Utility Classes
+.trust-clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.trust-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.trust-loading {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+    animation: trust-shimmer 1.5s infinite;
+  }
+}
+
+@keyframes trust-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

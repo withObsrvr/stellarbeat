@@ -152,6 +152,15 @@ if (!store.isSimulation) {
   if (store.networkContext.enableIndex) {
     fieldsBase.push({ key: "index", label: "index", sortable: true });
   }
+
+  // Add trust visualization columns
+  fieldsBase.push({ key: "trustScore", label: "Trust Score", sortable: true });
+  fieldsBase.push({ key: "trustRank", label: "Trust Rank", sortable: true });
+  
+  // Add seeded trust columns (will be shown/hidden based on view mode)
+  fieldsBase.push({ key: "seededTrustScore", label: "Seeded Trust Score", sortable: true });
+  fieldsBase.push({ key: "seededTrustRank", label: "Seeded Rank", sortable: true });
+  fieldsBase.push({ key: "distanceFromSeeds", label: "Distance from Seeds", sortable: true });
 }
 
 const fields = computed(() => {
@@ -172,6 +181,19 @@ const nodes: ComputedRef<TableNode[]> = computed(() => {
     .filter((node) => node.active || optionShowInactive.value)
     .filter((node) => node.isValidator || optionShowAllConnectableNodes.value)
     .map((node) => {
+      // Calculate incoming trust count
+      const trustingNodes = store.network.getTrustingNodes(node);
+      const incomingTrustCount = trustingNodes.length;
+      
+      // Calculate organizational diversity
+      const trustingOrganizations = new Set<string>();
+      trustingNodes.forEach(trustingNode => {
+        if (trustingNode.organizationId) {
+          trustingOrganizations.add(trustingNode.organizationId);
+        }
+      });
+      const organizationalDiversity = trustingOrganizations.size;
+
       const mappedNode: TableNode = {
         name: node.displayName,
         type: getNodeType(node),
@@ -202,6 +224,13 @@ const nodes: ComputedRef<TableNode[]> = computed(() => {
         validating: node.isValidating,
         organization: getOrganization(node),
         organizationId: node.organizationId || undefined,
+        // Trust metrics
+        trustCentralityScore: node.trustCentralityScore,
+        pageRankScore: node.pageRankScore,
+        trustRank: node.trustRank,
+        lastTrustCalculation: node.lastTrustCalculation || undefined,
+        organizationalDiversity,
+        incomingTrustCount,
       };
       return mappedNode;
     });

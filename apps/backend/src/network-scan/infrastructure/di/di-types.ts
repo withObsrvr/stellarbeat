@@ -25,5 +25,9 @@ export const NETWORK_TYPES = {
 	NetworkConfig: Symbol('NetworkConfig'),
 	networkId: Symbol('networkId'),
 	networkName: Symbol('networkName'),
-	NodeOrganizationMappingService: Symbol('NodeOrganizationMappingService')
+	NodeOrganizationMappingService: Symbol('NodeOrganizationMappingService'),
+	PageRankAlgorithm: Symbol('PageRankAlgorithm'),
+	SeededTrustRankCalculator: Symbol('SeededTrustRankCalculator'),
+	TrustConfigService: Symbol('TrustConfigService'),
+	NetworkService: Symbol('NetworkService')
 };

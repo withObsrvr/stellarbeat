@@ -13,7 +13,9 @@ describe('TrustRankCalculator', () => {
 		mockPageRankAlgorithm = {
 			calculatePageRank: jest.fn(),
 			normalizeScores: jest.fn(),
-			createRankings: jest.fn()
+			createRankings: jest.fn(),
+			calculateSeededPageRank: jest.fn(),
+			calculateDistanceFromSeeds: jest.fn()
 		} as jest.Mocked<PageRankAlgorithm>;
 		(trustRankCalculator as any).pageRankAlgorithm = mockPageRankAlgorithm;
 	});
