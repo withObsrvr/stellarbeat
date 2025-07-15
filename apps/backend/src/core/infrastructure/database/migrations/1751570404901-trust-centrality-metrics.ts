@@ -4,106 +4,125 @@ export class TrustCentralityMetrics1751570404901 implements MigrationInterface {
 	name = 'TrustCentralityMetrics1751570404901';
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
-		// Add trust metric columns to node_snap_shot table
-		await queryRunner.query(
-			`ALTER TABLE "node_snap_shot" ADD "trustCentralityScore" decimal(10,8) DEFAULT 0`
+		// First check if columns exist, if not add them without indexes
+		const nodeSnapShotColumns = await queryRunner.query(
+			`SELECT column_name FROM information_schema.columns 
+			WHERE table_name = 'node_snap_shot' 
+			AND column_name IN ('trustCentralityScore', 'pageRankScore', 'trustRank', 'lastTrustCalculation')`
 		);
-		await queryRunner.query(
-			`ALTER TABLE "node_snap_shot" ADD "pageRankScore" decimal(10,8) DEFAULT 0`
-		);
-		await queryRunner.query(
-			`ALTER TABLE "node_snap_shot" ADD "trustRank" integer DEFAULT 0`
-		);
-		await queryRunner.query(
-			`ALTER TABLE "node_snap_shot" ADD "lastTrustCalculation" timestamptz`
-		);
+		
+		const existingColumns = nodeSnapShotColumns.map((row: any) => row.column_name);
+		
+		// Add missing columns to node_snap_shot
+		if (!existingColumns.includes('trustCentralityScore')) {
+			await queryRunner.query(
+				`ALTER TABLE "node_snap_shot" ADD "trustCentralityScore" decimal(12,8) DEFAULT 0`
+			);
+		}
+		if (!existingColumns.includes('pageRankScore')) {
+			await queryRunner.query(
+				`ALTER TABLE "node_snap_shot" ADD "pageRankScore" decimal(12,8) DEFAULT 0`
+			);
+		}
+		if (!existingColumns.includes('trustRank')) {
+			await queryRunner.query(
+				`ALTER TABLE "node_snap_shot" ADD "trustRank" integer DEFAULT 0`
+			);
+		}
+		if (!existingColumns.includes('lastTrustCalculation')) {
+			await queryRunner.query(
+				`ALTER TABLE "node_snap_shot" ADD "lastTrustCalculation" timestamptz`
+			);
+		}
 
-		// Add trust metric columns to node_measurement_v2 table
-		await queryRunner.query(
-			`ALTER TABLE "node_measurement_v2" ADD "trustCentralityScore" decimal(10,8) DEFAULT 0`
+		// Check columns for node_measurement_v2
+		const nodeMeasurementColumns = await queryRunner.query(
+			`SELECT column_name FROM information_schema.columns 
+			WHERE table_name = 'node_measurement_v2' 
+			AND column_name IN ('trustCentralityScore', 'pageRankScore', 'trustRank', 'lastTrustCalculation')`
 		);
-		await queryRunner.query(
-			`ALTER TABLE "node_measurement_v2" ADD "pageRankScore" decimal(10,8) DEFAULT 0`
-		);
-		await queryRunner.query(
-			`ALTER TABLE "node_measurement_v2" ADD "trustRank" integer DEFAULT 0`
-		);
-		await queryRunner.query(
-			`ALTER TABLE "node_measurement_v2" ADD "lastTrustCalculation" timestamptz`
-		);
+		
+		const existingMeasurementColumns = nodeMeasurementColumns.map((row: any) => row.column_name);
+		
+		// Add missing columns to node_measurement_v2
+		if (!existingMeasurementColumns.includes('trustCentralityScore')) {
+			await queryRunner.query(
+				`ALTER TABLE "node_measurement_v2" ADD "trustCentralityScore" decimal(12,8) DEFAULT 0`
+			);
+		}
+		if (!existingMeasurementColumns.includes('pageRankScore')) {
+			await queryRunner.query(
+				`ALTER TABLE "node_measurement_v2" ADD "pageRankScore" decimal(12,8) DEFAULT 0`
+			);
+		}
+		if (!existingMeasurementColumns.includes('trustRank')) {
+			await queryRunner.query(
+				`ALTER TABLE "node_measurement_v2" ADD "trustRank" integer DEFAULT 0`
+			);
+		}
+		if (!existingMeasurementColumns.includes('lastTrustCalculation')) {
+			await queryRunner.query(
+				`ALTER TABLE "node_measurement_v2" ADD "lastTrustCalculation" timestamptz`
+			);
+		}
 
-		// Add indexes for performance on node_snap_shot
-		await queryRunner.query(
-			`CREATE INDEX "IDX_node_snap_shot_trust_centrality_score" ON "node_snap_shot" ("trustCentralityScore")`
-		);
-		await queryRunner.query(
-			`CREATE INDEX "IDX_node_snap_shot_page_rank_score" ON "node_snap_shot" ("pageRankScore")`
-		);
-		await queryRunner.query(
-			`CREATE INDEX "IDX_node_snap_shot_trust_rank" ON "node_snap_shot" ("trustRank")`
-		);
-
-		// Add indexes for performance on node_measurement_v2
-		await queryRunner.query(
-			`CREATE INDEX "IDX_node_measurement_v2_trust_centrality_score" ON "node_measurement_v2" ("trustCentralityScore")`
-		);
-		await queryRunner.query(
-			`CREATE INDEX "IDX_node_measurement_v2_page_rank_score" ON "node_measurement_v2" ("pageRankScore")`
-		);
-		await queryRunner.query(
-			`CREATE INDEX "IDX_node_measurement_v2_trust_rank" ON "node_measurement_v2" ("trustRank")`
-		);
+		// Create indexes CONCURRENTLY (non-blocking)
+		// Note: CONCURRENTLY cannot be used inside a transaction, so we need to handle this differently
+		console.log('Indexes will be created manually using CONCURRENTLY to avoid blocking');
+		console.log('Run these commands manually:');
+		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_snap_shot_trust_centrality_score" ON "node_snap_shot" ("trustCentralityScore");');
+		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_snap_shot_page_rank_score" ON "node_snap_shot" ("pageRankScore");');
+		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_snap_shot_trust_rank" ON "node_snap_shot" ("trustRank");');
+		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_measurement_v2_trust_centrality_score" ON "node_measurement_v2" ("trustCentralityScore");');
+		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_measurement_v2_page_rank_score" ON "node_measurement_v2" ("pageRankScore");');
+		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_measurement_v2_trust_rank" ON "node_measurement_v2" ("trustRank");');
 	}
 
 	public async down(queryRunner: QueryRunner): Promise<void> {
-		// Drop indexes from node_measurement_v2
+		// Drop indexes if they exist
 		await queryRunner.query(
-			`DROP INDEX "IDX_node_measurement_v2_trust_rank"`
+			`DROP INDEX IF EXISTS "IDX_node_measurement_v2_trust_rank"`
 		);
 		await queryRunner.query(
-			`DROP INDEX "IDX_node_measurement_v2_page_rank_score"`
+			`DROP INDEX IF EXISTS "IDX_node_measurement_v2_page_rank_score"`
 		);
 		await queryRunner.query(
-			`DROP INDEX "IDX_node_measurement_v2_trust_centrality_score"`
-		);
-
-		// Drop indexes from node_snap_shot
-		await queryRunner.query(
-			`DROP INDEX "IDX_node_snap_shot_trust_rank"`
+			`DROP INDEX IF EXISTS "IDX_node_measurement_v2_trust_centrality_score"`
 		);
 		await queryRunner.query(
-			`DROP INDEX "IDX_node_snap_shot_page_rank_score"`
+			`DROP INDEX IF EXISTS "IDX_node_snap_shot_trust_rank"`
 		);
 		await queryRunner.query(
-			`DROP INDEX "IDX_node_snap_shot_trust_centrality_score"`
+			`DROP INDEX IF EXISTS "IDX_node_snap_shot_page_rank_score"`
+		);
+		await queryRunner.query(
+			`DROP INDEX IF EXISTS "IDX_node_snap_shot_trust_centrality_score"`
 		);
 
-		// Drop columns from node_measurement_v2
+		// Drop columns
 		await queryRunner.query(
-			`ALTER TABLE "node_measurement_v2" DROP COLUMN "lastTrustCalculation"`
+			`ALTER TABLE "node_measurement_v2" DROP COLUMN IF EXISTS "lastTrustCalculation"`
 		);
 		await queryRunner.query(
-			`ALTER TABLE "node_measurement_v2" DROP COLUMN "trustRank"`
+			`ALTER TABLE "node_measurement_v2" DROP COLUMN IF EXISTS "trustRank"`
 		);
 		await queryRunner.query(
-			`ALTER TABLE "node_measurement_v2" DROP COLUMN "pageRankScore"`
+			`ALTER TABLE "node_measurement_v2" DROP COLUMN IF EXISTS "pageRankScore"`
 		);
 		await queryRunner.query(
-			`ALTER TABLE "node_measurement_v2" DROP COLUMN "trustCentralityScore"`
-		);
-
-		// Drop columns from node_snap_shot
-		await queryRunner.query(
-			`ALTER TABLE "node_snap_shot" DROP COLUMN "lastTrustCalculation"`
+			`ALTER TABLE "node_measurement_v2" DROP COLUMN IF EXISTS "trustCentralityScore"`
 		);
 		await queryRunner.query(
-			`ALTER TABLE "node_snap_shot" DROP COLUMN "trustRank"`
+			`ALTER TABLE "node_snap_shot" DROP COLUMN IF EXISTS "lastTrustCalculation"`
 		);
 		await queryRunner.query(
-			`ALTER TABLE "node_snap_shot" DROP COLUMN "pageRankScore"`
+			`ALTER TABLE "node_snap_shot" DROP COLUMN IF EXISTS "trustRank"`
 		);
 		await queryRunner.query(
-			`ALTER TABLE "node_snap_shot" DROP COLUMN "trustCentralityScore"`
+			`ALTER TABLE "node_snap_shot" DROP COLUMN IF EXISTS "pageRankScore"`
+		);
+		await queryRunner.query(
+			`ALTER TABLE "node_snap_shot" DROP COLUMN IF EXISTS "trustCentralityScore"`
 		);
 	}
 }
