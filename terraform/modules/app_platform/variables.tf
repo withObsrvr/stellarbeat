@@ -82,6 +82,18 @@ variable "database_production" {
   type        = bool
 }
 
+variable "database_size" {
+  description = "Database cluster size"
+  type        = string
+  default     = ""
+}
+
+variable "database_node_count" {
+  description = "Number of database nodes"
+  type        = number
+  default     = 1
+}
+
 variable "database_version_postgres" {
   description = "Postgres version"
   type        = string

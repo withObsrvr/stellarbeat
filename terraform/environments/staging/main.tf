@@ -34,6 +34,7 @@ module "app_platform" {
   users_instance_count           = 1
 
   database_production = false
+  database_size       = "db-s-2vcpu-4gb"
 
   feature_flags = {
     experimentalFeatures = false
