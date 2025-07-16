@@ -7,7 +7,8 @@ export class TrustCentralityMetrics1751570404901 implements MigrationInterface {
 		// First check if columns exist, if not add them without indexes
 		const nodeSnapShotColumns = await queryRunner.query(
 			`SELECT column_name FROM information_schema.columns 
-			WHERE table_name = 'node_snap_shot' 
+			WHERE table_schema = 'public' 
+			AND table_name = 'node_snap_shot' 
 			AND column_name IN ('trustCentralityScore', 'pageRankScore', 'trustRank', 'lastTrustCalculation')`
 		);
 		
@@ -38,7 +39,8 @@ export class TrustCentralityMetrics1751570404901 implements MigrationInterface {
 		// Check columns for node_measurement_v2
 		const nodeMeasurementColumns = await queryRunner.query(
 			`SELECT column_name FROM information_schema.columns 
-			WHERE table_name = 'node_measurement_v2' 
+			WHERE table_schema = 'public' 
+			AND table_name = 'node_measurement_v2' 
 			AND column_name IN ('trustCentralityScore', 'pageRankScore', 'trustRank', 'lastTrustCalculation')`
 		);
 		
@@ -67,15 +69,12 @@ export class TrustCentralityMetrics1751570404901 implements MigrationInterface {
 		}
 
 		// Create indexes CONCURRENTLY (non-blocking)
-		// Note: CONCURRENTLY cannot be used inside a transaction, so we need to handle this differently
-		console.log('Indexes will be created manually using CONCURRENTLY to avoid blocking');
-		console.log('Run these commands manually:');
-		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_snap_shot_trust_centrality_score" ON "node_snap_shot" ("trustCentralityScore");');
-		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_snap_shot_page_rank_score" ON "node_snap_shot" ("pageRankScore");');
-		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_snap_shot_trust_rank" ON "node_snap_shot" ("trustRank");');
-		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_measurement_v2_trust_centrality_score" ON "node_measurement_v2" ("trustCentralityScore");');
-		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_measurement_v2_page_rank_score" ON "node_measurement_v2" ("pageRankScore");');
-		console.log('CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_node_measurement_v2_trust_rank" ON "node_measurement_v2" ("trustRank");');
+		// Note: CONCURRENTLY cannot be used inside a transaction, so we defer index creation
+		console.log('\n🔥 IMPORTANT: Trust metric columns have been added successfully!');
+		console.log('📋 Next step: Create indexes manually to avoid blocking operations');
+		console.log('📁 Script location: scripts/create-trust-indexes-concurrent.sql');
+		console.log('⚡ Run this script manually when the system is stable');
+		console.log('📊 Monitor progress with: SELECT * FROM pg_stat_progress_create_index;\n');
 	}
 
 	public async down(queryRunner: QueryRunner): Promise<void> {
