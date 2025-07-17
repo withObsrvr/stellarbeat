@@ -68,13 +68,9 @@ export class TrustCentralityMetrics1751570404901 implements MigrationInterface {
 			);
 		}
 
-		// Create indexes CONCURRENTLY (non-blocking)
-		// Note: CONCURRENTLY cannot be used inside a transaction, so we defer index creation
-		console.log('\n🔥 IMPORTANT: Trust metric columns have been added successfully!');
-		console.log('📋 Next step: Create indexes manually to avoid blocking operations');
-		console.log('📁 Script location: scripts/create-trust-indexes-concurrent.sql');
-		console.log('⚡ Run this script manually when the system is stable');
-		console.log('📊 Monitor progress with: SELECT * FROM pg_stat_progress_create_index;\n');
+		// IMPORTANT: Indexes must be created manually using CONCURRENTLY to avoid blocking.
+		// See scripts/create-trust-indexes-concurrent.sql for the required index creation commands.
+		// Monitor progress with: SELECT * FROM pg_stat_progress_create_index;
 	}
 
 	public async down(queryRunner: QueryRunner): Promise<void> {
