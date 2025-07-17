@@ -11,10 +11,10 @@ resource "digitalocean_database_cluster" "radar_db" {
   name    = "${var.app_name}-db"
   engine  = "pg"
   version = var.database_version_postgres
-  # Use a larger database size for production
-  size       = var.database_production ? "db-s-2vcpu-4gb" : "db-s-1vcpu-1gb"
+  # Use database_size if provided, otherwise fall back to production flag logic
+  size       = var.database_size != null ? var.database_size : (var.database_production ? "db-s-2vcpu-4gb" : "db-s-1vcpu-1gb")
   region     = var.region
-  node_count = 1
+  node_count = var.database_node_count
 }
 
 # Add trusted sources (firewall rules) to restrict database access

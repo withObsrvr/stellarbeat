@@ -34,6 +34,7 @@ module "app_platform" {
   users_instance_count           = 1
 
   database_production = false
+  database_size       = "db-s-2vcpu-4gb"
 
   feature_flags = {
     experimentalFeatures = false
@@ -66,6 +67,7 @@ module "app_platform" {
   backend_env = {
     JWT_SECRET                    = var.app_jwt_secret
     NODE_ENV                      = "staging"
+    TYPEORM_MIGRATIONS_RUN        = "false"
     IPSTACK_ACCESS_KEY            = var.ipstack_access_key
     HORIZON_URL                   = var.horizon_url
     NETWORK_PASSPHRASE            = var.network_passphrase
@@ -112,6 +114,7 @@ module "app_platform" {
   network_scanner_env = {
     API_KEY                       = var.app_api_key
     NODE_ENV                      = "staging"
+    TYPEORM_MIGRATIONS_RUN        = "false"
     IPSTACK_ACCESS_KEY            = var.ipstack_access_key
     HORIZON_URL                   = var.horizon_url
     NETWORK_PASSPHRASE            = var.network_passphrase
