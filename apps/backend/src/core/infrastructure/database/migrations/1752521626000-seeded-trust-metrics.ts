@@ -30,24 +30,21 @@ export class SeededTrustMetrics1752521626000 implements MigrationInterface {
 			ADD COLUMN "distance_from_seeds" INTEGER DEFAULT NULL
 		`);
 
-		// Defer index creation to avoid blocking - create manually with CONCURRENTLY
-		console.log('\n📊 SEEDED TRUST: Columns added successfully!');
-		console.log('📋 Next step: Create seeded trust indexes manually');
-		console.log('💡 Run these commands manually when system is stable:');
-		console.log('CREATE INDEX CONCURRENTLY "idx_node_measurement_v2_seeded_trust_rank" ON "node_measurement_v2" ("seeded_trust_rank");');
-		console.log('CREATE INDEX CONCURRENTLY "idx_node_measurement_v2_seed_organization" ON "node_measurement_v2" ("seed_organization");');
-		console.log('CREATE INDEX CONCURRENTLY "idx_node_measurement_v2_distance_from_seeds" ON "node_measurement_v2" ("distance_from_seeds");');
-		console.log('CREATE INDEX CONCURRENTLY "idx_node_measurement_v2_org_seeded_rank" ON "node_measurement_v2" ("seed_organization", "seeded_trust_rank");');
-		console.log('CREATE INDEX CONCURRENTLY "idx_node_measurement_v2_time_org_seeded" ON "node_measurement_v2" ("time", "seed_organization");\n');
+		// IMPORTANT: Indexes must be created manually using CONCURRENTLY to avoid blocking:
+		// 1. CREATE INDEX CONCURRENTLY "idx_node_measurement_v2_seeded_trust_rank" ON "node_measurement_v2" ("seeded_trust_rank");
+		// 2. CREATE INDEX CONCURRENTLY "idx_node_measurement_v2_seed_organization" ON "node_measurement_v2" ("seed_organization");
+		// 3. CREATE INDEX CONCURRENTLY "idx_node_measurement_v2_distance_from_seeds" ON "node_measurement_v2" ("distance_from_seeds");
+		// 4. CREATE INDEX CONCURRENTLY "idx_node_measurement_v2_org_seeded_rank" ON "node_measurement_v2" ("seed_organization", "seeded_trust_rank");
+		// 5. CREATE INDEX CONCURRENTLY "idx_node_measurement_v2_time_org_seeded" ON "node_measurement_v2" ("time", "seed_organization");
 	}
 
 	public async down(queryRunner: QueryRunner): Promise<void> {
-		// Drop indexes first
-		await queryRunner.query(`DROP INDEX IF EXISTS "idx_node_measurement_v2_time_org_seeded"`);
-		await queryRunner.query(`DROP INDEX IF EXISTS "idx_node_measurement_v2_org_seeded_rank"`);
-		await queryRunner.query(`DROP INDEX IF EXISTS "idx_node_measurement_v2_distance_from_seeds"`);
-		await queryRunner.query(`DROP INDEX IF EXISTS "idx_node_measurement_v2_seed_organization"`);
-		await queryRunner.query(`DROP INDEX IF EXISTS "idx_node_measurement_v2_seeded_trust_rank"`);
+		// NOTE: If indexes were created manually, they must be dropped manually before running this rollback:
+		// DROP INDEX IF EXISTS "idx_node_measurement_v2_time_org_seeded";
+		// DROP INDEX IF EXISTS "idx_node_measurement_v2_org_seeded_rank";
+		// DROP INDEX IF EXISTS "idx_node_measurement_v2_distance_from_seeds";
+		// DROP INDEX IF EXISTS "idx_node_measurement_v2_seed_organization";
+		// DROP INDEX IF EXISTS "idx_node_measurement_v2_seeded_trust_rank";
 
 		// Drop columns
 		await queryRunner.query(`ALTER TABLE "node_measurement_v2" DROP COLUMN "distance_from_seeds"`);
