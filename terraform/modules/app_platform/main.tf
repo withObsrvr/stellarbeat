@@ -12,7 +12,7 @@ resource "digitalocean_database_cluster" "radar_db" {
   engine  = "pg"
   version = var.database_version_postgres
   # Use database_size if provided, otherwise fall back to production flag logic
-  size       = var.database_size != "" ? var.database_size : (var.database_production ? "db-s-2vcpu-4gb" : "db-s-1vcpu-1gb")
+  size       = var.database_size != null ? var.database_size : (var.database_production ? "db-s-2vcpu-4gb" : "db-s-1vcpu-1gb")
   region     = var.region
   node_count = var.database_node_count
 }

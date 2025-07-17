@@ -85,7 +85,7 @@ variable "database_production" {
 variable "database_size" {
   description = "Database cluster size"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "database_node_count" {
