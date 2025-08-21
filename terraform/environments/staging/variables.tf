@@ -372,6 +372,12 @@ variable "history_scan_api_password" {
   default     = "password"
 }
 
+variable "history_scanner_instance_size" {
+  description = "Size of the history scanner instances"
+  type        = string
+  default     = "apps-d-2vcpu-8gb"
+}
+
 variable "debug" {
   description = "Enable debug mode"
   type        = bool
