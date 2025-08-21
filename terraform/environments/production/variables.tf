@@ -263,6 +263,13 @@ variable "history_scanner_instance_count" {
   type        = number
   default     = 1
 }
+
+variable "history_scanner_instance_size" {
+  description = "Size of the history scanner instances"
+  type        = string
+  default     = "apps-d-2vcpu-8gb"
+}
+
 variable "users_instance_count" {
   description = "Number of instances for the users service"
   type        = number

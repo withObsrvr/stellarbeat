@@ -22,9 +22,9 @@ module "app_platform" {
   git_branch                = var.git_branch
   database_version_postgres = var.database_version_postgres
 
-  environment                    = "production"
-  instance_size                  = "apps-s-1vcpu-2gb"
-  history_scanner_instance_size  = "apps-d-4vcpu-16gb"
+  environment                   = "production"
+  instance_size                 = "apps-s-1vcpu-2gb"
+  history_scanner_instance_size = "apps-d-4vcpu-16gb"
 
   frontend_instance_count        = 2
   backend_instance_count         = 2
@@ -35,8 +35,8 @@ module "app_platform" {
   users_instance_count           = 1
 
   database_production = true
-  database_size       = "db-s-4vcpu-8gb"
-  database_node_count = 2
+  database_size       = "db-s-2vcpu-4gb"
+  database_node_count = 1
 
   feature_flags = {
     experimentalFeatures = false

@@ -27,14 +27,14 @@ module "app_platform" {
 
   frontend_instance_count        = 1
   backend_instance_count         = 1
-  testnet_backend_instance_count = 1
-  scanner_instance_count         = 1
+  testnet_backend_instance_count = 0
+  scanner_instance_count         = 0
   testnet_scanner_instance_count = 0
-  history_scanner_instance_count = 1
-  users_instance_count           = 1
+  history_scanner_instance_count = 0
+  users_instance_count           = 0
 
   database_production = false
-  database_size       = "db-s-2vcpu-4gb"
+
 
   feature_flags = {
     experimentalFeatures = false
