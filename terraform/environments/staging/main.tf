@@ -33,7 +33,7 @@ module "app_platform" {
   history_scanner_instance_count = 0
   users_instance_count           = 0
 
-  database_production = false
+  database_production = true
 
 
   feature_flags = {
