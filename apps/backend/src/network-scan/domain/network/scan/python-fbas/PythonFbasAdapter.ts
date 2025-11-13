@@ -220,14 +220,15 @@ export class PythonFbasAdapter {
 			organizations
 		);
 
-		// Log first 3 organizations in detail
-		const detailedOrgs = aggregatedNodes.slice(0, 3).map(n => ({
+		// Log ALL organizations in detail
+		const detailedOrgs = aggregatedNodes.map(n => ({
 			publicKey: n.publicKey,
 			name: n.name,
 			validatorCount: n._originalValidators.length,
 			threshold: n.quorumSet?.threshold || 0,
 			validators: n.quorumSet?.validators || [],
-			validatorCount_in_qs: (n.quorumSet?.validators || []).length
+			validatorCount_in_qs: (n.quorumSet?.validators || []).length,
+			hasInvalidThreshold: (n.quorumSet?.threshold || 0) > (n.quorumSet?.validators || []).length
 		}));
 
 		console.log('[PythonFbas] Organization aggregation summary:', {
@@ -235,7 +236,7 @@ export class PythonFbasAdapter {
 			totalOrganizations: organizations.length,
 			aggregatedCount: aggregatedNodes.length
 		});
-		console.log('[PythonFbas] Detailed orgs:', JSON.stringify(detailedOrgs, null, 2));
+		console.log('[PythonFbas] ALL Detailed orgs:', JSON.stringify(detailedOrgs, null, 2));
 
 		// Validate aggregation
 		const validation =
@@ -271,6 +272,27 @@ export class PythonFbasAdapter {
 			allNodesRequestCount: allNodesRequest.nodes.length,
 			validatingNodesRequestCount: validatingNodesRequest.nodes.length
 		});
+
+		// Log cleaned quorum sets (first 3)
+		const cleanedSample = allNodesRequest.nodes.slice(0, 3).map((n) => ({
+			publicKey: n.publicKey,
+			name: n.name,
+			threshold: n.quorumSet?.threshold || 0,
+			validators: n.quorumSet?.validators || [],
+			validatorCount: (n.quorumSet?.validators || []).length
+		}));
+		console.log(
+			'[PythonFbas] Cleaned QS (self-refs removed):',
+			JSON.stringify(cleanedSample, null, 2)
+		);
+
+		// DEBUG: Write full request to file for debugging
+		const fs = require('fs');
+		fs.writeFileSync(
+			'/tmp/python-fbas-request.json',
+			JSON.stringify(allNodesRequest, null, 2)
+		);
+		console.log('[PythonFbas] Wrote full request to /tmp/python-fbas-request.json');
 
 		// Run analyses
 		return await this.runAggregatedAnalysis(
@@ -422,20 +444,71 @@ export class PythonFbasAdapter {
 
 	/**
 	 * Convert aggregated nodes to Python FBAS format
+	 *
+	 * IMPORTANT: Removes self-references from quorum sets to prevent Python FBAS service
+	 * from miscalculating splitting sets. Self-references (org trusting itself) are
+	 * semantically correct but cause issues in the Python analyzer.
 	 */
 	private aggregatedNodesToPythonRequest(
 		aggregatedNodes: AggregatedNode[]
 	): PythonFbasAnalysisRequest {
 		return {
-			nodes: aggregatedNodes.map((node) => ({
-				publicKey: node.publicKey,
-				name: node.name,
-				quorumSet: node.quorumSet,
-				geoData: node.geoData,
-				isp: node.isp
-			})),
+			nodes: aggregatedNodes.map((node) => {
+				// Remove self-reference from quorum set if present
+				const cleanedQuorumSet = node.quorumSet
+					? this.removeSelfReference(node.publicKey, node.quorumSet)
+					: null;
+
+				return {
+					publicKey: node.publicKey,
+					name: node.name,
+					quorumSet: cleanedQuorumSet,
+					geoData: node.geoData,
+					isp: node.isp
+				};
+			}),
 			organizations: []
 		};
+	}
+
+	/**
+	 * Remove self-references from a quorum set
+	 * Returns a new QuorumSet with the node's own publicKey filtered out
+	 *
+	 * IMPORTANT: When removing self-references, we DON'T adjust the threshold.
+	 * Rationale: A node implicitly trusts itself. If a node says "I need threshold T
+	 * out of N validators (including myself)", removing the self-reference should
+	 * give us "I need threshold T out of N-1 external validators", NOT "T-1 out of N-1".
+	 *
+	 * Example: SDF aggregate says "need 2 out of {SDF, LOBSTR, Blockdaemon}"
+	 * After removing self: "need 2 out of {LOBSTR, Blockdaemon}" (still need 2 external orgs)
+	 */
+	private removeSelfReference(
+		nodePublicKey: string,
+		quorumSet: QuorumSet
+	): QuorumSet {
+		// Filter out self-reference from validators array
+		const filteredValidators = quorumSet.validators.filter(
+			(validator: string) => validator !== nodePublicKey
+		);
+
+		// Recursively clean inner quorum sets
+		const cleanedInnerQs = quorumSet.innerQuorumSets.map((innerQs) =>
+			this.removeSelfReference(nodePublicKey, innerQs)
+		);
+
+		// Calculate total available votes after removing self-reference
+		const totalAvailable = filteredValidators.length + cleanedInnerQs.length;
+
+		// Keep original threshold, but cap it at total available votes
+		// (can't require more validators than exist)
+		const adjustedThreshold = Math.min(quorumSet.threshold, Math.max(1, totalAvailable));
+
+		return new QuorumSet(
+			adjustedThreshold,
+			filteredValidators,
+			cleanedInnerQs
+		);
 	}
 
 	/**

@@ -226,6 +226,17 @@ async def analyze_top_tier(request: AnalysisRequest):
         ])
 
         if result.returncode != 0:
+            # Check if this is the known AssertionError with disjoint quorums
+            if 'AssertionError' in result.stderr and 'find_min_quorum' in result.stderr:
+                logger.warning(f"Top tier analysis failed due to disjoint quorums (network with splitting sets min_size=0)")
+                # Return empty top tier for networks with disjoint quorums
+                execution_time = int((time.time() - start_time) * 1000)
+                return TopTierResponse(
+                    top_tier=[],
+                    top_tier_size=0,
+                    execution_time_ms=execution_time,
+                    cache_hit=False
+                )
             logger.error(f"Top tier analysis failed: {result.stderr}")
             raise HTTPException(status_code=500, detail=result.stderr)
 
@@ -323,6 +334,7 @@ async def analyze_splitting_sets(request: AnalysisRequest):
         # Parse output
         output = result.stdout + result.stderr
         lines = output.strip().split('\n')
+
         min_size = 0
         example_set = []
         has_split = False
@@ -338,7 +350,7 @@ async def analyze_splitting_sets(request: AnalysisRequest):
                     if '[' in line:
                         set_str = line[line.index('['):line.index(']')+1]
                         example_set = json.loads(set_str.replace("'", '"'))
-                except:
+                except Exception:
                     pass
 
         execution_time = int((time.time() - start_time) * 1000)

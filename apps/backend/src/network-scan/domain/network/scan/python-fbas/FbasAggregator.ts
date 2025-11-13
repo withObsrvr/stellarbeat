@@ -202,28 +202,24 @@ export class FbasAggregator {
 	 * Merges multiple quorum sets into one aggregated quorum set
 	 *
 	 * Strategy:
-	 * 1. For each validator in group's quorum sets, replace with group identifier if they trust other validators in same group
-	 * 2. Keep external trust relationships as-is
-	 * 3. Calculate appropriate threshold based on merged trust relationships
+	 * Use INTERSECTION-based aggregation instead of UNION to preserve trust semantics.
+	 * Only include external entities that are trusted by at least threshold validators.
 	 *
 	 * Example:
-	 *   SDF has validators: sdf1, sdf2, sdf3
-	 *   sdf1 trusts: {threshold: 2, validators: [sdf2, sdf3, lobstr1]}
-	 *   sdf2 trusts: {threshold: 2, validators: [sdf1, sdf3, satoshipay1]}
+	 *   SDF has 3 validators: sdf1, sdf2, sdf3
+	 *   sdf1 trusts: {threshold: 2, validators: [sdf2, sdf3, lobstr1, blockdaemon1]}
+	 *   sdf2 trusts: {threshold: 2, validators: [sdf1, sdf3, lobstr1, satoshipay1]}
+	 *   sdf3 trusts: {threshold: 2, validators: [sdf1, sdf2, blockdaemon1, lobstr1]}
 	 *
-	 *   Merged SDF quorum set:
-	 *   {threshold: 2, validators: [SDF, LOBSTR, SATOSHIPAY]}
-	 *   (internal trust collapsed, external trust preserved)
+	 *   Old (UNION): SDF trusts ALL of {LOBSTR, Blockdaemon, SatoshiPay} ← too broad!
+	 *   New (INTERSECTION): SDF trusts {LOBSTR} ← only trusted by ≥threshold(2) validators
+	 *   With threshold=2, this means "need 2 of 3 SDF validators to agree on LOBSTR"
 	 */
 	private mergeQuorumSets(
 		quorumSets: QuorumSet[],
 		groupMap: Map<string, Node[]>,
 		aggregationType: 'organization' | 'country' | 'isp'
 	): QuorumSet {
-		// Collect all validators trusted by any member of the group
-		const allTrustedValidators = new Set<string>();
-		const allInnerQuorumSets: QuorumSet[] = [];
-
 		// Build reverse lookup: validator -> group
 		const validatorToGroup = new Map<string, string>();
 		groupMap.forEach((nodes, groupId) => {
@@ -232,66 +228,53 @@ export class FbasAggregator {
 			});
 		});
 
-		// DEBUG: Log what we're processing
-		if (aggregationType === 'organization' && quorumSets.length > 0) {
-			console.log('[FbasAggregator] mergeQuorumSets DEBUG:', {
-				numQuorumSets: quorumSets.length,
-				firstQS: {
-					threshold: quorumSets[0].threshold,
-					validatorsCount: quorumSets[0].validators.length,
-					firstValidator: quorumSets[0].validators[0],
-					innerQSCount: quorumSets[0].innerQuorumSets.length
-				},
-				validatorToGroupSize: validatorToGroup.size
-			});
-		}
+		// Count how many validators in the group trust each external entity
+		const trustCounts = new Map<string, number>();
 
 		// Process each quorum set in the group
 		quorumSets.forEach((qs) => {
+			// Track which entities THIS validator trusts (deduplicated)
+			const trustedByThisValidator = new Set<string>();
+
 			// Add trusted validators from the flat validators array
 			qs.validators.forEach((validator: string) => {
-				// Map validator to their group (if aggregated)
 				const group = validatorToGroup.get(validator);
-				if (group) {
-					allTrustedValidators.add(group);
-				} else {
-					// External validator, keep as-is
-					allTrustedValidators.add(validator);
-				}
+				trustedByThisValidator.add(group || validator);
 			});
 
-			// Extract and add validators from inner quorum sets
-			// Stellar nodes often put ALL trust in innerQuorumSets, not validators array!
+			// Extract validators from inner quorum sets
 			qs.innerQuorumSets.forEach((innerQs: QuorumSet) => {
-				// Extract all validators from this inner QS and add to trusted set
-				this.extractValidatorsFromQuorumSet(innerQs, validatorToGroup, allTrustedValidators);
+				this.extractValidatorsFromQuorumSet(
+					innerQs,
+					validatorToGroup,
+					trustedByThisValidator
+				);
+			});
+
+			// Increment trust count for each entity trusted by this validator
+			trustedByThisValidator.forEach((entity) => {
+				trustCounts.set(entity, (trustCounts.get(entity) || 0) + 1);
 			});
 		});
 
 		// Calculate merged threshold
-		// Strategy: Use majority of the group size as threshold
-		// This ensures the aggregated node requires consensus within the group
+		// Use majority of group size to ensure consensus
 		const groupSize = quorumSets.length;
 		const idealThreshold = Math.ceil(groupSize / 2);
 
-		// Deduplicate inner quorum sets
-		const uniqueInnerQs = this.deduplicateQuorumSets(allInnerQuorumSets);
+		// Only include entities trusted by at least idealThreshold validators
+		// This preserves the security semantics of the underlying quorum sets
+		const validators: string[] = [];
+		trustCounts.forEach((count, entity) => {
+			if (count >= idealThreshold) {
+				validators.push(entity);
+			}
+		});
 
-		const validators = Array.from(allTrustedValidators);
-		const totalAvailableVotes = validators.length + uniqueInnerQs.length;
+		const totalAvailableVotes = validators.length;
+		const threshold = Math.min(idealThreshold, Math.max(1, totalAvailableVotes));
 
-		// CRITICAL FIX: Threshold cannot exceed available validators
-		// If we have 3 validators in org but they all collapse to self + 2 external = 3 total
-		// And we need threshold 2 (from ceil(3/2)), that's valid
-		// But if all 3 only trust each other, we get 1 validator (self) with threshold 2 = INVALID
-		// So we must cap threshold at the total available votes
-		const threshold = Math.min(idealThreshold, totalAvailableVotes);
-
-		return new QuorumSet(
-			Math.max(1, threshold),
-			validators,
-			uniqueInnerQs
-		);
+		return new QuorumSet(threshold, validators, []);
 	}
 
 	/**
