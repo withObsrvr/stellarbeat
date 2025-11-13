@@ -18,6 +18,9 @@ import {
 } from 'exception-logger';
 
 export function load(container: Container, config: Config) {
+	// Bind Config itself so it can be injected
+	container.bind<Config>('Config').toConstantValue(config);
+
 	container
 		.bind<Logger>('Logger')
 		.toDynamicValue(() => {

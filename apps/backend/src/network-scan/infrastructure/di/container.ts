@@ -57,6 +57,10 @@ import { NetworkScanner } from '../../domain/network/scan/NetworkScanner';
 import { CrawlerService } from '../../domain/node/scan/node-crawl/CrawlerService';
 import { createCrawler, createCrawlFactory } from 'crawler';
 import FbasAnalyzerFacade from '../../domain/network/scan/fbas-analysis/FbasAnalyzerFacade';
+import { PythonFbasAdapter } from '../../domain/network/scan/python-fbas/PythonFbasAdapter';
+import { PythonFbasHttpClient, PythonFbasHttpClientFactory } from '../../domain/network/scan/python-fbas/PythonFbasHttpClient';
+import { FbasAggregator } from '../../domain/network/scan/python-fbas/FbasAggregator';
+import { FbasFilteredAnalyzer } from '../../domain/network/scan/python-fbas/FbasFilteredAnalyzer';
 import { HorizonService } from '../../domain/network/scan/HorizonService';
 import OrganizationMeasurement from '../../domain/organization/OrganizationMeasurement';
 import NetworkMeasurement from '../../domain/network/NetworkMeasurement';
@@ -262,6 +266,22 @@ function loadDomain(container: Container, config: Config) {
 	container.bind(FbasAnalyzerFacade).toSelf();
 	container.bind(FbasMergedByAnalyzer).toSelf();
 	container.bind(NodesInTransitiveNetworkQuorumSetFinder).toSelf();
+
+	// Python FBAS scanner dependencies
+	container.bind(FbasAggregator).toSelf();
+	container.bind(FbasFilteredAnalyzer).toSelf();
+	container.bind<PythonFbasHttpClient>(PythonFbasHttpClient).toDynamicValue(() => {
+		return PythonFbasHttpClientFactory.create({
+			baseUrl: config.pythonFbasServiceUrl
+		});
+	});
+	container.bind<PythonFbasAdapter>(PythonFbasAdapter).toDynamicValue(() => {
+		return new PythonFbasAdapter(
+			container.get<PythonFbasHttpClient>(PythonFbasHttpClient),
+			container.get<FbasAggregator>(FbasAggregator),
+			container.get<FbasFilteredAnalyzer>(FbasFilteredAnalyzer)
+		);
+	});
 	container.bind<HorizonService>(HorizonService).toDynamicValue(() => {
 		return new HorizonService(
 			container.get<HttpService>('HttpService'),

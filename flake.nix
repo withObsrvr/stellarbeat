@@ -140,6 +140,16 @@
             pkgs.rustc
             pkgs.cargo
             pkgs.wasm-pack
+            # Python for python-fbas-service
+            pkgs.python311
+            pkgs.python311Packages.pip
+            pkgs.python311Packages.virtualenv
+            # C++ libraries needed for python-fbas native extensions
+            pkgs.stdenv.cc.cc.lib
+            pkgs.gcc
+            pkgs.zlib
+            pkgs.cmake
+            pkgs.pkg-config
             # PostgreSQL management scripts
             setupPostgres
             stopPostgres
@@ -151,6 +161,13 @@
             export PATH="${pnpm}/bin:$PATH"
             export NODE_OPTIONS="--max_old_space_size=4096"
             export PATH="$PWD/node_modules/.bin:$PATH"
+
+            # Make C++ libraries available for Python native extensions
+            export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
+
+            # Make zlib available for CMake builds
+            export PKG_CONFIG_PATH="${pkgs.zlib.dev}/lib/pkgconfig:$PKG_CONFIG_PATH"
+            export CMAKE_PREFIX_PATH="${pkgs.zlib.dev}:$CMAKE_PREFIX_PATH"
             
             # Set up PostgreSQL environment variables
             export DATABASE_DEV_URL="postgresql://user:password@localhost:25432/stellarbeat"
@@ -199,6 +216,7 @@
             echo "🎉 Radar development environment ready!"
             echo "Using pnpm version: $(pnpm -v)"
             echo "Using Node.js version: $(node -v)"
+            echo "Using Python version: $(python3 --version 2>&1 | cut -d' ' -f2)"
             echo ""
             echo "📊 Database URLs:"
             echo "   DEV:  $DATABASE_DEV_URL"

@@ -585,6 +585,19 @@ resource "digitalocean_app" "radar" {
           type  = "SECRET"
         }
 
+        # Python FBAS configuration - only add if Python FBAS service is deployed
+        env {
+          key   = "ENABLE_PYTHON_FBAS"
+          value = var.python_fbas_instance_count > 0 ? "true" : "false"
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "PYTHON_FBAS_SERVICE_URL"
+          value = var.python_fbas_instance_count > 0 ? "http://python-fbas:8080" : ""
+          type  = "GENERAL"
+        }
+
         build_command = "pnpm build"
         run_command   = "pnpm start:scan-network 1"
       }
@@ -721,6 +734,19 @@ resource "digitalocean_app" "radar" {
         env {
           key   = "CRAWLER_BLACKLIST"
           value = lookup(var.testnet_scanner_env, "CRAWLER_BLACKLIST", "")
+          type  = "GENERAL"
+        }
+
+        # Python FBAS configuration - only add if Python FBAS service is deployed
+        env {
+          key   = "ENABLE_PYTHON_FBAS"
+          value = var.python_fbas_instance_count > 0 ? "true" : "false"
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "PYTHON_FBAS_SERVICE_URL"
+          value = var.python_fbas_instance_count > 0 ? "http://python-fbas:8080" : ""
           type  = "GENERAL"
         }
 
@@ -1073,6 +1099,46 @@ resource "digitalocean_app" "radar" {
 
         build_command = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
         run_command   = "pnpm --filter users start"
+      }
+    }
+
+    # Python FBAS Service - conditionally deployed based on instance count
+    dynamic "service" {
+      for_each = var.python_fbas_instance_count > 0 ? [1] : []
+      content {
+        name               = "python-fbas"
+        instance_count     = var.python_fbas_instance_count
+        instance_size_slug = var.instance_size
+
+        git {
+          repo_clone_url = var.repo_url
+          branch         = var.git_branch
+        }
+
+        # Use Dockerfile for Python FBAS service
+        dockerfile_path = "python-fbas-service/Dockerfile"
+
+        # Environment variables - minimal configuration
+        env {
+          key   = "NODE_ENV"
+          value = var.environment
+        }
+
+        # Add any additional environment variables from python_fbas_env
+        dynamic "env" {
+          for_each = var.python_fbas_env
+          content {
+            key   = env.key
+            value = env.value
+            type  = "GENERAL"
+          }
+        }
+
+        http_port = 8080
+
+        health_check {
+          http_path = "/health"
+        }
       }
     }
 

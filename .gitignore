@@ -17,3 +17,11 @@ terraform/environments/*/.terraform.lock.hcl
 create_github_secrets.sh
 create_github_secrets_staging.sh
 .nix-postgres/
+venv/
+apps/backend/rust-scanner-results.txt
+python-fbas-evaluation/week1-progress-summary.md
+test-org-blocking-sets.json
+test-org-with-self-reference.json
+docs/OBSRVR_Radar_Quarterly_Report_Sept_2025_Stellarbeat.md
+docs/OBSRVR_Radar_Quarterly_Report_Sept_2025.pdf
+.gitignore
