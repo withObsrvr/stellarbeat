@@ -83,7 +83,8 @@ export class FbasAggregator {
 			const mergedQuorumSet = this.mergeQuorumSets(
 				quorumSets,
 				orgMap,
-				'organization'
+				'organization',
+				orgId // Pass current org ID for self-reference
 			);
 
 			aggregated.push({
@@ -131,7 +132,8 @@ export class FbasAggregator {
 			const mergedQuorumSet = this.mergeQuorumSets(
 				quorumSets,
 				countryMap,
-				'country'
+				'country',
+				country // Pass current country for self-reference
 			);
 
 			aggregated.push({
@@ -181,7 +183,8 @@ export class FbasAggregator {
 			const mergedQuorumSet = this.mergeQuorumSets(
 				quorumSets,
 				ispMap,
-				'isp'
+				'isp',
+				isp // Pass current ISP for self-reference
 			);
 
 			aggregated.push({
@@ -218,7 +221,8 @@ export class FbasAggregator {
 	private mergeQuorumSets(
 		quorumSets: QuorumSet[],
 		groupMap: Map<string, Node[]>,
-		aggregationType: 'organization' | 'country' | 'isp'
+		aggregationType: 'organization' | 'country' | 'isp',
+		currentGroupId: string // ID of the group we're building the QS for
 	): QuorumSet {
 		// Build reverse lookup: validator -> group
 		const validatorToGroup = new Map<string, string>();
@@ -239,7 +243,10 @@ export class FbasAggregator {
 			// Add trusted validators from the flat validators array
 			qs.validators.forEach((validator: string) => {
 				const group = validatorToGroup.get(validator);
-				trustedByThisValidator.add(group || validator);
+				if (group) {
+					trustedByThisValidator.add(group);
+				}
+				// Silently skip unmapped validators - they create asymmetric trust
 			});
 
 			// Extract validators from inner quorum sets
@@ -271,6 +278,12 @@ export class FbasAggregator {
 			}
 		});
 
+		// Always include self-reference for aggregated groups
+		// This ensures the group always trusts itself (critical for FBAS analysis)
+		if (!validators.includes(currentGroupId)) {
+			validators.push(currentGroupId);
+		}
+
 		// Calculate the EXTERNAL threshold based on network size, not internal validator count
 		// For network safety, we need: ⌊n/2⌋ + 1 to prevent disjoint quorums
 		// Example: With 7 orgs, need 4 (not 2) to prevent splits like {A,B} and {C,D}
@@ -291,13 +304,13 @@ export class FbasAggregator {
 		allTrustedValidators: Set<string>
 	): void {
 		// Add validators from this QS
+		// Only include mapped validators (ignore unmapped individual validators)
 		qs.validators.forEach((validator: string) => {
 			const group = validatorToGroup.get(validator);
 			if (group) {
 				allTrustedValidators.add(group);
-			} else {
-				allTrustedValidators.add(validator);
 			}
+			// Silently skip unmapped validators - they create asymmetric trust
 		});
 
 		// Recursively process inner quorum sets

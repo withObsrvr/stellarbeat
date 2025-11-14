@@ -88,12 +88,12 @@ variable "network_name" {
 variable "network_overlay_version" {
   description = "Network overlay version"
   type        = number
-  default     = 37
+  default     = 38
 }
 variable "network_ledger_version" {
   description = "Network ledger version"
   type        = number
-  default     = 22
+  default     = 24
 }
 variable "network_overlay_min_version" {
   description = "Network overlay minimum version"
@@ -103,7 +103,7 @@ variable "network_overlay_min_version" {
 variable "network_stellar_core_version" {
   description = "Network Stellar Core version"
   type        = string
-  default     = "22.2.0"
+  default     = "24.0.0"
 }
 
 variable "network_quorum_set" {
