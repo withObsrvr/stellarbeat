@@ -258,21 +258,25 @@ export class FbasAggregator {
 		});
 
 		// Calculate merged threshold
-		// Use majority of group size to ensure consensus
+		// Use majority of group size for filtering which entities to trust
 		const groupSize = quorumSets.length;
-		const idealThreshold = Math.ceil(groupSize / 2);
+		const internalConsensusThreshold = Math.ceil(groupSize / 2);
 
-		// Only include entities trusted by at least idealThreshold validators
-		// This preserves the security semantics of the underlying quorum sets
+		// Only include entities trusted by at least internalConsensusThreshold validators
+		// This ensures we only trust entities that the organization internally agrees on
 		const validators: string[] = [];
 		trustCounts.forEach((count, entity) => {
-			if (count >= idealThreshold) {
+			if (count >= internalConsensusThreshold) {
 				validators.push(entity);
 			}
 		});
 
+		// Calculate the EXTERNAL threshold based on network size, not internal validator count
+		// For network safety, we need: ⌊n/2⌋ + 1 to prevent disjoint quorums
+		// Example: With 7 orgs, need 4 (not 2) to prevent splits like {A,B} and {C,D}
 		const totalAvailableVotes = validators.length;
-		const threshold = Math.min(idealThreshold, Math.max(1, totalAvailableVotes));
+		const networkSafetyThreshold = Math.floor(totalAvailableVotes / 2) + 1;
+		const threshold = Math.max(1, Math.min(networkSafetyThreshold, totalAvailableVotes));
 
 		return new QuorumSet(threshold, validators, []);
 	}

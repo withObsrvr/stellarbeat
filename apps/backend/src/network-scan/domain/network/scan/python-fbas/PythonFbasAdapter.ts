@@ -445,24 +445,24 @@ export class PythonFbasAdapter {
 	/**
 	 * Convert aggregated nodes to Python FBAS format
 	 *
-	 * IMPORTANT: Removes self-references from quorum sets to prevent Python FBAS service
-	 * from miscalculating splitting sets. Self-references (org trusting itself) are
-	 * semantically correct but cause issues in the Python analyzer.
+	 * IMPORTANT: Preserves self-references in quorum sets for aggregated organizations.
+	 * Unlike individual validators, aggregated organizations MUST include themselves because:
+	 * - An organization represents ALL its validators as a group
+	 * - The organization is not implicitly satisfied
+	 * - Without self-reference, circular dependencies form where no org can form a quorum
 	 */
 	private aggregatedNodesToPythonRequest(
 		aggregatedNodes: AggregatedNode[]
 	): PythonFbasAnalysisRequest {
 		return {
 			nodes: aggregatedNodes.map((node) => {
-				// Remove self-reference from quorum set if present
-				const cleanedQuorumSet = node.quorumSet
-					? this.removeSelfReference(node.publicKey, node.quorumSet)
-					: null;
-
+				// Use quorum set as-is - self-references are necessary for aggregated orgs
+				// DO NOT remove self-references! This creates circular dependencies where
+				// no org can form a quorum (topTierSize=0, splittingSetsMinSize=0)
 				return {
 					publicKey: node.publicKey,
 					name: node.name,
-					quorumSet: cleanedQuorumSet,
+					quorumSet: node.quorumSet,
 					geoData: node.geoData,
 					isp: node.isp
 				};
