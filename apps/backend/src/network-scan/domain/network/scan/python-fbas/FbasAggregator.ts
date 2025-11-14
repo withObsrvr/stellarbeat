@@ -239,7 +239,10 @@ export class FbasAggregator {
 			// Add trusted validators from the flat validators array
 			qs.validators.forEach((validator: string) => {
 				const group = validatorToGroup.get(validator);
-				trustedByThisValidator.add(group || validator);
+				if (group) {
+					trustedByThisValidator.add(group);
+				}
+				// Silently skip unmapped validators - they create asymmetric trust
 			});
 
 			// Extract validators from inner quorum sets
@@ -291,13 +294,13 @@ export class FbasAggregator {
 		allTrustedValidators: Set<string>
 	): void {
 		// Add validators from this QS
+		// Only include mapped validators (ignore unmapped individual validators)
 		qs.validators.forEach((validator: string) => {
 			const group = validatorToGroup.get(validator);
 			if (group) {
 				allTrustedValidators.add(group);
-			} else {
-				allTrustedValidators.add(validator);
 			}
+			// Silently skip unmapped validators - they create asymmetric trust
 		});
 
 		// Recursively process inner quorum sets
