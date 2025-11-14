@@ -5,7 +5,7 @@ import {
 	createOrganizationWithValidators,
 	createNodeWithGeoData,
 	createNodeWithISP
-} from './test-helpers';
+} from '../__fixtures__/test-helpers';
 
 describe('FbasFilteredAnalyzer', () => {
 	let analyzer: FbasFilteredAnalyzer;
