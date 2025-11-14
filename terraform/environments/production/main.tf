@@ -33,6 +33,7 @@ module "app_platform" {
   testnet_scanner_instance_count = 1
   history_scanner_instance_count = 1
   users_instance_count           = 1
+  python_fbas_instance_count     = 1
 
   database_production = true
   database_size       = "db-s-2vcpu-4gb"

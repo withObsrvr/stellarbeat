@@ -322,6 +322,25 @@ export function getConfigFromEnv(): Result<Config, Error> {
 					'PYTHON_FBAS_SERVICE_URL must be defined when ENABLE_PYTHON_FBAS is true'
 				)
 			);
+
+		// Validate URL format
+		try {
+			const urlObj = new URL(pythonFbasServiceUrl);
+			if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+				return err(
+					new Error(
+						'PYTHON_FBAS_SERVICE_URL must be a valid HTTP or HTTPS URL'
+					)
+				);
+			}
+		} catch (e) {
+			return err(
+				new Error(
+					'PYTHON_FBAS_SERVICE_URL is not a valid URL: ' + String(e)
+				)
+			);
+		}
+
 		config.pythonFbasServiceUrl = pythonFbasServiceUrl;
 	}
 

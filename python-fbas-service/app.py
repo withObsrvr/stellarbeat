@@ -351,6 +351,7 @@ async def analyze_splitting_sets(request: AnalysisRequest):
                         set_str = line[line.index('['):line.index(']')+1]
                         example_set = json.loads(set_str.replace("'", '"'))
                 except Exception:
+                    # Ignore malformed splitting set output - not critical for the analysis
                     pass
 
         execution_time = int((time.time() - start_time) * 1000)
@@ -485,4 +486,4 @@ async def analyze_full(request: AnalysisRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8082)
+    uvicorn.run(app, host="0.0.0.0", port=8080)

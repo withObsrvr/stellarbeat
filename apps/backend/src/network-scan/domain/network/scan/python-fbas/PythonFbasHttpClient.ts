@@ -227,7 +227,7 @@ export class PythonFbasHttpClientFactory {
 			baseUrl:
 				overrides?.baseUrl ||
 				process.env.PYTHON_FBAS_SERVICE_URL ||
-				'http://localhost:8000',
+				'http://localhost:8080',
 			timeout: overrides?.timeout || 60000, // 60 seconds
 			retries: overrides?.retries || 3
 		};
