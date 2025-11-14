@@ -1117,6 +1117,7 @@ resource "digitalocean_app" "radar" {
 
         # Use Dockerfile for Python FBAS service
         dockerfile_path = "python-fbas-service/Dockerfile"
+        source_dir      = "python-fbas-service"
 
         # Environment variables - minimal configuration
         env {
