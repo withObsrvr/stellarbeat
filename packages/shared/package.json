@@ -1,6 +1,6 @@
 {
 	"name": "shared",
-	"description": "Shared code between Stellarbeat frontend and backend",
+	"description": "Shared code between OBSRVR Radar frontend and backend",
 	"scripts": {
 		"preversion": "pnpm run build",
 		"build": "../../node_modules/typescript/bin/tsc  --declaration",

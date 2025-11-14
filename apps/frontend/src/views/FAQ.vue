@@ -128,7 +128,7 @@ Age = Time since discovery
         <p>
           All code is open-source and available on
           <a
-            href="https://github.com/stellarbeat"
+            href="https://github.com/withObsrvr/stellarbeat"
             class="btn btn-sm bt btn-outline-primary"
             rel="noopener"
             target="_blank"

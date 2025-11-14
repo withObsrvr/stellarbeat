@@ -1,15 +1,15 @@
-@startuml Stellarbeat C4 Container model
+@startuml OBSRVR Radar C4 Container model
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
 skinparam ranksep 100
 
-title Stellarbeat - Container Diagram
+title OBSRVR Radar - Container Diagram
 
 ' People
-Person(user, "User", "A user interacting with the Stellarbeat Dashboard")
-Person(developer, "3rd Party Developer", "A developer integrating with the Stellarbeat API")
+Person(user, "User", "A user interacting with the OBSRVR Radar Dashboard")
+Person(developer, "3rd Party Developer", "A developer integrating with the OBSRVR Radar API")
 
-System_Boundary(s1, "Stellarbeat") {
+System_Boundary(s1, "OBSRVR Radar") {
 
   ' Frontend group
   Boundary(frontendBoundary, "Frontend App") {

@@ -80,18 +80,18 @@
             file to include your validator info.
           </p>
           <h4>
-            What if your node is validating, but stellarbeat labels it as not
+            What if your node is validating, but OBSRVR Radar labels it as not
             validating?
           </h4>
           <ul>
             <li>
-              Stellarbeat detects nodes validating in a specific crawl/time
+              OBSRVR Radar detects nodes validating in a specific crawl/time
               window. It could be the validator is too slow for this window, or
               catching up.
             </li>
             <li>
-              If stellarbeat cannot connect to the node because it is at max
-              capacity and the node is not trusted by other nodes, stellarbeat
+              If OBSRVR Radar cannot connect to the node because it is at max
+              capacity and the node is not trusted by other nodes, OBSRVR Radar
               cannot detect the validating status and the node is marked as not
               validating.
             </li>
@@ -284,7 +284,7 @@
             Because quorum intersection is calculated for the entire network, it
             could be that badly configured nodes on the edge of the network can
             cause quorum intersection to fail.<br />
-            To mitigate this, stellarbeat filters out 'badly configured' nodes.
+            To mitigate this, OBSRVR Radar filters out 'badly configured' nodes.
             At the moment these are nodes that have only themselves in their
             quorumset.
           </p>

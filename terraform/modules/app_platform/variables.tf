@@ -77,6 +77,12 @@ variable "users_instance_count" {
   type        = number
 }
 
+variable "python_fbas_instance_count" {
+  description = "Number of Python FBAS service instances"
+  type        = number
+  default     = 0
+}
+
 variable "database_production" {
   description = "Whether to use production database"
   type        = bool
@@ -150,6 +156,13 @@ variable "history_scanner_env" {
 
 variable "users_env" {
   description = "Environment variables for users service"
+  type        = map(string)
+  default     = {}
+  sensitive   = true
+}
+
+variable "python_fbas_env" {
+  description = "Environment variables for Python FBAS service"
   type        = map(string)
   default     = {}
   sensitive   = true

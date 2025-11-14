@@ -52,6 +52,8 @@ export interface Config {
 	networkScanLoopIntervalMs?: number;
 	historyScanAPIPassword?: string;
 	historyScanAPIUsername?: string;
+	enablePythonFbas: boolean;
+	pythonFbasServiceUrl?: string;
 }
 
 export class DefaultConfig implements Config {
@@ -79,6 +81,8 @@ export class DefaultConfig implements Config {
 	networkScanLoopIntervalMs?: number;
 	historyScanAPIUsername?: string;
 	historyScanAPIPassword?: string;
+	enablePythonFbas = false;
+	pythonFbasServiceUrl?: string;
 
 	constructor(
 		public networkConfig: NetworkConfig,
@@ -302,6 +306,43 @@ export function getConfigFromEnv(): Result<Config, Error> {
 	const historyScanAPIUsername = process.env.HISTORY_SCAN_API_USERNAME;
 	if (isString(historyScanAPIUsername))
 		config.historyScanAPIUsername = historyScanAPIUsername;
+
+	// Python FBAS configuration
+	let enablePythonFbas = yn(process.env.ENABLE_PYTHON_FBAS);
+	if (enablePythonFbas === undefined) {
+		enablePythonFbas = false;
+	}
+	config.enablePythonFbas = enablePythonFbas;
+
+	if (config.enablePythonFbas) {
+		const pythonFbasServiceUrl = process.env.PYTHON_FBAS_SERVICE_URL;
+		if (!isString(pythonFbasServiceUrl))
+			return err(
+				new Error(
+					'PYTHON_FBAS_SERVICE_URL must be defined when ENABLE_PYTHON_FBAS is true'
+				)
+			);
+
+		// Validate URL format
+		try {
+			const urlObj = new URL(pythonFbasServiceUrl);
+			if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+				return err(
+					new Error(
+						'PYTHON_FBAS_SERVICE_URL must be a valid HTTP or HTTPS URL'
+					)
+				);
+			}
+		} catch (e) {
+			return err(
+				new Error(
+					'PYTHON_FBAS_SERVICE_URL is not a valid URL: ' + String(e)
+				)
+			);
+		}
+
+		config.pythonFbasServiceUrl = pythonFbasServiceUrl;
+	}
 
 	return ok(config);
 }

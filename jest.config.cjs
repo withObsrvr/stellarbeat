@@ -15,7 +15,8 @@ module.exports = {
 			preset: 'ts-jest',
 			displayName: 'backend',
 			rootDir: 'apps/backend',
-			moduleDirectories: ['node_modules']
+			moduleDirectories: ['node_modules'],
+			setupFilesAfterEnv: ['<rootDir>/jest.setup.ts']
 		},
 		{
 			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],

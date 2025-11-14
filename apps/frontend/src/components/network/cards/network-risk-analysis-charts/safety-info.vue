@@ -29,7 +29,7 @@
       Because quorum intersection is calculated for the entire network, it could
       be that badly configured nodes on the edge of the network can cause quorum
       intersection to fail.<br />
-      To mitigate this, Stellarbeat filters out 'badly configured' nodes. At the
+      To mitigate this, OBSRVR Radar filters out 'badly configured' nodes. At the
       moment these are nodes that have only themselves in their quorum-set.<br />
       For ISP and country information of nodes we rely on the
       <a href="https://ipstack.com/">IP-stack api</a>. This data is not

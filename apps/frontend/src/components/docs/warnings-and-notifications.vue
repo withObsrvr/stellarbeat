@@ -2,7 +2,7 @@
   <div>
     <h2 class="mt-0 mb-4">Warnings and notifications</h2>
     <p>
-      Stellarbeat detects and sends notifications for warnings on the network,
+      OBSRVR Radar detects and sends notifications for warnings on the network,
       organization and node level. This page describes the different types of
       warnings and notifications and how to resolve them. There are three levels
       of warnings:

@@ -139,11 +139,11 @@
           be sure to check the
           <a href="https://dashboard.stellar.org" target="_blank"
             >official Stellar network dashboard</a
-          >. There could be an issue with the Stellarbeat crawler, which itself
+          >. There could be an issue with the OBSRVR Radar crawler, which itself
           is in essence a non-validating node.
         </li>
         <li>
-          To improve the chances of the Stellarbeat crawler connecting to your
+          To improve the chances of the OBSRVR Radar crawler connecting to your
           node, add the crawler public keys to your PREFERRED_PEER_KEYS in your
           <a
             href="https://github.com/stellar/stellar-core/blob/ecd0a7462c84bd1d2445cdfd48aa9b38b1bbfd20/docs/stellar-core_example.cfg#L170"
@@ -153,7 +153,7 @@
           GAK7ZMDHKKEOYGZH3OSZQERK6UG5UDG5WEJV7GTN3Z4OIFXS3DXPUCRY
         </li>
         <li>
-          The Stellarbeat notification service does not replace the monitoring
+          The OBSRVR Radar notification service does not replace the monitoring
           setup advised in the
           <a
             href="https://developers.stellar.org/docs/run-core-node/monitoring/"

@@ -61,4 +61,5 @@ export class ConfigMock implements Config {
 	userServiceUsername = 'user';
 	frontendBaseUrl = 'https://radar.withobsrvr.com';
 	networkScanLoopIntervalMs = 1000;
+	enablePythonFbas = false;
 }

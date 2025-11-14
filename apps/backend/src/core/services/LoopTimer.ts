@@ -6,7 +6,7 @@ export class LoopTimer {
 	private startTime?: number;
 	private endTime?: number;
 	private idle = true;
-	private loopTime = 1000 * 60 * 3;
+	private loopTime = 1000 * 60 * 5; // 5 minutes to accommodate Python FBAS scanner
 
 	start(loopTime?: number) {
 		if (!this.idle) throw new Error('Timer already started');

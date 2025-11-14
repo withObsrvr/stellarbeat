@@ -28,10 +28,11 @@ module "app_platform" {
   frontend_instance_count        = 1
   backend_instance_count         = 1
   testnet_backend_instance_count = 0
-  scanner_instance_count         = 0
+  scanner_instance_count         = 1
   testnet_scanner_instance_count = 0
-  history_scanner_instance_count = 0
-  users_instance_count           = 0
+  history_scanner_instance_count = 1
+  users_instance_count           = 1
+  python_fbas_instance_count     = 1
 
   database_production = true
 
