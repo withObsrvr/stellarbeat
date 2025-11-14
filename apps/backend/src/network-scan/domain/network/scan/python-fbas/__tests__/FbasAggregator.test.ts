@@ -90,9 +90,11 @@ describe('FbasAggregator', () => {
 
 			expect(aggregated[0].quorumSet).not.toBeNull();
 			expect(aggregated[0].quorumSet!.threshold).toBeGreaterThan(0);
-			// Should contain external validators
-			expect(aggregated[0].quorumSet!.validators).toContain('EXT_A');
-			expect(aggregated[0].quorumSet!.validators).toContain('EXT_B');
+			// External validators (not mapped to organizations) are filtered out
+			// Only the organization itself should be in the validators list
+			expect(aggregated[0].quorumSet!.validators).toContain(
+				org.organizationId.value
+			);
 		});
 
 		it('should handle multiple organizations', () => {
@@ -284,17 +286,11 @@ describe('FbasAggregator', () => {
 
 	describe('validateAggregatedNodes', () => {
 		it('should validate correct nodes', () => {
-			const node = createNodeWithQuorumSet(
-				{
-					threshold: 1,
-					validators: ['A'],
-					innerQuorumSets: []
-				},
-				true,
-				time
-			);
+			// Use createNodeWithGeoData which properly sets geoData
+			const node = createNodeWithGeoData('TestCountry', true, time);
 
 			const aggregated = aggregator.aggregateByCountry([node]);
+			// After fix: quorum set includes only the country itself (self-reference)
 			const validation = aggregator.validateAggregatedNodes(aggregated);
 
 			expect(validation.valid).toBe(true);

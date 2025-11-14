@@ -83,7 +83,8 @@ export class FbasAggregator {
 			const mergedQuorumSet = this.mergeQuorumSets(
 				quorumSets,
 				orgMap,
-				'organization'
+				'organization',
+				orgId // Pass current org ID for self-reference
 			);
 
 			aggregated.push({
@@ -131,7 +132,8 @@ export class FbasAggregator {
 			const mergedQuorumSet = this.mergeQuorumSets(
 				quorumSets,
 				countryMap,
-				'country'
+				'country',
+				country // Pass current country for self-reference
 			);
 
 			aggregated.push({
@@ -181,7 +183,8 @@ export class FbasAggregator {
 			const mergedQuorumSet = this.mergeQuorumSets(
 				quorumSets,
 				ispMap,
-				'isp'
+				'isp',
+				isp // Pass current ISP for self-reference
 			);
 
 			aggregated.push({
@@ -218,7 +221,8 @@ export class FbasAggregator {
 	private mergeQuorumSets(
 		quorumSets: QuorumSet[],
 		groupMap: Map<string, Node[]>,
-		aggregationType: 'organization' | 'country' | 'isp'
+		aggregationType: 'organization' | 'country' | 'isp',
+		currentGroupId: string // ID of the group we're building the QS for
 	): QuorumSet {
 		// Build reverse lookup: validator -> group
 		const validatorToGroup = new Map<string, string>();
@@ -273,6 +277,12 @@ export class FbasAggregator {
 				validators.push(entity);
 			}
 		});
+
+		// Always include self-reference for aggregated groups
+		// This ensures the group always trusts itself (critical for FBAS analysis)
+		if (!validators.includes(currentGroupId)) {
+			validators.push(currentGroupId);
+		}
 
 		// Calculate the EXTERNAL threshold based on network size, not internal validator count
 		// For network safety, we need: ⌊n/2⌋ + 1 to prevent disjoint quorums
