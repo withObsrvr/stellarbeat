@@ -65,7 +65,20 @@ export class NetworkScanner {
 
 		const organizationsToAnalyze = organizationScan.organizations.filter(
 			(organization) => {
-				return organization.validators.value.length > 0;
+				// Filter out organizations with no validators
+				if (organization.validators.value.length === 0) {
+					return false;
+				}
+
+				// Filter out archived organizations
+				// Archived organizations have endDate < Snapshot.MAX_DATE
+				if (
+					organization.snapshotEndDate.getTime() < Snapshot.MAX_DATE.getTime()
+				) {
+					return false;
+				}
+
+				return true;
 			}
 		);
 
