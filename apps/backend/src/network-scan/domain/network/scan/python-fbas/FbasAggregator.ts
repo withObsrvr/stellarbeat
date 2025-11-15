@@ -80,10 +80,9 @@ export class FbasAggregator {
 			}
 
 			// Merge quorum sets - create union of trust relationships
-			const mergedQuorumSet = this.mergeQuorumSets(
+			const mergedQuorumSet = this.mergeQuorumSetsForOrganizations(
 				quorumSets,
-				orgMap,
-				'organization',
+				validatorToOrg, // Pass ALL organizations for complete validator mapping
 				orgId // Pass current org ID for self-reference
 			);
 
@@ -202,26 +201,71 @@ export class FbasAggregator {
 	}
 
 	/**
-	 * Merges multiple quorum sets into one aggregated quorum set
+	 * Merges multiple quorum sets for organization aggregation
 	 *
-	 * Strategy:
-	 * Use INTERSECTION-based aggregation instead of UNION to preserve trust semantics.
-	 * Only include external entities that are trusted by at least threshold validators.
+	 * Uses validator-to-organization map to properly resolve all trust relationships
+	 */
+	private mergeQuorumSetsForOrganizations(
+		quorumSets: QuorumSet[],
+		validatorToOrg: Map<string, Organization>,
+		currentGroupId: string // ID of the group we're building the QS for
+	): QuorumSet {
+		// Build reverse lookup: validator -> group (organization ID)
+		const validatorToGroup = new Map<string, string>();
+		validatorToOrg.forEach((org, validatorKey) => {
+			validatorToGroup.set(validatorKey, org.organizationId.value);
+		});
+
+		// Collect ALL entities trusted by ANY validator (UNION)
+		const allTrustedEntities = new Set<string>();
+
+		// Process each quorum set in the group
+		quorumSets.forEach((qs) => {
+			// Add trusted validators from the flat validators array
+			qs.validators.forEach((validator: string) => {
+				const group = validatorToGroup.get(validator);
+				if (group) {
+					allTrustedEntities.add(group);
+				}
+				// Silently skip unmapped validators - they create asymmetric trust
+			});
+
+			// Extract validators from inner quorum sets
+			qs.innerQuorumSets.forEach((innerQs: QuorumSet) => {
+				this.extractValidatorsFromQuorumSet(
+					innerQs,
+					validatorToGroup,
+					allTrustedEntities
+				);
+			});
+		});
+
+		// Always include self-reference for aggregated groups
+		// This ensures the group always trusts itself (critical for FBAS analysis)
+		allTrustedEntities.add(currentGroupId);
+
+		// Convert to array
+		const validators = Array.from(allTrustedEntities);
+
+		// Calculate threshold: average of individual validator thresholds
+		// This better preserves the original trust requirements
+		const avgThreshold = quorumSets.reduce((sum, qs) => sum + qs.threshold, 0) / quorumSets.length;
+		const threshold = Math.max(1, Math.ceil(avgThreshold));
+
+		console.log(`[FbasAggregator] Merged QS for ${currentGroupId}: threshold=${threshold}, validators=${validators.length}, originalThresholds=${quorumSets.map(qs => qs.threshold).join(',')}`);
+
+		return new QuorumSet(threshold, validators, []);
+	}
+
+	/**
+	 * Merges multiple quorum sets for country/ISP aggregation
 	 *
-	 * Example:
-	 *   SDF has 3 validators: sdf1, sdf2, sdf3
-	 *   sdf1 trusts: {threshold: 2, validators: [sdf2, sdf3, lobstr1, blockdaemon1]}
-	 *   sdf2 trusts: {threshold: 2, validators: [sdf1, sdf3, lobstr1, satoshipay1]}
-	 *   sdf3 trusts: {threshold: 2, validators: [sdf1, sdf2, blockdaemon1, lobstr1]}
-	 *
-	 *   Old (UNION): SDF trusts ALL of {LOBSTR, Blockdaemon, SatoshiPay} ← too broad!
-	 *   New (INTERSECTION): SDF trusts {LOBSTR} ← only trusted by ≥threshold(2) validators
-	 *   With threshold=2, this means "need 2 of 3 SDF validators to agree on LOBSTR"
+	 * Uses group map (country/ISP -> nodes) to build validator-to-group mapping
 	 */
 	private mergeQuorumSets(
 		quorumSets: QuorumSet[],
 		groupMap: Map<string, Node[]>,
-		aggregationType: 'organization' | 'country' | 'isp',
+		aggregationType: 'country' | 'isp',
 		currentGroupId: string // ID of the group we're building the QS for
 	): QuorumSet {
 		// Build reverse lookup: validator -> group
@@ -232,19 +276,16 @@ export class FbasAggregator {
 			});
 		});
 
-		// Count how many validators in the group trust each external entity
-		const trustCounts = new Map<string, number>();
+		// Collect ALL entities trusted by ANY validator (UNION)
+		const allTrustedEntities = new Set<string>();
 
 		// Process each quorum set in the group
 		quorumSets.forEach((qs) => {
-			// Track which entities THIS validator trusts (deduplicated)
-			const trustedByThisValidator = new Set<string>();
-
 			// Add trusted validators from the flat validators array
 			qs.validators.forEach((validator: string) => {
 				const group = validatorToGroup.get(validator);
 				if (group) {
-					trustedByThisValidator.add(group);
+					allTrustedEntities.add(group);
 				}
 				// Silently skip unmapped validators - they create asymmetric trust
 			});
@@ -254,42 +295,24 @@ export class FbasAggregator {
 				this.extractValidatorsFromQuorumSet(
 					innerQs,
 					validatorToGroup,
-					trustedByThisValidator
+					allTrustedEntities
 				);
 			});
-
-			// Increment trust count for each entity trusted by this validator
-			trustedByThisValidator.forEach((entity) => {
-				trustCounts.set(entity, (trustCounts.get(entity) || 0) + 1);
-			});
-		});
-
-		// Calculate merged threshold
-		// Use majority of group size for filtering which entities to trust
-		const groupSize = quorumSets.length;
-		const internalConsensusThreshold = Math.ceil(groupSize / 2);
-
-		// Only include entities trusted by at least internalConsensusThreshold validators
-		// This ensures we only trust entities that the organization internally agrees on
-		const validators: string[] = [];
-		trustCounts.forEach((count, entity) => {
-			if (count >= internalConsensusThreshold) {
-				validators.push(entity);
-			}
 		});
 
 		// Always include self-reference for aggregated groups
 		// This ensures the group always trusts itself (critical for FBAS analysis)
-		if (!validators.includes(currentGroupId)) {
-			validators.push(currentGroupId);
-		}
+		allTrustedEntities.add(currentGroupId);
 
-		// Calculate the EXTERNAL threshold based on network size, not internal validator count
-		// For network safety, we need: ⌊n/2⌋ + 1 to prevent disjoint quorums
-		// Example: With 7 orgs, need 4 (not 2) to prevent splits like {A,B} and {C,D}
-		const totalAvailableVotes = validators.length;
-		const networkSafetyThreshold = Math.floor(totalAvailableVotes / 2) + 1;
-		const threshold = Math.max(1, Math.min(networkSafetyThreshold, totalAvailableVotes));
+		// Convert to array
+		const validators = Array.from(allTrustedEntities);
+
+		// Calculate threshold: average of individual validator thresholds
+		// This better preserves the original trust requirements
+		const avgThreshold = quorumSets.reduce((sum, qs) => sum + qs.threshold, 0) / quorumSets.length;
+		const threshold = Math.max(1, Math.ceil(avgThreshold));
+
+		console.log(`[FbasAggregator] Merged QS for ${currentGroupId}: threshold=${threshold}, validators=${validators.length}, originalThresholds=${quorumSets.map(qs => qs.threshold).join(',')}`);
 
 		return new QuorumSet(threshold, validators, []);
 	}
