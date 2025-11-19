@@ -1,12 +1,13 @@
-// myDirective.ts
+// Vue 3 directive for Bootstrap tooltips
 import $ from "jquery";
-import { type DirectiveBinding } from "vue/types/options";
+import type { DirectiveBinding } from "vue";
 import Tooltip from "bootstrap/js/dist/tooltip";
 
 type PopoverPlacement = Tooltip.PopoverPlacement;
 
 export default {
-  inserted(el: HTMLElement, binding: DirectiveBinding) {
+  // Vue 3: 'inserted' hook renamed to 'mounted'
+  mounted(el: HTMLElement, binding: DirectiveBinding) {
     let placement: PopoverPlacement = "top";
     if (!binding.value) return;
 
@@ -25,7 +26,8 @@ export default {
       trigger: "hover",
     });
   },
-  unbind(el: HTMLElement) {
+  // Vue 3: 'unbind' hook renamed to 'unmounted'
+  unmounted(el: HTMLElement) {
     $(el).tooltip("dispose");
   },
 };

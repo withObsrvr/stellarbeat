@@ -48,7 +48,7 @@ import NodeActions from "@/components/node/sidebar/node-actions.vue";
 import { computed } from "vue";
 import useStore from "@/store/useStore";
 import { useDropdown } from "@/composables/useDropdown";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
 
 const props = defineProps<{

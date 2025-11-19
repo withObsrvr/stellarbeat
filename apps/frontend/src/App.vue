@@ -105,7 +105,7 @@ import CustomNetwork from "@/components/network/tools/modify-network.vue";
 import { isString } from "shared";
 import useStore from "@/store/useStore";
 import { computed, nextTick, onBeforeMount, ref, watch } from "vue";
-import { useRoute } from "vue-router/composables";
+import { useRoute } from "vue-router";
 import useMetaTags from "@/composables/useMetaTags";
 import { BIconEnvelope } from "bootstrap-vue";
 

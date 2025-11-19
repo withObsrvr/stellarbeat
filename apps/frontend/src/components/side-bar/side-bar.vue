@@ -159,7 +159,6 @@
 </template>
 
 <script setup lang="ts">
-import Vue from "vue";
 import UndoRedo from "@/components/node/tools/simulation/UndoRedo.vue";
 import {
   BFormCheckbox,
@@ -172,10 +171,6 @@ import {
 import useStore from "@/store/useStore";
 import NavLink from "@/components/side-bar/nav-link.vue";
 import { type BaseQuorumSet, Network } from "shared";
-
-Vue.component("BIconBullseye", BIconBullseye);
-Vue.component("BIconBuilding", BIconBuilding);
-Vue.component("BIconInfoCircle", BIconInfoCircle);
 
 defineProps({
   stickyKey: {

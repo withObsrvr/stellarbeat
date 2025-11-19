@@ -46,7 +46,7 @@
 import { computed, type ComputedRef, ref } from "vue";
 import { type RawLocation } from "vue-router";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import { BIconSearch } from "bootstrap-vue";
 
 type Match = { name: string; type: string; route: RawLocation };

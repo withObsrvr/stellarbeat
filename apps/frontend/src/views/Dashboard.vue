@@ -90,7 +90,7 @@ import CrawlTime from "@/components/crawl-time.vue";
 import SimulationBadge from "@/components/simulation-badge.vue";
 import TimeTravelBadge from "@/components/time-travel-badge.vue";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import useScrollTo from "@/composables/useScrollTo";
 
 const NetworkAnalysis = defineAsyncComponent(

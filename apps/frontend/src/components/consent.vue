@@ -53,7 +53,7 @@
 <script setup lang="ts">
 import $ from "jquery";
 import { onMounted, reactive, ref, type Ref } from "vue";
-import { onBeforeRouteUpdate, useRoute } from "vue-router/composables";
+import { onBeforeRouteUpdate, useRoute } from "vue-router";
 import useStore from "@/store/useStore";
 import useUserConsentManager from "@/store/useUserConsentManager";
 

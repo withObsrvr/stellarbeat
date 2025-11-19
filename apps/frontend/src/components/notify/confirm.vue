@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { BAlert } from "bootstrap-vue";
 import { onMounted, ref } from "vue";
-import { useRoute } from "vue-router/composables";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 const confirming = ref(true);

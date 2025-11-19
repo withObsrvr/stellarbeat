@@ -62,7 +62,7 @@ import NavLink from "@/components/side-bar/nav-link.vue";
 import OrganizationActions from "@/components/organization/sidebar/organization-actions.vue";
 import useStore from "@/store/useStore";
 import { computed } from "vue";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import { useDropdown } from "@/composables/useDropdown";
 import { OrganizationWarningDetector } from "@/services/OrganizationWarningDetector";
 

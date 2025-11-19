@@ -136,7 +136,7 @@ import {
 } from "bootstrap-vue";
 import { BModal, BDropdown, BDropdownItem } from "bootstrap-vue";
 import { computed, ref } from "vue";
-import { useRouter, useRoute } from "vue-router/composables";
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();

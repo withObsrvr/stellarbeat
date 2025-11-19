@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue2";
+import vue from "@vitejs/plugin-vue";
 import topLevelAwait from "vite-plugin-top-level-await";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import eslint from "vite-plugin-eslint";
@@ -57,7 +57,7 @@ export default defineConfig({
             "d3-drag",
           ],
           jquery: ["jquery"],
-          vue: ["vue", "vue-router", "vue-multiselect", "portal-vue"],
+          vue: ["vue", "vue-router", "vue-multiselect"],
           sentry: ["@sentry/vue"],
           shared: ["shared"],
           "scp-simulation": ["scp-simulation"],

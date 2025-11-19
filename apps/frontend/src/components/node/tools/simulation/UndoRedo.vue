@@ -33,7 +33,7 @@
 <script setup lang="ts">
 import { BIconArrowClockwise, BIconArrowCounterclockwise } from "bootstrap-vue";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 
 const store = useStore();
 const router = useRouter();

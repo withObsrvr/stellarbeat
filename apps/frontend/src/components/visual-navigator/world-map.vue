@@ -14,7 +14,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { Node } from "shared";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 
 interface CustomMarkerOptions extends L.CircleMarkerOptions {
   publicKey: string | null;

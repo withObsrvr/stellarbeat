@@ -82,7 +82,7 @@ import NodeActions from "@/components/node/sidebar/node-actions.vue";
 import QuorumSetActions from "@/components/node/sidebar/quorum-set-actions.vue";
 import useStore from "@/store/useStore";
 import { computed, toRefs, withDefaults } from "vue";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import { useDropdown } from "@/composables/useDropdown";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
 import { QuorumSetWarningDetector } from "@/services/QuorumSetWarningDetector";

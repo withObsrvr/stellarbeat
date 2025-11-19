@@ -165,7 +165,7 @@ import {
 } from "bootstrap-vue";
 import { isArray } from "shared";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import useNodeSnapshotRepository from "@/repositories/useNodeSnapshotRepository";
 
 interface Update {

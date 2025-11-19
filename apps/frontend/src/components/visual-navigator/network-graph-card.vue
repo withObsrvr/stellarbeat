@@ -31,7 +31,7 @@ import {
   watch,
 } from "vue";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import { NodeTrustGraphBuilder } from "@/services/NodeTrustGraphBuilder";
 import { OrganizationTrustGraphBuilder } from "@/services/OrganizationTrustGraphBuilder";
 import { TrustClusterFinder } from "@/services/TrustClusterFinder";

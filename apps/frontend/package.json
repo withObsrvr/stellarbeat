@@ -33,12 +33,11 @@
     "leaflet": "1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "popper.js": "1.16.1",
-    "portal-vue": "^2.1.7",
     "scp-simulation": "workspace:*",
     "shared": "workspace:*",
-    "vue": "^2.7.16",
+    "vue": "^3.5.13",
     "vue-multiselect": "^2.1.9",
-    "vue-router": "^3.6.5"
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.10",
@@ -51,10 +50,13 @@
     "@types/jquery": "^3.5.30",
     "@types/leaflet": "^1.9.12",
     "@types/leaflet.markercluster": "^1.5.4",
-    "@vitejs/plugin-vue2": "^2.3.1",
+    "@vitejs/plugin-vue": "^5.2.1",
     "ajv-formats": "^2.1.1",
+    "autoprefixer": "^10.4.22",
     "jest-localstorage-mock": "^2.4.26",
+    "postcss": "^8.5.6",
     "sass": "1.64.2",
+    "tailwindcss": "^4.1.17",
     "tslib": "^2.7.0",
     "vite": "^6.2.1",
     "vite-bundle-visualizer": "^1.2.1",
@@ -62,6 +64,6 @@
     "vite-plugin-static-copy": "^2.2.0",
     "vite-plugin-top-level-await": "^1.4.4",
     "vite-tsconfig-paths": "^5.1.3",
-    "vue-tsc": "2.2.0"
+    "vue-tsc": "^2.1.10"
   }
 }

@@ -56,7 +56,7 @@
 import { ref } from "vue";
 import { Node } from "shared";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 
 const newNodeName = ref("");
 const store = useStore();

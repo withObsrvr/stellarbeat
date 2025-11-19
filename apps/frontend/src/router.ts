@@ -1,13 +1,9 @@
-import Vue from "vue";
-import Router from "vue-router";
+import { createRouter as createVueRouter, createWebHistory } from "vue-router";
 import Dashboard from "./views/Dashboard.vue";
 
-Vue.use(Router);
-
 export function createRouter() {
-  return new Router({
-    mode: "history",
-    base: import.meta.env.BASE_URL,
+  return createVueRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
       {
         path: "/",

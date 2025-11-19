@@ -8,7 +8,7 @@
 </template>
 <script setup lang="ts">
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import { BIconX } from "bootstrap-vue";
 
 const store = useStore();

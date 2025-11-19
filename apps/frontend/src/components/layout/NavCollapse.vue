@@ -141,7 +141,7 @@
 <script setup lang="ts">
 import { computed, type PropType } from "vue";
 import useStore from "@/store/useStore";
-import { useRoute } from "vue-router/composables";
+import { useRoute } from "vue-router";
 import { type BrandLogo } from "@/components/layout/Navbar.vue";
 import NavNetworkSelector from "@/components/layout/NavNetworkSelector.vue";
 import Search from "@/components/search.vue";

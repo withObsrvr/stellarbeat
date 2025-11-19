@@ -134,7 +134,7 @@ import {
   VBModal,
 } from "bootstrap-vue";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import useOrganizationSnapshotRepository from "@/repositories/useOrganizationSnapshotRepository";
 
 interface Update {

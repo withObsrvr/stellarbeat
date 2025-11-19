@@ -255,7 +255,7 @@ import {
 } from "bootstrap-vue";
 import GraphLegend from "@/components/visual-navigator/graph/graph-legend.vue";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import { isString } from "shared";
 
 const WorldMap = defineAsyncComponent(
