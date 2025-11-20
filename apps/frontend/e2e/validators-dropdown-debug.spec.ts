@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.describe('Validators Dropdown Debug', () => {
   test('debug validators dropdown click', async ({ page }) => {

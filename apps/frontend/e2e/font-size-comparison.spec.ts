@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.describe('Font Size Comparison', () => {
   test('compare font sizes between production and local', async ({ page }) => {

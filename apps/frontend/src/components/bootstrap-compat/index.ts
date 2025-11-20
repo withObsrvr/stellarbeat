@@ -641,7 +641,7 @@ export const BPagination = defineComponent({
         (_, i) => startPage + i
       );
 
-      const items = [];
+      const items: any[] = [];
 
       // Previous button
       items.push(
