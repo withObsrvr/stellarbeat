@@ -152,7 +152,7 @@ import {
   BIconExclamationTriangle,
   BIconChevronDown,
   BIconChevronUp
-} from 'bootstrap-vue';
+} from '@/components/bootstrap-compat';
 import { useTrustStore } from '@/store/TrustStore';
 
 const trustStore = useTrustStore();

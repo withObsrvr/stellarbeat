@@ -36,7 +36,6 @@
       <nav-pagination
         v-model="currentPage"
         :total-rows="organizations.length"
-        @input="currentPage = $event"
       />
     </div>
   </div>
@@ -47,7 +46,7 @@ import { Organization } from "shared";
 import NavLink from "@/components/side-bar/nav-link.vue";
 import NavPagination from "@/components/side-bar/nav-pagination.vue";
 import OrganizationActions from "@/components/organization/sidebar/organization-actions.vue";
-import { computed } from "vue";
+import { computed, toRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import useStore from "@/store/useStore";
 import { useDropdown } from "@/composables/useDropdown";
@@ -63,7 +62,7 @@ const router = useRouter();
 const route = useRoute();
 const emit = defineEmits(["toggleExpand"]);
 const { showing, toggleShow, currentPage, paginate } = useDropdown(
-  props.expand,
+  toRef(props, 'expand'),
   emit,
 );
 

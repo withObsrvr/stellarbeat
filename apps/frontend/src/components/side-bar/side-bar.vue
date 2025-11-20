@@ -167,7 +167,7 @@ import {
   BIconBullseye,
   BIconInfoCircle,
   BModal,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 import NavLink from "@/components/side-bar/nav-link.vue";
 import { type BaseQuorumSet, Network } from "shared";

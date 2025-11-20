@@ -38,16 +38,17 @@ import NavLink from "@/components/side-bar/nav-link.vue";
 import NodeActions from "@/components/node/sidebar/node-actions.vue";
 import { useDropdown } from "@/composables/useDropdown";
 import useStore from "@/store/useStore";
-import { computed } from "vue";
+import { computed, toRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
 
 const props = defineProps<{
   organization: Organization;
+  expand: boolean;
 }>();
 
 const emit = defineEmits(["toggleExpand"]);
-const { showing, toggleShow } = useDropdown(true, emit);
+const { showing, toggleShow } = useDropdown(toRef(props, 'expand'), emit);
 
 const store = useStore();
 const router = useRouter();

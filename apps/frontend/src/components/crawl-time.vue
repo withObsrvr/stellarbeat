@@ -43,7 +43,7 @@ import {
   BFormTimepicker,
   BIconCalendar,
   BIconClock,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router";
 

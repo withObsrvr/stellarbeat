@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router";
-import { BIconX } from "bootstrap-vue";
+import { BIconX } from '@/components/bootstrap-compat';
 
 const store = useStore();
 const route = useRoute();

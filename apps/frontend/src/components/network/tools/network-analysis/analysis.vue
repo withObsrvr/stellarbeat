@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { BPagination, BTable, type BvTableFieldArray } from "bootstrap-vue";
+import { BPagination, BTable, type BvTableFieldArray } from '@/components/bootstrap-compat';
 import { computed, type ComputedRef, type PropType, ref, toRefs } from "vue";
 
 const props = defineProps({

@@ -52,7 +52,7 @@ import NodeInformation from "./node-information.vue";
 import EventLog from "../event-log.vue";
 import Actions from "../actions/actions.vue";
 import BreadCrumbs from "../../bread-crumbs.vue";
-import { BIconInfoCircle } from "bootstrap-vue";
+import { BIconInfoCircle } from '@/components/bootstrap-compat';
 import { infoBoxStore } from "../../info-box/useInfoBoxStore";
 import EventsAndActionsInfo from "../events-and-actions-info.vue";
 

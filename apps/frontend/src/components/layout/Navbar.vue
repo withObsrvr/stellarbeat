@@ -30,8 +30,7 @@
                     target="_blank"
                     rel="noopener"
                   >
-                    <github />
-                    Github
+                    <span style="display: inline-flex; align-items: center;"><github />Github</span>
                   </a>
                   <a
                     :href="`mailto:${store.appConfig.brandEmail}`"
@@ -46,8 +45,7 @@
             <button
               class="navbar-toggler"
               type="button"
-              data-toggle="collapse"
-              data-target="#nav_collapse"
+              v-b-toggle="'nav_collapse'"
               aria-controls="nav_collapse"
               aria-expanded="false"
               aria-label="Toggle navigation"
@@ -79,7 +77,7 @@ import NavNetworkSelector from "@/components/layout/NavNetworkSelector.vue";
 import NavCollapse from "@/components/layout/NavCollapse.vue";
 import Github from "@/components/organization/logo/github.vue";
 import useStore from "@/store/useStore";
-import { BIconList } from "bootstrap-vue";
+import { BIconList } from '@/components/bootstrap-compat';
 
 export interface BrandLogo {
   src: string;

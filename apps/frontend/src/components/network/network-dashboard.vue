@@ -1,9 +1,6 @@
 <template>
   <div>
-    <Teleport to="body">
-      <div id="simulate-node-modal"></div>
-    </Teleport>
-    <Alert :show="store.networkAnalyzer.manualMode" variant="warning">
+    <UiAlert :show="store.networkAnalyzer.manualMode" variant="warning">
       Network not fully analyzed because top tier is not symmetric or too large
       to analyze in a reasonable timeframe. <br />
       You can run the
@@ -11,8 +8,8 @@
         >network analysis</a
       >
       manually.
-    </Alert>
-    <Alert :show="store.networkHasDangers()" variant="danger">
+    </UiAlert>
+    <UiAlert :show="store.networkHasDangers()" variant="danger">
       {{ store.getNetworkDangers().description }}
       <br />
       See
@@ -20,8 +17,8 @@
         >network analysis</a
       >
       for details.
-    </Alert>
-    <Alert :show="store.networkHasWarnings()" variant="warning">
+    </UiAlert>
+    <UiAlert :show="store.networkHasWarnings()" variant="warning">
       {{ store.getNetworkWarnings().description }}
       <br />
       See
@@ -29,7 +26,7 @@
         >network analysis</a
       >
       for details.
-    </Alert>
+    </UiAlert>
     <div class="row row-cards row-deck">
       <div class="col-12">
         <network-statistics :network="network" />

@@ -62,7 +62,7 @@ import {
   BIconExclamationTriangle,
   BListGroup,
   BListGroupItem,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import { NodeSnapShot } from "shared";
 import useStore from "@/store/useStore";
 import { useIsLoading } from "@/composables/useIsLoading";

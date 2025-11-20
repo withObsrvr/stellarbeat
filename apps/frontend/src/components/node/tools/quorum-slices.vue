@@ -1,5 +1,5 @@
 <template>
-  <portal to="slices-modal">
+  <Teleport to="body">
     <div
       id="quorumSlicesModal"
       ref="quorumSlicesModal"
@@ -40,21 +40,20 @@
         </div>
       </div>
     </div>
-  </portal>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
 import $ from "jquery";
-import { BAlert, BPagination, BTable, VBToggle } from "bootstrap-vue";
+import { BAlert, BPagination, BTable, VBToggle } from '@/components/bootstrap-compat';
 import {
   Node,
   QuorumSet,
   QuorumSlicesGenerator,
 } from "shared";
-import Vue, { computed, nextTick, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import useStore from "@/store/useStore";
 
-Vue.directive("b-toggle", VBToggle);
 
 const props = defineProps<{
   selectedNode: Node;
@@ -104,8 +103,13 @@ onMounted(() => {
 </script>
 <style scoped>
 .modal {
-  z-index: 2000 !important; /* Increase modal z-index */
-  top: 0; /* Vertically align to top */
+  z-index: 2000 !important;
+}
+</style>
+<style>
+/* Ensure modal backdrop is below the modal but above everything else */
+.modal-backdrop {
+  z-index: 1999 !important;
 }
 </style>
 <style>

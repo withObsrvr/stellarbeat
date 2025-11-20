@@ -119,7 +119,7 @@ import {
   BFormInput,
   BFormSelect,
   BIconX,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import { AggregateChange } from "@/services/change-queue/changes/aggregate-change";
 import { EntityPropertyUpdate } from "@/services/change-queue/changes/entity-property-update";
 import useStore from "@/store/useStore";

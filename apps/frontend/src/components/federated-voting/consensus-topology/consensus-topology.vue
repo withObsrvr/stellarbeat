@@ -150,7 +150,7 @@
 import { ref, computed, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import BreadCrumbs from "../bread-crumbs.vue";
-import { BIconInfoCircle, BIconPerson } from "bootstrap-vue";
+import { BIconInfoCircle, BIconPerson } from '@/components/bootstrap-compat';
 import QuorumsTab from "./quorums.vue";
 import QuorumSlicesTab from "./quorum-slices.vue";
 import VBlockingSetsTab from "./v-blocking-sets.vue";

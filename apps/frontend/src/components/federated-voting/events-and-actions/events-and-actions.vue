@@ -65,7 +65,7 @@ import Actions from "./actions/actions.vue";
 import BreadCrumbs from "./../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import SelectedNodeEventsAndActions from "./selected-node-events-and-actions/selected-node-events-and-actions.vue";
-import { BIconInfoCircle } from "bootstrap-vue";
+import { BIconInfoCircle } from '@/components/bootstrap-compat';
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import EventsAndActionsInfo from "./events-and-actions-info.vue";
 

@@ -94,7 +94,7 @@
 import { ref, computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { Message, QuorumSet, Vote } from "scp-simulation";
-import { BIconEnvelopeFill, BIconExclamation, BModal } from "bootstrap-vue";
+import { BIconEnvelopeFill, BIconExclamation, BModal } from '@/components/bootstrap-compat';
 
 const forgeMessageModal = ref<BModal | null>(null);
 const forgeMessage = ref({

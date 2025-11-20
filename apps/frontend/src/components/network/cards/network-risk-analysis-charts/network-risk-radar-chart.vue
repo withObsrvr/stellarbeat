@@ -86,7 +86,7 @@ import {
   watch,
 } from "vue";
 
-import { BIconInfoCircle } from "bootstrap-vue";
+import { BIconInfoCircle } from '@/components/bootstrap-compat';
 import { AutomaticNetworkAnalysis } from "@/services/NetworkAnalyzer";
 import useStore from "@/store/useStore";
 import { MergeBy } from "@stellarbeat/stellar_analysis_web";

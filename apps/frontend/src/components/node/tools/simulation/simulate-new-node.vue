@@ -1,5 +1,5 @@
 <template>
-  <portal to="simulate-node-modal">
+  <Teleport to="body">
     <div
       id="simulate-node-modal"
       ref="simulateNodeModal"
@@ -49,7 +49,7 @@
         </div>
       </div>
     </div>
-  </portal>
+  </Teleport>
 </template>
 
 <script setup lang="ts">

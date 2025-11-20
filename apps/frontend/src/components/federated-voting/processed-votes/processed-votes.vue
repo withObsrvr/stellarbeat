@@ -71,7 +71,7 @@
 import { computed, ref, watch } from "vue";
 import BreadCrumbs from "../bread-crumbs.vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import { BIconInfoCircle } from "bootstrap-vue";
+import { BIconInfoCircle } from '@/components/bootstrap-compat';
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import ProcessedVotesInfo from "./processed-votes-info.vue";
 import ProcessedVotesTable from "./processed-votes-table.vue";

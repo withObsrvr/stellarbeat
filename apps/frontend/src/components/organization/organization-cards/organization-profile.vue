@@ -153,7 +153,7 @@ import {
   BIconMap,
   BIconPhone,
   BIconShield,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import Stellar from "@/components/organization/logo/stellar.vue";
 import useStore from "@/store/useStore";
 

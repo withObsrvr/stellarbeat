@@ -107,7 +107,7 @@ import {
   UserAction,
 } from "scp-simulation";
 import { ref, computed, watch, nextTick } from "vue";
-import { BModal } from "bootstrap-vue";
+import { BModal } from '@/components/bootstrap-compat';
 import ForgeMessages from "./forge-messages.vue";
 
 const actionsList = ref<HTMLElement | null>(null);

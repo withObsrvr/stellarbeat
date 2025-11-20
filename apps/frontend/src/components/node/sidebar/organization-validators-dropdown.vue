@@ -45,12 +45,13 @@ import NodeActions from "@/components/node/sidebar/node-actions.vue";
 import OrganizationActions from "@/components/organization/sidebar/organization-actions.vue";
 import useStore from "@/store/useStore";
 import { useDropdown } from "@/composables/useDropdown";
-import { computed } from "vue";
+import { computed, toRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
 
 const props = defineProps<{
   organization: Organization;
+  expand: boolean;
 }>();
 
 const store = useStore();
@@ -58,7 +59,7 @@ const network = store.network;
 const route = useRoute();
 const router = useRouter();
 const emit = defineEmits(["toggleExpand"]);
-const { showing, toggleShow } = useDropdown(true, emit);
+const { showing, toggleShow } = useDropdown(toRef(props, 'expand'), emit);
 const validators = computed(() =>
   props.organization.validators.map((validator) =>
     network.getNodeByPublicKey(validator),

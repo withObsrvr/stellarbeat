@@ -342,7 +342,6 @@ const centerVertex: ComputedRef<ViewVertex | undefined> = computed(() => {
 
 onMounted(() => {
   updateGraph();
-  Object.freeze(viewGraph);
   networkId = store.networkId;
 });
 </script>

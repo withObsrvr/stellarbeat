@@ -1,7 +1,7 @@
 @import "./tabler-ui/variables";
 @import "bootstrap/scss/bootstrap.scss";
 @import "./tabler-ui/dashboard/dashboard";
-@import "./../../node_modules/bootstrap-vue/src/index.scss";
+// Bootstrap-Vue removed - using compatibility layer instead
 @import "federated-voting";
 
 .dropdown-item.active,

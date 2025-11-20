@@ -134,7 +134,7 @@
 import { computed, ref, watch } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import BreadCrumbs from "./bread-crumbs.vue";
-import { BIconInfoCircle } from "bootstrap-vue";
+import { BIconInfoCircle } from '@/components/bootstrap-compat';
 import FbasNodeBadge from "./fbas-node-badge.vue";
 import InfoButton from "./info-box/info-button.vue";
 import { infoBoxStore } from "./info-box/useInfoBoxStore";

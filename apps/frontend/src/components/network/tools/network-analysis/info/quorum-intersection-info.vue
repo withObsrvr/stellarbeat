@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { BModal } from "bootstrap-vue";
+import { BModal } from '@/components/bootstrap-compat';
 
 import { ref } from "vue";
 

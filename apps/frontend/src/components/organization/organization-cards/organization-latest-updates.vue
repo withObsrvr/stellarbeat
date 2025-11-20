@@ -110,7 +110,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import Vue, { type Ref, ref, toRefs, watch } from "vue";
+import { type Ref, ref, toRefs, watch } from "vue";
 import {
   Organization,
   OrganizationSnapShot,
@@ -132,7 +132,7 @@ import {
   BListGroupItem,
   BModal,
   VBModal,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router";
 import useOrganizationSnapshotRepository from "@/repositories/useOrganizationSnapshotRepository";
@@ -159,7 +159,6 @@ interface SnapshotForDelta {
   keybase: string | null;
 }
 
-Vue.directive("b-modal", VBModal);
 
 const store = useStore();
 const organizationSnapshotRepository = useOrganizationSnapshotRepository();

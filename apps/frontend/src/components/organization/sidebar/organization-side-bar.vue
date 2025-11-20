@@ -42,13 +42,15 @@
       <li class="sb-nav-item">
         <organization-validators-dropdown
           :organization="selectedOrganization"
-          :expand="true"
+          :expand="validatorsExpanded"
+          @toggle-expand="validatorsExpanded = !validatorsExpanded"
         />
       </li>
       <li class="sb-nav-item">
         <trusted-organizations-dropdown
           :organization="selectedOrganization"
-          :expand="true"
+          :expand="trustedOrganizationsExpanded"
+          @toggle-expand="trustedOrganizationsExpanded = !trustedOrganizationsExpanded"
         />
       </li>
     </template>
@@ -105,21 +107,23 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { computed } from "vue";
+import { computed, ref } from "vue";
 import { StellarCoreConfigurationGenerator } from "shared";
 import OrganizationValidatorsDropdown from "@/components/organization/sidebar/organization-validators-dropdown.vue";
 import NavLink from "@/components/side-bar/nav-link.vue";
 import SimulateNewNode from "@/components/node/tools/simulation/simulate-new-node.vue";
 import SideBar from "@/components/side-bar/side-bar.vue";
-import { BBadge, BModal, VBModal } from "bootstrap-vue";
+import { BBadge, BModal, VBModal } from '@/components/bootstrap-compat';
 import TrustedOrganizationsDropdown from "@/components/organization/sidebar/trusted-organizations-dropdown.vue";
 import useStore from "@/store/useStore";
 import { OrganizationWarningDetector } from "@/services/OrganizationWarningDetector";
 
-Vue.directive("b-modal", VBModal);
 
 const store = useStore();
 const network = store.network;
+
+const validatorsExpanded = ref(true);
+const trustedOrganizationsExpanded = ref(true);
 
 const selectedOrganization = computed(() => {
   if (!store.selectedOrganization) throw new Error("No organization selected");

@@ -12,7 +12,7 @@
 </template>
 <script setup lang="ts">
 import useStore from "@/store/useStore";
-import { BIconX } from "bootstrap-vue";
+import { BIconX } from '@/components/bootstrap-compat';
 
 const store = useStore();
 </script>

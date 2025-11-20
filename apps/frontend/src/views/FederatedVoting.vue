@@ -87,7 +87,7 @@ import NodeTrustConfig from "@/components/federated-voting/node-trust-config/nod
 import ConsensusTopology from "@/components/federated-voting/consensus-topology/consensus-topology.vue";
 import { infoBoxStore } from "@/components/federated-voting/info-box/useInfoBoxStore";
 import FederatedVotingInfo from "@/components/federated-voting/federated-voting-info.vue";
-import { BIconInfoCircle } from "bootstrap-vue";
+import { BIconInfoCircle } from '@/components/bootstrap-compat';
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { onMounted } from "vue";
 import useMetaTags from "@/composables/useMetaTags";

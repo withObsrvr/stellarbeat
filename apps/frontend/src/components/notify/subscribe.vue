@@ -173,7 +173,7 @@ import {
   BFormCheckbox,
   BFormGroup,
   BFormInput,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import { computed, type ComputedRef, onMounted, type Ref, ref } from "vue";
 import useStore from "@/store/useStore";
 

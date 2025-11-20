@@ -57,7 +57,7 @@ import {
   BIconLightning,
   BIconThreeDotsVertical,
   BIconXCircle,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 
 import { Node, QuorumSet } from "shared";
 import useStore from "@/store/useStore";

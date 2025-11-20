@@ -30,7 +30,7 @@
 <script setup lang="ts">
 import { Organization } from "shared";
 import Gauge from "@/components/charts/gauge.vue";
-import { BIconInfoCircle } from "bootstrap-vue";
+import { BIconInfoCircle } from '@/components/bootstrap-compat';
 
 defineProps<{
   organization: Organization;

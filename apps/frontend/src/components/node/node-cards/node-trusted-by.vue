@@ -13,7 +13,7 @@
 import { computed } from "vue";
 import { Node } from "shared";
 import NodesTable, { type TableNode } from "@/components/node/nodes-table.vue";
-import { BBadge } from "bootstrap-vue";
+import { BBadge } from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 
 const props = defineProps<{

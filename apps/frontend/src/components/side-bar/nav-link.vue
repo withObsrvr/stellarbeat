@@ -1,12 +1,13 @@
 <template>
   <div
+    v-bind="$attrs"
     :class="classObject"
     role="button"
     tabindex="0"
     class="d-flex justify-content-between"
-    @click="$emit('click')"
-    @keyup.enter="$emit('click')"
-    @keyup.space="$emit('click')"
+    @click="handleClick"
+    @keyup.enter="handleKeyup('enter')"
+    @keyup.space="handleKeyup('space')"
     @mouseenter="hover = true"
     @mouseleave="hover = false"
   >
@@ -51,37 +52,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import Vue, { computed, ref } from "vue";
+import { computed, ref, useAttrs } from "vue";
 import NavTitle from "@/components/side-bar/nav-title.vue";
 
-import {
-  BIcon,
-  BIconPlus,
-  BIconDownload,
-  BIconChevronRight,
-  BIconChevronDown,
-  BIconLightning,
-  BIconLightningFill,
-  BIconGearWide,
-  BIconGear,
-  BIconSearch,
-  BBadge,
-  BIconPencil,
-  BIconBroadcast,
-} from "bootstrap-vue";
-
-Vue.component("BIconPlus", BIconPlus);
-Vue.component("BIconDownload", BIconDownload);
-Vue.component("BIconChevronRight", BIconChevronRight);
-Vue.component("BIconChevronDown", BIconChevronDown);
-Vue.component("BIconLightning", BIconLightning);
-Vue.component("BIconLightningFill", BIconLightningFill);
-Vue.component("BIconGearWide", BIconGearWide);
-Vue.component("BIconGear", BIconGear);
-Vue.component("BIconSearch", BIconSearch);
-Vue.component("BBadge", BBadge);
-Vue.component("BIconPencil", BIconPencil);
-Vue.component("BIconBroadcast", BIconBroadcast);
+// Components registered globally in app.ts, no need to register here
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -121,6 +95,42 @@ const dropdownClass = computed(() => {
     right: props.showDropdownToggle,
   };
 });
+
+const emit = defineEmits(['click']);
+
+const attrs = useAttrs();
+
+function handleClick() {
+  // Check if v-b-modal directive was used by looking for the modal ID in attrs
+  const vBModalAttr = Object.keys(attrs).find(key => key === 'v-b-modal' || key.startsWith('v-b-modal.'));
+
+  if (vBModalAttr) {
+    // Extract modal ID from v-b-modal.modalId or from the attribute value
+    let modalId;
+    if (vBModalAttr.startsWith('v-b-modal.')) {
+      // v-b-modal.modalId syntax
+      modalId = vBModalAttr.substring('v-b-modal.'.length);
+    } else {
+      // v-b-modal="modalId" syntax
+      modalId = attrs[vBModalAttr];
+    }
+
+    console.log('[nav-link] Triggering modal:', modalId);
+    const modalEl = document.getElementById(modalId);
+    if (modalEl) {
+      const event = new CustomEvent('show-modal', { detail: { modalId } });
+      modalEl.dispatchEvent(event);
+    } else {
+      console.warn('[nav-link] Modal element not found:', modalId);
+    }
+  }
+
+  emit('click');
+}
+
+function handleKeyup() {
+  emit('click');
+}
 </script>
 <style scoped>
 .action {

@@ -1,6 +1,5 @@
 <template>
   <div v-if="selectedNode">
-    <portal-target name="slices-modal"> </portal-target>
     <portal-target name="simulate-node-modal"> </portal-target>
     <portal-target name="quorum-set-modals" multiple></portal-target>
     <b-alert :show="network.isNodeFailing(selectedNode)" variant="danger">
@@ -179,7 +178,7 @@ import NodeIndex from "@/components/node/node-cards/statistics/node-index.vue";
 import NodeStatistics24HActive from "@/components/node/node-cards/statistics/node-statistics-24H-active.vue";
 import NodeTrustedBy from "@/components/node/node-cards/node-trusted-by.vue";
 import NodeLatestUpdates from "@/components/node/node-cards/node-latest-updates.vue";
-import { BAlert } from "bootstrap-vue";
+import { BAlert } from '@/components/bootstrap-compat';
 import { HistoryArchiveScan } from "shared";
 import useStore from "@/store/useStore";
 import NodeStatistics30DOverloaded from "@/components/node/node-cards/statistics/node-statistics-30D-overloaded.vue";

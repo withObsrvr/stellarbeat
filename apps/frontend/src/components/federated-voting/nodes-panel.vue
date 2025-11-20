@@ -83,7 +83,7 @@ import {
   BIconCheckCircleFill,
   BIconExclamationCircleFill,
   BIconStarFill,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 
 const nodes = computed(() => {
   return federatedVotingStore.nodes.map((node) => ({

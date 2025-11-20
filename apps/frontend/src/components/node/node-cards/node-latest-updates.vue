@@ -144,7 +144,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import Vue, { type Ref, ref, toRefs, watch } from "vue";
+import { type Ref, ref, toRefs, watch } from "vue";
 import { Node, type PublicKey, QuorumSet } from "shared";
 import * as jsondiffpatch from "jsondiffpatch";
 import * as htmlFormatter from "jsondiffpatch/formatters/html";
@@ -162,7 +162,7 @@ import {
   BListGroupItem,
   BModal,
   VBModal,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import { isArray } from "shared";
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router";
@@ -198,7 +198,6 @@ interface SnapshotForDelta {
   quorumSetHashKey: string | null;
 }
 
-Vue.directive("b-modal", VBModal);
 
 const props = defineProps<{
   node: Node;

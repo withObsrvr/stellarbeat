@@ -78,8 +78,7 @@
                 target="_blank"
                 rel="noopener"
               >
-                <github />
-                Github</a
+                <span style="display: inline-flex; align-items: center;"><github />Github</span></a
               >
               <a
                 :href="`mailto:${store.appConfig.brandEmail}`"
@@ -107,7 +106,7 @@ import useStore from "@/store/useStore";
 import { computed, nextTick, onBeforeMount, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import useMetaTags from "@/composables/useMetaTags";
-import { BIconEnvelope } from "bootstrap-vue";
+import { BIconEnvelope } from '@/components/bootstrap-compat';
 
 const errorMessage = ref("Could not connect to api, please refresh the page");
 

@@ -25,3 +25,11 @@ test-org-with-self-reference.json
 docs/OBSRVR_Radar_Quarterly_Report_Sept_2025_Stellarbeat.md
 docs/OBSRVR_Radar_Quarterly_Report_Sept_2025.pdf
 .gitignore
+
+# Testing
+apps/frontend/*.png
+test-results/
+e2e-results/
+playwright-report/
+docs/PROGRESS_SUMMARY.md
+docs/SHAPE_UP_VUE3_TAILWIND.md

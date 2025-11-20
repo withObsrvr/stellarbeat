@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import { computed, type ComputedRef, ref } from "vue";
 import { Node, QuorumSet } from "shared";
-import { BBadge } from "bootstrap-vue";
+import { BBadge } from '@/components/bootstrap-compat';
 import NodesTable, { type TableNode } from "@/components/node/nodes-table.vue";
 import useStore from "@/store/useStore";
 

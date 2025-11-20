@@ -32,7 +32,7 @@
 </template>
 <script setup lang="ts">
 import { Organization } from "shared";
-import { BBadge, BIconSearch } from "bootstrap-vue";
+import { BBadge, BIconSearch } from '@/components/bootstrap-compat';
 import OrganizationsTable from "@/components/organization/organizations-table.vue";
 import useStore from "@/store/useStore";
 import { computed, ref } from "vue";

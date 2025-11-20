@@ -52,9 +52,11 @@
     <div class="row h-100">
       <aside class="col-xs-12 col-sm-5 col-lg-3 col-xl-auto mb-5">
         <div class="card pt-0 sidebar-card h-100">
-          <transition name="fade" mode="out-in">
-            <router-view name="sideBar" class="h-100 side-bar" />
-          </transition>
+          <router-view name="sideBar" v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" class="h-100 side-bar" />
+            </transition>
+          </router-view>
         </div>
       </aside>
       <div id="content" class="col-sm-7 col-lg-9 col-xl">

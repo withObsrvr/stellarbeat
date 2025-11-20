@@ -203,7 +203,7 @@
         <div class="world-loader">
           <div class="loader"></div>
         </div>
-        <world-map :full-screen="fullScreen" />
+        <WorldMap :full-screen="fullScreen" />
       </div>
       <network-graph-card
         v-else
@@ -252,7 +252,7 @@ import {
   BIconFullscreenExit,
   BIconList,
   BIconZoomIn,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import GraphLegend from "@/components/visual-navigator/graph/graph-legend.vue";
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router";

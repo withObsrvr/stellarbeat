@@ -23,7 +23,7 @@
           :level="level"
           :quorum-set="quorumSet"
           :parent-quorum-set="parentQuorumSet"
-          @expand="showing = true"
+          @expand="handleExpand"
         />
       </template>
     </nav-link>
@@ -65,7 +65,8 @@
         :parent-quorum-set="quorumSet"
         :quorum-set="innerQuorumSet"
         :level="level + 1"
-        :expand="false"
+        :expand="innerQuorumSetExpanded[index] || false"
+        @toggle-expand="toggleInnerQuorumSet(index)"
       />
     </div>
   </div>
@@ -81,7 +82,7 @@ import NavLink from "@/components/side-bar/nav-link.vue";
 import NodeActions from "@/components/node/sidebar/node-actions.vue";
 import QuorumSetActions from "@/components/node/sidebar/quorum-set-actions.vue";
 import useStore from "@/store/useStore";
-import { computed, toRefs, withDefaults } from "vue";
+import { computed, toRef, toRefs, withDefaults, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useDropdown } from "@/composables/useDropdown";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
@@ -107,7 +108,7 @@ const store = useStore();
 const router = useRouter();
 const route = useRoute();
 const emit = defineEmits(["toggleExpand"]);
-const { showing, toggleShow } = useDropdown(expand.value, emit);
+const { showing, toggleShow } = useDropdown(toRef(props, 'expand'), emit);
 
 const quorumSetDangers = computed(() => {
   if (!store.selectedNode) throw new Error("No node selected");
@@ -167,6 +168,20 @@ const validators = computed(() => {
 const innerQuorumSets = computed(() => {
   return props.quorumSet.innerQuorumSets;
 });
+
+// Track expanded state for each inner quorum set using a reactive record
+const innerQuorumSetExpanded = ref<Record<number, boolean>>({});
+
+function toggleInnerQuorumSet(index: number) {
+  innerQuorumSetExpanded.value[index] = !innerQuorumSetExpanded.value[index];
+}
+
+function handleExpand() {
+  // When quorum-set-actions wants to expand the dropdown, emit toggle if currently collapsed
+  if (!props.expand) {
+    emit('toggleExpand');
+  }
+}
 
 function selectNode(node: Node) {
   if (route.params.publicKey && route.params.publicKey === node.publicKey)

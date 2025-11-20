@@ -133,8 +133,8 @@ import {
   BIconGear,
   BIconDownload,
   BIconUpload,
-} from "bootstrap-vue";
-import { BModal, BDropdown, BDropdownItem } from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
+import { BModal, BDropdown, BDropdownItem } from '@/components/bootstrap-compat';
 import { computed, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
