@@ -10,7 +10,7 @@
 /* eslint-disable vue/require-default-prop */
 /* eslint-disable vue/require-prop-types */
 
-import { h, defineComponent, PropType, ref, onMounted, watch, Teleport, resolveComponent } from 'vue';
+import { h, defineComponent, PropType, ref, onMounted, onBeforeUnmount, watch, Teleport, resolveComponent } from 'vue';
 
 // Type exports for table field arrays
 export type BvTableField = {
@@ -307,6 +307,9 @@ export const BModal = defineComponent({
       console.log('[BModal] isVisible is now:', isVisible.value);
     };
 
+    // Store event handler references for cleanup
+    let handleGlobalEvent: ((e: Event) => void) | null = null;
+
     // Listen for show-modal event - set up as early as possible
     onMounted(() => {
       console.log('[BModal] onMounted for', props.id);
@@ -314,7 +317,7 @@ export const BModal = defineComponent({
       // Always set up global event listener for lazy modals
       if (props.id) {
         console.log('[BModal] Setting up global document listener for', props.id);
-        const handleGlobalEvent = (e: Event) => {
+        handleGlobalEvent = (e: Event) => {
           const customEvent = e as CustomEvent;
           console.log('[BModal] Received global event, detail:', customEvent.detail, 'matching:', props.id);
           if (customEvent.detail?.modalId === props.id) {
@@ -328,6 +331,18 @@ export const BModal = defineComponent({
         if (rootEl.value) {
           console.log('[BModal] Setting up direct element listener for', props.id);
           rootEl.value.addEventListener('show-modal', showModal);
+        }
+      }
+    });
+
+    // Clean up event listeners when component is unmounted
+    onBeforeUnmount(() => {
+      if (props.id) {
+        if (handleGlobalEvent) {
+          document.removeEventListener('show-modal-global', handleGlobalEvent);
+        }
+        if (rootEl.value) {
+          rootEl.value.removeEventListener('show-modal', showModal);
         }
       }
     });
