@@ -30,7 +30,6 @@
             <node-actions :node="node" />
           </template>
         </nav-link>
-        <!-- @ts-expect-error - Vue template compiler v-model type checking issue -->
         <nav-pagination
           v-model="currentPage"
           :total-rows="nodes.length"

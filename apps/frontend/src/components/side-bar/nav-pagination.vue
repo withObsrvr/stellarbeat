@@ -13,17 +13,17 @@
   </div>
 </template>
 <script setup lang="ts">
+import { withDefaults } from 'vue';
 import { BPagination } from '@/components/bootstrap-compat';
 
-defineProps({
-  modelValue: {
-    type: Number,
-    required: true,
-  },
-  totalRows: {
-    type: Number,
-    required: true,
-  },
+// Allow both modelValue (Vue 3 standard) and value (for vue-tsc compatibility)
+withDefaults(defineProps<{
+  modelValue?: number;
+  value?: number;
+  totalRows: number;
+}>(), {
+  modelValue: 1,
+  value: 1,
 });
 
 defineEmits(['update:modelValue']);
