@@ -15,7 +15,8 @@ export type BvTableField = {
   sortable?: boolean;
   class?: string;
 };
-export type BvTableFieldArray = BvTableField[] | string[];
+// Allow mixed arrays of strings and BvTableField objects
+export type BvTableFieldArray = (BvTableField | string)[];
 
 // Simple icon components using Bootstrap Icons
 export const BIconBullseye = defineComponent({

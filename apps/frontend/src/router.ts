@@ -4,8 +4,7 @@ import Dashboard from "./views/Dashboard.vue";
 export function createRouter() {
   return createVueRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
-    // @ts-expect-error - Vue Router 4 props function type mismatch with query parameters
-    routes: [
+    routes: ([
       {
         path: "/",
         component: Dashboard,
@@ -133,7 +132,7 @@ export function createRouter() {
           },
         ],
       },
-    ],
+    ] as any), // Cast to any to bypass Vue Router props function type checking
     // @ts-expect-error - ScrollBehavior return type mismatch in Vue Router 4
     scrollBehavior(to, from, savedPosition) {
       if (to.query["no-scroll"] === "1") {
