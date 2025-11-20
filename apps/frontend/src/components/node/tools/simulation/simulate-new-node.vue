@@ -1,5 +1,5 @@
 <template>
-  <portal to="simulate-node-modal">
+  <Teleport to="body">
     <div
       id="simulate-node-modal"
       ref="simulateNodeModal"
@@ -49,14 +49,14 @@
         </div>
       </div>
     </div>
-  </portal>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
 import { Node } from "shared";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 
 const newNodeName = ref("");
 const store = useStore();

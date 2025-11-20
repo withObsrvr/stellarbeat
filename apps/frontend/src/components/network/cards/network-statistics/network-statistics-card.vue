@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { BBadge, BIconInfoCircle, BModal } from "bootstrap-vue";
+import { BBadge, BIconInfoCircle, BModal } from '@/components/bootstrap-compat';
 import NetworkStatisticsChart from "@/components/network/cards/network-statistics/network-statistics-chart.vue";
 import { NetworkStatisticsAggregation } from "shared";
 import { computed, type Ref, ref, toRefs, withDefaults } from "vue";
@@ -91,7 +91,7 @@ export interface Props {
   value: number | boolean;
   initialDataLoaded: boolean;
   yearStatistics: NetworkStatisticsAggregation[];
-  statsProperty: keyof NetworkStatisticsAggregation;
+  statsProperty: string;
   isBool?: boolean;
   isSimulationSensitive?: boolean;
   unknown?: boolean;

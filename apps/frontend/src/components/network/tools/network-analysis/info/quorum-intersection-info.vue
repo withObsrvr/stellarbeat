@@ -47,13 +47,13 @@
 </template>
 
 <script setup lang="ts">
-import { BModal } from "bootstrap-vue";
+import { BModal } from '@/components/bootstrap-compat';
 
 import { ref } from "vue";
 
 const quorumIntersectionInfoModal = ref(null);
 function hideModal() {
   if (quorumIntersectionInfoModal.value)
-    (quorumIntersectionInfoModal.value as BModal).hide();
+    (quorumIntersectionInfoModal.value as typeof BModal).hide();
 }
 </script>

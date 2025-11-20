@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import * as L from "leaflet";
-import "leaflet.markercluster";
+import "leaflet.markercluster/dist/leaflet.markercluster";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
@@ -14,7 +14,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { Node } from "shared";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 
 interface CustomMarkerOptions extends L.CircleMarkerOptions {
   publicKey: string | null;
@@ -45,6 +45,7 @@ const zoom = ref(2);
 const store = useStore();
 const mapRef = ref();
 const map = ref<L.Map | null>(null);
+// @ts-expect-error - Leaflet MarkerClusterGroup types not properly exported in @types/leaflet
 const clusterGroup = ref<L.MarkerClusterGroup | null>(null);
 const fullScreen = ref(props.fullScreen);
 
@@ -182,8 +183,10 @@ onMounted(() => {
     zoom.value,
   );
   L.tileLayer(url, { attribution }).addTo(map.value as L.Map);
+  // @ts-expect-error - markerClusterGroup from leaflet.markercluster plugin not in base @types/leaflet
   clusterGroup.value = L.markerClusterGroup({
     maxClusterRadius: 30,
+    // @ts-expect-error - MarkerCluster type from leaflet.markercluster plugin
     iconCreateFunction: (cluster: L.MarkerCluster) => {
       const markers: L.Marker[] = cluster.getAllChildMarkers();
       return divIcon({
@@ -195,6 +198,7 @@ onMounted(() => {
       });
     },
   });
+  // @ts-expect-error - MarkerClusterGroup type from leaflet.markercluster plugin
   map.value?.addLayer(clusterGroup.value as L.MarkerClusterGroup);
   updateMarkers();
 });

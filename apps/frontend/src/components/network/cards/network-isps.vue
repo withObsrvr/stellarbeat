@@ -57,7 +57,7 @@
         <b-pagination
           v-model="currentPage"
           size="sm"
-          limit="3"
+          :limit="3"
           class="mb-0"
           :total-rows="totalRows"
           :per-page="perPage"
@@ -76,7 +76,7 @@ import {
   BIconThreeDotsVertical,
   BPagination,
   BTable,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 import { AggregateChange } from "@/services/change-queue/changes/aggregate-change";
 import { EntityPropertyUpdate } from "@/services/change-queue/changes/entity-property-update";

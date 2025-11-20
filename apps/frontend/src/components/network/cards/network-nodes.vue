@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import NodesTable, { type TableNode } from "@/components/node/nodes-table.vue";
-import { BBadge, BIconSearch } from "bootstrap-vue";
+import { BBadge, BIconSearch } from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 
 const store = useStore();

@@ -171,7 +171,7 @@ import {
   type ScatterDataPoint,
   type TooltipItem,
 } from "chart.js";
-import { BIconExclamationTriangle, BIconInfoCircle } from "bootstrap-vue";
+import { BIconExclamationTriangle, BIconInfoCircle } from '@/components/bootstrap-compat';
 import DateNavigator from "@/components/date-navigator.vue";
 import AggregationLineChart from "@/components/network/cards/network-risk-analysis-charts/aggregation-line-chart.vue";
 import StatisticsDateTimeNavigator from "@/components/network/cards/network-risk-analysis-charts/StatisticsDateTimeNavigator";

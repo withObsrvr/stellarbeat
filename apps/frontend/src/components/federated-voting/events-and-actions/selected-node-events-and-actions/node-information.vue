@@ -49,7 +49,7 @@ import {
   BIconInfoCircleFill,
   BIconCheckCircleFill,
   BIconQuestionCircleFill,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 
 const props = defineProps({
   publicKey: {

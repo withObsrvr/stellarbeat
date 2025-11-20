@@ -27,6 +27,8 @@
                   name: 'organization-dashboard',
                   params: {
                     organizationId: node.organizationId,
+                  },
+                  query: {
                     view: $route.query.view,
                     network: $route.query.network,
                     at: $route.query.at,

@@ -2,29 +2,31 @@
   <div v-if="totalRows > 10" class="sb-nav-pagination">
     <b-pagination
       size="sm"
-      :value="value"
+      :model-value="modelValue"
       :total-rows="totalRows"
       :per-page="10"
       first-number
       last-number
       align="left"
-      @input="$emit('input', $event)"
+      @update:model-value="$emit('update:modelValue', $event)"
     />
   </div>
 </template>
 <script setup lang="ts">
-import { BPagination } from "bootstrap-vue";
+import { withDefaults } from 'vue';
+import { BPagination } from '@/components/bootstrap-compat';
 
-defineProps({
-  value: {
-    type: Number,
-    required: true,
-  },
-  totalRows: {
-    type: Number,
-    required: true,
-  },
+// Allow both modelValue (Vue 3 standard) and value (for vue-tsc compatibility)
+withDefaults(defineProps<{
+  modelValue?: number;
+  value?: number;
+  totalRows: number;
+}>(), {
+  modelValue: 1,
+  value: 1,
 });
+
+defineEmits(['update:modelValue']);
 </script>
 
 <style scoped>

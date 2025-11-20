@@ -33,7 +33,7 @@
 </template>
 <script setup lang="ts">
 import useStore from "@/store/useStore";
-import { useRouter } from "vue-router/composables";
+import { useRouter } from "vue-router";
 
 const store = useStore();
 const router = useRouter();

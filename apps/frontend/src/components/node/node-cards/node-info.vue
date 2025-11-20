@@ -93,7 +93,7 @@
 </template>
 <script setup lang="ts">
 import { Node } from "shared";
-import { BBadge, BIconClipboard } from "bootstrap-vue";
+import { BBadge, BIconClipboard } from '@/components/bootstrap-compat';
 import FullValidatorTitle from "@/components/node/full-validator-title.vue";
 import useStore from "@/store/useStore";
 import { useTruncate } from "@/composables/useTruncate";

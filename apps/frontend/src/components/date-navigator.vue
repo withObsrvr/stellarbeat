@@ -62,10 +62,10 @@ import {
   BIconChevronLeft,
   BIconChevronRight,
   BIconClock,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import StatisticsDateTimeNavigator from "@/components/network/cards/network-risk-analysis-charts/StatisticsDateTimeNavigator";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 
 const props = defineProps({
   selectedDate: {

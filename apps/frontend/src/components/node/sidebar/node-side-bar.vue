@@ -34,7 +34,8 @@
       <li v-if="hasOrganization && organization" class="sb-nav-item">
         <organization-validators-dropdown
           :organization="organization"
-          :expand="true"
+          :expand="organizationValidatorsExpanded"
+          @toggle-expand="organizationValidatorsExpanded = !organizationValidatorsExpanded"
         />
       </li>
       <li class="sb-nav-item">
@@ -42,7 +43,7 @@
           v-if="selectedNode.isValidator"
           :quorum-set="selectedNode.quorumSet"
           :expand="quorumSetExpanded"
-          @toggleExpand="quorumSetExpanded = !quorumSetExpanded"
+          @toggle-expand="quorumSetExpanded = !quorumSetExpanded"
         />
       </li>
     </template>
@@ -127,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { computed, ref } from "vue";
+import { computed, ref } from "vue";
 import { StellarCoreConfigurationGenerator } from "shared";
 import QuorumSetDropdown from "@/components/node/sidebar/quorum-set-dropdown.vue";
 import NavLink from "@/components/side-bar/nav-link.vue";
@@ -135,15 +136,15 @@ import SimulateNewNode from "@/components/node/tools/simulation/simulate-new-nod
 import { Node } from "shared";
 import OrganizationValidatorsDropdown from "@/components/node/sidebar/organization-validators-dropdown.vue";
 import SideBar from "@/components/side-bar/side-bar.vue";
-import { BBadge, BModal, VBModal } from "bootstrap-vue";
+import { BBadge, BModal, VBModal } from '@/components/bootstrap-compat';
 import QuorumSlices from "@/components/node/tools/quorum-slices.vue";
 import useStore from "@/store/useStore";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
 
-Vue.directive("b-modal", VBModal);
 
 const store = useStore();
 const quorumSetExpanded = ref(true);
+const organizationValidatorsExpanded = ref(true);
 const tomlNodesExport = ref("");
 
 const selectedNode = computed(() => {

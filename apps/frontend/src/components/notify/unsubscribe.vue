@@ -19,9 +19,9 @@
 </template>
 
 <script setup lang="ts">
-import { BAlert } from "bootstrap-vue";
+import { BAlert } from '@/components/bootstrap-compat';
 import { onMounted, ref } from "vue";
-import { useRoute } from "vue-router/composables";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 const unsubscribing = ref(true);

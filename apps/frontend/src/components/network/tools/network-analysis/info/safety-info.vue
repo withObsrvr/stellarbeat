@@ -65,12 +65,12 @@
 </template>
 
 <script setup lang="ts">
-import { BModal } from "bootstrap-vue";
+import { BModal } from '@/components/bootstrap-compat';
 
 import { ref } from "vue";
 
 const safetyInfoModal = ref(null);
 function hideModal() {
-  if (safetyInfoModal.value) (safetyInfoModal.value as BModal).hide();
+  if (safetyInfoModal.value) (safetyInfoModal.value as typeof BModal).hide();
 }
 </script>

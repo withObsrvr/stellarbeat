@@ -320,7 +320,7 @@ import {
   BIconX,
   VBModal,
   VBToggle,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import {
   BaseQuorumSet,
   Node,
@@ -334,13 +334,11 @@ import LivenessInfo from "@/components/network/tools/network-analysis/info/liven
 import TopTierInfo from "@/components/network/tools/network-analysis/info/top-tier-info.vue";
 import { MergeBy } from "@stellarbeat/stellar_analysis_web";
 import { type FbasAnalysisWorkerResult } from "@/workers/fbas-analysis-v3.worker";
-import Vue, { onMounted, type Ref, ref } from "vue";
+import { onMounted, type Ref, ref } from "vue";
 import { useIsLoading } from "@/composables/useIsLoading";
 import useStore from "@/store/useStore";
 import useScrollTo from "@/composables/useScrollTo";
 
-Vue.directive("b-modal", VBModal);
-Vue.directive("b-toggle", VBToggle);
 
 const { isLoading, dimmerClass } = useIsLoading();
 const store = useStore();

@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { BIconShield } from "bootstrap-vue";
+import { BIconShield } from '@/components/bootstrap-compat';
 import { useTruncate } from "@/composables/useTruncate";
 import { Node } from "shared";
 

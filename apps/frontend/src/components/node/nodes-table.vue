@@ -155,7 +155,7 @@
               view: $route.query.view,
               network: $route.query.network,
               at: $route.query.at,
-              center: true,
+              center: '1',
             },
           }"
         >
@@ -181,7 +181,7 @@
       <b-pagination
         v-model="currentPage"
         size="sm"
-        limit="3"
+        :limit="3"
         class="mb-0"
         :total-rows="totalRows"
         :per-page="perPage"
@@ -199,7 +199,7 @@ import {
   BPagination,
   BTable,
   type BvTableFieldArray,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import NodeActions from "@/components/node/sidebar/node-actions.vue";
 import useStore from "@/store/useStore";
 import { useTruncate } from "@/composables/useTruncate";

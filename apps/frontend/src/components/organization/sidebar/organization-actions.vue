@@ -84,14 +84,13 @@ import {
   BIconXCircle,
   BModal,
   VBModal,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 
 import { Organization } from "shared";
 import AddOrganizationsTable from "@/components/node/tools/simulation/add-organizations-table.vue";
-import Vue, { computed, ref, type Ref, toRefs } from "vue";
+import { computed, ref, type Ref, toRefs } from "vue";
 import useStore from "@/store/useStore";
 
-Vue.directive("b-modal", VBModal);
 
 interface Props {
   organization: Organization;

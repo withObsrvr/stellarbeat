@@ -9,7 +9,12 @@
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+          config = {
+            allowUnfree = true;
+          };
+        };
         nodejs = pkgs.nodejs_20;
         # Pin pnpm to version 9.15.0
         pnpm = (pkgs.nodePackages.pnpm.override { nodejs = nodejs; }).overrideAttrs (old: {
@@ -19,6 +24,33 @@
             sha256 = "0a7xy0qwixjfs9035yfzvbvcwk1g03s1j1k8aiip1njglcqzxa09";
           };
         });
+
+        # Playwright runtime dependencies
+        playwrightRuntimeDeps = with pkgs; [
+          glib
+          nss
+          nspr
+          dbus
+          atk
+          at-spi2-core
+          at-spi2-atk
+          cups
+          libdrm
+          expat
+          libxkbcommon
+          xorg.libxcb
+          xorg.libX11
+          xorg.libXcomposite
+          xorg.libXdamage
+          xorg.libXext
+          xorg.libXfixes
+          xorg.libXrandr
+          mesa
+          libgbm
+          pango
+          cairo
+          alsa-lib
+        ];
 
         # Docker image for users service
         usersDockerImage = pkgs.dockerTools.buildImage {
@@ -154,7 +186,9 @@
             setupPostgres
             stopPostgres
             statusPostgres
-          ];
+            # Playwright for E2E testing
+            pkgs.playwright-driver
+          ] ++ playwrightRuntimeDeps;
 
           shellHook = ''
             # Ensure we're using the correct pnpm version
@@ -168,6 +202,10 @@
             # Make zlib available for CMake builds
             export PKG_CONFIG_PATH="${pkgs.zlib.dev}/lib/pkgconfig:$PKG_CONFIG_PATH"
             export CMAKE_PREFIX_PATH="${pkgs.zlib.dev}:$CMAKE_PREFIX_PATH"
+
+            # Playwright runtime dependencies
+            export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
+            export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath playwrightRuntimeDeps}:$LD_LIBRARY_PATH"
             
             # Set up PostgreSQL environment variables
             export DATABASE_DEV_URL="postgresql://user:password@localhost:25432/stellarbeat"

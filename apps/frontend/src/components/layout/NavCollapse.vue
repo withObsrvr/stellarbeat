@@ -141,7 +141,7 @@
 <script setup lang="ts">
 import { computed, type PropType } from "vue";
 import useStore from "@/store/useStore";
-import { useRoute } from "vue-router/composables";
+import { useRoute } from "vue-router";
 import { type BrandLogo } from "@/components/layout/Navbar.vue";
 import NavNetworkSelector from "@/components/layout/NavNetworkSelector.vue";
 import Search from "@/components/search.vue";
@@ -153,7 +153,7 @@ import {
   BIconHouse,
   BIconNewspaper,
   BIconQuestionCircle,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 
 defineProps({
   faqRoute: {
@@ -219,5 +219,25 @@ const homeActiveClass = computed(() => {
 <style lang="scss" scoped>
 .collapser {
   background: white;
+}
+</style>
+
+<style lang="scss">
+/* Fix Tailwind's .collapse (visibility: collapse) conflicting with Bootstrap's .collapse */
+/* Bootstrap's collapse should hide/show with display, not visibility */
+#nav_collapse.collapse {
+  visibility: visible !important;
+}
+
+/* On mobile, hide the navbar collapse by default */
+#nav_collapse.collapse:not(.show) {
+  display: none;
+}
+
+/* On large screens (lg+), always show the navbar */
+@media (min-width: 992px) {
+  #nav_collapse.collapse {
+    display: flex !important;
+  }
 }
 </style>

@@ -83,7 +83,7 @@ import OrganizationValidators from "@/components/organization/organization-cards
 import OrganizationStatisticsSubQuorum24hAvailability from "@/components/organization/organization-cards/statistics/organization-statistics-subquorum-24h-availability.vue";
 import OrganizationStatisticsSubQuorum30DAvailability from "@/components/organization/organization-cards/statistics/organization-statistics-subquorum-30D-availability.vue";
 import OrganizationLatestUpdates from "@/components/organization/organization-cards/organization-latest-updates.vue";
-import { BAlert } from "bootstrap-vue";
+import { BAlert } from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 import useOrganizationMeasurementsStore from "@/store/useOrganizationMeasurementsStore";
 import { OrganizationWarningDetector } from "@/services/OrganizationWarningDetector";

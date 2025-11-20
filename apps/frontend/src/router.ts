@@ -1,14 +1,10 @@
-import Vue from "vue";
-import Router from "vue-router";
+import { createRouter as createVueRouter, createWebHistory } from "vue-router";
 import Dashboard from "./views/Dashboard.vue";
 
-Vue.use(Router);
-
 export function createRouter() {
-  return new Router({
-    mode: "history",
-    base: import.meta.env.BASE_URL,
-    routes: [
+  return createVueRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes: ([
       {
         path: "/",
         component: Dashboard,
@@ -136,8 +132,8 @@ export function createRouter() {
           },
         ],
       },
-    ],
-
+    ] as any), // Cast to any to bypass Vue Router props function type checking
+    // @ts-expect-error - ScrollBehavior return type mismatch in Vue Router 4
     scrollBehavior(to, from, savedPosition) {
       if (to.query["no-scroll"] === "1") {
         return;

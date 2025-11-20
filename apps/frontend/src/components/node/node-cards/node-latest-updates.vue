@@ -144,7 +144,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import Vue, { type Ref, ref, toRefs, watch } from "vue";
+import { type Ref, ref, toRefs, watch } from "vue";
 import { Node, type PublicKey, QuorumSet } from "shared";
 import * as jsondiffpatch from "jsondiffpatch";
 import * as htmlFormatter from "jsondiffpatch/formatters/html";
@@ -162,10 +162,10 @@ import {
   BListGroupItem,
   BModal,
   VBModal,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import { isArray } from "shared";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import useNodeSnapshotRepository from "@/repositories/useNodeSnapshotRepository";
 
 interface Update {
@@ -198,7 +198,6 @@ interface SnapshotForDelta {
   quorumSetHashKey: string | null;
 }
 
-Vue.directive("b-modal", VBModal);
 
 const props = defineProps<{
   node: Node;
@@ -233,7 +232,7 @@ const route = useRoute();
 const isLoading = ref(true);
 const failed = ref(false);
 
-const modalDiff: Ref<BModal | null> = ref(null);
+const modalDiff: Ref<typeof BModal | null> = ref(null);
 
 function showDiff(snapShot: SnapshotForDelta) {
   if (!modalDiff.value) return;

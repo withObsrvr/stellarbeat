@@ -126,7 +126,7 @@ import { curveCatmullRomClosed, line } from "d3-shape";
 import fbasGraphService from "./TrustGraphService";
 import messageService, { MessageAnimation } from "./MessageService";
 import { ProtocolEvent } from "scp-simulation";
-import { BIconInfoCircle } from "bootstrap-vue";
+import { BIconInfoCircle } from '@/components/bootstrap-compat';
 import { infoBoxStore } from "../info-box/useInfoBoxStore";
 import FbasGraphInfo from "./trust-graph-info.vue";
 import NetworkAnalysisBadges from "../network-analysis-badges.vue";

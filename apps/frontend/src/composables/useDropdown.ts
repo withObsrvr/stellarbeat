@@ -1,12 +1,16 @@
-import { onMounted, ref } from "vue";
+import { ref, computed, Ref } from "vue";
 
 export function useDropdown(
-  expand: boolean,
+  expandProp: Ref<boolean>,
   emit: (event: "toggleExpand", ...args: unknown[]) => void,
 ) {
   const currentPage = ref(1);
   const perPage = ref(10);
-  const showing = ref(false);
+
+  // Use computed to make showing reactive to the prop
+  const showing = computed(() => {
+    return expandProp.value;
+  });
 
   function paginate<T>(items: T[]): T[] {
     return items.slice(
@@ -16,13 +20,8 @@ export function useDropdown(
   }
 
   function toggleShow(): void {
-    showing.value = !showing.value;
     emit("toggleExpand");
   }
-
-  onMounted(() => {
-    showing.value = expand;
-  });
 
   return {
     currentPage,

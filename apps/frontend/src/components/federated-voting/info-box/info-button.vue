@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { BIconInfoCircle } from "bootstrap-vue";
+import { BIconInfoCircle } from '@/components/bootstrap-compat';
 
 defineEmits(["click"]);
 </script>

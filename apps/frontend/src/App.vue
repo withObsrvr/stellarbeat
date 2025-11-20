@@ -78,8 +78,7 @@
                 target="_blank"
                 rel="noopener"
               >
-                <github />
-                Github</a
+                <span style="display: inline-flex; align-items: center;"><github />Github</span></a
               >
               <a
                 :href="`mailto:${store.appConfig.brandEmail}`"
@@ -105,9 +104,9 @@ import CustomNetwork from "@/components/network/tools/modify-network.vue";
 import { isString } from "shared";
 import useStore from "@/store/useStore";
 import { computed, nextTick, onBeforeMount, ref, watch } from "vue";
-import { useRoute } from "vue-router/composables";
+import { useRoute } from "vue-router";
 import useMetaTags from "@/composables/useMetaTags";
-import { BIconEnvelope } from "bootstrap-vue";
+import { BIconEnvelope } from '@/components/bootstrap-compat';
 
 const errorMessage = ref("Could not connect to api, please refresh the page");
 
@@ -121,7 +120,7 @@ useMetaTags(
 );
 
 const getNetworkIdFromQueryParam = (
-  networkQueryParameter: string | (string | null)[],
+  networkQueryParameter: string | null | (string | null)[],
 ): string | null => {
   if (isString(networkQueryParameter)) return networkQueryParameter;
   return null;

@@ -55,7 +55,7 @@
 import { computed, onMounted, ref } from "vue";
 
 import { Node } from "shared";
-import { BFormInput, BIconShield, BPagination, BTable } from "bootstrap-vue";
+import { BFormInput, BIconShield, BPagination, BTable } from '@/components/bootstrap-compat';
 import { useTruncate } from "@/composables/useTruncate";
 
 const props = defineProps<{

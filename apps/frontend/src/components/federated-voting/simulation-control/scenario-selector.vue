@@ -133,10 +133,10 @@ import {
   BIconGear,
   BIconDownload,
   BIconUpload,
-} from "bootstrap-vue";
-import { BModal, BDropdown, BDropdownItem } from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
+import { BModal, BDropdown, BDropdownItem } from '@/components/bootstrap-compat';
 import { computed, ref } from "vue";
-import { useRouter, useRoute } from "vue-router/composables";
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
@@ -163,10 +163,10 @@ const selectedScenarioId = computed({
 
 const isFullyConnected = ref(federatedVotingStore.overlayIsFullyConnected);
 const isGossipEnabled = ref(federatedVotingStore.overlayIsGossipEnabled);
-const settingsModal = ref<BModal | null>(null);
-const exportModal = ref<BModal | null>(null);
+const settingsModal = ref<typeof BModal | null>(null);
+const exportModal = ref<typeof BModal | null>(null);
 const exportedScenario = ref("");
-const importModal = ref<BModal | null>(null);
+const importModal = ref<typeof BModal | null>(null);
 const importJsonText = ref("");
 const importError = ref("");
 

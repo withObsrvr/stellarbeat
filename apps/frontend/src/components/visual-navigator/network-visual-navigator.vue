@@ -149,7 +149,7 @@
       >
         <b-icon-list font-scale="2" />
       </div>
-      <div class="pl-3 sb-bread-crumbs-container py-0">
+      <div class="pl-3 sb-bread-crumbs-container py-1">
         <b-breadcrumb class="sb-bread-crumbs" :items="breadCrumbs">
         </b-breadcrumb>
       </div>
@@ -203,7 +203,7 @@
         <div class="world-loader">
           <div class="loader"></div>
         </div>
-        <world-map :full-screen="fullScreen" />
+        <WorldMap :full-screen="fullScreen" />
       </div>
       <network-graph-card
         v-else
@@ -252,10 +252,10 @@ import {
   BIconFullscreenExit,
   BIconList,
   BIconZoomIn,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import GraphLegend from "@/components/visual-navigator/graph/graph-legend.vue";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import { isString } from "shared";
 
 const WorldMap = defineAsyncComponent(
@@ -377,6 +377,22 @@ function navigateToView() {
   align-self: center;
 }
 
+.sb-bread-crumbs :deep(.breadcrumb) {
+  margin-bottom: 0;
+  background-color: transparent !important;
+}
+
+.sb-bread-crumbs :deep(.breadcrumb-item) a,
+.sb-bread-crumbs :deep(.breadcrumb-item) span,
+.sb-bread-crumbs :deep(.breadcrumb-item.active) a,
+.sb-bread-crumbs :deep(.breadcrumb-item.active) span {
+  color: rgb(134, 142, 150) !important;
+}
+
+.sb-bread-crumbs :deep(.breadcrumb-item + .breadcrumb-item::before) {
+  color: rgb(134, 142, 150) !important;
+}
+
 .sb-card-fullscreen {
   z-index: 4;
   height: 100% !important;
@@ -467,6 +483,8 @@ function navigateToView() {
   display: flex;
   flex-grow: 1;
   align-items: center;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .world-loader {

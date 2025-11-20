@@ -96,7 +96,7 @@ import {
   BIconPlusCircle,
   BIconThreeDotsVertical,
   BIconXCircle,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 import QuorumSetTomlExportModal from "@/components/node/sidebar/quorum-set-toml-export-modal.vue";
 import QuorumSetAddOrganizationsModal from "@/components/node/sidebar/quorum-set-add-organizations-modal.vue";
@@ -121,7 +121,7 @@ const inputState = ref<boolean | null>(null);
 
 const store = useStore();
 
-const dropdown = ref<BDropdown | null>(null);
+const dropdown = ref<typeof BDropdown | null>(null);
 
 function deleteQuorumSet() {
   if (!parentQuorumSet.value) return;

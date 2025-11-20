@@ -17,7 +17,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { BIconExclamationTriangle } from "bootstrap-vue";
+import { BIconExclamationTriangle } from '@/components/bootstrap-compat';
 
 defineProps({
   title: { type: String, default: "" },

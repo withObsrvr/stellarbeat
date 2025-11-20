@@ -49,12 +49,12 @@
 </template>
 
 <script setup lang="ts">
-import { BModal } from "bootstrap-vue";
+import { BModal } from '@/components/bootstrap-compat';
 
 import { ref } from "vue";
 
 const topTierInfoModal = ref(null);
 function hideModal() {
-  if (topTierInfoModal.value) (topTierInfoModal.value as BModal).hide();
+  if (topTierInfoModal.value) (topTierInfoModal.value as typeof BModal).hide();
 }
 </script>

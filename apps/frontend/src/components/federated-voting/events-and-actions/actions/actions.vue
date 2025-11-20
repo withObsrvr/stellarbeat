@@ -107,7 +107,7 @@ import {
   UserAction,
 } from "scp-simulation";
 import { ref, computed, watch, nextTick } from "vue";
-import { BModal } from "bootstrap-vue";
+import { BModal } from '@/components/bootstrap-compat';
 import ForgeMessages from "./forge-messages.vue";
 
 const actionsList = ref<HTMLElement | null>(null);
@@ -121,7 +121,7 @@ const props = withDefaults(
   },
 );
 
-const disruptModal = ref<BModal | null>(null);
+const disruptModal = ref<typeof BModal | null>(null);
 const currentAction = ref<Broadcast | Gossip | null>(null);
 const neighbors = ref<string[]>([]);
 const selectedNeighbors = ref<string[]>([]);

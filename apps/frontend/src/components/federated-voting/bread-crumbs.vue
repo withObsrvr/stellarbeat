@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import { BIconArrowCounterclockwise, BIconX } from "bootstrap-vue";
+import { BIconArrowCounterclockwise, BIconX } from '@/components/bootstrap-compat';
 
 withDefaults(
   defineProps<{

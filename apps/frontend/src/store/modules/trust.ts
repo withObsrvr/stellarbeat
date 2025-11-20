@@ -1,4 +1,4 @@
-import Vue from 'vue';
+// Vue import removed - Vue.set not needed in Vue 3 (proxy-based reactivity)
 import { TrustMetrics } from '@/utils/TrustStyleCalculator';
 import { TrustDataService, NetworkTrustStats } from '@/services/TrustDataService';
 
@@ -46,12 +46,14 @@ const state: TrustState = {
 
 const mutations = {
   SET_TRUST_METRICS(state: TrustState, { publicKey, metrics }: { publicKey: string; metrics: TrustMetrics }) {
-    Vue.set(state.trustMetrics, publicKey, metrics);
+    // Vue 3: Direct assignment works due to Proxy-based reactivity
+    state.trustMetrics[publicKey] = metrics;
   },
 
   SET_MULTIPLE_TRUST_METRICS(state: TrustState, metricsMap: Map<string, TrustMetrics>) {
     metricsMap.forEach((metrics, publicKey) => {
-      Vue.set(state.trustMetrics, publicKey, metrics);
+      // Vue 3: Direct assignment works due to Proxy-based reactivity
+      state.trustMetrics[publicKey] = metrics;
     });
   },
 

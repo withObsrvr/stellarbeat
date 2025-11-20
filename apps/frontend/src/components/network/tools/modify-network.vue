@@ -36,8 +36,8 @@
         id="textarea"
         v-model="modifiedNetworkString"
         placeholder="Paste your custom network here"
-        rows="20"
-        max-rows="20"
+        :rows="20"
+        :max-rows="20"
         :state="modified ? null : isValid"
         @input="modified = true"
       ></b-form-textarea>
@@ -100,7 +100,7 @@ import {
   BListGroup,
   BListGroupItem,
   BModal,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import { Node, Organization, QuorumSet } from "shared";
 import { ModifyNetwork as ModifyNetworkChange } from "@/services/change-queue/changes/modify-network";
 import useStore from "@/store/useStore";

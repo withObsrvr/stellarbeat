@@ -20,7 +20,7 @@
 </template>
 <script setup lang="ts">
 import { computed } from "vue";
-import { BListGroup, BListGroupItem } from "bootstrap-vue";
+import { BListGroup, BListGroupItem } from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 
 const store = useStore();

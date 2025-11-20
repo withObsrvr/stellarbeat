@@ -52,9 +52,11 @@
     <div class="row h-100">
       <aside class="col-xs-12 col-sm-5 col-lg-3 col-xl-auto mb-5">
         <div class="card pt-0 sidebar-card h-100">
-          <transition name="fade" mode="out-in">
-            <router-view name="sideBar" class="h-100 side-bar" />
-          </transition>
+          <router-view v-slot="{ Component }" name="sideBar">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" class="h-100 side-bar" />
+            </transition>
+          </router-view>
         </div>
       </aside>
       <div id="content" class="col-sm-7 col-lg-9 col-xl">
@@ -90,7 +92,7 @@ import CrawlTime from "@/components/crawl-time.vue";
 import SimulationBadge from "@/components/simulation-badge.vue";
 import TimeTravelBadge from "@/components/time-travel-badge.vue";
 import useStore from "@/store/useStore";
-import { useRoute, useRouter } from "vue-router/composables";
+import { useRoute, useRouter } from "vue-router";
 import useScrollTo from "@/composables/useScrollTo";
 
 const NetworkAnalysis = defineAsyncComponent(
@@ -117,7 +119,7 @@ const scrollTo = useScrollTo();
 watch(
   route,
   (to) => {
-    if (to.params.publicKey) {
+    if (to.params.publicKey && typeof to.params.publicKey === 'string') {
       store.selectedNode = network.getNodeByPublicKey(to.params.publicKey);
       if (!store.selectedNode) {
         router.push({
@@ -130,7 +132,7 @@ watch(
         });
       }
     } else store.selectedNode = undefined;
-    if (to.params.organizationId) {
+    if (to.params.organizationId && typeof to.params.organizationId === 'string') {
       store.selectedOrganization = network.getOrganizationById(
         to.params.organizationId,
       );

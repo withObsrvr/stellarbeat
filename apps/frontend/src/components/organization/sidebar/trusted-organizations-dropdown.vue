@@ -61,13 +61,14 @@ import { Organization } from "shared";
 import NavLink from "@/components/side-bar/nav-link.vue";
 import OrganizationActions from "@/components/organization/sidebar/organization-actions.vue";
 import useStore from "@/store/useStore";
-import { computed } from "vue";
-import { useRoute, useRouter } from "vue-router/composables";
+import { computed, toRef } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useDropdown } from "@/composables/useDropdown";
 import { OrganizationWarningDetector } from "@/services/OrganizationWarningDetector";
 
 const props = defineProps<{
   organization: Organization;
+  expand: boolean;
 }>();
 
 const store = useStore();
@@ -76,7 +77,7 @@ const route = useRoute();
 const router = useRouter();
 
 const emit = defineEmits(["toggleExpand"]);
-const { showing, toggleShow } = useDropdown(true, emit);
+const { showing, toggleShow } = useDropdown(toRef(props, 'expand'), emit);
 
 const trustedOrganizations = computed(() => {
   const trustedOrganizations = new Set<Organization>();

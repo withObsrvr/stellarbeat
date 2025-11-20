@@ -51,7 +51,7 @@
 import { onMounted, ref } from "vue";
 
 import { Node, Organization } from "shared";
-import { BFormInput, BIconShield, BPagination, BTable } from "bootstrap-vue";
+import { BFormInput, BIconShield, BPagination, BTable } from '@/components/bootstrap-compat';
 
 const props = defineProps<{
   organizations: Organization[];

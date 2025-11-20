@@ -1,7 +1,6 @@
 <template>
   <div>
-    <portal-target name="simulate-node-modal"> </portal-target>
-    <b-alert :show="store.networkAnalyzer.manualMode" variant="warning">
+    <UiAlert :show="store.networkAnalyzer.manualMode" variant="warning">
       Network not fully analyzed because top tier is not symmetric or too large
       to analyze in a reasonable timeframe. <br />
       You can run the
@@ -9,8 +8,8 @@
         >network analysis</a
       >
       manually.
-    </b-alert>
-    <b-alert :show="store.networkHasDangers()" variant="danger">
+    </UiAlert>
+    <UiAlert :show="store.networkHasDangers()" variant="danger">
       {{ store.getNetworkDangers().description }}
       <br />
       See
@@ -18,8 +17,8 @@
         >network analysis</a
       >
       for details.
-    </b-alert>
-    <b-alert :show="store.networkHasWarnings()" variant="warning">
+    </UiAlert>
+    <UiAlert :show="store.networkHasWarnings()" variant="warning">
       {{ store.getNetworkWarnings().description }}
       <br />
       See
@@ -27,7 +26,7 @@
         >network analysis</a
       >
       for details.
-    </b-alert>
+    </UiAlert>
     <div class="row row-cards row-deck">
       <div class="col-12">
         <network-statistics :network="network" />
@@ -115,7 +114,6 @@ import NetworkStatistics from "@/components/network/cards/network-statistics/net
 import NetworkNodes from "@/components/network/cards/network-nodes.vue";
 import NetworkOrganizations from "@/components/network/cards/network-organizations.vue";
 import NetworkAnalysis from "@/components/network/cards/network-risk-analysis-charts/network-analysis.vue";
-import { BAlert } from "bootstrap-vue";
 import LivenessInfo from "@/components/network/cards/network-risk-analysis-charts/liveness-info.vue";
 import SafetyInfo from "@/components/network/cards/network-risk-analysis-charts/safety-info.vue";
 import NetworkValidatorUpdates from "@/components/network/cards/network-validator-updates.vue";

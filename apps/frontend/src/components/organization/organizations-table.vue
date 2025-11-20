@@ -37,8 +37,8 @@
                     center: '1',
                     view: $route.query.view,
                     network: $route.query.network,
+                    at: $route.query.at,
                   },
-                  at: $route.query.at,
                 }"
               >
                 {{ validator.displayName }}
@@ -176,7 +176,7 @@
       <b-pagination
         v-model="currentPage"
         size="sm"
-        limit="3"
+        :limit="3"
         class="mb-0"
         :total-rows="totalRows"
         :per-page="perPage"
@@ -194,7 +194,7 @@ import {
   BPagination,
   BTable,
   type BvTableFieldArray,
-} from "bootstrap-vue";
+} from '@/components/bootstrap-compat';
 import OrganizationActions from "@/components/organization/sidebar/organization-actions.vue";
 import useStore from "@/store/useStore";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";

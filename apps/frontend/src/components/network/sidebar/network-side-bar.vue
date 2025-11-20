@@ -35,12 +35,14 @@
         <organizations-dropdown
           :organizations="networkTransitiveQuorumSetOrganizations"
           :expand="organizationsExpanded"
+          @toggle-expand="organizationsExpanded = !organizationsExpanded"
         />
       </li>
       <li class="sb-nav-item">
         <validators-dropdown
           :nodes="networkTransitiveQuorumSetNodes"
           :expand="validatorsExpanded"
+          @toggle-expand="handleValidatorsToggle"
         />
       </li>
     </template>
@@ -103,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { computed, ref } from "vue";
+import { computed, ref } from "vue";
 import { StellarCoreConfigurationGenerator } from "shared";
 import SimulateNewNode from "@/components/node/tools/simulation/simulate-new-node.vue";
 import ValidatorsDropdown from "@/components/network/sidebar/validators-dropdown.vue";
@@ -111,13 +113,10 @@ import NavLink from "@/components/side-bar/nav-link.vue";
 import OrganizationsDropdown from "@/components/network/sidebar/organizations-dropdown.vue";
 import SideBar from "@/components/side-bar/side-bar.vue";
 
-import { BBadge, BIconHouse, BModal, VBModal } from "bootstrap-vue";
+// Components and directives registered globally in app.ts
 import useStore from "@/store/useStore";
 import useScrollTo from "@/composables/useScrollTo";
 import ModifyNetwork from "@/components/network/tools/modify-network.vue";
-
-Vue.directive("b-modal", VBModal);
-Vue.component("BIconHouse", BIconHouse);
 
 const organizationsExpanded = ref(true);
 const store = useStore();
@@ -161,5 +160,9 @@ const tomlNodesExport = computed(() => {
 
 function scrollToHorizonCard() {
   scrollTo("public-horizon-apis-card");
+}
+
+function handleValidatorsToggle() {
+  validatorsExpanded.value = !validatorsExpanded.value;
 }
 </script>

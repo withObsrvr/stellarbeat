@@ -293,11 +293,45 @@ watch(selectedVertices, () => {
 });
 watch(viewGraph, () => {
   isLoading.value = true;
+
+  // Serialize vertices and edges to plain objects for Web Worker
+  // Class instances cannot be cloned by postMessage's structured clone algorithm
+  const vertices = Array.from(viewGraph.value.viewVertices.values()).map(v => ({
+    key: v.key,
+    label: v.label,
+    x: v.x,
+    y: v.y,
+    isPartOfTransitiveQuorumSet: v.isPartOfTransitiveQuorumSet,
+    isTrustingSelectedVertex: v.isTrustingSelectedVertex,
+    isTrustedBySelectedVertex: v.isTrustedBySelectedVertex,
+    selected: v.selected,
+    isFailing: v.isFailing,
+    trustCentralityScore: v.trustCentralityScore,
+    pageRankScore: v.pageRankScore,
+    trustRank: v.trustRank,
+    organizationalDiversity: v.organizationalDiversity
+  }));
+
+  const edges = Array.from(viewGraph.value.viewEdges.values()).map(e => ({
+    key: e.key,
+    source: e.source,
+    target: e.target,
+    parent: e.parent,
+    child: e.child,
+    isPartOfStronglyConnectedComponent: e.isPartOfStronglyConnectedComponent,
+    isPartOfTransitiveQuorumSet: e.isPartOfTransitiveQuorumSet,
+    highlightAsTrusting: e.highlightAsTrusting,
+    highlightAsTrusted: e.highlightAsTrusted,
+    isFailing: e.isFailing,
+    x: e.x,
+    y: e.y
+  }));
+
   computeGraphWorker.postMessage({
     width: width(),
     height: height(),
-    vertices: Array.from(viewGraph.value.viewVertices.values()),
-    edges: Array.from(viewGraph.value.viewEdges.values()),
+    vertices: vertices,
+    edges: edges,
   });
 });
 

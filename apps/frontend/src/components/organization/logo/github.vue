@@ -18,4 +18,10 @@
 </template>
 
 <script setup lang="ts"></script>
-<style scoped></style>
+<style scoped>
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+</style>
