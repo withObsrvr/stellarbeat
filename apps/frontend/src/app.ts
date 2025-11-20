@@ -48,6 +48,7 @@ Object.entries(bootstrapCompat).forEach(([name, component]) => {
     app.directive('b-toggle', component);
   } else {
     // Register as component
+    // @ts-expect-error - Bootstrap compat components have complex union types that TypeScript can't properly narrow
     app.component(name, component);
   }
 });

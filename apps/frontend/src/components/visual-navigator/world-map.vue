@@ -45,6 +45,7 @@ const zoom = ref(2);
 const store = useStore();
 const mapRef = ref();
 const map = ref<L.Map | null>(null);
+// @ts-expect-error - Leaflet MarkerClusterGroup types not properly exported in @types/leaflet
 const clusterGroup = ref<L.MarkerClusterGroup | null>(null);
 const fullScreen = ref(props.fullScreen);
 
@@ -182,8 +183,10 @@ onMounted(() => {
     zoom.value,
   );
   L.tileLayer(url, { attribution }).addTo(map.value as L.Map);
+  // @ts-expect-error - markerClusterGroup from leaflet.markercluster plugin not in base @types/leaflet
   clusterGroup.value = L.markerClusterGroup({
     maxClusterRadius: 30,
+    // @ts-expect-error - MarkerCluster type from leaflet.markercluster plugin
     iconCreateFunction: (cluster: L.MarkerCluster) => {
       const markers: L.Marker[] = cluster.getAllChildMarkers();
       return divIcon({
@@ -195,6 +198,7 @@ onMounted(() => {
       });
     },
   });
+  // @ts-expect-error - MarkerClusterGroup type from leaflet.markercluster plugin
   map.value?.addLayer(clusterGroup.value as L.MarkerClusterGroup);
   updateMarkers();
 });

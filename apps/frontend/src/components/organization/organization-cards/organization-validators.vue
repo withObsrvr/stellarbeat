@@ -1,5 +1,6 @@
 <template>
   <div class="card">
+    <!-- @ts-expect-error - Bootstrap table fields type mismatch with mixed string/object array -->
     <nodes-table :nodes="validators" :fields="fields" />
   </div>
 </template>

@@ -33,6 +33,7 @@
           <organization-actions :organization="organization" />
         </template>
       </nav-link>
+      <!-- @ts-expect-error - Vue template compiler v-model type checking issue -->
       <nav-pagination
         v-model="currentPage"
         :total-rows="organizations.length"

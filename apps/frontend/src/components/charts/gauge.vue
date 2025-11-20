@@ -69,7 +69,7 @@ onMounted(() => {
     data: {
       datasets: [
         {
-          label: title?.value,
+          label: title?.value || '',
           backgroundColor: [valueColor?.value, negativeValueColor?.value],
           data: [
             value?.value,
@@ -77,7 +77,7 @@ onMounted(() => {
           ],
         },
       ],
-      labels: [title?.value, ""],
+      labels: [title?.value || '', ""],
     },
     options: {
       plugins: {
@@ -99,7 +99,9 @@ onMounted(() => {
       maintainAspectRatio: true,
     },
   });
-  chart.options.animation = false; // disables all animations
+  if (chart) {
+    chart.options.animation = false; // disables all animations
+  }
 });
 
 onBeforeUnmount(() => {

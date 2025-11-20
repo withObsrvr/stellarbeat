@@ -44,12 +44,12 @@
 
 <script setup lang="ts">
 import { computed, type ComputedRef, ref } from "vue";
-import { type RawLocation } from "vue-router";
+import { type RouteLocationRaw } from "vue-router";
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router";
 import { BIconSearch } from '@/components/bootstrap-compat';
 
-type Match = { name: string; type: string; route: RawLocation };
+type Match = { name: string; type: string; route: RouteLocationRaw };
 const searchString = ref("");
 const arrowCounter = ref(-1);
 
@@ -87,7 +87,7 @@ const filteredList: ComputedRef<Match[]> = computed(() => {
             view: route.query.view,
             network: route.query.network,
           },
-        } as RawLocation,
+        } as RouteLocationRaw,
       };
     });
 
@@ -110,7 +110,7 @@ const filteredList: ComputedRef<Match[]> = computed(() => {
             view: route.query.view,
             network: route.query.network,
           },
-        } as RawLocation,
+        } as RouteLocationRaw,
       };
     });
 

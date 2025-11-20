@@ -6,8 +6,8 @@
     tabindex="0"
     class="d-flex justify-content-between"
     @click="handleClick"
-    @keyup.enter="handleKeyup('enter')"
-    @keyup.space="handleKeyup('space')"
+    @keyup.enter="handleKeyup"
+    @keyup.space="handleKeyup"
     @mouseenter="hover = true"
     @mouseleave="hover = false"
   >
