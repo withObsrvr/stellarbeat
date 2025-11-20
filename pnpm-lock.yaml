@@ -262,6 +262,9 @@ importers:
       '@stellarbeat/stellar_analysis_web':
         specifier: ^0.7.0
         version: 0.7.0
+      '@vueform/multiselect':
+        specifier: ^2.6.11
+        version: 2.6.11
       bootstrap:
         specifier: 4.6.1
         version: 4.6.1(jquery@3.7.1)(popper.js@1.16.1)
@@ -2241,6 +2244,9 @@ packages:
 
   '@vue/shared@3.5.24':
     resolution: {integrity: sha512-9cwHL2EsJBdi8NY22pngYYWzkTDhld6fAD6jlaeloNGciNSJL6bLpbxVgXl96X00Jtc6YWQv96YA/0sxex/k1A==}
+
+  '@vueform/multiselect@2.6.11':
+    resolution: {integrity: sha512-iG4TGfqE3baftbSGF0PhoS+xZOCnV0ChkDo9rwhJ/Qi2YlCdb6tyQCjvyug3jnzncga8+d85kx0WvG7rDYFqiA==}
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -7491,6 +7497,8 @@ snapshots:
   '@vue/shared@3.5.11': {}
 
   '@vue/shared@3.5.24': {}
+
+  '@vueform/multiselect@2.6.11': {}
 
   abort-controller@3.0.0:
     dependencies:

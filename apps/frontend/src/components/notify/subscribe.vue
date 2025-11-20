@@ -30,14 +30,14 @@
           <multiselect
             id="nodes-select"
             v-model="selectedNodes"
-            :multiple="true"
+            mode="tags"
             :close-on-select="false"
-            :clear-on-select="false"
+            :searchable="true"
             placeholder="Nodes"
             label="name"
-            track-by="name"
+            valueProp="publicKey"
+            :object="true"
             :options="nodes"
-            :internal-search="false"
             @search-change="searchNodes"
           >
           </multiselect>
@@ -52,12 +52,13 @@
           <multiselect
             id="organization-select"
             v-model="selectedOrganizations"
-            :multiple="true"
+            mode="tags"
             :close-on-select="false"
-            :clear-on-select="false"
+            :searchable="true"
             placeholder="Organizations"
             label="name"
-            track-by="name"
+            valueProp="id"
+            :object="true"
             :options="organizations"
           >
           </multiselect>
@@ -166,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import { Multiselect } from "vue-multiselect";
+import Multiselect from "@vueform/multiselect";
 import {
   BAlert,
   BForm,
@@ -358,6 +359,6 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style src="@vueform/multiselect/themes/default.css"></style>
 
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style scoped></style>

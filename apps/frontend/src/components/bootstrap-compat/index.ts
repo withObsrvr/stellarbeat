@@ -10,7 +10,7 @@
 /* eslint-disable vue/require-default-prop */
 /* eslint-disable vue/require-prop-types */
 
-import { h, defineComponent, PropType, ref, onMounted, watch, Teleport } from 'vue';
+import { h, defineComponent, PropType, ref, onMounted, watch, Teleport, resolveComponent } from 'vue';
 
 // Type exports for table field arrays
 export type BvTableField = {
@@ -88,7 +88,20 @@ export const BIconFullscreenExit = defineComponent({
 });
 
 export const BIconList = defineComponent({
-  render: () => h('i', { class: 'bi bi-list' })
+  props: {
+    fontScale: {
+      type: [String, Number],
+      default: 1
+    }
+  },
+  setup(props) {
+    return () => h('i', {
+      class: 'bi bi-list',
+      style: {
+        fontSize: `${Number(props.fontScale) * 15}px`
+      }
+    });
+  }
 });
 
 export const BIconZoomIn = defineComponent({
@@ -1078,10 +1091,43 @@ export const BSpinner = defineComponent({
 // BBreadcrumb
 export const BBreadcrumb = defineComponent({
   name: 'BBreadcrumb',
+  props: {
+    items: {
+      type: Array as PropType<Array<{
+        text?: string;
+        to?: any;
+        active?: boolean;
+      }>>,
+      default: () => []
+    }
+  },
   setup(props, { slots }) {
-    return () => h('nav', { 'aria-label': 'breadcrumb' }, [
-      h('ol', { class: 'breadcrumb' }, slots.default?.())
-    ]);
+    return () => {
+      const RouterLink = resolveComponent('RouterLink');
+
+      const children = props.items.length > 0
+        ? props.items.map((item, index) => {
+            const isActive = item.active !== undefined ? item.active : index === props.items.length - 1;
+            const liClass = isActive ? 'breadcrumb-item active' : 'breadcrumb-item';
+
+            if (item.to) {
+              // Return breadcrumb item with router-link
+              return h('li', { class: liClass }, [
+                h(RouterLink, { to: item.to }, () => item.text)
+              ]);
+            } else {
+              // Return breadcrumb item with span
+              return h('li', { class: liClass }, [
+                h('span', { 'aria-current': isActive ? 'location' : undefined }, item.text)
+              ]);
+            }
+          })
+        : slots.default?.();
+
+      return h('nav', { 'aria-label': 'breadcrumb' }, [
+        h('ol', { class: 'breadcrumb' }, children)
+      ]);
+    };
   }
 });
 
