@@ -55,6 +55,6 @@ import { ref } from "vue";
 
 const topTierInfoModal = ref(null);
 function hideModal() {
-  if (topTierInfoModal.value) (topTierInfoModal.value as BModal).hide();
+  if (topTierInfoModal.value) (topTierInfoModal.value as typeof BModal).hide();
 }
 </script>

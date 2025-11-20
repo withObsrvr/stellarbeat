@@ -54,6 +54,6 @@ import { ref } from "vue";
 const quorumIntersectionInfoModal = ref(null);
 function hideModal() {
   if (quorumIntersectionInfoModal.value)
-    (quorumIntersectionInfoModal.value as BModal).hide();
+    (quorumIntersectionInfoModal.value as typeof BModal).hide();
 }
 </script>

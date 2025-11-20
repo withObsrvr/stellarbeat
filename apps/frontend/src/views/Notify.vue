@@ -9,7 +9,7 @@
         <router-view />
       </div>
       <div
-        v-show="$route.name && !$route.name.match('privacy')"
+        v-show="$route.name && typeof $route.name === 'string' && !$route.name.match('privacy')"
         class="card-footer"
       >
         <div class="d-flex privacy-link">

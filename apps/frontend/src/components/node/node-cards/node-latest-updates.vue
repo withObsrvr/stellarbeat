@@ -232,7 +232,7 @@ const route = useRoute();
 const isLoading = ref(true);
 const failed = ref(false);
 
-const modalDiff: Ref<BModal | null> = ref(null);
+const modalDiff: Ref<typeof BModal | null> = ref(null);
 
 function showDiff(snapShot: SnapshotForDelta) {
   if (!modalDiff.value) return;

@@ -96,7 +96,7 @@ import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 import { Message, QuorumSet, Vote } from "scp-simulation";
 import { BIconEnvelopeFill, BIconExclamation, BModal } from '@/components/bootstrap-compat';
 
-const forgeMessageModal = ref<BModal | null>(null);
+const forgeMessageModal = ref<typeof BModal | null>(null);
 const forgeMessage = ref({
   from: "",
   to: "",

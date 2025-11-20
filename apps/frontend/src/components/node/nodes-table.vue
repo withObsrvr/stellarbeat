@@ -155,7 +155,7 @@
               view: $route.query.view,
               network: $route.query.network,
               at: $route.query.at,
-              center: true,
+              center: '1',
             },
           }"
         >

@@ -37,8 +37,8 @@
                     center: '1',
                     view: $route.query.view,
                     network: $route.query.network,
+                    at: $route.query.at,
                   },
-                  at: $route.query.at,
                 }"
               >
                 {{ validator.displayName }}

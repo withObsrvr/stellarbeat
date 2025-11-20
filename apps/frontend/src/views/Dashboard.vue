@@ -119,7 +119,7 @@ const scrollTo = useScrollTo();
 watch(
   route,
   (to) => {
-    if (to.params.publicKey) {
+    if (to.params.publicKey && typeof to.params.publicKey === 'string') {
       store.selectedNode = network.getNodeByPublicKey(to.params.publicKey);
       if (!store.selectedNode) {
         router.push({
@@ -132,7 +132,7 @@ watch(
         });
       }
     } else store.selectedNode = undefined;
-    if (to.params.organizationId) {
+    if (to.params.organizationId && typeof to.params.organizationId === 'string') {
       store.selectedOrganization = network.getOrganizationById(
         to.params.organizationId,
       );

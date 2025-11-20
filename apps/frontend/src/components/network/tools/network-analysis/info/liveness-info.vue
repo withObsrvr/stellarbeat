@@ -66,6 +66,6 @@ import { ref } from "vue";
 
 const livenessInfoModal = ref(null);
 function hideModal() {
-  if (livenessInfoModal.value) (livenessInfoModal.value as BModal).hide();
+  if (livenessInfoModal.value) (livenessInfoModal.value as typeof BModal).hide();
 }
 </script>

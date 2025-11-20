@@ -163,10 +163,10 @@ const selectedScenarioId = computed({
 
 const isFullyConnected = ref(federatedVotingStore.overlayIsFullyConnected);
 const isGossipEnabled = ref(federatedVotingStore.overlayIsGossipEnabled);
-const settingsModal = ref<BModal | null>(null);
-const exportModal = ref<BModal | null>(null);
+const settingsModal = ref<typeof BModal | null>(null);
+const exportModal = ref<typeof BModal | null>(null);
 const exportedScenario = ref("");
-const importModal = ref<BModal | null>(null);
+const importModal = ref<typeof BModal | null>(null);
 const importJsonText = ref("");
 const importError = ref("");
 

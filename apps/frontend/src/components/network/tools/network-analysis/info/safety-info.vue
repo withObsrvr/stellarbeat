@@ -71,6 +71,6 @@ import { ref } from "vue";
 
 const safetyInfoModal = ref(null);
 function hideModal() {
-  if (safetyInfoModal.value) (safetyInfoModal.value as BModal).hide();
+  if (safetyInfoModal.value) (safetyInfoModal.value as typeof BModal).hide();
 }
 </script>

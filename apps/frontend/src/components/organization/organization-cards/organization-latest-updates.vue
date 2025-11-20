@@ -179,7 +179,7 @@ const updatesPerDate: Ref<
 
 const isLoading = ref(true);
 const failed = ref(false);
-const modalDiff: Ref<BModal | null> = ref(null);
+const modalDiff: Ref<typeof BModal | null> = ref(null);
 
 const props = defineProps<{
   organization: Organization;

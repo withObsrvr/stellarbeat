@@ -121,7 +121,7 @@ const inputState = ref<boolean | null>(null);
 
 const store = useStore();
 
-const dropdown = ref<BDropdown | null>(null);
+const dropdown = ref<typeof BDropdown | null>(null);
 
 function deleteQuorumSet() {
   if (!parentQuorumSet.value) return;

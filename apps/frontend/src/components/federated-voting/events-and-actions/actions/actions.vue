@@ -121,7 +121,7 @@ const props = withDefaults(
   },
 );
 
-const disruptModal = ref<BModal | null>(null);
+const disruptModal = ref<typeof BModal | null>(null);
 const currentAction = ref<Broadcast | Gossip | null>(null);
 const neighbors = ref<string[]>([]);
 const selectedNeighbors = ref<string[]>([]);

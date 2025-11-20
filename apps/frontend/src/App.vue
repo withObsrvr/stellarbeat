@@ -120,7 +120,7 @@ useMetaTags(
 );
 
 const getNetworkIdFromQueryParam = (
-  networkQueryParameter: string | (string | null)[],
+  networkQueryParameter: string | null | (string | null)[],
 ): string | null => {
   if (isString(networkQueryParameter)) return networkQueryParameter;
   return null;
