@@ -43,9 +43,9 @@
               </div>
             </div>
             <button
+              v-b-toggle="'nav_collapse'"
               class="navbar-toggler"
               type="button"
-              v-b-toggle="'nav_collapse'"
               aria-controls="nav_collapse"
               aria-expanded="false"
               aria-label="Toggle navigation"

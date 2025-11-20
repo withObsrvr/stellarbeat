@@ -6,6 +6,10 @@
  * Goal: Get the app running, then incrementally replace with Tailwind components.
  */
 
+/* eslint-disable vue/one-component-per-file */
+/* eslint-disable vue/require-default-prop */
+/* eslint-disable vue/require-prop-types */
+
 import { h, defineComponent, PropType, ref, onMounted, watch, Teleport } from 'vue';
 
 // Type exports for table field arrays

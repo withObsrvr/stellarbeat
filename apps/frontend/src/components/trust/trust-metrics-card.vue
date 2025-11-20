@@ -5,7 +5,7 @@
         <b-icon-shield-check class="mr-2" />
         Trust Metrics
       </h5>
-      <small class="text-muted" v-if="lastCalculation">
+      <small v-if="lastCalculation" class="text-muted">
         Updated {{ lastCalculationFormatted }}
       </small>
     </b-card-header>
@@ -44,11 +44,11 @@
             <span class="metric-label">PageRank Score:</span>
             <span class="metric-value">{{ formattedPageRankScore }}</span>
           </div>
-          <div class="metric-row" v-if="organizationalDiversity !== undefined">
+          <div v-if="organizationalDiversity !== undefined" class="metric-row">
             <span class="metric-label">Organizational Diversity:</span>
             <span class="metric-value">{{ organizationalDiversity }} orgs</span>
           </div>
-          <div class="metric-row" v-if="incomingTrustCount !== undefined">
+          <div v-if="incomingTrustCount !== undefined" class="metric-row">
             <span class="metric-label">Incoming Trust:</span>
             <span class="metric-value">{{ incomingTrustCount }} connections</span>
           </div>

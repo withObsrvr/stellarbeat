@@ -137,7 +137,7 @@ test.describe('Production vs Local Comparison', () => {
 
     if (href) {
       // Extract just the path from href
-      const nodePath = href.replace(/^https?:\/\/[^\/]+/, '');
+      const nodePath = href.replace(/^https?:\/\/[^/]+/, '');
       console.log('Comparing node:', nodePath);
 
       // Navigate both to the same node

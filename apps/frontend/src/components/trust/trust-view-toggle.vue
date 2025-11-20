@@ -51,9 +51,9 @@
       <!-- Error Indicator -->
       <b-icon-exclamation-triangle 
         v-if="error" 
+        v-b-tooltip.hover
         variant="danger"
         class="ml-2"
-        v-b-tooltip.hover
         :title="error"
       />
 
@@ -123,7 +123,7 @@
     </b-collapse>
 
     <!-- Info Toggle Button -->
-    <div class="text-center mt-2" v-if="viewMode === 'seeded' && summary">
+    <div v-if="viewMode === 'seeded' && summary" class="text-center mt-2">
       <b-button
         variant="link"
         size="sm"
