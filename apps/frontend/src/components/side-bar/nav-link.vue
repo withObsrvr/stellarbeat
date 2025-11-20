@@ -121,7 +121,14 @@ function handleClick() {
       const event = new CustomEvent('show-modal', { detail: { modalId } });
       modalEl.dispatchEvent(event);
     } else {
-      console.warn('[nav-link] Modal element not found:', modalId);
+      // If modal element not found (lazy mount), dispatch global event
+      console.log('[nav-link] Modal element not found, dispatching global event for', modalId);
+      const globalEvent = new CustomEvent('show-modal-global', {
+        detail: { modalId },
+        bubbles: true,
+        composed: true
+      });
+      document.dispatchEvent(globalEvent);
     }
   }
 

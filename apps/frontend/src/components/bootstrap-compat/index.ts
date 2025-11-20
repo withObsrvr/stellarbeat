@@ -310,19 +310,25 @@ export const BModal = defineComponent({
     // Listen for show-modal event - set up as early as possible
     onMounted(() => {
       console.log('[BModal] onMounted for', props.id);
-      if (props.id && rootEl.value) {
-        console.log('[BModal] Setting up event listener for', props.id);
-        rootEl.value.addEventListener('show-modal', showModal);
-      } else if (props.id) {
-        // Fallback: listen on document for this modal ID
-        console.log('[BModal] rootEl not ready, setting up document listener for', props.id);
+
+      // Always set up global event listener for lazy modals
+      if (props.id) {
+        console.log('[BModal] Setting up global document listener for', props.id);
         const handleGlobalEvent = (e: Event) => {
           const customEvent = e as CustomEvent;
+          console.log('[BModal] Received global event, detail:', customEvent.detail, 'matching:', props.id);
           if (customEvent.detail?.modalId === props.id) {
+            console.log('[BModal] Global event matched modal ID', props.id);
             showModal();
           }
         };
         document.addEventListener('show-modal-global', handleGlobalEvent);
+
+        // Also set up direct element listener if rootEl is available
+        if (rootEl.value) {
+          console.log('[BModal] Setting up direct element listener for', props.id);
+          rootEl.value.addEventListener('show-modal', showModal);
+        }
       }
     });
 
@@ -1150,7 +1156,14 @@ export const VBModal: Directive = {
         console.log('[VBModal] Dispatching show-modal event');
         modalEl.dispatchEvent(event);
       } else {
-        console.warn('[VBModal] Modal element not found with ID:', modalId);
+        // If modal element not found (lazy mount), dispatch global event
+        console.log('[VBModal] Modal element not found, dispatching global event for', modalId);
+        const globalEvent = new CustomEvent('show-modal-global', {
+          detail: { modalId },
+          bubbles: true,
+          composed: true
+        });
+        document.dispatchEvent(globalEvent);
       }
     });
   }

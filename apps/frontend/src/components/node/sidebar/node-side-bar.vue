@@ -114,7 +114,6 @@
       </li>
       <b-modal
         id="tomlExportModal"
-        lazy
         size="lg"
         title="Stellar Core Config"
         ok-only
