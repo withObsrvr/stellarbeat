@@ -106,7 +106,8 @@
         class="sb-nav-item"
       >
         <nav-link
-          v-b-modal.tomlExportModal
+          data-toggle="modal"
+          data-target="#tomlExportModal"
           :title="'Stellar core config'"
           :show-icon="true"
           icon="download"
@@ -135,7 +136,7 @@ import SimulateNewNode from "@/components/node/tools/simulation/simulate-new-nod
 import { Node } from "shared";
 import OrganizationValidatorsDropdown from "@/components/node/sidebar/organization-validators-dropdown.vue";
 import SideBar from "@/components/side-bar/side-bar.vue";
-import { BBadge, BModal, VBModal } from '@/components/bootstrap-compat';
+import { BBadge, BModal } from '@/components/bootstrap-compat';
 import QuorumSlices from "@/components/node/tools/quorum-slices.vue";
 import useStore from "@/store/useStore";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";

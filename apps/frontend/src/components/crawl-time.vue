@@ -3,7 +3,7 @@
     <b-form-datepicker
       v-model="time"
       size="sm"
-      class="date-picker p-0"
+      class="date-picker"
       :date-format-options="{
         year: 'numeric',
         month: 'short',
@@ -20,7 +20,7 @@
     <b-form-timepicker
       v-model="crawlTime"
       size="sm"
-      class="time-picker p-0"
+      class="time-picker"
       dropleft
     >
       <template #button-content></template>
@@ -111,6 +111,7 @@ function timeToDateObject() {
 <style lang="scss" scoped>
 .date-picker {
   width: auto;
+  height: 31px;
   border-bottom-right-radius: 0;
   border-top-right-radius: 0;
   border-right: 0;
@@ -129,6 +130,7 @@ function timeToDateObject() {
 
 .time-picker {
   width: 120px;
+  height: 31px;
   border-radius: 0;
   border-right: none;
 }

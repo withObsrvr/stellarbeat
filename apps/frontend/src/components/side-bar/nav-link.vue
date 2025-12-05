@@ -101,8 +101,35 @@ const emit = defineEmits(['click']);
 const attrs = useAttrs();
 
 function handleClick() {
+  console.log('[nav-link] Click handler called');
+  console.log('[nav-link] attrs:', attrs);
+
+  // Check for Bootstrap data-toggle and data-target attributes
+  if (attrs['data-toggle'] === 'modal' && attrs['data-target']) {
+    // Extract modal ID from data-target (remove the # prefix)
+    const modalId = (attrs['data-target'] as string).replace('#', '');
+    console.log('[nav-link] Found data-toggle modal with target:', modalId);
+
+    const modalEl = document.getElementById(modalId);
+    if (modalEl) {
+      console.log('[nav-link] Modal element found, dispatching direct event');
+      const event = new CustomEvent('show-modal', { detail: { modalId } });
+      modalEl.dispatchEvent(event);
+    } else {
+      // If modal element not found (lazy mount), dispatch global event
+      console.log('[nav-link] Modal element not found, dispatching global event for', modalId);
+      const globalEvent = new CustomEvent('show-modal-global', {
+        detail: { modalId },
+        bubbles: true,
+        composed: true
+      });
+      document.dispatchEvent(globalEvent);
+    }
+  }
+
   // Check if v-b-modal directive was used by looking for the modal ID in attrs
   const vBModalAttr = Object.keys(attrs).find(key => key === 'v-b-modal' || key.startsWith('v-b-modal.'));
+  console.log('[nav-link] vBModalAttr found:', vBModalAttr);
 
   if (vBModalAttr) {
     // Extract modal ID from v-b-modal.modalId or from the attribute value
@@ -118,6 +145,7 @@ function handleClick() {
     console.log('[nav-link] Triggering modal:', modalId);
     const modalEl = document.getElementById(modalId);
     if (modalEl) {
+      console.log('[nav-link] Modal element found, dispatching direct event');
       const event = new CustomEvent('show-modal', { detail: { modalId } });
       modalEl.dispatchEvent(event);
     } else {
