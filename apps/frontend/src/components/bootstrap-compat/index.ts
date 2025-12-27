@@ -10,7 +10,7 @@
 /* eslint-disable vue/require-default-prop */
 /* eslint-disable vue/require-prop-types */
 
-import { h, defineComponent, PropType, ref, onMounted, onBeforeUnmount, watch, Teleport, resolveComponent } from 'vue';
+import { h, defineComponent, PropType, ref, onMounted, onBeforeUnmount, watch, Teleport, resolveComponent, provide, inject } from 'vue';
 
 // Type exports for table field arrays
 export type BvTableField = {
@@ -587,22 +587,66 @@ export const BDropdown = defineComponent({
     text: String,
     variant: String,
     size: String,
+    right: Boolean,
+    boundary: String,
+    toggleClass: String,
+    noCaret: Boolean,
   },
-  setup(props, { slots }) {
-    return () => h('div', { class: 'dropdown' }, [
+  setup(props, { slots, attrs }) {
+    const isOpen = ref(false);
+    const dropdownRef = ref<HTMLElement | null>(null);
+
+    const toggle = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      isOpen.value = !isOpen.value;
+    };
+
+    const close = () => {
+      isOpen.value = false;
+    };
+
+    // Provide close function to child components
+    provide('closeDropdown', close);
+
+    // Close dropdown when clicking outside
+    onMounted(() => {
+      const handleClickOutside = (e: MouseEvent) => {
+        if (dropdownRef.value && !dropdownRef.value.contains(e.target as Node)) {
+          close();
+        }
+      };
+      document.addEventListener('click', handleClickOutside);
+      onBeforeUnmount(() => {
+        document.removeEventListener('click', handleClickOutside);
+      });
+    });
+
+    return () => h('div', {
+      ...attrs,
+      class: ['dropdown', isOpen.value && 'show'].filter(Boolean).join(' '),
+      ref: dropdownRef
+    }, [
       h('button', {
         class: [
-          'btn dropdown-toggle',
+          'btn',
+          !props.noCaret && 'dropdown-toggle',
           props.variant ? `btn-${props.variant}` : 'btn-secondary',
-          props.size && `btn-${props.size}`
+          props.size && `btn-${props.size}`,
+          props.toggleClass
         ].filter(Boolean).join(' '),
         type: 'button',
         'data-toggle': 'dropdown',
-        onClick: (e: Event) => {
-          e.stopPropagation();
-        }
-      }, props.text),
-      h('div', { class: 'dropdown-menu' }, slots.default?.())
+        'aria-expanded': isOpen.value,
+        onClick: toggle
+      }, slots['button-content'] ? slots['button-content']() : props.text),
+      h('div', {
+        class: [
+          'dropdown-menu',
+          props.right && 'dropdown-menu-right',
+          isOpen.value && 'show'
+        ].filter(Boolean).join(' ')
+      }, slots.default?.())
     ]);
   }
 });
@@ -610,10 +654,24 @@ export const BDropdown = defineComponent({
 export const BDropdownItem = defineComponent({
   name: 'BDropdownItem',
   setup(props, { slots, attrs }) {
+    const closeDropdown = inject<(() => void) | undefined>('closeDropdown', undefined);
+
+    const handleClick = (e: Event) => {
+      // Call the original click handler if provided
+      if (attrs.onClick) {
+        (attrs.onClick as (e: Event) => void)(e);
+      }
+      // Close the dropdown after clicking
+      if (closeDropdown) {
+        closeDropdown();
+      }
+    };
+
     return () => h('a', {
       ...attrs,
       class: 'dropdown-item',
-      href: '#'
+      href: '#',
+      onClick: handleClick
     }, slots.default?.());
   }
 });
@@ -892,10 +950,24 @@ export const BDropdownText = defineComponent({
 export const BDropdownItemButton = defineComponent({
   name: 'BDropdownItemButton',
   setup(props, { slots, attrs }) {
+    const closeDropdown = inject<(() => void) | undefined>('closeDropdown', undefined);
+
+    const handleClick = (e: Event) => {
+      // Call the original click handler if provided
+      if (attrs.onClick) {
+        (attrs.onClick as (e: Event) => void)(e);
+      }
+      // Close the dropdown after clicking
+      if (closeDropdown) {
+        closeDropdown();
+      }
+    };
+
     return () => h('button', {
       ...attrs,
       class: 'dropdown-item',
-      type: 'button'
+      type: 'button',
+      onClick: handleClick
     }, slots.default?.());
   }
 });

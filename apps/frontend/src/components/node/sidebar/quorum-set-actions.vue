@@ -10,7 +10,7 @@
       no-caret
       @click.prevent.stop=""
     >
-      <template slot="button-content">
+      <template #button-content>
         <b-icon-three-dots-vertical scale="0.9" />
       </template>
       <b-dropdown-header id="dropdown-header-label" @click.prevent.stop="">

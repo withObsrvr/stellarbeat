@@ -35,7 +35,7 @@
             toggle-class="more-button btn-thin"
             no-caret
           >
-            <template slot="button-content">
+            <template #button-content>
               <b-icon-three-dots-vertical scale="0.9" />
             </template>
             <b-dropdown-header> Simulation options </b-dropdown-header>
