@@ -24,7 +24,7 @@ test.describe('Production vs Local Comparison', () => {
 
     // Navigate both to homepage
     await prodPage.goto('https://radar.withobsrvr.com/');
-    await localPage.goto('http://localhost:5173/');
+    await localPage.goto('/');
 
     // Wait for both to load
     await prodPage.waitForLoadState('networkidle');
@@ -65,7 +65,7 @@ test.describe('Production vs Local Comparison', () => {
 
     // Navigate to nodes pages
     await prodPage.goto('https://radar.withobsrvr.com/nodes');
-    await localPage.goto('http://localhost:5173/nodes');
+    await localPage.goto('/nodes');
 
     await prodPage.waitForLoadState('networkidle');
     await localPage.waitForLoadState('networkidle');
@@ -96,7 +96,7 @@ test.describe('Production vs Local Comparison', () => {
 
     // Navigate to organizations pages
     await prodPage.goto('https://radar.withobsrvr.com/organizations');
-    await localPage.goto('http://localhost:5173/organizations');
+    await localPage.goto('/organizations');
 
     await prodPage.waitForLoadState('networkidle');
     await localPage.waitForLoadState('networkidle');
@@ -126,7 +126,7 @@ test.describe('Production vs Local Comparison', () => {
     const localPage = await localContext.newPage();
 
     // First get a node from local to ensure we're comparing the same node
-    await localPage.goto('http://localhost:5173/nodes');
+    await localPage.goto('/nodes');
     await localPage.waitForLoadState('networkidle');
     await localPage.waitForSelector('.loader', { state: 'hidden', timeout: 30000 }).catch(() => {});
     await localPage.waitForTimeout(2000);

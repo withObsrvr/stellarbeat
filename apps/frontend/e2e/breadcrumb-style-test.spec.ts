@@ -4,7 +4,7 @@ test.describe('Breadcrumb Style Test', () => {
   test('check breadcrumb background and text color', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
 
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
 

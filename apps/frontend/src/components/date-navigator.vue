@@ -15,7 +15,7 @@
           v-model="datePickerDate"
           size="sm"
           :dark="true"
-          class="date-picker p-0"
+          class="date-picker"
           :date-format-options="{
             year: 'numeric',
             month: 'short',
@@ -33,7 +33,7 @@
           :key="timeKey"
           v-model="time"
           size="sm"
-          class="time-picker p-0"
+          class="time-picker"
           @hidden="timeInputHandler"
         >
           <template #button-content></template>
@@ -205,6 +205,7 @@ function timeTravel() {
 }
 
 .time-picker {
+  height: 31px;
   border-radius: 0;
   border-left: 0;
   width: 100px;
@@ -214,5 +215,6 @@ function timeTravel() {
 .date-picker {
   border-radius: 0;
   border-left: 0;
+  height: 31px;
 }
 </style>

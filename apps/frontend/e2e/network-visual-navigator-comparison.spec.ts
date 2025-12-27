@@ -6,7 +6,7 @@ test.describe('Network Visual Navigator Menu Button Comparison', () => {
     await page.setViewportSize({ width: 1280, height: 720 });
 
     // Test on local
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Find the menu button in the network visual navigator
@@ -112,7 +112,7 @@ test.describe('Network Visual Navigator Menu Button Comparison', () => {
     await page.setViewportSize({ width: 1280, height: 720 });
 
     // Local screenshot
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     const localMenuButton = page.locator('.menu-button.text-gray');

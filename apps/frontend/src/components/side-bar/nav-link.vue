@@ -101,6 +101,26 @@ const emit = defineEmits(['click']);
 const attrs = useAttrs();
 
 function handleClick() {
+  // Check for Bootstrap data-toggle and data-target attributes
+  if (attrs['data-toggle'] === 'modal' && attrs['data-target']) {
+    // Extract modal ID from data-target (remove the # prefix)
+    const modalId = (attrs['data-target'] as string).replace('#', '');
+
+    const modalEl = document.getElementById(modalId);
+    if (modalEl) {
+      const event = new CustomEvent('show-modal', { detail: { modalId } });
+      modalEl.dispatchEvent(event);
+    } else {
+      // If modal element not found (lazy mount), dispatch global event
+      const globalEvent = new CustomEvent('show-modal-global', {
+        detail: { modalId },
+        bubbles: true,
+        composed: true
+      });
+      document.dispatchEvent(globalEvent);
+    }
+  }
+
   // Check if v-b-modal directive was used by looking for the modal ID in attrs
   const vBModalAttr = Object.keys(attrs).find(key => key === 'v-b-modal' || key.startsWith('v-b-modal.'));
 
@@ -115,13 +135,18 @@ function handleClick() {
       modalId = attrs[vBModalAttr];
     }
 
-    console.log('[nav-link] Triggering modal:', modalId);
     const modalEl = document.getElementById(modalId);
     if (modalEl) {
       const event = new CustomEvent('show-modal', { detail: { modalId } });
       modalEl.dispatchEvent(event);
     } else {
-      console.warn('[nav-link] Modal element not found:', modalId);
+      // If modal element not found (lazy mount), dispatch global event
+      const globalEvent = new CustomEvent('show-modal-global', {
+        detail: { modalId },
+        bubbles: true,
+        composed: true
+      });
+      document.dispatchEvent(globalEvent);
     }
   }
 

@@ -10,7 +10,7 @@
 /* eslint-disable vue/require-default-prop */
 /* eslint-disable vue/require-prop-types */
 
-import { h, defineComponent, PropType, ref, onMounted, watch, Teleport, resolveComponent } from 'vue';
+import { h, defineComponent, PropType, ref, onMounted, onBeforeUnmount, watch, Teleport, resolveComponent, provide, inject } from 'vue';
 
 // Type exports for table field arrays
 export type BvTableField = {
@@ -297,32 +297,44 @@ export const BModal = defineComponent({
     const rootEl = ref<HTMLElement | null>(null);
 
     const showModal = () => {
-      console.log('[BModal] show-modal event received for', props.id);
-      console.log('[BModal] Setting isVisible to true');
       isVisible.value = true;
       emit('update:visible', true);
       emit('update:modelValue', true);
       emit('show');
       emit('shown');
-      console.log('[BModal] isVisible is now:', isVisible.value);
     };
+
+    // Store event handler references for cleanup
+    let handleGlobalEvent: ((e: Event) => void) | null = null;
 
     // Listen for show-modal event - set up as early as possible
     onMounted(() => {
-      console.log('[BModal] onMounted for', props.id);
-      if (props.id && rootEl.value) {
-        console.log('[BModal] Setting up event listener for', props.id);
-        rootEl.value.addEventListener('show-modal', showModal);
-      } else if (props.id) {
-        // Fallback: listen on document for this modal ID
-        console.log('[BModal] rootEl not ready, setting up document listener for', props.id);
-        const handleGlobalEvent = (e: Event) => {
+      // Always set up global event listener for lazy modals
+      if (props.id) {
+        handleGlobalEvent = (e: Event) => {
           const customEvent = e as CustomEvent;
           if (customEvent.detail?.modalId === props.id) {
             showModal();
           }
         };
         document.addEventListener('show-modal-global', handleGlobalEvent);
+
+        // Also set up direct element listener if rootEl is available
+        if (rootEl.value) {
+          rootEl.value.addEventListener('show-modal', showModal);
+        }
+      }
+    });
+
+    // Clean up event listeners when component is unmounted
+    onBeforeUnmount(() => {
+      if (props.id) {
+        if (handleGlobalEvent) {
+          document.removeEventListener('show-modal-global', handleGlobalEvent);
+        }
+        if (rootEl.value) {
+          rootEl.value.removeEventListener('show-modal', showModal);
+        }
       }
     });
 
@@ -575,22 +587,66 @@ export const BDropdown = defineComponent({
     text: String,
     variant: String,
     size: String,
+    right: Boolean,
+    boundary: String,
+    toggleClass: String,
+    noCaret: Boolean,
   },
-  setup(props, { slots }) {
-    return () => h('div', { class: 'dropdown' }, [
+  setup(props, { slots, attrs }) {
+    const isOpen = ref(false);
+    const dropdownRef = ref<HTMLElement | null>(null);
+
+    const toggle = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      isOpen.value = !isOpen.value;
+    };
+
+    const close = () => {
+      isOpen.value = false;
+    };
+
+    // Provide close function to child components
+    provide('closeDropdown', close);
+
+    // Close dropdown when clicking outside
+    onMounted(() => {
+      const handleClickOutside = (e: MouseEvent) => {
+        if (dropdownRef.value && !dropdownRef.value.contains(e.target as Node)) {
+          close();
+        }
+      };
+      document.addEventListener('click', handleClickOutside);
+      onBeforeUnmount(() => {
+        document.removeEventListener('click', handleClickOutside);
+      });
+    });
+
+    return () => h('div', {
+      ...attrs,
+      class: ['dropdown', isOpen.value && 'show'].filter(Boolean).join(' '),
+      ref: dropdownRef
+    }, [
       h('button', {
         class: [
-          'btn dropdown-toggle',
+          'btn',
+          !props.noCaret && 'dropdown-toggle',
           props.variant ? `btn-${props.variant}` : 'btn-secondary',
-          props.size && `btn-${props.size}`
+          props.size && `btn-${props.size}`,
+          props.toggleClass
         ].filter(Boolean).join(' '),
         type: 'button',
         'data-toggle': 'dropdown',
-        onClick: (e: Event) => {
-          e.stopPropagation();
-        }
-      }, props.text),
-      h('div', { class: 'dropdown-menu' }, slots.default?.())
+        'aria-expanded': isOpen.value,
+        onClick: toggle
+      }, slots['button-content'] ? slots['button-content']() : props.text),
+      h('div', {
+        class: [
+          'dropdown-menu',
+          props.right && 'dropdown-menu-right',
+          isOpen.value && 'show'
+        ].filter(Boolean).join(' ')
+      }, slots.default?.())
     ]);
   }
 });
@@ -598,10 +654,24 @@ export const BDropdown = defineComponent({
 export const BDropdownItem = defineComponent({
   name: 'BDropdownItem',
   setup(props, { slots, attrs }) {
+    const closeDropdown = inject<(() => void) | undefined>('closeDropdown', undefined);
+
+    const handleClick = (e: Event) => {
+      // Call the original click handler if provided
+      if (attrs.onClick) {
+        (attrs.onClick as (e: Event) => void)(e);
+      }
+      // Close the dropdown after clicking
+      if (closeDropdown) {
+        closeDropdown();
+      }
+    };
+
     return () => h('a', {
       ...attrs,
       class: 'dropdown-item',
-      href: '#'
+      href: '#',
+      onClick: handleClick
     }, slots.default?.());
   }
 });
@@ -880,10 +950,24 @@ export const BDropdownText = defineComponent({
 export const BDropdownItemButton = defineComponent({
   name: 'BDropdownItemButton',
   setup(props, { slots, attrs }) {
+    const closeDropdown = inject<(() => void) | undefined>('closeDropdown', undefined);
+
+    const handleClick = (e: Event) => {
+      // Call the original click handler if provided
+      if (attrs.onClick) {
+        (attrs.onClick as (e: Event) => void)(e);
+      }
+      // Close the dropdown after clicking
+      if (closeDropdown) {
+        closeDropdown();
+      }
+    };
+
     return () => h('button', {
       ...attrs,
       class: 'dropdown-item',
-      type: 'button'
+      type: 'button',
+      onClick: handleClick
     }, slots.default?.());
   }
 });
@@ -1140,17 +1224,20 @@ export const VBModal: Directive = {
     el.addEventListener('click', () => {
       // Support both v-b-modal="'modalId'" and v-b-modal.modalId syntax
       const modalId = binding.value || Object.keys(binding.modifiers)[0];
-      console.log('[VBModal] Looking for modal with ID:', modalId);
       const modalEl = document.getElementById(modalId);
-      console.log('[VBModal] Modal element found:', modalEl);
       if (modalEl) {
         // Trigger modal show - in a real app you'd use Bootstrap's modal API
         // For now, just dispatch a custom event that the modal can listen to
         const event = new CustomEvent('show-modal', { detail: { modalId } });
-        console.log('[VBModal] Dispatching show-modal event');
         modalEl.dispatchEvent(event);
       } else {
-        console.warn('[VBModal] Modal element not found with ID:', modalId);
+        // If modal element not found (lazy mount), dispatch global event
+        const globalEvent = new CustomEvent('show-modal-global', {
+          detail: { modalId },
+          bubbles: true,
+          composed: true
+        });
+        document.dispatchEvent(globalEvent);
       }
     });
   }
