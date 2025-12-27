@@ -5,7 +5,7 @@ test.describe('Breadcrumb Layout Comparison', () => {
     await page.setViewportSize({ width: 1280, height: 720 });
 
     // Test on local
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
 

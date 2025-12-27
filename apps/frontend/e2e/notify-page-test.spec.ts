@@ -12,7 +12,7 @@ test.describe('Notify Page Rendering', () => {
       }
     });
 
-    await page.goto('http://localhost:5173/notify');
+    await page.goto('/notify');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 

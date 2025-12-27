@@ -297,14 +297,11 @@ export const BModal = defineComponent({
     const rootEl = ref<HTMLElement | null>(null);
 
     const showModal = () => {
-      console.log('[BModal] show-modal event received for', props.id);
-      console.log('[BModal] Setting isVisible to true');
       isVisible.value = true;
       emit('update:visible', true);
       emit('update:modelValue', true);
       emit('show');
       emit('shown');
-      console.log('[BModal] isVisible is now:', isVisible.value);
     };
 
     // Store event handler references for cleanup
@@ -312,16 +309,11 @@ export const BModal = defineComponent({
 
     // Listen for show-modal event - set up as early as possible
     onMounted(() => {
-      console.log('[BModal] onMounted for', props.id);
-
       // Always set up global event listener for lazy modals
       if (props.id) {
-        console.log('[BModal] Setting up global document listener for', props.id);
         handleGlobalEvent = (e: Event) => {
           const customEvent = e as CustomEvent;
-          console.log('[BModal] Received global event, detail:', customEvent.detail, 'matching:', props.id);
           if (customEvent.detail?.modalId === props.id) {
-            console.log('[BModal] Global event matched modal ID', props.id);
             showModal();
           }
         };
@@ -329,7 +321,6 @@ export const BModal = defineComponent({
 
         // Also set up direct element listener if rootEl is available
         if (rootEl.value) {
-          console.log('[BModal] Setting up direct element listener for', props.id);
           rootEl.value.addEventListener('show-modal', showModal);
         }
       }
@@ -1161,18 +1152,14 @@ export const VBModal: Directive = {
     el.addEventListener('click', () => {
       // Support both v-b-modal="'modalId'" and v-b-modal.modalId syntax
       const modalId = binding.value || Object.keys(binding.modifiers)[0];
-      console.log('[VBModal] Looking for modal with ID:', modalId);
       const modalEl = document.getElementById(modalId);
-      console.log('[VBModal] Modal element found:', modalEl);
       if (modalEl) {
         // Trigger modal show - in a real app you'd use Bootstrap's modal API
         // For now, just dispatch a custom event that the modal can listen to
         const event = new CustomEvent('show-modal', { detail: { modalId } });
-        console.log('[VBModal] Dispatching show-modal event');
         modalEl.dispatchEvent(event);
       } else {
         // If modal element not found (lazy mount), dispatch global event
-        console.log('[VBModal] Modal element not found, dispatching global event for', modalId);
         const globalEvent = new CustomEvent('show-modal-global', {
           detail: { modalId },
           bubbles: true,

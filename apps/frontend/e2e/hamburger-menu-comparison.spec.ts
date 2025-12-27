@@ -6,7 +6,7 @@ test.describe('Hamburger Menu Visual Comparison', () => {
     await page.setViewportSize({ width: 375, height: 667 });
 
     // Test on local
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Take screenshot of hamburger button (closed state)
@@ -49,7 +49,7 @@ test.describe('Hamburger Menu Visual Comparison', () => {
     await page.setViewportSize({ width: 375, height: 667 });
 
     // Navigate to trust graph on local
-    await page.goto('http://localhost:5173/federated-voting');
+    await page.goto('/federated-voting');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000); // Wait for graph to render
 
@@ -83,7 +83,7 @@ test.describe('Hamburger Menu Visual Comparison', () => {
     await page.setViewportSize({ width: 375, height: 667 });
 
     // Check local styling
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     const localButton = page.locator('button.navbar-toggler');
@@ -151,7 +151,7 @@ test.describe('Hamburger Menu Visual Comparison', () => {
     await page.setViewportSize({ width: 375, height: 667 });
 
     // Check local icon
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     const localIcon = page.locator('button.navbar-toggler svg, button.navbar-toggler .b-icon');
