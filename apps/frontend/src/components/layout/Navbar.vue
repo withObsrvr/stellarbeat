@@ -63,6 +63,7 @@
       :mail-to="mailTo"
       :include-organizations="includeOrganizations"
       :include-notify="includeNotify"
+      :include-contact-us="includeContactUs"
       :include-faq="includeFAQ"
       :faq-route="faqRoute"
       :brand-name="brandName"
@@ -103,6 +104,10 @@ defineProps({
     default: true,
   },
   includeNotify: {
+    type: Boolean,
+    default: false,
+  },
+  includeContactUs: {
     type: Boolean,
     default: false,
   },

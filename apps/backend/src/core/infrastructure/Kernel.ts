@@ -5,6 +5,7 @@ import { Config, getConfigFromEnv } from '../config/Config';
 import { load as loadHistory } from '../../history-scan-coordinator/infrastructure/di/container';
 import { load as loadNetworkScan } from '../../network-scan/infrastructure/di/container';
 import { load as loadNetworkEventNotifications } from '../../notifications/infrastructure/di/container';
+import { load as loadContact } from '../../contact/infrastructure/di/container';
 import { load as loadCore } from '../infrastructure/di/container';
 import { AppDataSource } from './database/AppDataSource';
 import { TestingAppDataSource } from './database/TestingAppDataSource';
@@ -57,6 +58,7 @@ export default class Kernel {
 		loadCore(this.container, config);
 		loadNetworkScan(this.container, config);
 		loadNetworkEventNotifications(this.container, config);
+		loadContact(this.container, config);
 		loadHistory(this.container, config);
 	}
 

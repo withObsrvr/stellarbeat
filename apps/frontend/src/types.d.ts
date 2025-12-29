@@ -9,8 +9,10 @@ interface ImportMetaEnv {
   readonly VUE_APP_BRAND_LOGO_SRC: string;
   readonly VUE_APP_BRAND_LOGO_ALT: string;
   readonly VUE_APP_BRAND_EMAIL: string;
+  readonly VUE_APP_CONTACT_EMAIL: string;
   readonly VUE_APP_PUBLIC_API_URL: string;
   readonly VUE_APP_PUBLIC_ENABLE_NOTIFY: string;
+  readonly VUE_APP_PUBLIC_ENABLE_CONTACT_US: string;
   readonly VUE_APP_PUBLIC_ENABLE_HISTORY: string;
   readonly VUE_APP_PUBLIC_ENABLE_HORIZON: string;
   readonly VUE_APP_PUBLIC_ENABLE_CONFIG_EXPORT: string;

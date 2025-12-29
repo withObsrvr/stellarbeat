@@ -9,7 +9,7 @@ export class Url {
 	}
 
 	static create(url: string): Result<Url, Error> {
-		if (!validator.isURL(url))
+		if (!validator.isURL(url, { require_tld: false }))
 			return err(new Error('Url is not a proper url: ' + url));
 
 		url = url.replace(/\/$/, ''); //remove trailing slash

@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { Config, getConfigFromEnv } from '../../config/Config';
 import { ExceptionLogger } from 'exception-logger';
 import { subscriptionRouter } from '../../../notifications/infrastructure/http/SubscriptionRouter';
+import { contactRouter } from '../../../contact/infrastructure/http/ContactRouter';
 import bodyParser from 'body-parser';
 import { Server } from 'net';
 import { ConfirmSubscription } from '../../../notifications/use-cases/confirm-subscription/ConfirmSubscription';
@@ -34,12 +35,31 @@ import { RequestUnsubscribeLink } from '../../../notifications/use-cases/request
 import { RegisterScan } from '../../../history-scan-coordinator/use-cases/register-scan/RegisterScan';
 import { historyScanRouter } from '../../../history-scan-coordinator/infrastructure/http/HistoryScanRouter';
 import { GetScanJob } from '../../../history-scan-coordinator/use-cases/get-scan-job/GetScanJob';
+import { SendContactSubmission } from '../../../contact/use-cases/send-contact-submission/SendContactSubmission';
 
 let server: Server;
 const api = express();
 api.use(bodyParser.json());
 api.use(helmet());
 api.set('trust proxy', true); //todo: env var
+
+// CORS middleware - must be before routes
+api.use(function (
+	req: express.Request,
+	res: express.Response,
+	next: express.NextFunction
+) {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header(
+		'Access-Control-Allow-Headers',
+		'Origin, X-Requested-With, Content-Type, Accept'
+	);
+	res.header(
+		'Access-Control-Allow-Methods',
+		'GET, POST, PUT, DELETE, OPTIONS'
+	);
+	next();
+});
 
 // Add a simple health check endpoint that doesn't require database access
 api.get('/health', (req, res) => {
@@ -87,23 +107,6 @@ const listen = async () => {
 	const exceptionLogger =
 		kernel.container.get<ExceptionLogger>('ExceptionLogger');
 
-	api.use(function (
-		req: express.Request,
-		res: express.Response,
-		next: express.NextFunction
-	) {
-		res.header('Access-Control-Allow-Origin', '*');
-		res.header(
-			'Access-Control-Allow-Headers',
-			'Origin, X-Requested-With, Content-Type, Accept'
-		);
-		res.header(
-			'Access-Control-Allow-Methods',
-			'GET, POST, PUT, DELETE, OPTIONS'
-		);
-		next();
-	});
-
 	const swaggerOptions = {
 		customCss: '.swagger-ui .topbar { display: none }',
 		explorer: true,
@@ -132,6 +135,14 @@ const listen = async () => {
 			unmuteNotification: kernel.container.get(UnmuteNotification),
 			unsubscribe: kernel.container.get(Unsubscribe),
 			requestUnsubscribeLink: kernel.container.get(RequestUnsubscribeLink)
+		})
+	);
+
+	api.use(
+		'/v1/contact',
+		contactRouter({
+			exceptionLogger: exceptionLogger,
+			sendContactSubmission: kernel.container.get(SendContactSubmission)
 		})
 	);
 

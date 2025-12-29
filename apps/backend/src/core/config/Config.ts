@@ -54,6 +54,7 @@ export interface Config {
 	historyScanAPIUsername?: string;
 	enablePythonFbas: boolean;
 	pythonFbasServiceUrl?: string;
+	contactRecipientEmail?: string;
 }
 
 export class DefaultConfig implements Config {
@@ -83,6 +84,7 @@ export class DefaultConfig implements Config {
 	historyScanAPIPassword?: string;
 	enablePythonFbas = false;
 	pythonFbasServiceUrl?: string;
+	contactRecipientEmail?: string;
 
 	constructor(
 		public networkConfig: NetworkConfig,
@@ -293,9 +295,9 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		config.frontendBaseUrl = frontendBaseUrl;
 	} else {
 		config.enableNotifications = false;
-		config.userServiceBaseUrl = '127.0.0.1';
-		config.userServiceUsername = 'user';
-		config.userServicePassword = 'password';
+		config.userServiceBaseUrl = process.env.USER_SERVICE_BASE_URL || 'http://127.0.0.1:6000';
+		config.userServiceUsername = process.env.USER_SERVICE_USERNAME || 'user';
+		config.userServicePassword = process.env.USER_SERVICE_PASSWORD || 'password';
 		config.frontendBaseUrl = 'http://localhost:3000';
 	}
 
@@ -342,6 +344,12 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		}
 
 		config.pythonFbasServiceUrl = pythonFbasServiceUrl;
+	}
+
+	// Contact form configuration
+	const contactRecipientEmail = process.env.CONTACT_RECIPIENT_EMAIL;
+	if (isString(contactRecipientEmail)) {
+		config.contactRecipientEmail = contactRecipientEmail;
 	}
 
 	return ok(config);

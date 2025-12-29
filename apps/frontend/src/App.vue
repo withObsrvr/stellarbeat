@@ -12,6 +12,7 @@
         :api-doc-url="store.appConfig.apiDocUrl"
         :blog-url="store.appConfig.blogUrl"
         :include-notify="store.networkContext.enableNotify"
+        :include-contact-us="store.networkContext.enableContactUs"
       ></navbar>
       <div class="container-fluid h-100 mt-0 mt-md-2" style="max-width: 1360px">
         <div class="">

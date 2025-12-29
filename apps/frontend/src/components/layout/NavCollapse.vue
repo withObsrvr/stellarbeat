@@ -88,6 +88,32 @@
                 Notify
               </router-link>
             </li>
+            <li
+              v-if="
+                includeContactUs &&
+                !store.isLoading &&
+                !store.fetchingDataFailed &&
+                store.networkId === 'public' &&
+                !store.isSimulation
+              "
+              class="nav-item"
+            >
+              <router-link
+                active-class="active"
+                class="nav-link"
+                :to="{
+                  name: 'contact-form',
+                  query: {
+                    view: $route.query.view,
+                    network: $route.query.network,
+                    at: $route.query.at,
+                  },
+                }"
+              >
+                <b-icon-envelope class="mr-1" scale="0.9" />
+                Contact Us
+              </router-link>
+            </li>
             <li v-if="blogUrl" class="nav-item">
               <a
                 class="nav-link"
@@ -150,6 +176,7 @@ import {
   BIconBuilding,
   BIconBullseye,
   BIconCode,
+  BIconEnvelope,
   BIconHouse,
   BIconNewspaper,
   BIconQuestionCircle,
@@ -174,6 +201,10 @@ defineProps({
     default: true,
   },
   includeNotify: {
+    type: Boolean,
+    default: false,
+  },
+  includeContactUs: {
     type: Boolean,
     default: false,
   },
