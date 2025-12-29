@@ -19,18 +19,34 @@ const contactRouterWrapper = (config: ContactRouterConfig): Router => {
 	contactRouter.post(
 		'/',
 		[
-			body('name').trim().notEmpty().withMessage('Name is required'),
+			body('name')
+				.trim()
+				.notEmpty()
+				.withMessage('Name is required')
+				.isLength({ max: 100 })
+				.withMessage('Name must be at most 100 characters'),
 			body('emailAddress')
 				.trim()
 				.isEmail()
 				.normalizeEmail()
 				.withMessage('Valid email is required'),
-			body('company').optional().trim(),
+			body('company')
+				.optional()
+				.trim()
+				.isLength({ max: 200 })
+				.withMessage('Company must be at most 200 characters'),
 			body('serviceInterest')
 				.trim()
 				.notEmpty()
-				.withMessage('Service interest is required'),
-			body('message').trim().notEmpty().withMessage('Message is required')
+				.withMessage('Service interest is required')
+				.isLength({ max: 200 })
+				.withMessage('Service interest must be at most 200 characters'),
+			body('message')
+				.trim()
+				.notEmpty()
+				.withMessage('Message is required')
+				.isLength({ max: 5000 })
+				.withMessage('Message must be at most 5000 characters')
 		],
 		async function (req: express.Request, res: express.Response) {
 			const errors = validationResult(req);

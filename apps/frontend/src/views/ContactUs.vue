@@ -13,7 +13,7 @@
             :href="privacyLink"
             class="nav-link"
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
           >
             Privacy policy
           </a>

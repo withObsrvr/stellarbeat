@@ -21,6 +21,12 @@ export class SendContactSubmission {
 		protected recipientEmail: string
 	) {}
 
+	private sanitizeEmailSubject(text: string): string {
+		// Remove newlines, carriage returns, and other control characters
+		// that could be used for email header injection
+		return text.replace(/[\r\n\t\f\v]/g, ' ').trim();
+	}
+
 	async execute(
 		contactSubmission: ContactSubmission
 	): Promise<Result<void, Error>> {
@@ -38,9 +44,14 @@ export class SendContactSubmission {
 				}
 			);
 
+			// Sanitize serviceInterest for use in email subject to prevent header injection
+			const sanitizedServiceInterest = this.sanitizeEmailSubject(
+				contactSubmission.serviceInterest
+			);
+
 			const message = new Message(
 				body,
-				`New Contact Form Submission - ${contactSubmission.serviceInterest}`
+				`New Contact Form Submission - ${sanitizedServiceInterest}`
 			);
 
 			// Find or create user for recipient email
