@@ -132,6 +132,33 @@ export function createRouter() {
           },
         ],
       },
+      {
+        path: "/contact",
+        component: () =>
+          import(/* webpackChunkName: "contact" */ "@/views/ContactUs.vue"),
+        children: [
+          {
+            name: "contact-form",
+            path: "",
+            component: () =>
+              import(
+                /* webpackChunkName: "contact-form" */ "@/components/contact/contact-form.vue"
+              ),
+          },
+        ],
+      },
+      {
+        name: "terms-of-service",
+        path: "/terms",
+        component: () =>
+          import(/* webpackChunkName: "terms" */ "@/views/TermsOfService.vue"),
+      },
+      {
+        name: "privacy-policy",
+        path: "/privacy",
+        component: () =>
+          import(/* webpackChunkName: "privacy" */ "@/views/PrivacyPolicy.vue"),
+      },
     ] as any), // Cast to any to bypass Vue Router props function type checking
     // @ts-expect-error - ScrollBehavior return type mismatch in Vue Router 4
     scrollBehavior(to, from, savedPosition) {

@@ -10,6 +10,7 @@ export interface NetworkContext {
   name: string;
   repository: NetworkRepository;
   enableNotify: boolean;
+  enableContactUs: boolean;
   enableHistory: boolean;
   //@deprecated can be removed once all fetching logic is encapsulated in repositories
   apiBaseUrl?: string;
@@ -62,6 +63,7 @@ export default class Config {
         import.meta.env["VUE_APP_PUBLIC_API_URL"],
       ),
       enableNotify: import.meta.env["VUE_APP_PUBLIC_ENABLE_NOTIFY"] === "1",
+      enableContactUs: import.meta.env["VUE_APP_PUBLIC_ENABLE_CONTACT_US"] === "1",
       enableHistory: import.meta.env["VUE_APP_PUBLIC_ENABLE_HISTORY"]
         ? import.meta.env["VUE_APP_PUBLIC_ENABLE_HISTORY"] === "1"
         : true,
@@ -92,6 +94,7 @@ export default class Config {
           import.meta.env["VUE_APP_TEST_API_URL"],
         ),
         enableNotify: import.meta.env["VUE_APP_TEST_ENABLE_NOTIFY"] === "1",
+        enableContactUs: import.meta.env["VUE_APP_TEST_ENABLE_CONTACT_US"] === "1",
         enableHistory: import.meta.env["VUE_APP_TEST_ENABLE_HISTORY"]
           ? import.meta.env["VUE_APP_TEST_ENABLE_HISTORY"] === "1"
           : true,
@@ -118,6 +121,7 @@ export default class Config {
         name: "FBAS demo",
         repository: new FBASRepository(),
         enableNotify: false,
+        enableContactUs: false,
         enableHistory: false,
         enableIndex: false,
         isSimulation: true,
@@ -132,6 +136,7 @@ export default class Config {
         name: "FBAS QI demo",
         repository: new FBASQIRepository(),
         enableNotify: false,
+        enableContactUs: false,
         enableHistory: false,
         enableIndex: false,
         isSimulation: true,
@@ -145,6 +150,7 @@ export default class Config {
         name: "Trust Cluster demo",
         repository: new TrustClusterDemoRepository(),
         enableNotify: false,
+        enableContactUs: false,
         enableHistory: false,
         enableIndex: false,
         isSimulation: true,
