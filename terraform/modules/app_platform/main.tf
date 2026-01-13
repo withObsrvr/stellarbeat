@@ -1138,7 +1138,12 @@ resource "digitalocean_app" "radar" {
         http_port = 8080
 
         health_check {
-          http_path = "/health"
+          http_path             = "/health"
+          initial_delay_seconds = 30
+          period_seconds        = 10
+          timeout_seconds       = 10
+          success_threshold     = 1
+          failure_threshold     = 5
         }
       }
     }
