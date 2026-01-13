@@ -1,5 +1,9 @@
 import {JSONSchemaType} from "ajv";
-import {nullable} from "./helper/nullable";
+
+export interface HistoryArchiveScanErrorV1 {
+    readonly url: string;
+    readonly message: string;
+}
 
 export interface HistoryArchiveScanV1 {
     readonly url: string;
@@ -7,22 +11,21 @@ export interface HistoryArchiveScanV1 {
     readonly endDate: string;
     readonly latestVerifiedLedger: number;
     readonly hasError: boolean;
-    readonly errorUrl: string | null;
-    readonly errorMessage: string | null;
+    readonly errors: HistoryArchiveScanErrorV1[];
     readonly isSlow: boolean;
 }
 
 export const HistoryArchiveScanV1Schema: JSONSchemaType<HistoryArchiveScanV1> = {
     "$id": "history-scan-v1.json",
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "properties": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "properties": {
         "startDate": {
             "format": "date-time",
-                "type": "string"
+            "type": "string"
         },
         "endDate": {
             "format": "date-time",
-                "type": "string"
+            "type": "string"
         },
         "url": {
             "type": "string"
@@ -33,25 +36,29 @@ export const HistoryArchiveScanV1Schema: JSONSchemaType<HistoryArchiveScanV1> = 
         "hasError": {
             "type": "boolean"
         },
-        "errorUrl": nullable({
-            "type": "string"
-        }),
-        "errorMessage": nullable({
-            "type": "string"
-        }),
+        "errors": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "url": { "type": "string" },
+                    "message": { "type": "string" }
+                },
+                "required": ["url", "message"]
+            }
+        },
         "isSlow": {
             "type": "boolean"
         }
     },
     "type": "object",
-        "required": [
+    "required": [
         "url",
         "startDate",
         "endDate",
         "hasError",
         "latestVerifiedLedger",
         "isSlow",
-        "errorUrl",
-        "errorMessage"
+        "errors"
     ]
 }

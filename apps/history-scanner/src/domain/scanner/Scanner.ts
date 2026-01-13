@@ -85,9 +85,9 @@ export class Scanner {
 				: scanSettings.toLedger;
 
 		let alreadyScannedBucketHashes = new Set<string>();
-		let error: ScanError | undefined;
+		const allErrors: ScanError[] = [];
 
-		while (rangeFromLedger < scanSettings.toLedger && !error) {
+		while (rangeFromLedger < scanSettings.toLedger) {
 			console.time('range_scan');
 			const rangeResult = await this.rangeScanner.scan(
 				url,
@@ -101,7 +101,8 @@ export class Scanner {
 			console.timeEnd('range_scan');
 
 			if (rangeResult.isErr()) {
-				error = rangeResult.error;
+				allErrors.push(rangeResult.error);
+				// Continue scanning to collect more errors
 			} else {
 				latestLedgerHeader.ledger = rangeResult.value.latestLedgerHeader
 					? rangeResult.value.latestLedgerHeader.ledger
@@ -109,18 +110,18 @@ export class Scanner {
 				latestLedgerHeader.hash = rangeResult.value.latestLedgerHeader?.hash;
 
 				alreadyScannedBucketHashes = rangeResult.value.scannedBucketHashes;
-
-				rangeFromLedger += this.rangeSize;
-				rangeToLedger =
-					rangeFromLedger + this.rangeSize < scanSettings.toLedger
-						? rangeFromLedger + this.rangeSize
-						: scanSettings.toLedger;
 			}
+
+			rangeFromLedger += this.rangeSize;
+			rangeToLedger =
+				rangeFromLedger + this.rangeSize < scanSettings.toLedger
+					? rangeFromLedger + this.rangeSize
+					: scanSettings.toLedger;
 		}
 
 		return {
 			latestLedgerHeader,
-			error
+			errors: allErrors
 		};
 	}
 }

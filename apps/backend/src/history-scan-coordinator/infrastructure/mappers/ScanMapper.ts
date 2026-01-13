@@ -42,8 +42,8 @@ export class ScanMapper {
 				return err(new Error('concurrency must be a positive integer'));
 			}
 
-			const error = dto.error ? this.mapToScanError(dto.error) : null;
-			if (error && error.isErr()) return err(error.error);
+			const errorsResult = this.mapToScanErrors(dto.errors);
+			if (errorsResult.isErr()) return err(errorsResult.error);
 
 			const baseUrlResult = Url.create(dto.baseUrl);
 			if (baseUrlResult.isErr()) {
@@ -72,7 +72,7 @@ export class ScanMapper {
 					dto.latestScannedLedgerHeaderHash,
 					dto.concurrency,
 					dto.isSlowArchive,
-					error ? error.value : null
+					errorsResult.value
 				)
 			);
 		} catch (e) {
@@ -82,6 +82,16 @@ export class ScanMapper {
 				)
 			);
 		}
+	}
+
+	private mapToScanErrors(errorDTOs: ScanErrorDTO[]): Result<ScanError[], Error> {
+		const errors: ScanError[] = [];
+		for (const errorDTO of errorDTOs) {
+			const errorResult = this.mapToScanError(errorDTO);
+			if (errorResult.isErr()) return err(errorResult.error);
+			errors.push(errorResult.value);
+		}
+		return ok(errors);
 	}
 
 	private mapToScanError(errorDTO: ScanErrorDTO): Result<ScanError, Error> {

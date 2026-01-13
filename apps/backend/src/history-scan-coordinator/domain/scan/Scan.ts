@@ -1,4 +1,4 @@
-import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { Url } from '../../../core/domain/Url';
 import { ScanError } from './ScanError';
 import { CoreEntity } from '../../../core/domain/CoreEntity';
@@ -41,9 +41,8 @@ export class Scan extends CoreEntity {
 	@Column('boolean', { nullable: true })
 	public readonly isSlowArchive: boolean | null = null;
 
-	@OneToOne(() => ScanError, { nullable: true, cascade: true, eager: true })
-	@JoinColumn()
-	public readonly error: ScanError | null = null;
+	@OneToMany(() => ScanError, (error) => error.scan, { cascade: true, eager: true })
+	public readonly errors!: ScanError[];
 
 	constructor(
 		scanChainInitDate: Date,
@@ -56,7 +55,7 @@ export class Scan extends CoreEntity {
 		latestScannedLedgerHeaderHash: string | null = null,
 		concurrency = 0,
 		archiveIsSlow: boolean | null = null,
-		error: ScanError | null = null
+		errors?: ScanError[]
 	) {
 		super();
 		this.baseUrl = url;
@@ -67,7 +66,9 @@ export class Scan extends CoreEntity {
 		this.isSlowArchive = archiveIsSlow;
 		this.fromLedger = fromLedger;
 		this.toLedger = toLedger;
-		this.error = error;
+		if (errors !== undefined) {
+			this.errors = errors;
+		}
 		this.latestScannedLedger = latestScannedLedger;
 		this.latestScannedLedgerHeaderHash = latestScannedLedgerHeaderHash;
 	}
@@ -86,7 +87,7 @@ export class Scan extends CoreEntity {
 	}
 
 	hasError(): boolean {
-		return this.error !== null;
+		return this.errors.length > 0;
 	}
 
 	public isStartOfScanChain() {

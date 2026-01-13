@@ -17,7 +17,7 @@ export class ScanDTO {
 		public readonly latestScannedLedgerHeaderHash: string | null,
 		public readonly concurrency: number,
 		public readonly isSlowArchive: boolean | null,
-		public readonly error: ScanErrorDTO | null,
+		public readonly errors: ScanErrorDTO[],
 		public readonly scanJobRemoteId: string
 	) {}
 
@@ -39,7 +39,7 @@ export class ScanDTO {
 				json.latestScannedLedgerHeaderHash as string | null,
 				json.concurrency as number,
 				json.isSlowArchive as boolean | null,
-				json.error as ScanErrorDTO | null,
+				json.errors as ScanErrorDTO[],
 				json.scanJobRemoteId as string
 			)
 		);
@@ -69,8 +69,15 @@ export class ScanDTO {
 			Number.isInteger(json.concurrency) &&
 			(json.isSlowArchive === null ||
 				typeof json.isSlowArchive === 'boolean') &&
-			(json.error === null || this.isValidScanErrorDTO(json.error)) &&
+			this.isValidScanErrorsArray(json.errors) &&
 			typeof json.scanJobRemoteId === 'string'
+		);
+	}
+
+	private static isValidScanErrorsArray(errors: unknown): errors is ScanErrorDTO[] {
+		return (
+			Array.isArray(errors) &&
+			errors.every((error) => this.isValidScanErrorDTO(error))
 		);
 	}
 

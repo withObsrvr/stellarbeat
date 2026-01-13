@@ -12,7 +12,7 @@ export { TrustGraph, Edge, Vertex, isVertex } from './trust-graph/trust-graph';
 export { TrustGraphBuilder } from './trust-graph/trust-graph-builder';
 export { OrganizationSnapShot } from './organization-snap-shot';
 export { NodeSnapShot } from './node-snap-shot';
-export { HistoryArchiveScan } from './history-archive-scan';
+export { HistoryArchiveScan, type HistoryArchiveScanError } from './history-archive-scan';
 export { TransitiveQuorumSetFinder } from './transitive-quorum-set-finder';
 export { containsSlice } from './quorum/containsSlice';
 export * from './quorum/isQuorum';
@@ -29,6 +29,7 @@ export {
 } from './dto/organization-v1';
 export {
 	type HistoryArchiveScanV1,
+	type HistoryArchiveScanErrorV1,
 	HistoryArchiveScanV1Schema
 } from './dto/history-archive-scan-v1';
 export {

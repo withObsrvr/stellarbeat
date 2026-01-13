@@ -1,5 +1,6 @@
 import { IdentifiedValueObject } from '../../../core/domain/IdentifiedValueObject';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
+import type { Scan } from './Scan';
 
 export enum ScanErrorType {
 	TYPE_VERIFICATION,
@@ -16,6 +17,9 @@ export class ScanError extends IdentifiedValueObject implements Error {
 	public readonly url: string;
 	@Column('text', { nullable: false })
 	public readonly message: string;
+
+	@ManyToOne('Scan', 'errors')
+	public scan?: Scan;
 
 	constructor(type: ScanErrorType, url: string, message: string) {
 		super();

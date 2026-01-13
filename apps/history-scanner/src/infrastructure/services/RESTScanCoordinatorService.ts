@@ -78,13 +78,11 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 			latestScannedLedgerHeaderHash: scan.latestScannedLedgerHeaderHash,
 			concurrency: scan.concurrency,
 			isSlowArchive: scan.isSlowArchive,
-			error: scan.error
-				? {
-						message: scan.error.message,
-						type: ScanErrorType[scan.error.type],
-						url: scan.error.url
-					}
-				: null,
+			errors: scan.errors.map((error) => ({
+				message: error.message,
+				type: ScanErrorType[error.type],
+				url: error.url
+			})),
 			scanJobRemoteId: scan.scanJobRemoteId!
 		};
 	}

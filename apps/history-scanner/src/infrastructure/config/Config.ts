@@ -18,6 +18,7 @@ export interface Config {
 	logLevel: string;
 	historyMaxFileMs: number;
 	historySlowArchiveMaxLedgers: number;
+	stellarArchivistPath: string;
 }
 
 // Default values
@@ -27,7 +28,8 @@ const defaultConfig = {
 	userAgent: 'radar-history-scanner',
 	logLevel: 'info',
 	historyMaxFileMs: 60000,
-	historySlowArchiveMaxLedgers: 1000
+	historySlowArchiveMaxLedgers: 1000,
+	stellarArchivistPath: 'stellar-archivist'
 };
 
 export function getConfigFromEnv(): Result<Config, Error> {
@@ -77,6 +79,8 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		coordinatorAPIUsername: process.env.COORDINATOR_API_USERNAME!,
 		logLevel: process.env.LOG_LEVEL ?? defaultConfig.logLevel,
 		historyMaxFileMs,
-		historySlowArchiveMaxLedgers
+		historySlowArchiveMaxLedgers,
+		stellarArchivistPath:
+			process.env.STELLAR_ARCHIVIST_PATH ?? defaultConfig.stellarArchivistPath
 	});
 }

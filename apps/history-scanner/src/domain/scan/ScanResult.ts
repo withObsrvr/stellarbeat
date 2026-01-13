@@ -3,5 +3,5 @@ import { LedgerHeader } from '../scanner/Scanner';
 
 export interface ScanResult {
 	readonly latestLedgerHeader: LedgerHeader;
-	readonly error?: ScanError;
+	readonly errors: ScanError[];
 }

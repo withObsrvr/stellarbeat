@@ -1,7 +1,7 @@
 import { Url } from '../../../core/domain/Url';
 import { mapUnknownToError } from '../../../core/utilities/mapUnknownToError';
 import { GetLatestScanDTO } from './GetLatestScanDTO';
-import { HistoryArchiveScan } from 'shared';
+import { HistoryArchiveScan, HistoryArchiveScanError } from 'shared';
 import { InvalidUrlError } from './InvalidUrlError';
 import { Result, err, ok } from 'neverthrow';
 import { ScanRepository } from '../../domain/scan/ScanRepository';
@@ -31,19 +31,22 @@ export class GetLatestScan {
 
 			if (scan === null) return ok(null);
 
+			// Filter to only verification errors for display
+			const verificationErrors: HistoryArchiveScanError[] = scan.errors
+				.filter((error) => error.type === ScanErrorType.TYPE_VERIFICATION)
+				.map((error) => ({
+					url: error.url,
+					message: error.message
+				}));
+
 			return ok(
 				new HistoryArchiveScan(
 					scan.baseUrl.value,
 					scan.startDate,
 					scan.endDate,
 					scan.latestVerifiedLedger,
-					scan.error?.type === ScanErrorType.TYPE_VERIFICATION,
-					scan.error?.type === ScanErrorType.TYPE_VERIFICATION
-						? scan.error.url
-						: null,
-					scan.error?.type === ScanErrorType.TYPE_VERIFICATION
-						? scan.error.message
-						: null,
+					verificationErrors.length > 0,
+					verificationErrors,
 					scan.isSlowArchive ?? false
 				)
 			);

@@ -13,6 +13,8 @@ import { VerifyArchives } from '../../use-cases/verify-archives/VerifyArchives';
 import { ArchivePerformanceTester } from '../../domain/scanner/ArchivePerformanceTester';
 import { ScanSettingsFactory } from '../../domain/scan/ScanSettingsFactory';
 import { CategoryVerificationService } from '../../domain/scanner/CategoryVerificationService';
+import { StellarArchivistVerifier } from '../../domain/scanner/StellarArchivistVerifier';
+import { ArchivistRangeScanner } from '../../domain/scanner/ArchivistRangeScanner';
 import { Config } from '../config/Config';
 import { AxiosHttpService, HttpQueue, HttpService } from 'http-helper';
 import { ScanCoordinatorService } from '../../domain/scan/ScanCoordinatorService';
@@ -32,6 +34,11 @@ export function load(container: Container, config: Config) {
 	container.bind(HASValidator).toSelf();
 	container.bind(Scanner).toSelf();
 	container.bind(RangeScanner).toSelf();
+	container.bind(StellarArchivistVerifier).toSelf();
+	container.bind(ArchivistRangeScanner).toSelf();
+	container
+		.bind<string>('StellarArchivistPath')
+		.toConstantValue(config.stellarArchivistPath);
 	container.bind(VerifyArchives).toSelf();
 	container.bind(VerifySingleArchive).toSelf();
 	container.bind(CheckPointGenerator).toSelf();

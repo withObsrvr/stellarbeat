@@ -30,14 +30,29 @@
     >
       <strong>History archive issue details</strong>
       <br />
-      <span v-html="historyArchiveErrorDescription"></span>
-      with
-      <a
-        href="https://github.com/stellar/go/tree/master/tools/stellar-archivist"
-        target="_blank"
-        >Stellar Archivist</a
-      >
-      and purge your cache afterwards.
+      <p v-if="historyArchiveScan && historyArchiveScan.errors.length > 0">
+        Archive verification errors detected. Start repair at ledger
+        {{ historyArchiveScan.latestVerifiedLedger }} with
+        <a
+          href="https://github.com/stellar/go/tree/master/tools/stellar-archivist"
+          target="_blank"
+          >Stellar Archivist</a
+        >
+        and purge your cache afterwards.
+      </p>
+      <p v-else>
+        Verification error in history archive detected. Repair with
+        <a
+          href="https://github.com/stellar/go/tree/master/tools/stellar-archivist"
+          target="_blank"
+          >Stellar Archivist</a
+        >
+        and purge your cache afterwards.
+      </p>
+      <history-archive-error-list
+        v-if="historyArchiveScan"
+        :errors="historyArchiveScan.errors"
+      />
     </b-alert>
     <b-alert
       :show="historyArchiveScan ? historyArchiveScan.isSlow : false"
@@ -178,6 +193,7 @@ import NodeIndex from "@/components/node/node-cards/statistics/node-index.vue";
 import NodeStatistics24HActive from "@/components/node/node-cards/statistics/node-statistics-24H-active.vue";
 import NodeTrustedBy from "@/components/node/node-cards/node-trusted-by.vue";
 import NodeLatestUpdates from "@/components/node/node-cards/node-latest-updates.vue";
+import HistoryArchiveErrorList from "@/components/node/node-cards/history-archive-error-list.vue";
 import { BAlert } from '@/components/bootstrap-compat';
 import { HistoryArchiveScan } from "shared";
 import useStore from "@/store/useStore";
@@ -210,18 +226,6 @@ async function fetchHistoryArchiveScan() {
 
   fetchingLatestHistoryArchiveScan.value = false;
 }
-
-const historyArchiveErrorDescription = computed(() => {
-  if (historyArchiveScan.value === null)
-    return "Verification error in history archive detected. Repair ";
-
-  let message = `Archive verification error at <a href=${historyArchiveScan.value.errorUrl} target="_blank">${historyArchiveScan.value.errorUrl}</a>: ${historyArchiveScan.value.errorMessage}. `;
-
-  message +=
-    "Start repair at ledger " + historyArchiveScan.value.latestVerifiedLedger;
-
-  return message;
-});
 
 watch(
   selectedNode,

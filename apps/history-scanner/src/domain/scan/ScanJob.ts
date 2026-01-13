@@ -84,7 +84,7 @@ export class ScanJob {
 			this.latestScannedLedgerHeaderHash,
 			this.concurrency,
 			null,
-			error,
+			[error],
 			this.remoteId
 		);
 	}
@@ -106,7 +106,7 @@ export class ScanJob {
 			scanResult.latestLedgerHeader.hash,
 			settings.concurrency,
 			settings.isSlowArchive,
-			scanResult.error,
+			scanResult.errors,
 			this.remoteId
 		);
 	}
