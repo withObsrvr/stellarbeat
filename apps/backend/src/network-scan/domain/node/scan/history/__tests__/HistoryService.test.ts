@@ -126,8 +126,7 @@ it('should return urls with historyErrors', async function () {
 						new Date(),
 						10,
 						true,
-						null,
-						null,
+						[],
 						false
 					),
 					new HistoryArchiveScan(
@@ -136,8 +135,7 @@ it('should return urls with historyErrors', async function () {
 						new Date(),
 						10,
 						false,
-						null,
-						null,
+						[],
 						false
 					)
 				])

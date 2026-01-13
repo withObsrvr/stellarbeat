@@ -18,7 +18,7 @@ export class TypeOrmHistoryArchiveScanResultRepository
 			.createQueryBuilder('scan')
 			.where('scan.url=:url', { url: url })
 			//.andWhere('scan."hasError"=false')
-			.leftJoinAndSelect('scan.error', 'error')
+			.leftJoinAndSelect('scan.errors', 'errors')
 			.orderBy('scan.startDate', 'DESC')
 			.getOne();
 	}
@@ -35,7 +35,7 @@ export class TypeOrmHistoryArchiveScanResultRepository
 				'haj',
 				'ha.id = haj.id'
 			)
-			.leftJoinAndSelect('ha.error', 'error')
+			.leftJoinAndSelect('ha.errors', 'errors')
 			.getMany();
 	}
 }

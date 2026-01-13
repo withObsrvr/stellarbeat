@@ -35,7 +35,7 @@ describe('RESTScanCoordinatorService Integration Tests', () => {
 				'hash123',
 				5,
 				false,
-				null,
+				[],
 				'remote-id'
 			);
 

@@ -16,12 +16,11 @@ it('should map from json', function () {
         endDate: endDate,
         latestVerifiedLedger: latestVerifiedLedger,
         hasError: hasError,
-        errorUrl: errorUrl,
-        errorMessage: errorMessage,
+        errors: [{ url: errorUrl, message: errorMessage }],
         isSlow: isSlow
     }
 
     const scan = HistoryArchiveScan.fromHistoryArchiveScanV1(scanDTO);
     expect(scan.isSlow).toEqual(isSlow);
-    expect(HistoryArchiveScan.fromHistoryArchiveScanV1(scanDTO)).toEqual(new HistoryArchiveScan(url, new Date(startDate), new Date(endDate), latestVerifiedLedger, hasError, errorUrl, errorMessage, isSlow));
+    expect(HistoryArchiveScan.fromHistoryArchiveScanV1(scanDTO)).toEqual(new HistoryArchiveScan(url, new Date(startDate), new Date(endDate), latestVerifiedLedger, hasError, [{ url: errorUrl, message: errorMessage }], isSlow));
 });

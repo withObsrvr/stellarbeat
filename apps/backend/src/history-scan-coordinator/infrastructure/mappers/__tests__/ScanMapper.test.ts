@@ -20,7 +20,7 @@ describe('ScanMapper', () => {
 			latestVerifiedLedger: 49,
 			concurrency: 10,
 			isSlowArchive: false,
-			error: null,
+			errors: [],
 			scanJobRemoteId: 'remoteId'
 		};
 	});
@@ -70,11 +70,11 @@ describe('ScanMapper', () => {
 				url: 'https://test.com',
 				message: 'Test error'
 			};
-			const dtoWithError = { ...validScanDTO, error: validErrorDTO };
-			const result = mapper.toDomain(dtoWithError);
+			const dtoWithErrors = { ...validScanDTO, errors: [validErrorDTO] };
+			const result = mapper.toDomain(dtoWithErrors);
 			expect(result.isOk()).toBe(true);
 			if (result.isOk()) {
-				expect(result.value.error).toBeInstanceOf(ScanError);
+				expect(result.value.errors[0]).toBeInstanceOf(ScanError);
 			}
 		});
 
@@ -84,8 +84,8 @@ describe('ScanMapper', () => {
 				url: 'https://test.com',
 				message: 'Test error'
 			};
-			const dtoWithError = { ...validScanDTO, error: invalidErrorDTO };
-			const result = mapper.toDomain(dtoWithError);
+			const dtoWithErrors = { ...validScanDTO, errors: [invalidErrorDTO] };
+			const result = mapper.toDomain(dtoWithErrors);
 			expect(result.isErr()).toBe(true);
 		});
 
@@ -95,12 +95,12 @@ describe('ScanMapper', () => {
 				url: 'https://test.com',
 				message: 'Test error'
 			};
-			const dtoWithError = { ...validScanDTO, error: validErrorDTO };
-			const result = mapper.toDomain(dtoWithError);
+			const dtoWithErrors = { ...validScanDTO, errors: [validErrorDTO] };
+			const result = mapper.toDomain(dtoWithErrors);
 			expect(result.isOk()).toBe(true);
 			if (result.isOk()) {
-				expect(result.value.error).toBeInstanceOf(ScanError);
-				expect(result.value.error?.type).toBe(ScanErrorType.TYPE_VERIFICATION);
+				expect(result.value.errors[0]).toBeInstanceOf(ScanError);
+				expect(result.value.errors[0]?.type).toBe(ScanErrorType.TYPE_VERIFICATION);
 			}
 		});
 
@@ -110,12 +110,12 @@ describe('ScanMapper', () => {
 				url: 'https://test.com',
 				message: 'Test error'
 			};
-			const dtoWithError = { ...validScanDTO, error: validErrorDTO };
-			const result = mapper.toDomain(dtoWithError);
+			const dtoWithErrors = { ...validScanDTO, errors: [validErrorDTO] };
+			const result = mapper.toDomain(dtoWithErrors);
 			expect(result.isOk()).toBe(true);
 			if (result.isOk()) {
-				expect(result.value.error).toBeInstanceOf(ScanError);
-				expect(result.value.error?.type).toBe(ScanErrorType.TYPE_CONNECTION);
+				expect(result.value.errors[0]).toBeInstanceOf(ScanError);
+				expect(result.value.errors[0]?.type).toBe(ScanErrorType.TYPE_CONNECTION);
 			}
 		});
 
@@ -125,8 +125,8 @@ describe('ScanMapper', () => {
 				url: 'https://test.com',
 				message: 'Test error'
 			};
-			const dtoWithError = { ...validScanDTO, error: invalidErrorDTO };
-			const result = mapper.toDomain(dtoWithError);
+			const dtoWithErrors = { ...validScanDTO, errors: [invalidErrorDTO] };
+			const result = mapper.toDomain(dtoWithErrors);
 			expect(result.isErr()).toBe(true);
 			if (result.isErr()) {
 				expect(result.error.message).toContain('Invalid error type');
