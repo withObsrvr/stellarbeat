@@ -447,10 +447,12 @@ jobs:
   deploy-staging:
     needs: [plan-production, plan-staging]
     if: >
-      github.ref == 'refs/heads/main' &&  
-      needs.plan-staging.result == 'success' &&  
+      needs.plan-staging.result == 'success' &&
       needs.plan-production.result == 'success'
     runs-on: ubuntu-latest
+    concurrency:
+      group: staging-deploy
+      cancel-in-progress: false
     permissions:
       contents: read
     environment: obsrvr-radar-staging
