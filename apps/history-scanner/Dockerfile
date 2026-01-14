@@ -1,13 +1,13 @@
 # Build stellar-archivist from source
-FROM golang:1.21-alpine AS archivist-builder
+FROM golang:1.22-alpine AS archivist-builder
 
 RUN apk add --no-cache git
 
 WORKDIR /build
-# Clone stellar/go repo - main branch has Protocol 23+ support
-RUN git clone --depth 1 https://github.com/stellar/go.git
+# Clone the new go-stellar-sdk repo (stellar/go is deprecated)
+RUN git clone --depth 1 https://github.com/stellar/go-stellar-sdk.git
 
-WORKDIR /build/go/tools/stellar-archivist
+WORKDIR /build/go-stellar-sdk/tools/stellar-archivist
 RUN go build -o /stellar-archivist
 
 # Build the Node.js application
