@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Scanner } from '../Scanner';
 import { mock } from 'jest-mock-extended';
 import { createDummyHistoryBaseUrl } from '../../history-archive/__fixtures__/HistoryBaseUrl';

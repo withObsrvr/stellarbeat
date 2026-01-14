@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { VerifyArchives } from '../VerifyArchives';
 import { Scanner } from '../../../domain/scanner/Scanner';
