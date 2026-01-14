@@ -1,5 +1,5 @@
-# Install stellar-archivist
-FROM golang:1.22-alpine AS archivist-builder
+# Install stellar-archivist (requires Go 1.24+)
+FROM golang:1.24-alpine AS archivist-builder
 
 RUN go install github.com/stellar/go-stellar-sdk/tools/stellar-archivist@latest
 
