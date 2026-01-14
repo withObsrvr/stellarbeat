@@ -4,10 +4,8 @@ FROM golang:1.21-alpine AS archivist-builder
 RUN apk add --no-cache git
 
 WORKDIR /build
-RUN git clone https://github.com/stellar/go.git
-WORKDIR /build/go
-# Use commit with Protocol 23+ support
-RUN git checkout d4bcb010
+# Clone stellar/go repo - main branch has Protocol 23+ support
+RUN git clone --depth 1 https://github.com/stellar/go.git
 
 WORKDIR /build/go/tools/stellar-archivist
 RUN go build -o /stellar-archivist
