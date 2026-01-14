@@ -1,14 +1,7 @@
-# Build stellar-archivist from source
+# Install stellar-archivist
 FROM golang:1.22-alpine AS archivist-builder
 
-RUN apk add --no-cache git
-
-WORKDIR /build
-# Clone the new go-stellar-sdk repo (stellar/go is deprecated)
-RUN git clone --depth 1 https://github.com/stellar/go-stellar-sdk.git
-
-WORKDIR /build/go-stellar-sdk/tools/stellar-archivist
-RUN go build -o /stellar-archivist
+RUN go install github.com/stellar/go-stellar-sdk/tools/stellar-archivist@latest
 
 # Build the Node.js application
 FROM node:20-alpine AS app-builder
@@ -52,8 +45,8 @@ COPY --from=app-builder /app/apps/history-scanner ./apps/history-scanner
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
 
-# Copy stellar-archivist binary
-COPY --from=archivist-builder /stellar-archivist /usr/local/bin/stellar-archivist
+# Copy stellar-archivist binary (go install puts it in /go/bin/)
+COPY --from=archivist-builder /go/bin/stellar-archivist /usr/local/bin/stellar-archivist
 RUN chmod +x /usr/local/bin/stellar-archivist
 
 # Set environment variable for binary path
