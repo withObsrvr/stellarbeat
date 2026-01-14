@@ -17,6 +17,10 @@ export class MockHistoryArchive {
 						'/__fixtures__/',
 						path.basename(req.path)
 					);
+					if (!fs.existsSync(file)) {
+						res.status(404).send('Not found');
+						return;
+					}
 					const content = fs.readFileSync(file, { encoding: 'utf8' });
 					res.send(content);
 				}
@@ -29,6 +33,10 @@ export class MockHistoryArchive {
 						'/__fixtures__/',
 						path.basename(req.path)
 					);
+					if (!fs.existsSync(file)) {
+						res.status(404).send('Not found');
+						return;
+					}
 					fs.createReadStream(file).pipe(res);
 				}
 			);
