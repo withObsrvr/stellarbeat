@@ -21,31 +21,22 @@ COPY tsconfig.base.json ./
 COPY packages ./packages
 COPY apps/history-scanner ./apps/history-scanner
 
-# Install dependencies
+# Install dependencies and build
 RUN pnpm install --frozen-lockfile
-
-# Build packages and app
 RUN pnpm --filter history-scanner... build
+
+# Prune dev dependencies for production
+RUN pnpm prune --prod
 
 # Production runtime image
 FROM node:20-alpine AS runtime
 
 WORKDIR /app
 
-# Install pnpm for production
-RUN npm install -g pnpm@9.15.0
+# Copy the entire built workspace from builder (includes node_modules and lib/)
+COPY --from=app-builder /app ./
 
-# Copy built application
-COPY --from=app-builder /app/pnpm-workspace.yaml ./
-COPY --from=app-builder /app/pnpm-lock.yaml ./
-COPY --from=app-builder /app/package.json ./
-COPY --from=app-builder /app/packages ./packages
-COPY --from=app-builder /app/apps/history-scanner ./apps/history-scanner
-
-# Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod
-
-# Copy stellar-archivist binary (go install puts it in /go/bin/)
+# Copy stellar-archivist binary
 COPY --from=archivist-builder /go/bin/stellar-archivist /usr/local/bin/stellar-archivist
 RUN chmod +x /usr/local/bin/stellar-archivist
 
