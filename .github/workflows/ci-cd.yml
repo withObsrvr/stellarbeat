@@ -161,7 +161,7 @@ jobs:
           cat > terraform.auto.tfvars <<EOF
           # Core credentials
           do_token                 = "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}"
-          git_branch               = "main"
+          git_branch               = "${{ github.head_ref || github.ref_name }}"
           region                   = "${{ vars.REGION || 'nyc3' }}"
           aws_access_key           = "${{ secrets.AWS_ACCESS_KEY_ID }}"
           aws_secret_access_key    = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
