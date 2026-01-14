@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { VerifyArchives } from '../VerifyArchives';
 import Kernel from '../../../infrastructure/Kernel';
 import { ConfigMock } from '../../../infrastructure/config/__mocks__/configMock';
@@ -55,8 +56,7 @@ describe('VerifyArchives Integration Tests', () => {
 		expect(registeredScan).toBeDefined();
 		expect(registeredScan.hasError()).toBe(false);
 		expect(registeredScan.latestScannedLedger).toEqual(127);
-		expect(registeredScan.latestScannedLedgerHeaderHash).toEqual(
-			'7XqhM1busGfKYJi/v/lHL/IDp/h/6TMLTDxYwKu88QA='
-		);
+		// stellar-archivist doesn't provide header hashes, so this is null
+		expect(registeredScan.latestScannedLedgerHeaderHash).toBeNull();
 	});
 });
