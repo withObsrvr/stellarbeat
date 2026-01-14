@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { Scan } from '../scan/Scan';
 import { ExceptionLogger } from 'exception-logger';
-import { RangeScanner } from './RangeScanner';
+import { ArchivistRangeScanner } from './ArchivistRangeScanner';
 import { ScanJob } from '../scan/ScanJob';
 import { ScanError } from '../scan/ScanError';
 import { ScanSettingsFactory } from '../scan/ScanSettingsFactory';
@@ -19,7 +19,7 @@ export interface LedgerHeader {
 @injectable()
 export class Scanner {
 	constructor(
-		private rangeScanner: RangeScanner,
+		private rangeScanner: ArchivistRangeScanner,
 		private scanJobSettingsFactory: ScanSettingsFactory,
 		@inject('Logger') private logger: Logger,
 		@inject(TYPES.ExceptionLogger) private exceptionLogger: ExceptionLogger,
@@ -78,25 +78,20 @@ export class Scanner {
 			hash: scanSettings.latestScannedLedgerHeaderHash ?? undefined
 		};
 
-		let rangeFromLedger = scanSettings.fromLedger; //todo move to range generator
+		let rangeFromLedger = scanSettings.fromLedger;
 		let rangeToLedger =
 			rangeFromLedger + this.rangeSize < scanSettings.toLedger
 				? rangeFromLedger + this.rangeSize
 				: scanSettings.toLedger;
 
-		let alreadyScannedBucketHashes = new Set<string>();
 		const allErrors: ScanError[] = [];
 
 		while (rangeFromLedger < scanSettings.toLedger) {
 			console.time('range_scan');
 			const rangeResult = await this.rangeScanner.scan(
 				url,
-				scanSettings.concurrency,
-				rangeToLedger,
 				rangeFromLedger,
-				latestLedgerHeader.ledger,
-				latestLedgerHeader.hash,
-				alreadyScannedBucketHashes
+				rangeToLedger
 			);
 			console.timeEnd('range_scan');
 
@@ -104,12 +99,13 @@ export class Scanner {
 				allErrors.push(rangeResult.error);
 				// Continue scanning to collect more errors
 			} else {
+				// Collect any verification errors from the range
+				allErrors.push(...rangeResult.value.errors);
+
 				latestLedgerHeader.ledger = rangeResult.value.latestLedgerHeader
 					? rangeResult.value.latestLedgerHeader.ledger
 					: rangeToLedger;
 				latestLedgerHeader.hash = rangeResult.value.latestLedgerHeader?.hash;
-
-				alreadyScannedBucketHashes = rangeResult.value.scannedBucketHashes;
 			}
 
 			rangeFromLedger += this.rangeSize;

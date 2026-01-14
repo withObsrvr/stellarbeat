@@ -44,9 +44,10 @@ module "app_platform" {
 
   # Backend environment variables
   backend_env = {
-    DATABASE_URL = var.integration_database_url
-    JWT_SECRET   = var.integration_jwt_secret
-    NODE_ENV     = "integration"
+    DATABASE_URL            = var.integration_database_url
+    JWT_SECRET              = var.integration_jwt_secret
+    NODE_ENV                = "integration"
+    CONTACT_RECIPIENT_EMAIL = "hello@withobsrvr.com"
   }
 
   # Network Scanner environment variables

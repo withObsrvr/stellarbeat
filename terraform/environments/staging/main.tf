@@ -109,6 +109,7 @@ module "app_platform" {
     TYPEORM_MIGRATIONS_RUN        = "false"
     HISTORY_SCAN_API_USERNAME     = var.coordinator_api_username
     HISTORY_SCAN_API_PASSWORD     = var.coordinator_api_password
+    CONTACT_RECIPIENT_EMAIL       = "hello@withobsrvr.com"
   }
 
   # Network Scanner environment variables for mainnet
