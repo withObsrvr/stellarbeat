@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { VerifySingleArchive } from '../../use-cases/verify-single-archive/VerifySingleArchive';
 import Kernel from '../Kernel';
 

@@ -51,4 +51,4 @@ RUN chmod +x /usr/local/bin/stellar-archivist
 # Set environment variable for binary path
 ENV STELLAR_ARCHIVIST_PATH=/usr/local/bin/stellar-archivist
 
-CMD ["node", "lib/index.js"]
+CMD ["node", "lib/infrastructure/cli/verify-archives.js", "1", "1"]
