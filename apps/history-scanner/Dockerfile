@@ -27,15 +27,21 @@ RUN pnpm install --frozen-lockfile
 # Build all packages and the app
 RUN pnpm --filter history-scanner... build
 
-# Use pnpm deploy to create a standalone production bundle
+# Create production deployment directory
+RUN mkdir -p /prod/history-scanner
+
+# Use pnpm deploy for dependencies
 RUN pnpm --filter history-scanner deploy --prod /prod/history-scanner
+
+# Explicitly copy the built lib/ directory (pnpm deploy may not include it)
+RUN cp -r /app/apps/history-scanner/lib /prod/history-scanner/lib
 
 # Production runtime image
 FROM node:20-alpine AS runtime
 
 WORKDIR /app
 
-# Copy the deployed production bundle
+# Copy the deployed production bundle with built files
 COPY --from=app-builder /prod/history-scanner ./
 
 # Copy stellar-archivist binary
