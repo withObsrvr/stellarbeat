@@ -27,7 +27,8 @@ export class Scanner {
 	) {}
 
 	async perform(time: Date, scanJob: ScanJob): Promise<Scan> {
-		console.time('scan');
+		const scanTimerLabel = `scan:${scanJob.url.value}`;
+		console.time(scanTimerLabel);
 
 		this.logger.info('Starting scan', {
 			url: scanJob.url.value,
@@ -39,6 +40,7 @@ export class Scanner {
 			await this.scanJobSettingsFactory.determineSettings(scanJob);
 
 		if (scanSettingsOrError.isErr()) {
+			console.timeEnd(scanTimerLabel);
 			const error = scanSettingsOrError.error;
 			return scanJob.createFailedScanCouldNotDetermineSettings(
 				time,
@@ -64,7 +66,7 @@ export class Scanner {
 			scanSettings,
 			scanResult
 		);
-		console.timeEnd('scan');
+		console.timeEnd(scanTimerLabel);
 
 		return scan;
 	}
@@ -100,7 +102,10 @@ export class Scanner {
 				// Continue scanning to collect more errors
 			} else {
 				// Collect any verification errors from the range
-				allErrors.push(...rangeResult.value.errors);
+				// Note: Using concat instead of push(...) to avoid stack overflow with large error arrays
+				for (const error of rangeResult.value.errors) {
+					allErrors.push(error);
+				}
 
 				latestLedgerHeader.ledger = rangeResult.value.latestLedgerHeader
 					? rangeResult.value.latestLedgerHeader.ledger
