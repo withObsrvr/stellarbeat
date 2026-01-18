@@ -50,16 +50,48 @@ export class StellarArchivistVerifier {
 			const process = spawn(this.binaryPath, args);
 			let stdout = '';
 			let stderr = '';
+			const startTime = Date.now();
+
+			// Periodic heartbeat to show process is still running
+			const heartbeatInterval = setInterval(() => {
+				const elapsedMinutes = Math.floor((Date.now() - startTime) / 60000);
+				this.logger.info('stellar-archivist still running', {
+					url: archiveUrl.value,
+					elapsedMinutes,
+					fromLedger,
+					toLedger,
+					ledgerRange: toLedger - fromLedger
+				});
+			}, 5 * 60 * 1000); // Log every 5 minutes
 
 			process.stdout.on('data', (data: Buffer) => {
-				stdout += data.toString();
+				const chunk = data.toString();
+				stdout += chunk;
+				// Log progress lines in real-time
+				for (const line of chunk.split('\n')) {
+					if (line.trim() && !line.includes('level=debug')) {
+						this.logger.debug('stellar-archivist', { output: line.trim() });
+					}
+				}
 			});
 
 			process.stderr.on('data', (data: Buffer) => {
-				stderr += data.toString();
+				const chunk = data.toString();
+				stderr += chunk;
+				// Log error/warning lines in real-time
+				for (const line of chunk.split('\n')) {
+					if (line.trim()) {
+						if (line.includes('level=error')) {
+							this.logger.warn('stellar-archivist error', { output: line.trim() });
+						} else if (line.includes('level=warn')) {
+							this.logger.info('stellar-archivist warning', { output: line.trim() });
+						}
+					}
+				}
 			});
 
 			process.on('error', (error) => {
+				clearInterval(heartbeatInterval);
 				this.logger.error('Failed to spawn stellar-archivist', {
 					error: error.message,
 					binaryPath: this.binaryPath
@@ -76,6 +108,15 @@ export class StellarArchivistVerifier {
 			});
 
 			process.on('close', (code) => {
+				clearInterval(heartbeatInterval);
+				const elapsedMinutes = Math.floor((Date.now() - startTime) / 60000);
+				this.logger.info('stellar-archivist completed', {
+					url: archiveUrl.value,
+					exitCode: code,
+					elapsedMinutes,
+					fromLedger,
+					toLedger
+				});
 				const output = stdout + stderr;
 				const result = this.parseOutput(output, archiveUrl, fromLedger, toLedger, code);
 				resolve(ok(result));
