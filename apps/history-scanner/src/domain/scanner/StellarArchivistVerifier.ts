@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import { injectable, inject } from 'inversify';
 import { err, ok, Result } from 'neverthrow';
 import { Logger } from 'logger';
-import { ScanError, ScanErrorType } from '../scan/ScanError';
+import { ScanError, ScanErrorType, ScanErrorCategory } from '../scan/ScanError';
 import { Url } from 'http-helper';
 
 export interface VerificationResult {
@@ -11,11 +11,11 @@ export interface VerificationResult {
 	success: boolean;
 }
 
-interface ParsedError {
-	type: 'ledger_header' | 'transaction_set' | 'transaction_result_set' | 'bucket' | 'missing_file';
-	ledger?: number;
-	url: string;
-	message: string;
+interface ErrorAggregation {
+	category: ScanErrorCategory;
+	count: number;
+	firstLedger: number | null;
+	lastLedger: number | null;
 }
 
 @injectable()
@@ -132,53 +132,98 @@ export class StellarArchivistVerifier {
 		exitCode: number | null
 	): VerificationResult {
 		const lines = output.split('\n');
-		const errors: ScanError[] = [];
 		let latestVerifiedLedger = fromLedger;
+
+		// Aggregate errors by category
+		const aggregations = new Map<ScanErrorCategory, ErrorAggregation>();
 
 		for (const line of lines) {
 			// Parse verified ledger count to estimate latest verified ledger
 			const verifiedMatch = line.match(/Verified (\d+) ledger headers/);
 			if (verifiedMatch) {
 				const verifiedCount = parseInt(verifiedMatch[1], 10);
-				// Estimate: fromLedger + verifiedCount (approximate)
 				latestVerifiedLedger = Math.min(fromLedger + verifiedCount, toLedger);
 			}
 
-			// Parse error messages
+			// Parse summary error lines (e.g., "Error: 1000121 transaction sets (of 1000121 checked) have unexpected hashes")
+			const summaryMatch = line.match(
+				/level=error msg="Error: (\d+) (transaction sets|transaction result sets|ledger headers|buckets) \(of \d+ checked\) have unexpected hashes"/
+			);
+			if (summaryMatch) {
+				const count = parseInt(summaryMatch[1], 10);
+				const errorType = summaryMatch[2];
+				const category = this.mapSummaryTypeToCategory(errorType);
+
+				// Use summary count as the authoritative count
+				const existing = aggregations.get(category);
+				if (existing) {
+					existing.count = count; // Override with summary count
+				} else {
+					aggregations.set(category, {
+						category,
+						count,
+						firstLedger: null,
+						lastLedger: null
+					});
+				}
+				continue;
+			}
+
+			// Parse individual error messages for ledger tracking
 			const errorMatch = line.match(/level=error msg="([^"]+)"/);
 			if (errorMatch) {
 				const errorMsg = errorMatch[1];
-				const parsedError = this.parseErrorMessage(errorMsg, archiveUrl.value);
-				if (parsedError) {
-					errors.push(
-						new ScanError(
-							ScanErrorType.TYPE_VERIFICATION,
-							parsedError.url,
-							parsedError.message
-						)
-					);
-
-					// Update latest verified ledger based on error
-					if (parsedError.ledger && parsedError.ledger < latestVerifiedLedger) {
-						latestVerifiedLedger = parsedError.ledger - 1;
+				const parsed = this.categorizeError(errorMsg);
+				if (parsed) {
+					const existing = aggregations.get(parsed.category);
+					if (existing) {
+						existing.count++;
+						if (parsed.ledger !== null) {
+							if (existing.firstLedger === null || parsed.ledger < existing.firstLedger) {
+								existing.firstLedger = parsed.ledger;
+							}
+							if (existing.lastLedger === null || parsed.ledger > existing.lastLedger) {
+								existing.lastLedger = parsed.ledger;
+							}
+						}
+						// Update latest verified ledger
+						if (parsed.ledger && parsed.ledger < latestVerifiedLedger) {
+							latestVerifiedLedger = parsed.ledger - 1;
+						}
+					} else {
+						aggregations.set(parsed.category, {
+							category: parsed.category,
+							count: 1,
+							firstLedger: parsed.ledger,
+							lastLedger: parsed.ledger
+						});
+						if (parsed.ledger && parsed.ledger < latestVerifiedLedger) {
+							latestVerifiedLedger = parsed.ledger - 1;
+						}
 					}
 				}
 			}
 
 			// Parse missing file errors
-			const missingMatch = line.match(/Missing (\w+) files \((\d+)\): \[([^\]]+)\]/);
+			const missingMatch = line.match(/Missing (\w+) files \((\d+)\)/);
 			if (missingMatch) {
-				const category = missingMatch[1];
-				const range = missingMatch[3];
-				errors.push(
-					new ScanError(
-						ScanErrorType.TYPE_VERIFICATION,
-						archiveUrl.value,
-						`Missing ${category} files in range ${range}`
-					)
-				);
+				const count = parseInt(missingMatch[2], 10);
+				const existing = aggregations.get(ScanErrorCategory.MISSING_FILE);
+				if (existing) {
+					existing.count += count;
+				} else {
+					aggregations.set(ScanErrorCategory.MISSING_FILE, {
+						category: ScanErrorCategory.MISSING_FILE,
+						count,
+						firstLedger: null,
+						lastLedger: null
+					});
+				}
 			}
 		}
+
+		// Convert aggregations to ScanErrors
+		const errors = this.aggregationsToErrors(aggregations, archiveUrl.value);
 
 		return {
 			latestVerifiedLedger: Math.max(latestVerifiedLedger, fromLedger),
@@ -187,84 +232,117 @@ export class StellarArchivistVerifier {
 		};
 	}
 
-	private parseErrorMessage(errorMsg: string, baseUrl: string): ParsedError | null {
-		// Parse: "Error: mismatched hash on ledger header 0x03595e53: expected ..., got ..."
-		const ledgerHeaderMatch = errorMsg.match(
-			/mismatched hash on ledger header (0x[0-9a-fA-F]+): expected ([^,]+), got ([^\s]+)/
-		);
+	private mapSummaryTypeToCategory(summaryType: string): ScanErrorCategory {
+		switch (summaryType) {
+			case 'transaction sets':
+				return ScanErrorCategory.TRANSACTION_SET_HASH;
+			case 'transaction result sets':
+				return ScanErrorCategory.TRANSACTION_RESULT_HASH;
+			case 'ledger headers':
+				return ScanErrorCategory.LEDGER_HEADER_HASH;
+			case 'buckets':
+				return ScanErrorCategory.BUCKET_HASH;
+			default:
+				return ScanErrorCategory.OTHER;
+		}
+	}
+
+	private categorizeError(errorMsg: string): { category: ScanErrorCategory; ledger: number | null } | null {
+		// Parse: "Error: mismatched hash on ledger header 0x03595e53: ..."
+		const ledgerHeaderMatch = errorMsg.match(/mismatched hash on ledger header (0x[0-9a-fA-F]+)/);
 		if (ledgerHeaderMatch) {
-			const ledgerHex = ledgerHeaderMatch[1];
-			const ledger = parseInt(ledgerHex, 16);
 			return {
-				type: 'ledger_header',
-				ledger,
-				url: this.buildCategoryUrl(baseUrl, ledger, 'ledger'),
-				message: `Wrong ledger hash at ledger ${ledger}`
+				category: ScanErrorCategory.LEDGER_HEADER_HASH,
+				ledger: parseInt(ledgerHeaderMatch[1], 16)
 			};
 		}
 
-		// Parse: "Error: mismatched hash on transaction set 0x038784ef: expected ..., got ..."
-		const txSetMatch = errorMsg.match(
-			/mismatched hash on transaction set (0x[0-9a-fA-F]+): expected ([^,]+), got ([^\s]+)/
-		);
+		// Parse: "Error: mismatched hash on transaction set 0x038784ef: ..."
+		const txSetMatch = errorMsg.match(/mismatched hash on transaction set (0x[0-9a-fA-F]+)/);
 		if (txSetMatch) {
-			const ledgerHex = txSetMatch[1];
-			const ledger = parseInt(ledgerHex, 16);
 			return {
-				type: 'transaction_set',
-				ledger,
-				url: this.buildCategoryUrl(baseUrl, ledger, 'transactions'),
-				message: `Wrong transaction hash at ledger ${ledger}`
+				category: ScanErrorCategory.TRANSACTION_SET_HASH,
+				ledger: parseInt(txSetMatch[1], 16)
 			};
 		}
 
-		// Parse: "Error: mismatched hash on transaction result set 0x038784ef: expected ..., got ..."
-		const txResultMatch = errorMsg.match(
-			/mismatched hash on transaction result set (0x[0-9a-fA-F]+): expected ([^,]+), got ([^\s]+)/
-		);
+		// Parse: "Error: mismatched hash on transaction result set 0x038784ef: ..."
+		const txResultMatch = errorMsg.match(/mismatched hash on transaction result set (0x[0-9a-fA-F]+)/);
 		if (txResultMatch) {
-			const ledgerHex = txResultMatch[1];
-			const ledger = parseInt(ledgerHex, 16);
 			return {
-				type: 'transaction_result_set',
-				ledger,
-				url: this.buildCategoryUrl(baseUrl, ledger, 'results'),
-				message: `Wrong results hash at ledger ${ledger}`
+				category: ScanErrorCategory.TRANSACTION_RESULT_HASH,
+				ledger: parseInt(txResultMatch[1], 16)
 			};
 		}
 
-		// Parse: "Error: bucket hash mismatch: expected ..., got ..."
-		const bucketMatch = errorMsg.match(/bucket hash mismatch/);
-		if (bucketMatch) {
+		// Parse: "Error: bucket hash mismatch: ..."
+		if (errorMsg.includes('bucket hash mismatch')) {
 			return {
-				type: 'bucket',
-				url: baseUrl,
-				message: errorMsg
+				category: ScanErrorCategory.BUCKET_HASH,
+				ledger: null
 			};
+		}
+
+		// Skip summary lines (already handled separately)
+		if (errorMsg.includes('have unexpected hashes')) {
+			return null;
 		}
 
 		// Generic error
 		if (errorMsg.startsWith('Error:')) {
 			return {
-				type: 'missing_file',
-				url: baseUrl,
-				message: errorMsg.replace('Error: ', '')
+				category: ScanErrorCategory.OTHER,
+				ledger: null
 			};
 		}
 
 		return null;
 	}
 
-	private buildCategoryUrl(baseUrl: string, ledger: number, category: string): string {
-		// Calculate checkpoint: ledgers are in checkpoints of 64
-		const checkpoint = Math.floor((ledger + 1) / 64) * 64 - 1;
-		const checkpointHex = checkpoint.toString(16).padStart(8, '0');
+	private aggregationsToErrors(
+		aggregations: Map<ScanErrorCategory, ErrorAggregation>,
+		baseUrl: string
+	): ScanError[] {
+		const errors: ScanError[] = [];
 
-		// URL format: baseUrl/category/xx/yy/zz/category-xxxxxxxx.xdr.gz
-		const dir1 = checkpointHex.substring(0, 2);
-		const dir2 = checkpointHex.substring(2, 4);
-		const dir3 = checkpointHex.substring(4, 6);
+		for (const [category, agg] of aggregations) {
+			if (agg.count === 0) continue;
 
-		return `${baseUrl}/${category}/${dir1}/${dir2}/${dir3}/${category}-${checkpointHex}.xdr.gz`;
+			const message = this.buildAggregatedMessage(agg);
+			errors.push(
+				new ScanError(
+					ScanErrorType.TYPE_VERIFICATION,
+					baseUrl,
+					message,
+					agg.count,
+					category
+				)
+			);
+		}
+
+		return errors;
+	}
+
+	private buildAggregatedMessage(agg: ErrorAggregation): string {
+		const categoryNames: Record<ScanErrorCategory, string> = {
+			[ScanErrorCategory.TRANSACTION_SET_HASH]: 'transaction set hash mismatch',
+			[ScanErrorCategory.TRANSACTION_RESULT_HASH]: 'transaction result hash mismatch',
+			[ScanErrorCategory.LEDGER_HEADER_HASH]: 'ledger header hash mismatch',
+			[ScanErrorCategory.BUCKET_HASH]: 'bucket hash mismatch',
+			[ScanErrorCategory.MISSING_FILE]: 'missing file',
+			[ScanErrorCategory.CONNECTION]: 'connection error',
+			[ScanErrorCategory.OTHER]: 'verification error'
+		};
+
+		const categoryName = categoryNames[agg.category];
+		const plural = agg.count === 1 ? '' : 's';
+
+		if (agg.firstLedger !== null && agg.lastLedger !== null && agg.firstLedger !== agg.lastLedger) {
+			return `${agg.count} ${categoryName}${plural} (ledgers ${agg.firstLedger} - ${agg.lastLedger})`;
+		} else if (agg.firstLedger !== null) {
+			return `${agg.count} ${categoryName}${plural} (at ledger ${agg.firstLedger})`;
+		} else {
+			return `${agg.count} ${categoryName}${plural}`;
+		}
 	}
 }

@@ -39,7 +39,9 @@ export class HistoryScanCoordinatorScanService
 						.filter((error) => error.type === ScanErrorType.TYPE_VERIFICATION)
 						.map((error) => ({
 							url: error.url,
-							message: error.message
+							message: error.message,
+							count: error.count,
+							category: error.category
 						}));
 
 					return new HistoryArchiveScan(

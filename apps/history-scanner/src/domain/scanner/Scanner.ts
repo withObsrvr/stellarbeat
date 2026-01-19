@@ -4,7 +4,7 @@ import { Scan } from '../scan/Scan';
 import { ExceptionLogger } from 'exception-logger';
 import { ArchivistRangeScanner } from './ArchivistRangeScanner';
 import { ScanJob } from '../scan/ScanJob';
-import { ScanError } from '../scan/ScanError';
+import { ScanError, ScanErrorCategory, ScanErrorType } from '../scan/ScanError';
 import { ScanSettingsFactory } from '../scan/ScanSettingsFactory';
 import { ScanSettings } from '../scan/ScanSettings';
 import { ScanResult } from '../scan/ScanResult';
@@ -122,7 +122,85 @@ export class Scanner {
 
 		return {
 			latestLedgerHeader,
-			errors: allErrors
+			errors: this.aggregateErrors(allErrors, url.value)
 		};
+	}
+
+	/**
+	 * Aggregates errors by category to avoid duplicate error entries.
+	 * Errors of the same category are combined into a single error with summed counts.
+	 */
+	private aggregateErrors(errors: ScanError[], baseUrl: string): ScanError[] {
+		if (errors.length === 0) return [];
+
+		// Separate connection errors (TYPE_CONNECTION) from verification errors
+		const connectionErrors = errors.filter(
+			(e) => e.type === ScanErrorType.TYPE_CONNECTION
+		);
+		const verificationErrors = errors.filter(
+			(e) => e.type === ScanErrorType.TYPE_VERIFICATION
+		);
+
+		// If there's any connection error, just return the first one
+		// (connection errors typically mean the scan couldn't proceed)
+		if (connectionErrors.length > 0) {
+			return [connectionErrors[0]];
+		}
+
+		// Aggregate verification errors by category
+		const aggregations = new Map<
+			ScanErrorCategory,
+			{ count: number; message: string }
+		>();
+
+		for (const error of verificationErrors) {
+			const existing = aggregations.get(error.category);
+			if (existing) {
+				existing.count += error.count;
+			} else {
+				aggregations.set(error.category, {
+					count: error.count,
+					message: error.message
+				});
+			}
+		}
+
+		// Convert aggregations to ScanError array
+		const aggregatedErrors: ScanError[] = [];
+		for (const [category, agg] of aggregations) {
+			// Build a descriptive message based on the category
+			const message = this.buildAggregatedMessage(category, agg.count);
+			aggregatedErrors.push(
+				new ScanError(
+					ScanErrorType.TYPE_VERIFICATION,
+					baseUrl,
+					message,
+					agg.count,
+					category
+				)
+			);
+		}
+
+		return aggregatedErrors;
+	}
+
+	private buildAggregatedMessage(
+		category: ScanErrorCategory,
+		count: number
+	): string {
+		const categoryNames: Record<ScanErrorCategory, string> = {
+			[ScanErrorCategory.TRANSACTION_SET_HASH]: 'transaction set hash mismatch',
+			[ScanErrorCategory.TRANSACTION_RESULT_HASH]:
+				'transaction result hash mismatch',
+			[ScanErrorCategory.LEDGER_HEADER_HASH]: 'ledger header hash mismatch',
+			[ScanErrorCategory.BUCKET_HASH]: 'bucket hash mismatch',
+			[ScanErrorCategory.MISSING_FILE]: 'missing file',
+			[ScanErrorCategory.CONNECTION]: 'connection error',
+			[ScanErrorCategory.OTHER]: 'verification error'
+		};
+
+		const categoryName = categoryNames[category];
+		const plural = count === 1 ? '' : 's';
+		return `${count} ${categoryName}${plural}`;
 	}
 }

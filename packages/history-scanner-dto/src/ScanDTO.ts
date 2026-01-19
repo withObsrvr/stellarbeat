@@ -87,7 +87,9 @@ export class ScanDTO {
 			error !== null &&
 			typeof (error as ScanErrorDTO).type === 'string' &&
 			typeof (error as ScanErrorDTO).url === 'string' &&
-			typeof (error as ScanErrorDTO).message === 'string'
+			typeof (error as ScanErrorDTO).message === 'string' &&
+			typeof (error as ScanErrorDTO).count === 'number' &&
+			typeof (error as ScanErrorDTO).category === 'string'
 		);
 	}
 }

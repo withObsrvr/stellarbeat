@@ -3,7 +3,7 @@ import { injectable } from 'inversify';
 import { Url } from 'http-helper';
 import 'reflect-metadata';
 import { Scan } from '../../domain/scan/Scan';
-import { ScanError, ScanErrorType } from '../../domain/scan/ScanError';
+import { ScanError, ScanErrorType, ScanErrorCategory } from '../../domain/scan/ScanError';
 import { ScanDTO, ScanErrorDTO } from 'history-scanner-dto';
 
 @injectable()
@@ -107,7 +107,10 @@ export class ScanMapper {
 			return err(new Error(`Invalid error type: ${errorDTO.type}`));
 		}
 
-		return ok(new ScanError(errorType, errorDTO.url, errorDTO.message));
+		const errorCategory = this.mapErrorCategory(errorDTO.category);
+		const count = typeof errorDTO.count === 'number' ? errorDTO.count : 1;
+
+		return ok(new ScanError(errorType, errorDTO.url, errorDTO.message, count, errorCategory));
 	}
 
 	private mapErrorType(type: string): ScanErrorType | undefined {
@@ -118,6 +121,26 @@ export class ScanMapper {
 				return ScanErrorType.TYPE_CONNECTION;
 			default:
 				return undefined;
+		}
+	}
+
+	private mapErrorCategory(category: string | undefined): ScanErrorCategory {
+		if (!category) return ScanErrorCategory.OTHER;
+		switch (category) {
+			case 'TRANSACTION_SET_HASH':
+				return ScanErrorCategory.TRANSACTION_SET_HASH;
+			case 'TRANSACTION_RESULT_HASH':
+				return ScanErrorCategory.TRANSACTION_RESULT_HASH;
+			case 'LEDGER_HEADER_HASH':
+				return ScanErrorCategory.LEDGER_HEADER_HASH;
+			case 'BUCKET_HASH':
+				return ScanErrorCategory.BUCKET_HASH;
+			case 'MISSING_FILE':
+				return ScanErrorCategory.MISSING_FILE;
+			case 'CONNECTION':
+				return ScanErrorCategory.CONNECTION;
+			default:
+				return ScanErrorCategory.OTHER;
 		}
 	}
 }

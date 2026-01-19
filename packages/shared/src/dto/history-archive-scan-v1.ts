@@ -3,6 +3,8 @@ import {JSONSchemaType} from "ajv";
 export interface HistoryArchiveScanErrorV1 {
     readonly url: string;
     readonly message: string;
+    readonly count: number;
+    readonly category: string;
 }
 
 export interface HistoryArchiveScanV1 {
@@ -42,9 +44,11 @@ export const HistoryArchiveScanV1Schema: JSONSchemaType<HistoryArchiveScanV1> = 
                 "type": "object",
                 "properties": {
                     "url": { "type": "string" },
-                    "message": { "type": "string" }
+                    "message": { "type": "string" },
+                    "count": { "type": "number" },
+                    "category": { "type": "string" }
                 },
-                "required": ["url", "message"]
+                "required": ["url", "message", "count", "category"]
             }
         },
         "isSlow": {

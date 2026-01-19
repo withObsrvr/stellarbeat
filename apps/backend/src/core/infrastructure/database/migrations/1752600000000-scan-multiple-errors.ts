@@ -4,9 +4,30 @@ export class ScanMultipleErrors1752600000000 implements MigrationInterface {
 	name = 'ScanMultipleErrors1752600000000';
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
+		// 0. Create the category enum type
+		await queryRunner.query(`
+			CREATE TYPE "public"."history_archive_scan_error_category_enum" AS ENUM (
+				'TRANSACTION_SET_HASH',
+				'TRANSACTION_RESULT_HASH',
+				'LEDGER_HEADER_HASH',
+				'BUCKET_HASH',
+				'MISSING_FILE',
+				'CONNECTION',
+				'OTHER'
+			)
+		`);
+
 		// 1. Add scanId column to error table (nullable initially for migration)
 		await queryRunner.query(
 			`ALTER TABLE "history_archive_scan_error" ADD "scanId" integer`
+		);
+
+		// 1.5 Add count and category columns
+		await queryRunner.query(
+			`ALTER TABLE "history_archive_scan_error" ADD "count" integer NOT NULL DEFAULT 1`
+		);
+		await queryRunner.query(
+			`ALTER TABLE "history_archive_scan_error" ADD "category" "public"."history_archive_scan_error_category_enum" NOT NULL DEFAULT 'OTHER'`
 		);
 
 		// 2. Migrate existing data: set scanId based on the reverse relationship
@@ -80,6 +101,19 @@ export class ScanMultipleErrors1752600000000 implements MigrationInterface {
 		// 7. Drop scanId column from error table
 		await queryRunner.query(
 			`ALTER TABLE "history_archive_scan_error" DROP COLUMN "scanId"`
+		);
+
+		// 8. Drop count and category columns
+		await queryRunner.query(
+			`ALTER TABLE "history_archive_scan_error" DROP COLUMN "count"`
+		);
+		await queryRunner.query(
+			`ALTER TABLE "history_archive_scan_error" DROP COLUMN "category"`
+		);
+
+		// 9. Drop the category enum type
+		await queryRunner.query(
+			`DROP TYPE "public"."history_archive_scan_error_category_enum"`
 		);
 	}
 }

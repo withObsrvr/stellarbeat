@@ -5,7 +5,7 @@
       class="btn btn-sm btn-outline-secondary"
       @click="expanded = !expanded"
     >
-      {{ errors.length }} error(s) detected
+      {{ totalErrorCount }} error(s) detected
       <span v-if="expanded">&#9650;</span>
       <span v-else>&#9660;</span>
     </button>
@@ -13,10 +13,12 @@
     <div v-if="expanded" class="mt-2">
       <ul class="list-unstyled error-list">
         <li v-for="(error, index) in errors" :key="index" class="mb-2">
-          <a :href="error.url" target="_blank" rel="noopener noreferrer">
-            {{ truncateUrl(error.url) }}
-          </a>
-          <br />
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <span class="badge bg-warning text-dark me-2">{{ formatCategory(error.category) }}</span>
+              <span v-if="error.count > 1" class="badge bg-secondary">{{ formatCount(error.count) }}</span>
+            </div>
+          </div>
           <small class="text-muted">{{ error.message }}</small>
         </li>
       </ul>
@@ -25,18 +27,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import type { HistoryArchiveScanError } from "shared";
 
-defineProps<{
+const props = defineProps<{
   errors: HistoryArchiveScanError[];
 }>();
 
 const expanded = ref(false);
 
-function truncateUrl(url: string): string {
-  if (url.length <= 80) return url;
-  return url.substring(0, 77) + "...";
+const totalErrorCount = computed(() => {
+  return props.errors.reduce((sum, error) => sum + error.count, 0);
+});
+
+function formatCategory(category: string): string {
+  const categoryLabels: Record<string, string> = {
+    TRANSACTION_SET_HASH: "Tx Set Hash",
+    TRANSACTION_RESULT_HASH: "Tx Result Hash",
+    LEDGER_HEADER_HASH: "Ledger Hash",
+    BUCKET_HASH: "Bucket Hash",
+    MISSING_FILE: "Missing File",
+    CONNECTION: "Connection",
+    OTHER: "Other",
+  };
+  return categoryLabels[category] || category;
+}
+
+function formatCount(count: number): string {
+  if (count >= 1000000) {
+    return `${(count / 1000000).toFixed(1)}M`;
+  }
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}K`;
+  }
+  return count.toString();
 }
 </script>
 

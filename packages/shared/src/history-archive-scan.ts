@@ -3,6 +3,8 @@ import {HistoryArchiveScanV1} from "./dto/history-archive-scan-v1";
 export interface HistoryArchiveScanError {
     url: string;
     message: string;
+    count: number;
+    category: string;
 }
 
 export class HistoryArchiveScan {
@@ -24,7 +26,7 @@ export class HistoryArchiveScan {
             new Date(historyArchiveScanV1DTO.endDate),
             historyArchiveScanV1DTO.latestVerifiedLedger,
             historyArchiveScanV1DTO.hasError,
-            historyArchiveScanV1DTO.errors.map(e => ({ url: e.url, message: e.message })),
+            historyArchiveScanV1DTO.errors.map(e => ({ url: e.url, message: e.message, count: e.count, category: e.category })),
             historyArchiveScanV1DTO.isSlow
         );
     }

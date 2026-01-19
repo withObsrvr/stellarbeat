@@ -42,12 +42,13 @@ it('should not update latestScannedLedger in case of error', async () => {
 	);
 	const scanner = getScanner(rangeScanner);
 
-	const scanJob = ScanJob.newScanChain(createDummyHistoryBaseUrl(), 0, 200, 1);
+	const archiveUrl = createDummyHistoryBaseUrl();
+	const scanJob = ScanJob.newScanChain(archiveUrl, 0, 200, 1);
 	const scan = await scanner.perform(new Date(), scanJob);
 
-	console.log(scan);
 	expect(scan.errors[0]?.type).toEqual(ScanErrorType.TYPE_VERIFICATION);
-	expect(scan.errors[0]?.url).toEqual('url');
+	// After aggregation, errors use the archive URL instead of individual file URLs
+	expect(scan.errors[0]?.url).toEqual(archiveUrl.value);
 	expect(scan.latestScannedLedger).toEqual(0);
 	expect(scan.latestScannedLedgerHeaderHash).toEqual(null);
 });
