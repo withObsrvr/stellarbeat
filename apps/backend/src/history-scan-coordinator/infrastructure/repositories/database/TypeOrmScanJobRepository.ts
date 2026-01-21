@@ -17,7 +17,8 @@ export class TypeOrmScanJobRepository implements ScanJobRepository {
 				status: 'PENDING'
 			},
 			order: {
-				id: 'ASC' //fifo queue
+				priority: 'DESC', // higher priority first
+				id: 'ASC' // then FIFO by id
 			}
 		});
 	}

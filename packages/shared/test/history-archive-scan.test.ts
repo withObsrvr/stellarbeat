@@ -10,17 +10,20 @@ it('should map from json', function () {
     const errorMessage = 'message';
     const isSlow = true;
 
+    const errorCount = 1;
+    const errorCategory = 'verification';
+
     const scanDTO = {
         url: url,
         startDate: startDate,
         endDate: endDate,
         latestVerifiedLedger: latestVerifiedLedger,
         hasError: hasError,
-        errors: [{ url: errorUrl, message: errorMessage }],
+        errors: [{ url: errorUrl, message: errorMessage, count: errorCount, category: errorCategory }],
         isSlow: isSlow
     }
 
     const scan = HistoryArchiveScan.fromHistoryArchiveScanV1(scanDTO);
     expect(scan.isSlow).toEqual(isSlow);
-    expect(HistoryArchiveScan.fromHistoryArchiveScanV1(scanDTO)).toEqual(new HistoryArchiveScan(url, new Date(startDate), new Date(endDate), latestVerifiedLedger, hasError, [{ url: errorUrl, message: errorMessage }], isSlow));
+    expect(HistoryArchiveScan.fromHistoryArchiveScanV1(scanDTO)).toEqual(new HistoryArchiveScan(url, new Date(startDate), new Date(endDate), latestVerifiedLedger, hasError, [{ url: errorUrl, message: errorMessage, count: errorCount, category: errorCategory }], isSlow));
 });

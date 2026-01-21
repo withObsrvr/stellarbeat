@@ -84,7 +84,9 @@ describe('ScanDTO', () => {
 				errors: [{
 					type: 'validation',
 					url: 'https://history.stellar.org',
-					message: 'Invalid checksum'
+					message: 'Invalid checksum',
+					count: 1,
+					category: 'verification'
 				}],
 				scanJobRemoteId: 'test'
 			};
@@ -97,7 +99,9 @@ describe('ScanDTO', () => {
 			expect(dto.errors).toEqual([{
 				type: 'validation',
 				url: 'https://history.stellar.org',
-				message: 'Invalid checksum'
+				message: 'Invalid checksum',
+				count: 1,
+				category: 'verification'
 			}]);
 		});
 

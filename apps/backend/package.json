@@ -11,7 +11,8 @@
 		"build-and-start-api": "pnpm run build; node lib/core/infrastructure/http/api.js",
 		"start-api": "node lib/core/infrastructure/http/api.js",
 		"retrieve-home-domain": "node lib/network-scan/infrastructure/cli/retrieve-home-domain.js",
-		"update-geo-data": "node lib/network-scan/infrastructure/cli/update-geo-data.js"
+		"update-geo-data": "node lib/network-scan/infrastructure/cli/update-geo-data.js",
+		"priority-scan": "node lib/history-scan-coordinator/infrastructure/cli/queue-priority-scan.js"
 	},
 	"author": "pieterjan84@github",
 	"license": "MIT",
