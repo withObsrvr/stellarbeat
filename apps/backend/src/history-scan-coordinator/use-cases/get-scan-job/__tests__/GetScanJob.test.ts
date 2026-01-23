@@ -35,7 +35,7 @@ describe('GetScanJob', () => {
 		});
 	});
 
-	it('should return ok(job) when a scan job is available and update its status to TAKEN', async () => {
+	it('should return ok(job) when a scan job is available', async () => {
 		const mockJob = new ScanJob('http://test.com');
 		scanJobRepositoryMock.fetchNextJob.mockResolvedValue(mockJob);
 
@@ -50,18 +50,14 @@ describe('GetScanJob', () => {
 				remoteId: mockJob.remoteId
 			})
 		);
-		expect(loggerMock.info).toHaveBeenCalledWith('Returning next scan job', {
+		expect(loggerMock.info).toHaveBeenCalledWith('Assigned scan job', {
 			app: 'history-scan-coordinator',
 			url: 'http://test.com',
-			chainInitDate: mockJob.chainInitDate
+			remoteId: mockJob.remoteId
 		});
 
-		expect(scanJobRepositoryMock.save).toHaveBeenCalledWith([
-			{
-				...mockJob,
-				status: 'TAKEN'
-			}
-		]);
+		// Job status is now updated atomically in fetchNextJob, not via separate save()
+		expect(scanJobRepositoryMock.save).not.toHaveBeenCalled();
 	});
 
 	it('should return err(error) when fetchNextJob fails', async () => {

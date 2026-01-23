@@ -12,15 +12,24 @@ export class TypeOrmScanJobRepository implements ScanJobRepository {
 	}
 
 	async fetchNextJob(): Promise<ScanJob | null> {
-		return await this.baseRepository.findOne({
-			where: {
-				status: 'PENDING'
-			},
-			order: {
-				priority: 'DESC', // higher priority first
-				id: 'ASC' // then FIFO by id
+		return await this.baseRepository.manager.transaction(
+			async (transactionalEntityManager) => {
+				const job = await transactionalEntityManager
+					.createQueryBuilder(ScanJob, 'job')
+					.setLock('pessimistic_write')
+					.where('job.status = :status', { status: 'PENDING' })
+					.orderBy('job.priority', 'DESC')
+					.addOrderBy('job.id', 'ASC')
+					.getOne();
+
+				if (job) {
+					job.status = 'TAKEN';
+					await transactionalEntityManager.save(job);
+				}
+
+				return job;
 			}
-		});
+		);
 	}
 
 	async hasPendingJobs(): Promise<boolean> {

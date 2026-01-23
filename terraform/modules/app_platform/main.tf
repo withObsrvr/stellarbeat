@@ -772,13 +772,13 @@ resource "digitalocean_app" "radar" {
       }
     }
 
-    # History Scanner as a worker - conditionally deployed based on instance count
+    # History Scanner workers - creates multiple workers with unique WORKER_IDs
     # Uses Dockerfile to include stellar-archivist binary for archive verification
     dynamic "worker" {
-      for_each = var.history_scanner_instance_count > 0 ? [1] : []
+      for_each = var.history_scanner_worker_count > 0 ? toset([for i in range(var.history_scanner_worker_count) : tostring(i + 1)]) : toset([])
       content {
-        name               = "history-scanner"
-        instance_count     = var.history_scanner_instance_count
+        name               = var.history_scanner_worker_count == 1 ? "history-scanner" : "history-scanner-${worker.value}"
+        instance_count     = 1 # Each worker is a single instance with unique WORKER_ID
         instance_size_slug = coalesce(var.history_scanner_instance_size, var.instance_size)
 
         git {
@@ -798,6 +798,13 @@ resource "digitalocean_app" "radar" {
         env {
           key   = "FEATURE_FLAGS"
           value = jsonencode(var.feature_flags)
+        }
+
+        # Unique WORKER_ID for each instance
+        env {
+          key   = "WORKER_ID"
+          value = "scanner-${worker.value}"
+          type  = "GENERAL"
         }
 
         # Use database connection string with doadmin user (already has all necessary permissions)

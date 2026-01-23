@@ -19,6 +19,7 @@ export interface Config {
 	historyMaxFileMs: number;
 	historySlowArchiveMaxLedgers: number;
 	stellarArchivistPath: string;
+	workerId: string;
 }
 
 // Default values
@@ -81,6 +82,7 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		historyMaxFileMs,
 		historySlowArchiveMaxLedgers,
 		stellarArchivistPath:
-			process.env.STELLAR_ARCHIVIST_PATH ?? defaultConfig.stellarArchivistPath
+			process.env.STELLAR_ARCHIVIST_PATH ?? defaultConfig.stellarArchivistPath,
+		workerId: process.env.WORKER_ID ?? `worker-${process.pid}`
 	});
 }

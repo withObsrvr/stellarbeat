@@ -5,6 +5,7 @@ import { Scanner } from '../../../domain/scanner/Scanner';
 import { ScanCoordinatorService } from '../../../domain/scan/ScanCoordinatorService';
 import { ExceptionLogger } from 'exception-logger';
 import { JobMonitor } from 'job-monitor';
+import { Logger } from 'logger';
 import { ok, err } from 'neverthrow';
 import { ScanJobDTO } from 'history-scanner-dto';
 import { Scan } from '../../../domain/scan/Scan';
@@ -22,6 +23,7 @@ describe('VerifyArchives', () => {
 	let scanCoordinatorMock: MockProxy<ScanCoordinatorService>;
 	let exceptionLoggerMock: MockProxy<ExceptionLogger>;
 	let jobMonitorMock: MockProxy<JobMonitor>;
+	let loggerMock: MockProxy<Logger>;
 
 	const mockScanJobDTO: ScanJobDTO = new ScanJobDTO(
 		'https://example.com',
@@ -36,12 +38,15 @@ describe('VerifyArchives', () => {
 		scanCoordinatorMock = mock<ScanCoordinatorService>();
 		exceptionLoggerMock = mock<ExceptionLogger>();
 		jobMonitorMock = mock<JobMonitor>();
+		loggerMock = mock<Logger>();
 
 		verifyArchives = new VerifyArchives(
 			scannerMock,
 			scanCoordinatorMock,
 			exceptionLoggerMock,
-			jobMonitorMock
+			jobMonitorMock,
+			loggerMock,
+			'test-worker-1'
 		);
 	});
 
@@ -90,6 +95,16 @@ describe('VerifyArchives', () => {
 	it('should respect persist flag', async () => {
 		scanCoordinatorMock.getScanJob.mockResolvedValue(ok(mockScanJobDTO));
 		jobMonitorMock.checkIn.mockResolvedValue(ok(undefined));
+		scannerMock.perform.mockResolvedValue(
+			new Scan(
+				new Date(),
+				new Date(),
+				new Date(),
+				Url.create('https://example.com')._unsafeUnwrap(),
+				0,
+				100
+			)
+		);
 
 		await verifyArchives.execute({ persist: true, loop: false });
 
@@ -101,6 +116,16 @@ describe('VerifyArchives', () => {
 
 		jobMonitorMock.checkIn.mockResolvedValue(ok(undefined));
 		scanCoordinatorMock.getScanJob.mockResolvedValue(ok(mockScanJobDTO));
+		scannerMock.perform.mockResolvedValue(
+			new Scan(
+				new Date(),
+				new Date(),
+				new Date(),
+				Url.create('https://example.com')._unsafeUnwrap(),
+				0,
+				100
+			)
+		);
 		scanCoordinatorMock.registerScan.mockRejectedValue(error);
 
 		await verifyArchives.execute({ persist: true, loop: false });

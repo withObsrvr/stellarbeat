@@ -10,6 +10,7 @@ import { JobMonitor } from 'job-monitor';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../infrastructure/di/di-types';
 import { ScanJobDTO } from 'history-scanner-dto';
+import { Logger } from 'logger';
 
 @injectable()
 export class VerifyArchives {
@@ -20,13 +21,21 @@ export class VerifyArchives {
 		@inject(TYPES.ExceptionLogger)
 		private exceptionLogger: ExceptionLogger,
 		@inject(TYPES.JobMonitor)
-		private jobMonitor: JobMonitor
+		private jobMonitor: JobMonitor,
+		@inject('Logger')
+		private logger: Logger,
+		@inject(TYPES.WorkerId)
+		private workerId: string
 	) {}
 
 	public async execute(verifyArchivesDTO: VerifyArchivesDTO): Promise<void> {
+		this.logger.info('Worker starting', { workerId: this.workerId });
 		const shutDown = false; //todo: implement graceful shutdown
 		do {
 			try {
+				this.logger.info('Worker fetching next job', {
+					workerId: this.workerId
+				});
 				const scanJobDTOResult = await this.scanCoordinator.getScanJob();
 				if (scanJobDTOResult.isErr()) {
 					this.exceptionLogger.captureException(scanJobDTOResult.error);
@@ -53,6 +62,12 @@ export class VerifyArchives {
 			return;
 		}
 
+		this.logger.info('Worker received scan job', {
+			workerId: this.workerId,
+			url: dto.url,
+			remoteId: dto.remoteId
+		});
+
 		await this.checkIn('in_progress');
 		await this.perform(scanJobResult.value, persist);
 		await this.checkIn('ok');
@@ -60,8 +75,11 @@ export class VerifyArchives {
 
 	private async perform(scanJob: ScanJob, persist = false) {
 		const scan = await this.scanner.perform(new Date(), scanJob);
-		console.log(scan);
-		//todo: logger
+		this.logger.info('Scan completed', {
+			workerId: this.workerId,
+			url: scanJob.url.value,
+			hasError: scan.hasError
+		});
 		if (persist) await this.persist(scan);
 	}
 

@@ -30,7 +30,8 @@ module "app_platform" {
   testnet_backend_instance_count = 0
   scanner_instance_count         = 1
   testnet_scanner_instance_count = 0
-  history_scanner_instance_count = 1
+  history_scanner_instance_count = 0 # Deprecated, use history_scanner_worker_count
+  history_scanner_worker_count   = var.history_scanner_worker_count
   users_instance_count           = 1
   python_fbas_instance_count     = 1
 

@@ -217,7 +217,8 @@ jobs:
           frontend_instance_count  = 1
           backend_instance_count   = 1
           scanner_instance_count   = 1
-          history_scanner_instance_count = 1
+          history_scanner_instance_count = 0
+          history_scanner_worker_count = ${{ vars.HISTORY_SCANNER_WORKER_COUNT || 2 }}
           users_instance_count     = 1
 
           # Service configuration
@@ -380,7 +381,8 @@ jobs:
           frontend_instance_count  = 2
           backend_instance_count   = 1
           scanner_instance_count   = 1
-          history_scanner_instance_count = 1
+          history_scanner_instance_count = 0
+          history_scanner_worker_count = ${{ vars.HISTORY_SCANNER_WORKER_COUNT || 3 }}
           users_instance_count     = 1
 
           # Service configuration

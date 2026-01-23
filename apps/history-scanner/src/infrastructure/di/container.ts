@@ -104,4 +104,5 @@ export function load(container: Container, config: Config) {
 			container.get<Logger>('Logger')
 		);
 	});
+	container.bind<string>(TYPES.WorkerId).toConstantValue(config.workerId);
 }
