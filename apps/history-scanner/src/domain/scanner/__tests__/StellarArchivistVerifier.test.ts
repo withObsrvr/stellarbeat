@@ -61,6 +61,24 @@ describe('StellarArchivistVerifier', () => {
 				expect(result.value.success).toBe(true);
 				expect(result.value.errors).toHaveLength(0);
 				expect(result.value.latestVerifiedLedger).toBe(200);
+				expect(result.value.exitCode).toBe(0);
+			}
+		});
+
+		it('should expose exit code 2 for connection errors', async () => {
+			const mockProcess = createMockProcess();
+			mockSpawn.mockReturnValue(mockProcess);
+
+			const verifyPromise = verifier.verify(archiveUrl, 100, 200);
+
+			// Exit code 2 indicates connection error
+			emitOutput(mockProcess, '', 'dial tcp: connection refused', 2);
+
+			const result = await verifyPromise;
+			expect(result.isOk()).toBe(true);
+			if (result.isOk()) {
+				expect(result.value.success).toBe(false);
+				expect(result.value.exitCode).toBe(2);
 			}
 		});
 

@@ -9,6 +9,7 @@ export interface VerificationResult {
 	latestVerifiedLedger: number;
 	errors: ScanError[];
 	success: boolean;
+	exitCode: number | null;
 }
 
 interface ErrorAggregation {
@@ -228,7 +229,8 @@ export class StellarArchivistVerifier {
 		return {
 			latestVerifiedLedger: Math.max(latestVerifiedLedger, fromLedger),
 			errors,
-			success: exitCode === 0 && errors.length === 0
+			success: exitCode === 0 && errors.length === 0,
+			exitCode
 		};
 	}
 

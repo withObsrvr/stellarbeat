@@ -11,6 +11,7 @@ import { ExceptionLogger } from 'exception-logger';
 export interface ArchivistRangeScanResult {
 	latestLedgerHeader?: LedgerHeader;
 	errors: ScanError[];
+	exitCode: number | null;
 }
 
 /**
@@ -53,7 +54,8 @@ export class ArchivistRangeScanner {
 				ledger: result.latestVerifiedLedger,
 				hash: undefined // stellar-archivist doesn't provide header hashes
 			},
-			errors: result.errors
+			errors: result.errors,
+			exitCode: result.exitCode
 		});
 	}
 }
