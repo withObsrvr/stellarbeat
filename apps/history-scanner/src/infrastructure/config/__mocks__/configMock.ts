@@ -13,4 +13,5 @@ export class ConfigMock implements Config {
 	coordinatorAPIPassword = 'test-password';
 	coordinatorAPIUsername = 'test-user';
 	stellarArchivistPath = 'stellar-archivist';
+	workerId = 'test-worker-1';
 }
