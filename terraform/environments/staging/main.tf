@@ -69,7 +69,7 @@ module "app_platform" {
   backend_env = {
     JWT_SECRET                    = var.app_jwt_secret
     NODE_ENV                      = "staging"
-    TYPEORM_MIGRATIONS_RUN        = "false"
+    TYPEORM_MIGRATIONS_RUN        = "true"
     IPSTACK_ACCESS_KEY            = var.ipstack_access_key
     HORIZON_URL                   = var.horizon_url
     NETWORK_PASSPHRASE            = var.network_passphrase
@@ -107,7 +107,6 @@ module "app_platform" {
     DATABASE_TEST_URL             = var.database_test_url
     BACKEND_PORT                  = var.backend_port
     USER_AGENT                    = var.user_agent
-    TYPEORM_MIGRATIONS_RUN        = "false"
     HISTORY_SCAN_API_USERNAME     = var.coordinator_api_username
     HISTORY_SCAN_API_PASSWORD     = var.coordinator_api_password
     CONTACT_RECIPIENT_EMAIL       = "hello@withobsrvr.com"
