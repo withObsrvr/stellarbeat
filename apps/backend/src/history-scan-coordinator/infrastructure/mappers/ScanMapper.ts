@@ -109,8 +109,10 @@ export class ScanMapper {
 
 		const errorCategory = this.mapErrorCategory(errorDTO.category);
 		const count = typeof errorDTO.count === 'number' ? errorDTO.count : 1;
+		const firstLedger = typeof errorDTO.firstLedger === 'number' ? errorDTO.firstLedger : null;
+		const lastLedger = typeof errorDTO.lastLedger === 'number' ? errorDTO.lastLedger : null;
 
-		return ok(new ScanError(errorType, errorDTO.url, errorDTO.message, count, errorCategory));
+		return ok(new ScanError(errorType, errorDTO.url, errorDTO.message, count, errorCategory, firstLedger, lastLedger));
 	}
 
 	private mapErrorType(type: string): ScanErrorType | undefined {

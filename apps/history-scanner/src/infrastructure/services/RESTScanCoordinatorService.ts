@@ -83,7 +83,9 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 				type: ScanErrorType[error.type],
 				url: error.url,
 				count: error.count,
-				category: error.category
+				category: error.category,
+				firstLedger: error.firstLedger,
+				lastLedger: error.lastLedger
 			})),
 			scanJobRemoteId: scan.scanJobRemoteId!
 		};

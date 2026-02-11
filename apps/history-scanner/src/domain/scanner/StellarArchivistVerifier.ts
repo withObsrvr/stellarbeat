@@ -317,7 +317,9 @@ export class StellarArchivistVerifier {
 					baseUrl,
 					message,
 					agg.count,
-					category
+					category,
+					agg.firstLedger,
+					agg.lastLedger
 				)
 			);
 		}

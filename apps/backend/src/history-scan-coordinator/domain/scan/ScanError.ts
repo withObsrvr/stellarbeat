@@ -32,6 +32,12 @@ export class ScanError extends IdentifiedValueObject implements Error {
 	@Column('enum', { enum: ScanErrorCategory, nullable: false, default: ScanErrorCategory.OTHER })
 	public readonly category: ScanErrorCategory;
 
+	@Column('bigint', { nullable: true })
+	public readonly firstLedger: number | null;
+
+	@Column('bigint', { nullable: true })
+	public readonly lastLedger: number | null;
+
 	@ManyToOne('Scan', 'errors')
 	public scan?: Scan;
 
@@ -40,7 +46,9 @@ export class ScanError extends IdentifiedValueObject implements Error {
 		url: string,
 		message: string,
 		count: number = 1,
-		category: ScanErrorCategory = ScanErrorCategory.OTHER
+		category: ScanErrorCategory = ScanErrorCategory.OTHER,
+		firstLedger: number | null = null,
+		lastLedger: number | null = null
 	) {
 		super();
 		this.type = type;
@@ -48,6 +56,8 @@ export class ScanError extends IdentifiedValueObject implements Error {
 		this.message = message;
 		this.count = count;
 		this.category = category;
+		this.firstLedger = firstLedger;
+		this.lastLedger = lastLedger;
 	}
 
 	equals(other: this): boolean {
@@ -55,7 +65,9 @@ export class ScanError extends IdentifiedValueObject implements Error {
 			this.type === other.type &&
 			this.url === other.url &&
 			this.message === other.message &&
-			this.category === other.category
+			this.category === other.category &&
+			this.firstLedger === other.firstLedger &&
+			this.lastLedger === other.lastLedger
 		);
 	}
 }

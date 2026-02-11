@@ -5,6 +5,8 @@ export interface HistoryArchiveScanErrorV1 {
     readonly message: string;
     readonly count: number;
     readonly category: string;
+    readonly firstLedger?: number | null;
+    readonly lastLedger?: number | null;
 }
 
 export interface HistoryArchiveScanV1 {
@@ -46,7 +48,9 @@ export const HistoryArchiveScanV1Schema: JSONSchemaType<HistoryArchiveScanV1> = 
                     "url": { "type": "string" },
                     "message": { "type": "string" },
                     "count": { "type": "number" },
-                    "category": { "type": "string" }
+                    "category": { "type": "string" },
+                    "firstLedger": { "type": "number", "nullable": true },
+                    "lastLedger": { "type": "number", "nullable": true }
                 },
                 "required": ["url", "message", "count", "category"]
             }

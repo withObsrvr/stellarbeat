@@ -1,7 +1,7 @@
 # Install stellar-archivist (requires Go 1.24+)
 FROM golang:1.24-alpine AS archivist-builder
 
-RUN go install github.com/stellar/go-stellar-sdk/tools/stellar-archivist@latest
+RUN go install github.com/stellar/go-stellar-sdk/tools/stellar-archivist@main
 
 # Build the Node.js application
 FROM node:20-alpine AS app-builder

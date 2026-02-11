@@ -41,7 +41,9 @@ export class HistoryScanCoordinatorScanService
 							url: error.url,
 							message: error.message,
 							count: error.count,
-							category: error.category
+							category: error.category,
+							firstLedger: error.firstLedger,
+							lastLedger: error.lastLedger
 						}));
 
 					return new HistoryArchiveScan(

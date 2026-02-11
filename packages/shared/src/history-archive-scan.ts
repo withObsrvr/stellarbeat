@@ -5,6 +5,8 @@ export interface HistoryArchiveScanError {
     message: string;
     count: number;
     category: string;
+    firstLedger: number | null;
+    lastLedger: number | null;
 }
 
 export class HistoryArchiveScan {
@@ -26,7 +28,14 @@ export class HistoryArchiveScan {
             new Date(historyArchiveScanV1DTO.endDate),
             historyArchiveScanV1DTO.latestVerifiedLedger,
             historyArchiveScanV1DTO.hasError,
-            historyArchiveScanV1DTO.errors.map(e => ({ url: e.url, message: e.message, count: e.count, category: e.category })),
+            historyArchiveScanV1DTO.errors.map(e => ({
+                url: e.url,
+                message: e.message,
+                count: e.count,
+                category: e.category,
+                firstLedger: e.firstLedger ?? null,
+                lastLedger: e.lastLedger ?? null
+            })),
             historyArchiveScanV1DTO.isSlow
         );
     }

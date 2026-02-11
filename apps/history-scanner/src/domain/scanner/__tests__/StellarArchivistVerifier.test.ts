@@ -199,6 +199,9 @@ level=error msg="Error: mismatched hash on transaction set 0x000000c8: expected 
 				expect(txSetErrors[0].message).toContain('ledgers');
 				expect(txSetErrors[0].message).toContain('100');
 				expect(txSetErrors[0].message).toContain('200');
+				// Should have firstLedger and lastLedger fields
+				expect(txSetErrors[0].firstLedger).toBe(100);
+				expect(txSetErrors[0].lastLedger).toBe(200);
 			}
 		});
 
@@ -356,6 +359,9 @@ level=error msg="Error: 1 buckets (of 50 checked) have unexpected hashes"`;
 				expect(txSetErrors).toHaveLength(1);
 				// Message should show "at ledger" for single ledger
 				expect(txSetErrors[0].message).toContain('at ledger 100');
+				// firstLedger and lastLedger should both be 100
+				expect(txSetErrors[0].firstLedger).toBe(100);
+				expect(txSetErrors[0].lastLedger).toBe(100);
 			}
 		});
 

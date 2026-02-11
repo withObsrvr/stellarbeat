@@ -20,19 +20,25 @@ export class ScanError implements Error {
 	public readonly message: string;
 	public readonly count: number;
 	public readonly category: ScanErrorCategory;
+	public readonly firstLedger: number | null;
+	public readonly lastLedger: number | null;
 
 	constructor(
 		type: ScanErrorType,
 		url: string,
 		message: string,
 		count: number = 1,
-		category: ScanErrorCategory = ScanErrorCategory.OTHER
+		category: ScanErrorCategory = ScanErrorCategory.OTHER,
+		firstLedger: number | null = null,
+		lastLedger: number | null = null
 	) {
 		this.type = type;
 		this.url = url;
 		this.message = message;
 		this.count = count;
 		this.category = category;
+		this.firstLedger = firstLedger;
+		this.lastLedger = lastLedger;
 	}
 
 	equals(other: this): boolean {
@@ -40,7 +46,9 @@ export class ScanError implements Error {
 			this.type === other.type &&
 			this.url === other.url &&
 			this.message === other.message &&
-			this.category === other.category
+			this.category === other.category &&
+			this.firstLedger === other.firstLedger &&
+			this.lastLedger === other.lastLedger
 		);
 	}
 }

@@ -4,4 +4,6 @@ export interface ScanErrorDTO {
 	message: string;
 	count: number;
 	category: string;
+	firstLedger: number | null;
+	lastLedger: number | null;
 }

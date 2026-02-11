@@ -8,7 +8,9 @@ describe('ScanError', () => {
 				'https://test.com',
 				'100 transaction set hash mismatches',
 				100,
-				ScanErrorCategory.TRANSACTION_SET_HASH
+				ScanErrorCategory.TRANSACTION_SET_HASH,
+				55999998,
+				59499998
 			);
 
 			expect(error.type).toBe(ScanErrorType.TYPE_VERIFICATION);
@@ -16,6 +18,8 @@ describe('ScanError', () => {
 			expect(error.message).toBe('100 transaction set hash mismatches');
 			expect(error.count).toBe(100);
 			expect(error.category).toBe(ScanErrorCategory.TRANSACTION_SET_HASH);
+			expect(error.firstLedger).toBe(55999998);
+			expect(error.lastLedger).toBe(59499998);
 			expect(error.name).toBe('ScanError');
 		});
 
@@ -48,6 +52,32 @@ describe('ScanError', () => {
 
 			expect(error.count).toBe(1);
 			expect(error.category).toBe(ScanErrorCategory.OTHER);
+		});
+
+		it('should create error with default firstLedger and lastLedger as null', () => {
+			const error = new ScanError(
+				ScanErrorType.TYPE_VERIFICATION,
+				'https://test.com',
+				'Test error'
+			);
+
+			expect(error.firstLedger).toBeNull();
+			expect(error.lastLedger).toBeNull();
+		});
+
+		it('should create error with firstLedger only', () => {
+			const error = new ScanError(
+				ScanErrorType.TYPE_VERIFICATION,
+				'https://test.com',
+				'Test error',
+				1,
+				ScanErrorCategory.TRANSACTION_SET_HASH,
+				100,
+				null
+			);
+
+			expect(error.firstLedger).toBe(100);
+			expect(error.lastLedger).toBeNull();
 		});
 	});
 
@@ -98,17 +128,67 @@ describe('ScanError', () => {
 				'https://test.com',
 				'Same error',
 				10,
-				ScanErrorCategory.BUCKET_HASH
+				ScanErrorCategory.BUCKET_HASH,
+				100,
+				200
 			);
 			const error2 = new ScanError(
 				ScanErrorType.TYPE_VERIFICATION,
 				'https://test.com',
 				'Same error',
 				10,
-				ScanErrorCategory.BUCKET_HASH
+				ScanErrorCategory.BUCKET_HASH,
+				100,
+				200
 			);
 
 			expect(error1.equals(error2)).toBe(true);
+		});
+
+		it('should return false for different firstLedger', () => {
+			const error1 = new ScanError(
+				ScanErrorType.TYPE_VERIFICATION,
+				'https://test.com',
+				'Error',
+				1,
+				ScanErrorCategory.OTHER,
+				100,
+				200
+			);
+			const error2 = new ScanError(
+				ScanErrorType.TYPE_VERIFICATION,
+				'https://test.com',
+				'Error',
+				1,
+				ScanErrorCategory.OTHER,
+				150,
+				200
+			);
+
+			expect(error1.equals(error2)).toBe(false);
+		});
+
+		it('should return false for different lastLedger', () => {
+			const error1 = new ScanError(
+				ScanErrorType.TYPE_VERIFICATION,
+				'https://test.com',
+				'Error',
+				1,
+				ScanErrorCategory.OTHER,
+				100,
+				200
+			);
+			const error2 = new ScanError(
+				ScanErrorType.TYPE_VERIFICATION,
+				'https://test.com',
+				'Error',
+				1,
+				ScanErrorCategory.OTHER,
+				100,
+				250
+			);
+
+			expect(error1.equals(error2)).toBe(false);
 		});
 
 		it('should return false for different types', () => {
