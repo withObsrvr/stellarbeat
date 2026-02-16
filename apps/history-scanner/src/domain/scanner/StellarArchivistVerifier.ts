@@ -82,9 +82,9 @@ export class StellarArchivistVerifier {
 				// Log error/warning lines in real-time
 				for (const line of chunk.split('\n')) {
 					if (line.trim()) {
-						if (line.includes('level=error')) {
+						if (line.includes('level=error') || line.startsWith('ERRO[')) {
 							this.logger.warn('stellar-archivist error', { output: line.trim() });
-						} else if (line.includes('level=warn')) {
+						} else if (line.includes('level=warn') || line.startsWith('WARN[')) {
 							this.logger.info('stellar-archivist warning', { output: line.trim() });
 						}
 					}
@@ -147,8 +147,9 @@ export class StellarArchivistVerifier {
 			}
 
 			// Parse summary error lines (e.g., "Error: 1000121 transaction sets (of 1000121 checked) have unexpected hashes")
+			// Supports both logrus format (ERRO[timestamp]) and structured format (level=error msg="...")
 			const summaryMatch = line.match(
-				/level=error msg="Error: (\d+) (transaction sets|transaction result sets|ledger headers|buckets) \(of \d+ checked\) have unexpected hashes"/
+				/(?:level=error msg="|ERRO\[\d+\] )Error: (\d+) (transaction sets|transaction result sets|ledger headers|buckets) \(of \d+ checked\) have unexpected hashes/
 			);
 			if (summaryMatch) {
 				const count = parseInt(summaryMatch[1], 10);
@@ -171,7 +172,8 @@ export class StellarArchivistVerifier {
 			}
 
 			// Parse individual error messages for ledger tracking
-			const errorMatch = line.match(/level=error msg="([^"]+)"/);
+			// Supports both logrus format (ERRO[timestamp]) and structured format (level=error msg="...")
+			const errorMatch = line.match(/level=error msg="([^"]+)"/) || line.match(/ERRO\[\d+\] (.+)/);
 			if (errorMatch) {
 				const errorMsg = errorMatch[1];
 				const parsed = this.categorizeError(errorMsg);

@@ -386,5 +386,131 @@ level=error msg="Error: 1 buckets (of 50 checked) have unexpected hashes"`;
 				expect(bucketErrors[0].message).toBe('1 bucket hash mismatch');
 			}
 		});
+
+		// Tests for logrus format (ERRO[timestamp]) which is the actual output format
+		describe('logrus format support', () => {
+			it('should parse transaction set hash errors in logrus format', async () => {
+				const mockProcess = createMockProcess();
+				mockSpawn.mockReturnValue(mockProcess);
+
+				const verifyPromise = verifier.verify(archiveUrl, 100, 300);
+
+				// Actual stellar-archivist output format
+				// 0x03a5fa74 = 61209204, 0x03a5fa75 = 61209205
+				const stderr = `ERRO[3822] Error: mismatched hash on transaction set 0x03a5fa74: expected 6e73843542b73424844b2f3def85794045ce9ade334f0a4795c5e895ae2442dd, got 66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925
+ERRO[3823] Error: mismatched hash on transaction set 0x03a5fa75: expected abc123, got def456
+ERRO[3900] Error: 2 transaction sets (of 100 checked) have unexpected hashes`;
+
+				emitOutput(mockProcess, '', stderr, 1);
+
+				const result = await verifyPromise;
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.success).toBe(false);
+					const txSetErrors = result.value.errors.filter(
+						(e) => e.category === ScanErrorCategory.TRANSACTION_SET_HASH
+					);
+					expect(txSetErrors).toHaveLength(1);
+					expect(txSetErrors[0].count).toBe(2); // Summary count
+					expect(txSetErrors[0].firstLedger).toBe(61209204); // 0x03a5fa74
+					expect(txSetErrors[0].lastLedger).toBe(61209205); // 0x03a5fa75
+				}
+			});
+
+			it('should parse ledger header hash errors in logrus format', async () => {
+				const mockProcess = createMockProcess();
+				mockSpawn.mockReturnValue(mockProcess);
+
+				const verifyPromise = verifier.verify(archiveUrl, 100, 200);
+
+				const stderr = `ERRO[1234] Error: mismatched hash on ledger header 0x00000064: expected abc got def
+ERRO[1300] Error: 1 ledger headers (of 50 checked) have unexpected hashes`;
+
+				emitOutput(mockProcess, '', stderr, 1);
+
+				const result = await verifyPromise;
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					const ledgerErrors = result.value.errors.filter(
+						(e) => e.category === ScanErrorCategory.LEDGER_HEADER_HASH
+					);
+					expect(ledgerErrors).toHaveLength(1);
+					expect(ledgerErrors[0].count).toBe(1);
+					expect(ledgerErrors[0].firstLedger).toBe(100); // 0x64
+					expect(ledgerErrors[0].lastLedger).toBe(100);
+				}
+			});
+
+			it('should parse transaction result hash errors in logrus format', async () => {
+				const mockProcess = createMockProcess();
+				mockSpawn.mockReturnValue(mockProcess);
+
+				const verifyPromise = verifier.verify(archiveUrl, 100, 200);
+
+				const stderr = `ERRO[500] Error: mismatched hash on transaction result set 0x000000c8: expected abc got def
+ERRO[600] Error: 1 transaction result sets (of 50 checked) have unexpected hashes`;
+
+				emitOutput(mockProcess, '', stderr, 1);
+
+				const result = await verifyPromise;
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					const txResultErrors = result.value.errors.filter(
+						(e) => e.category === ScanErrorCategory.TRANSACTION_RESULT_HASH
+					);
+					expect(txResultErrors).toHaveLength(1);
+					expect(txResultErrors[0].count).toBe(1);
+					expect(txResultErrors[0].firstLedger).toBe(200); // 0xc8
+				}
+			});
+
+			it('should parse bucket hash errors in logrus format', async () => {
+				const mockProcess = createMockProcess();
+				mockSpawn.mockReturnValue(mockProcess);
+
+				const verifyPromise = verifier.verify(archiveUrl, 100, 200);
+
+				const stderr = `ERRO[100] Error: bucket hash mismatch: expected abc got def
+ERRO[200] Error: 5 buckets (of 10 checked) have unexpected hashes`;
+
+				emitOutput(mockProcess, '', stderr, 1);
+
+				const result = await verifyPromise;
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					const bucketErrors = result.value.errors.filter(
+						(e) => e.category === ScanErrorCategory.BUCKET_HASH
+					);
+					expect(bucketErrors).toHaveLength(1);
+					expect(bucketErrors[0].count).toBe(5);
+				}
+			});
+
+			it('should handle mixed format output', async () => {
+				const mockProcess = createMockProcess();
+				mockSpawn.mockReturnValue(mockProcess);
+
+				const verifyPromise = verifier.verify(archiveUrl, 100, 200);
+
+				// Mix of both formats
+				const stderr = `ERRO[100] Error: mismatched hash on transaction set 0x00000064: expected abc got def
+level=error msg="Error: mismatched hash on transaction set 0x00000065: expected xyz got 123"
+ERRO[200] Error: 2 transaction sets (of 50 checked) have unexpected hashes`;
+
+				emitOutput(mockProcess, '', stderr, 1);
+
+				const result = await verifyPromise;
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					const txSetErrors = result.value.errors.filter(
+						(e) => e.category === ScanErrorCategory.TRANSACTION_SET_HASH
+					);
+					expect(txSetErrors).toHaveLength(1);
+					expect(txSetErrors[0].count).toBe(2);
+					expect(txSetErrors[0].firstLedger).toBe(100); // 0x64
+					expect(txSetErrors[0].lastLedger).toBe(101); // 0x65
+				}
+			});
+		});
 	});
 });
