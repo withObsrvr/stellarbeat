@@ -15,6 +15,7 @@ import { ScanSettingsFactory } from '../../domain/scan/ScanSettingsFactory';
 import { CategoryVerificationService } from '../../domain/scanner/CategoryVerificationService';
 import { StellarArchivistVerifier } from '../../domain/scanner/StellarArchivistVerifier';
 import { ArchivistRangeScanner } from '../../domain/scanner/ArchivistRangeScanner';
+import { IRangeScanner } from '../../domain/scanner/IRangeScanner';
 import { Config } from '../config/Config';
 import { AxiosHttpService, HttpQueue, HttpService } from 'http-helper';
 import { ScanCoordinatorService } from '../../domain/scan/ScanCoordinatorService';
@@ -39,6 +40,9 @@ export function load(container: Container, config: Config) {
 	container
 		.bind<string>('StellarArchivistPath')
 		.toConstantValue(config.stellarArchivistPath);
+	container
+		.bind<boolean>(TYPES.UseStellarArchivist)
+		.toConstantValue(config.useStellarArchivist);
 	container.bind(VerifyArchives).toSelf();
 	container.bind(VerifySingleArchive).toSelf();
 	container.bind(CheckPointGenerator).toSelf();

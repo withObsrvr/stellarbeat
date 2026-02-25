@@ -12,10 +12,15 @@ import { LedgerHeader } from './Scanner';
 import { EmptyTransactionSetsHashVerifier } from './verification/empty-transaction-sets/EmptyTransactionSetsHashVerifier';
 import { getLowestNumber } from './getLowestNumber';
 
-interface VerificationError {
+export interface VerificationError {
 	ledger: number;
 	category: Category;
 	message: string;
+}
+
+export interface VerificationResult {
+	errors: VerificationError[];
+	latestLedgerHeader?: { ledger: number; hash: string };
 }
 
 @injectable()
@@ -25,10 +30,12 @@ export class CategoryVerificationService {
 		bucketListHashes: Map<number, string>,
 		checkPointFrequency: CheckPointFrequency,
 		initialPreviousLedgerHeader?: LedgerHeader //bootstrapped from a previous run
-	): Result<void, VerificationError> {
+	): VerificationResult {
 		const lowestLedger = CategoryVerificationService.getLowestLedger(
 			categoryVerificationData
 		);
+
+		const errors: VerificationError[] = [];
 
 		for (const [
 			ledger,
@@ -43,10 +50,28 @@ export class CategoryVerificationService {
 				checkPointFrequency,
 				initialPreviousLedgerHeader
 			);
-			if (result.isErr()) return result;
+			if (result.isErr()) {
+				errors.push(result.error);
+			}
 		}
 
-		return ok(undefined);
+		// Find latest ledger header hash
+		let maxLedger: number | undefined;
+		for (const ledger of categoryVerificationData.calculatedLedgerHeaderHashes.keys()) {
+			if (maxLedger === undefined || ledger > maxLedger) {
+				maxLedger = ledger;
+			}
+		}
+		const latestLedgerHeader = maxLedger
+			? {
+					ledger: maxLedger,
+					hash: categoryVerificationData.calculatedLedgerHeaderHashes.get(
+						maxLedger
+					) as string
+				}
+			: undefined;
+
+		return { errors, latestLedgerHeader };
 	}
 	private verifyLedgerData(
 		ledger: number,

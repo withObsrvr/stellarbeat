@@ -399,7 +399,7 @@ Scan Chain for https://history.stellar.org/...
 **File:** `domain/scanner/hash-worker.ts` (lines 73-83)
 
 ```typescript
-import * as hasher from '@stellarbeat/stellar-history-archive-hasher';
+import * as hasher from '@withobsrvr/stellar-history-archive-hasher';
 
 export function processTransactionHistoryEntryXDR(
   transactionHistoryEntryXDR: Uint8Array

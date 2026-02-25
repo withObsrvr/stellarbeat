@@ -4,6 +4,7 @@ import { mock } from 'jest-mock-extended';
 import { createDummyHistoryBaseUrl } from '../../history-archive/__fixtures__/HistoryBaseUrl';
 import { err, ok } from 'neverthrow';
 import { ArchivistRangeScanner } from '../ArchivistRangeScanner';
+import { RangeScanner } from '../RangeScanner';
 import { ScanError, ScanErrorCategory, ScanErrorType } from '../../scan/ScanError';
 import { ScanJob } from '../../scan/ScanJob';
 import { ScanSettingsFactory } from '../../scan/ScanSettingsFactory';
@@ -251,12 +252,14 @@ describe('connection error handling', () => {
 function getScanner(rangeScanner: ArchivistRangeScanner) {
 	return new Scanner(
 		rangeScanner,
+		mock<RangeScanner>(), // TypeScript scanner (not used when useStellarArchivist=true)
 		new ScanSettingsFactory(
 			mock<CategoryScanner>(),
 			mock<ArchivePerformanceTester>()
 		),
 		mock<Logger>(),
 		mock<ExceptionLogger>(),
+		true, // useStellarArchivist - use the provided rangeScanner directly
 		100
 	);
 }

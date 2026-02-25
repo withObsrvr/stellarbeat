@@ -27,7 +27,7 @@
 		"http-helper": "workspace:*",
 		"history-scanner-dto": "workspace:*",
 		"workerpool": "^6.5.1",
-		"@stellarbeat/stellar-history-archive-hasher": "0.7.0"
+		"@withobsrvr/stellar-history-archive-hasher": "^0.8.1"
 	},
 	"devDependencies": {
 		"@types/workerpool": "^6.4.7",

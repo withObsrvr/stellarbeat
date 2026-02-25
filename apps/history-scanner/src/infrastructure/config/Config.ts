@@ -20,6 +20,7 @@ export interface Config {
 	historySlowArchiveMaxLedgers: number;
 	stellarArchivistPath: string;
 	workerId: string;
+	useStellarArchivist: boolean;
 }
 
 // Default values
@@ -30,7 +31,8 @@ const defaultConfig = {
 	logLevel: 'info',
 	historyMaxFileMs: 60000,
 	historySlowArchiveMaxLedgers: 1000,
-	stellarArchivistPath: 'stellar-archivist'
+	stellarArchivistPath: 'stellar-archivist',
+	useStellarArchivist: false
 };
 
 export function getConfigFromEnv(): Result<Config, Error> {
@@ -83,6 +85,8 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		historySlowArchiveMaxLedgers,
 		stellarArchivistPath:
 			process.env.STELLAR_ARCHIVIST_PATH ?? defaultConfig.stellarArchivistPath,
-		workerId: process.env.WORKER_ID ?? `worker-${process.pid}`
+		workerId: process.env.WORKER_ID ?? `worker-${process.pid}`,
+		useStellarArchivist:
+			yn(process.env.USE_STELLAR_ARCHIVIST) ?? defaultConfig.useStellarArchivist
 	});
 }

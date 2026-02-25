@@ -23,9 +23,9 @@ it('should verify', async function () {
 		})
 	);
 	categoryScanner.scanOtherCategories.mockResolvedValue(
-		ok({ ledger: 50, hash: 'hash' })
+		ok({ latestLedgerHeader: { ledger: 50, hash: 'hash' }, errors: [] })
 	);
-	bucketScanner.scan.mockResolvedValue(ok(undefined));
+	bucketScanner.scan.mockResolvedValue(ok({ errors: [] }));
 
 	const httpQueue = mock<HttpQueue>();
 	httpQueue.sendRequests.mockResolvedValue(ok(undefined));

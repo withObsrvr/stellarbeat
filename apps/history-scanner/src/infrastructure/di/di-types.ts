@@ -8,5 +8,7 @@ export const TYPES = {
 	ExceptionLogger: Symbol('ExceptionLogger'),
 	HttpQueue: Symbol('HttpQueue'),
 	HttpService: Symbol('HttpService'),
-	WorkerId: Symbol('WorkerId')
+	WorkerId: Symbol('WorkerId'),
+	RangeScannerInterface: Symbol('RangeScannerInterface'),
+	UseStellarArchivist: Symbol('UseStellarArchivist')
 };

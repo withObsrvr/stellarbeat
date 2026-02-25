@@ -87,12 +87,12 @@ importers:
       '@sentry/node':
         specifier: ^7.119.1
         version: 7.119.1
-      '@stellarbeat/stellar-history-archive-hasher':
-        specifier: 0.7.0
-        version: 0.7.0
       '@stellarbeat/stellar_analysis_nodejs':
         specifier: ^0.6.2
         version: 0.6.2
+      '@withobsrvr/stellar-history-archive-hasher':
+        specifier: ^0.8.1
+        version: 0.8.1
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -425,9 +425,9 @@ importers:
 
   apps/history-scanner:
     dependencies:
-      '@stellarbeat/stellar-history-archive-hasher':
-        specifier: 0.7.0
-        version: 0.7.0
+      '@withobsrvr/stellar-history-archive-hasher':
+        specifier: ^0.8.1
+        version: 0.8.1
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -1793,9 +1793,6 @@ packages:
   '@stellarbeat/stellar-halting-analysis@1.2.0':
     resolution: {integrity: sha512-W/OfQOgIcogIxpwyQ93RTr8Ke55z4/mvqG9UNUdB4AgJLwfgelYFn+RMdmWw4I77koQ3zdw19kuTm6pbg4yUkw==}
 
-  '@stellarbeat/stellar-history-archive-hasher@0.7.0':
-    resolution: {integrity: sha512-lpTmgPAPNwFF2EF7O7yhQ2chFaKK+L6KnSF82jk6PXw5BG/fuXU4awpcdzVvYBLtvWpzGj6tPKY21SgYdgCMkA==}
-
   '@stellarbeat/stellar_analysis_nodejs@0.6.2':
     resolution: {integrity: sha512-YHyZ2DvO3Ouyhs3fh3Iq5jHHg4Nc4hjKXmkE9DYp9RCebFYkus8cgDmLb17VH21bE/Z+G6S8eUrG4wVvGlQw3A==}
 
@@ -2247,6 +2244,9 @@ packages:
 
   '@vueform/multiselect@2.6.11':
     resolution: {integrity: sha512-iG4TGfqE3baftbSGF0PhoS+xZOCnV0ChkDo9rwhJ/Qi2YlCdb6tyQCjvyug3jnzncga8+d85kx0WvG7rDYFqiA==}
+
+  '@withobsrvr/stellar-history-archive-hasher@0.8.1':
+    resolution: {integrity: sha512-AptXs+u+Jwqm+35Gr68z6B2e+c0IYDXxNoX/kOo6DJeVAJETIkMuhF/NHaHOOLapuFk2VMRE44DmLuCBtpOuIQ==}
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -6947,8 +6947,6 @@ snapshots:
 
   '@stellarbeat/stellar-halting-analysis@1.2.0': {}
 
-  '@stellarbeat/stellar-history-archive-hasher@0.7.0': {}
-
   '@stellarbeat/stellar_analysis_nodejs@0.6.2': {}
 
   '@stellarbeat/stellar_analysis_web@0.7.0': {}
@@ -7499,6 +7497,8 @@ snapshots:
   '@vue/shared@3.5.24': {}
 
   '@vueform/multiselect@2.6.11': {}
+
+  '@withobsrvr/stellar-history-archive-hasher@0.8.1': {}
 
   abort-controller@3.0.0:
     dependencies:

@@ -96,4 +96,60 @@ describe('PeerNodeToNodeMapper', () => {
 		expect(node.latestMeasurement()?.time).toEqual(node.snapshotStartDate);
 		expect(node.latestMeasurement()?.connectivityError).toEqual(false);
 	}
+
+	test('should set isValidating and isActiveInScp to false when connection failed', () => {
+		const time = new Date('2019-01-01T00:00:00.000Z');
+		const publicKey = createDummyPublicKey();
+		const node = Node.create(time, publicKey, {
+			ip: 'localhost',
+			port: 11625
+		});
+
+		const peerNode = mock<PeerNode>();
+		peerNode.successfullyConnected = false;
+		peerNode.isValidating = true; // Saw relayed messages
+		peerNode.participatingInSCP = true;
+		peerNode.overLoaded = false;
+		peerNode.getMinLagMS.mockReturnValue(5);
+
+		const measurement = PeerNodeToNodeMapper.mapPeerNodeToNodeMeasurement(
+			peerNode,
+			node,
+			time
+		);
+
+		expect(measurement.connectivityError).toBe(true);
+		expect(measurement.isValidating).toBe(false); // Should be false despite relayed messages
+		expect(measurement.isActiveInScp).toBe(false);
+		expect(measurement.isActive).toBe(false);
+		expect(measurement.lag).toBe(null);
+	});
+
+	test('should set isValidating and isActiveInScp to true when successfully connected and validating', () => {
+		const time = new Date('2019-01-01T00:00:00.000Z');
+		const publicKey = createDummyPublicKey();
+		const node = Node.create(time, publicKey, {
+			ip: 'localhost',
+			port: 11625
+		});
+
+		const peerNode = mock<PeerNode>();
+		peerNode.successfullyConnected = true;
+		peerNode.isValidating = true;
+		peerNode.participatingInSCP = true;
+		peerNode.overLoaded = false;
+		peerNode.getMinLagMS.mockReturnValue(5);
+
+		const measurement = PeerNodeToNodeMapper.mapPeerNodeToNodeMeasurement(
+			peerNode,
+			node,
+			time
+		);
+
+		expect(measurement.connectivityError).toBe(false);
+		expect(measurement.isValidating).toBe(true);
+		expect(measurement.isActiveInScp).toBe(true);
+		expect(measurement.isActive).toBe(true);
+		expect(measurement.lag).toBe(5);
+	});
 });

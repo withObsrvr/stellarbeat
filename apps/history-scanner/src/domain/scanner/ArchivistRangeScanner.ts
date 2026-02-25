@@ -3,13 +3,13 @@ import { Logger } from 'logger';
 import { err, ok, Result } from 'neverthrow';
 import { Url } from 'http-helper';
 import { ScanError } from '../scan/ScanError';
-import { LedgerHeader } from './Scanner';
 import { TYPES } from '../../infrastructure/di/di-types';
 import { StellarArchivistVerifier } from './StellarArchivistVerifier';
 import { ExceptionLogger } from 'exception-logger';
+import { IRangeScanner, RangeScanResult } from './IRangeScanner';
 
 export interface ArchivistRangeScanResult {
-	latestLedgerHeader?: LedgerHeader;
+	latestLedgerHeader?: { ledger: number; hash?: string };
 	errors: ScanError[];
 	exitCode: number | null;
 }
@@ -19,7 +19,7 @@ export interface ArchivistRangeScanResult {
  * This replaces the streaming verification with subprocess-based verification
  */
 @injectable()
-export class ArchivistRangeScanner {
+export class ArchivistRangeScanner implements IRangeScanner {
 	constructor(
 		private archivistVerifier: StellarArchivistVerifier,
 		@inject('Logger') private logger: Logger,
@@ -30,7 +30,7 @@ export class ArchivistRangeScanner {
 		baseUrl: Url,
 		fromLedger: number,
 		toLedger: number
-	): Promise<Result<ArchivistRangeScanResult, ScanError>> {
+	): Promise<Result<RangeScanResult, ScanError>> {
 		this.logger.info('Starting archivist range scan', {
 			history: baseUrl.value,
 			toLedger: toLedger,

@@ -16,9 +16,13 @@ import { createHash } from 'crypto';
 import * as stream from 'stream';
 import { pipeline } from 'stream/promises';
 import { mapUnknownToError } from 'shared';
-import { ScanError, ScanErrorType } from '../scan/ScanError';
+import { ScanError, ScanErrorCategory, ScanErrorType } from '../scan/ScanError';
 import { isZLibError } from './isZLibError';
 import { TYPES } from '../../infrastructure/di/di-types';
+
+export interface BucketScanResult {
+	errors: ScanError[];
+}
 
 @injectable()
 export class BucketScanner {
@@ -27,15 +31,19 @@ export class BucketScanner {
 	async scan(
 		scanState: BucketScanState,
 		verify = false
-	): Promise<Result<void, ScanError>> {
+	): Promise<Result<BucketScanResult, ScanError>> {
 		if (verify) {
 			return await this.verify(scanState);
 		} else {
-			return await this.exists(scanState);
+			return (await this.exists(scanState)).map(() => ({ errors: [] }));
 		}
 	}
 
-	private async verify(scanState: BucketScanState) {
+	private async verify(
+		scanState: BucketScanState
+	): Promise<Result<BucketScanResult, ScanError>> {
+		const bucketErrors: ScanError[] = [];
+
 		const verify = async (
 			readStream: unknown,
 			request: Request<BucketRequestMeta>
@@ -47,17 +55,18 @@ export class BucketScanner {
 
 			try {
 				await pipeline(readStream, zlib, hasher);
-				if (hasher.digest('hex') !== request.meta?.hash)
-					return err(
-						new QueueError(
-							request,
-							new ScanError(
-								ScanErrorType.TYPE_VERIFICATION,
-								request.url.value,
-								'Wrong bucket hash'
-							)
+				if (hasher.digest('hex') !== request.meta?.hash) {
+					// Collect error and continue scanning
+					bucketErrors.push(
+						new ScanError(
+							ScanErrorType.TYPE_VERIFICATION,
+							request.url.value,
+							'Wrong bucket hash',
+							1,
+							ScanErrorCategory.BUCKET_HASH
 						)
 					);
+				}
 				return ok(undefined);
 			} catch (error: unknown) {
 				if (isZLibError(error)) {
@@ -106,7 +115,7 @@ export class BucketScanner {
 			return err(mapHttpQueueErrorToScanError(verifyBucketsResult.error));
 		}
 
-		return ok(undefined);
+		return ok({ errors: bucketErrors });
 	}
 
 	private async exists(scanState: BucketScanState) {

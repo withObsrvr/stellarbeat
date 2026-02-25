@@ -2,10 +2,13 @@ import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { Scan } from '../scan/Scan';
 import { ExceptionLogger } from 'exception-logger';
+import { ArchivistRangeScanner } from './ArchivistRangeScanner';
+import { RangeScanner } from './RangeScanner';
 import {
-	ArchivistRangeScanner,
-	ArchivistRangeScanResult
-} from './ArchivistRangeScanner';
+	RangeScannerAdapter,
+	RangeScannerSettings
+} from './RangeScannerAdapter';
+import { IRangeScanner, RangeScanResult } from './IRangeScanner';
 import { ScanJob } from '../scan/ScanJob';
 import { ScanError, ScanErrorCategory, ScanErrorType } from '../scan/ScanError';
 import { ScanSettingsFactory } from '../scan/ScanSettingsFactory';
@@ -26,10 +29,13 @@ export class Scanner {
 	private readonly baseRetryDelayMs = 30000; // 30 seconds
 
 	constructor(
-		private rangeScanner: ArchivistRangeScanner,
+		private archivistRangeScanner: ArchivistRangeScanner,
+		private typeScriptRangeScanner: RangeScanner,
 		private scanJobSettingsFactory: ScanSettingsFactory,
 		@inject('Logger') private logger: Logger,
 		@inject(TYPES.ExceptionLogger) private exceptionLogger: ExceptionLogger,
+		@inject(TYPES.UseStellarArchivist)
+		private readonly useStellarArchivist: boolean,
 		private readonly rangeSize = 1000000
 	) {}
 
@@ -87,6 +93,13 @@ export class Scanner {
 			hash: scanSettings.latestScannedLedgerHeaderHash ?? undefined
 		};
 
+		// Create the appropriate range scanner based on config
+		const rangeScanner = this.createRangeScanner(scanSettings);
+
+		this.logger.info('Using scanner backend', {
+			backend: this.useStellarArchivist ? 'stellar-archivist' : 'typescript'
+		});
+
 		let rangeFromLedger = scanSettings.fromLedger;
 		let rangeToLedger =
 			rangeFromLedger + this.rangeSize < scanSettings.toLedger
@@ -94,10 +107,21 @@ export class Scanner {
 				: scanSettings.toLedger;
 
 		const allErrors: ScanError[] = [];
+		const scannedBucketHashes = new Set<string>();
 
 		while (rangeFromLedger < scanSettings.toLedger) {
 			console.time('range_scan');
-			let rangeResult = await this.rangeScanner.scan(
+
+			// Update settings for TypeScript scanner if needed
+			if (!this.useStellarArchivist && rangeScanner instanceof RangeScannerAdapter) {
+				rangeScanner.updateSettings({
+					latestScannedLedger: latestLedgerHeader.ledger,
+					latestScannedLedgerHeaderHash: latestLedgerHeader.hash ?? null,
+					alreadyScannedBucketHashes: scannedBucketHashes
+				});
+			}
+
+			let rangeResult = await rangeScanner.scan(
 				url,
 				rangeFromLedger,
 				rangeToLedger
@@ -117,6 +141,7 @@ export class Scanner {
 				});
 
 				rangeResult = await this.retryRangeScan(
+					rangeScanner,
 					url,
 					rangeFromLedger,
 					rangeToLedger
@@ -172,6 +197,26 @@ export class Scanner {
 			latestLedgerHeader,
 			errors: this.aggregateErrors(allErrors, url.value)
 		};
+	}
+
+	private createRangeScanner(scanSettings: ScanSettings): IRangeScanner {
+		if (this.useStellarArchivist) {
+			return this.archivistRangeScanner;
+		}
+
+		// Create adapter for TypeScript scanner with initial settings
+		const adapterSettings: RangeScannerSettings = {
+			concurrency: scanSettings.concurrency,
+			latestScannedLedger: scanSettings.latestScannedLedger,
+			latestScannedLedgerHeaderHash:
+				scanSettings.latestScannedLedgerHeaderHash,
+			alreadyScannedBucketHashes: new Set<string>()
+		};
+
+		return new RangeScannerAdapter(
+			this.typeScriptRangeScanner,
+			adapterSettings
+		);
 	}
 
 	/**
@@ -257,10 +302,11 @@ export class Scanner {
 	}
 
 	private async retryRangeScan(
+		rangeScanner: IRangeScanner,
 		url: Url,
 		fromLedger: number,
 		toLedger: number
-	): Promise<Result<ArchivistRangeScanResult, ScanError>> {
+	): Promise<Result<RangeScanResult, ScanError>> {
 		for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
 			const delay = this.baseRetryDelayMs * Math.pow(2, attempt - 1);
 			this.logger.info('Retrying range scan after connection error', {
@@ -272,7 +318,7 @@ export class Scanner {
 			});
 
 			await this.sleep(delay);
-			const result = await this.rangeScanner.scan(url, fromLedger, toLedger);
+			const result = await rangeScanner.scan(url, fromLedger, toLedger);
 
 			// Check if this attempt succeeded (not a connection error)
 			if (result.isOk() && result.value.exitCode !== 2) {
@@ -298,6 +344,6 @@ export class Scanner {
 		});
 
 		// Return the last failed result to preserve any error details
-		return this.rangeScanner.scan(url, fromLedger, toLedger);
+		return rangeScanner.scan(url, fromLedger, toLedger);
 	}
 }

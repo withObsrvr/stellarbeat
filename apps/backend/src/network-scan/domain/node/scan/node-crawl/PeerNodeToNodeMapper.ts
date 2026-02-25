@@ -74,12 +74,17 @@ export class PeerNodeToNodeMapper {
 		time: Date
 	): NodeMeasurement {
 		const measurement = new NodeMeasurement(time, node);
-		measurement.isActive = true;
+		measurement.isActive = peerNode.successfullyConnected;
 		measurement.connectivityError = peerNode.successfullyConnected === false;
-		measurement.isValidating = peerNode.isValidating;
+		// Only trust validating status if we could directly connect to verify
+		measurement.isValidating =
+			peerNode.successfullyConnected && peerNode.isValidating;
 		measurement.isOverLoaded = peerNode.overLoaded;
-		measurement.isActiveInScp = peerNode.participatingInSCP;
-		measurement.lag = peerNode.getMinLagMS() ?? null;
+		measurement.isActiveInScp =
+			peerNode.successfullyConnected && peerNode.participatingInSCP;
+		measurement.lag = peerNode.successfullyConnected
+			? (peerNode.getMinLagMS() ?? null)
+			: null;
 
 		return measurement;
 	}
