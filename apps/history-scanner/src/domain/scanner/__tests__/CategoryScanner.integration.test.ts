@@ -113,7 +113,9 @@ it('should not verify wrong previous ledger headers', async function () {
 		ledger: 556799,
 		hash: 'WRONG'
 	});
-	expect(result.isOk()).toBeFalsy();
+	expect(result.isOk()).toBeTruthy();
+	if (result.isErr()) throw result.error;
+	expect(result.value.errors.length).toBeGreaterThan(0);
 });
 
 it('should not verify wrong bucket list hash', async function () {
@@ -122,14 +124,18 @@ it('should not verify wrong bucket list hash', async function () {
 		undefined,
 		new Map()
 	);
-	expect(result.isOk()).toBeFalsy();
+	expect(result.isOk()).toBeTruthy();
+	if (result.isErr()) throw result.error;
+	expect(result.value.errors.length).toBeGreaterThan(0);
 
 	const resultWrongHash = await getOtherCategoriesVerifyResult(
 		false,
 		undefined,
 		new Map([[556863, 'wrong']])
 	);
-	expect(resultWrongHash.isOk()).toBeFalsy();
+	expect(resultWrongHash.isOk()).toBeTruthy();
+	if (resultWrongHash.isErr()) throw resultWrongHash.error;
+	expect(resultWrongHash.value.errors.length).toBeGreaterThan(0);
 });
 
 it('should not verify passed previous ledger headers (from a previous scan)', async function () {
