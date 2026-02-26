@@ -104,8 +104,6 @@ export class RangeScanner {
 		);
 		const categoryScanResult = await this.scanCategories(categoryScanState);
 
-		let latestLedgerHeader: LedgerHeader | undefined;
-
 		if (categoryScanResult.isErr()) {
 			// Category scan had a fatal error (connection failure, etc.)
 			httpAgent.destroy();
@@ -119,7 +117,7 @@ export class RangeScanner {
 			baseUrl
 		);
 		allErrors.push(...categoryErrors);
-		latestLedgerHeader = categoryScanResult.value.latestLedgerHeader;
+		const latestLedgerHeader = categoryScanResult.value.latestLedgerHeader;
 
 		const bucketScanState = new BucketScanState(
 			baseUrl,
