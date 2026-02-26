@@ -9,8 +9,9 @@ export class MockHistoryArchive {
 
 	async listen(port = 3000) {
 		return new Promise<void>((resolve, reject) => {
+			// Match any path ending in .json (including nested paths like /history/00/00/00/file.json)
 			this.api.get(
-				'*.json',
+				/.*\.json$/,
 				async (req: express.Request, res: express.Response) => {
 					const file = path.join(
 						__dirname,
@@ -25,8 +26,9 @@ export class MockHistoryArchive {
 					res.send(content);
 				}
 			);
+			// Match any path ending in .xdr.gz (including nested paths)
 			this.api.get(
-				'*.xdr.gz',
+				/.*\.xdr\.gz$/,
 				async (req: express.Request, res: express.Response) => {
 					const file = path.join(
 						__dirname,

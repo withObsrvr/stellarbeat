@@ -48,8 +48,19 @@ export class BucketScanner {
 			readStream: unknown,
 			request: Request<BucketRequestMeta>
 		): Promise<Result<void, QueueError>> => {
-			if (!(readStream instanceof stream.Readable))
-				return err(new FileNotFoundError(request));
+			if (!(readStream instanceof stream.Readable)) {
+				// Collect missing file error and continue scanning
+				bucketErrors.push(
+					new ScanError(
+						ScanErrorType.TYPE_VERIFICATION,
+						request.url.value,
+						'Missing bucket file',
+						1,
+						ScanErrorCategory.MISSING_FILE
+					)
+				);
+				return ok(undefined);
+			}
 			const zlib = createGunzip();
 			const hasher = createHash('sha256');
 
