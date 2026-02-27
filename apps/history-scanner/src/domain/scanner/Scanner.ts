@@ -222,6 +222,7 @@ export class Scanner {
 	/**
 	 * Aggregates errors by category to avoid duplicate error entries.
 	 * Errors of the same category are combined into a single error with summed counts.
+	 * Tracks the min firstLedger and max lastLedger across all errors in each category.
 	 */
 	private aggregateErrors(errors: ScanError[], baseUrl: string): ScanError[] {
 		if (errors.length === 0) return [];
@@ -243,17 +244,46 @@ export class Scanner {
 		// Aggregate verification errors by category
 		const aggregations = new Map<
 			ScanErrorCategory,
-			{ count: number; message: string }
+			{
+				count: number;
+				message: string;
+				firstLedger: number | null;
+				lastLedger: number | null;
+			}
 		>();
 
 		for (const error of verificationErrors) {
 			const existing = aggregations.get(error.category);
 			if (existing) {
 				existing.count += error.count;
+				// Track min firstLedger
+				if (error.firstLedger !== null) {
+					if (existing.firstLedger === null) {
+						existing.firstLedger = error.firstLedger;
+					} else {
+						existing.firstLedger = Math.min(
+							existing.firstLedger,
+							error.firstLedger
+						);
+					}
+				}
+				// Track max lastLedger
+				if (error.lastLedger !== null) {
+					if (existing.lastLedger === null) {
+						existing.lastLedger = error.lastLedger;
+					} else {
+						existing.lastLedger = Math.max(
+							existing.lastLedger,
+							error.lastLedger
+						);
+					}
+				}
 			} else {
 				aggregations.set(error.category, {
 					count: error.count,
-					message: error.message
+					message: error.message,
+					firstLedger: error.firstLedger,
+					lastLedger: error.lastLedger
 				});
 			}
 		}
@@ -269,7 +299,9 @@ export class Scanner {
 					baseUrl,
 					message,
 					agg.count,
-					category
+					category,
+					agg.firstLedger,
+					agg.lastLedger
 				)
 			);
 		}
