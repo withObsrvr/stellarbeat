@@ -21,6 +21,7 @@ export interface Config {
 	stellarArchivistPath: string;
 	workerId: string;
 	useStellarArchivist: boolean;
+	bucketTimeoutMs: number;
 }
 
 // Default values
@@ -32,7 +33,8 @@ const defaultConfig = {
 	historyMaxFileMs: 60000,
 	historySlowArchiveMaxLedgers: 1000,
 	stellarArchivistPath: 'stellar-archivist',
-	useStellarArchivist: false
+	useStellarArchivist: false,
+	bucketTimeoutMs: 300000 // 5 minutes - handles large bucket files
 };
 
 export function getConfigFromEnv(): Result<Config, Error> {
@@ -72,6 +74,14 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		return err(new Error('HISTORY_SLOW_ARCHIVE_MAX_LEDGERS must be a number'));
 	}
 
+	const bucketTimeoutMs = process.env.BUCKET_TIMEOUT_MS
+		? Number(process.env.BUCKET_TIMEOUT_MS)
+		: defaultConfig.bucketTimeoutMs;
+
+	if (isNaN(bucketTimeoutMs)) {
+		return err(new Error('BUCKET_TIMEOUT_MS must be a number'));
+	}
+
 	return ok({
 		nodeEnv: process.env.NODE_ENV ?? defaultConfig.nodeEnv,
 		enableSentry,
@@ -87,6 +97,7 @@ export function getConfigFromEnv(): Result<Config, Error> {
 			process.env.STELLAR_ARCHIVIST_PATH ?? defaultConfig.stellarArchivistPath,
 		workerId: process.env.WORKER_ID ?? `worker-${process.pid}`,
 		useStellarArchivist:
-			yn(process.env.USE_STELLAR_ARCHIVIST) ?? defaultConfig.useStellarArchivist
+			yn(process.env.USE_STELLAR_ARCHIVIST) ?? defaultConfig.useStellarArchivist,
+		bucketTimeoutMs
 	});
 }

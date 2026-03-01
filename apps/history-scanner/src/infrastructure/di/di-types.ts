@@ -10,5 +10,6 @@ export const TYPES = {
 	HttpService: Symbol('HttpService'),
 	WorkerId: Symbol('WorkerId'),
 	RangeScannerInterface: Symbol('RangeScannerInterface'),
-	UseStellarArchivist: Symbol('UseStellarArchivist')
+	UseStellarArchivist: Symbol('UseStellarArchivist'),
+	BucketTimeoutMs: Symbol('BucketTimeoutMs')
 };

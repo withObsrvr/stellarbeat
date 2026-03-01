@@ -109,4 +109,7 @@ export function load(container: Container, config: Config) {
 		);
 	});
 	container.bind<string>(TYPES.WorkerId).toConstantValue(config.workerId);
+	container
+		.bind<number>(TYPES.BucketTimeoutMs)
+		.toConstantValue(config.bucketTimeoutMs);
 }

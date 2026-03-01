@@ -26,7 +26,10 @@ export interface BucketScanResult {
 
 @injectable()
 export class BucketScanner {
-	constructor(@inject(TYPES.HttpQueue) private httpQueue: HttpQueue) {}
+	constructor(
+		@inject(TYPES.HttpQueue) private httpQueue: HttpQueue,
+		@inject(TYPES.BucketTimeoutMs) private bucketTimeoutMs: number
+	) {}
 
 	async scan(
 		scanState: BucketScanState,
@@ -115,8 +118,8 @@ export class BucketScanner {
 						httpAgent: scanState.httpAgent,
 						httpsAgent: scanState.httpsAgent,
 						responseType: 'stream',
-						socketTimeoutMs: 60000,
-						connectionTimeoutMs: 10000
+						socketTimeoutMs: this.bucketTimeoutMs,
+						connectionTimeoutMs: 30000
 					}
 				},
 				verify
