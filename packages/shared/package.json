@@ -3,7 +3,7 @@
 	"description": "Shared code between OBSRVR Radar frontend and backend",
 	"scripts": {
 		"preversion": "pnpm run build",
-		"build": "../../node_modules/typescript/bin/tsc  --declaration",
+		"build": "../../node_modules/typescript/bin/tsc --declaration",
 		"post-build": "pnpm run compile-schemas",
 		"compile-schemas": "ajv compile -s \"schemas/*(network).json\" -r \"schemas/*(node|organization).json\" -o lib/network-schema.js -c ajv-formats --code-optimize=true --code-lines=false --strict=true; node generate-dto-validate-functions.mjs",
 		"test:unit": "jest"

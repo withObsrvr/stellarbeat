@@ -46,6 +46,15 @@ describe('stellar-archive-paths', () => {
 			expect(getCheckpointForLedger(64)).toBe(checkpoint);
 			expect(getCheckpointForLedger(127)).toBe(checkpoint);
 		});
+
+		it('should handle string input gracefully (coerce to number)', () => {
+			// This can happen when data comes from JSON/API responses
+			// Without Number() coercion, "60326271" + 64 would concatenate to "6032627164"
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			expect(getCheckpointForLedger('60326271' as any)).toBe(60326271);
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			expect(getCheckpointForLedger('127' as any)).toBe(127);
+		});
 	});
 
 	describe('ledgerToHex', () => {

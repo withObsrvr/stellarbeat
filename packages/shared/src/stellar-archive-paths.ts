@@ -1,8 +1,9 @@
 export const CHECKPOINT_FREQUENCY = 64;
 
 export function getCheckpointForLedger(ledger: number): number {
+	const ledgerNum = Number(ledger);
 	return (
-		Math.floor((ledger + CHECKPOINT_FREQUENCY) / CHECKPOINT_FREQUENCY) *
+		Math.floor((ledgerNum + CHECKPOINT_FREQUENCY) / CHECKPOINT_FREQUENCY) *
 			CHECKPOINT_FREQUENCY -
 		1
 	);

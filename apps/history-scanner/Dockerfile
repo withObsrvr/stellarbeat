@@ -24,8 +24,15 @@ COPY apps/history-scanner ./apps/history-scanner
 # Install all dependencies (including dev for build)
 RUN pnpm install --frozen-lockfile
 
-# Build all packages and the app
-RUN pnpm --filter history-scanner... build
+# Build workspace packages in dependency order (sequential to avoid race conditions)
+RUN pnpm --filter shared build && \
+    pnpm --filter logger build && \
+    pnpm --filter custom-error build && \
+    pnpm --filter history-scanner-dto build && \
+    pnpm --filter exception-logger build && \
+    pnpm --filter job-monitor build && \
+    pnpm --filter http-helper build && \
+    pnpm --filter history-scanner build
 
 # Create production deployment directory
 RUN mkdir -p /prod/history-scanner
