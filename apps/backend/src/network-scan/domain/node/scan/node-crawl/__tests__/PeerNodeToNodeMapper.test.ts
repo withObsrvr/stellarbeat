@@ -97,7 +97,7 @@ describe('PeerNodeToNodeMapper', () => {
 		expect(node.latestMeasurement()?.connectivityError).toEqual(false);
 	}
 
-	test('should set isValidating and isActiveInScp to false when connection failed', () => {
+	test('should set isValidating to true from relayed messages when connection failed', () => {
 		const time = new Date('2019-01-01T00:00:00.000Z');
 		const publicKey = createDummyPublicKey();
 		const node = Node.create(time, publicKey, {
@@ -107,7 +107,7 @@ describe('PeerNodeToNodeMapper', () => {
 
 		const peerNode = mock<PeerNode>();
 		peerNode.successfullyConnected = false;
-		peerNode.isValidating = true; // Saw relayed messages
+		peerNode.isValidating = true; // Saw relayed messages (cryptographically signed)
 		peerNode.participatingInSCP = true;
 		peerNode.overLoaded = false;
 		peerNode.getMinLagMS.mockReturnValue(5);
@@ -118,8 +118,36 @@ describe('PeerNodeToNodeMapper', () => {
 			time
 		);
 
-		expect(measurement.connectivityError).toBe(true);
-		expect(measurement.isValidating).toBe(false); // Should be false despite relayed messages
+		expect(measurement.connectivityError).toBe(true); // Crawler rejected
+		expect(measurement.isValidating).toBe(true); // Trust relayed validation (signed SCP messages)
+		expect(measurement.isActiveInScp).toBe(false); // SCP participation not tracked via relay
+		expect(measurement.isActive).toBe(false);
+		expect(measurement.lag).toBe(null); // No lag measurement without direct connection
+	});
+
+	test('should set isValidating to false when connection failed and no relayed validation', () => {
+		const time = new Date('2019-01-01T00:00:00.000Z');
+		const publicKey = createDummyPublicKey();
+		const node = Node.create(time, publicKey, {
+			ip: 'localhost',
+			port: 11625
+		});
+
+		const peerNode = mock<PeerNode>();
+		peerNode.successfullyConnected = false;
+		peerNode.isValidating = false; // No relayed validation messages
+		peerNode.participatingInSCP = false;
+		peerNode.overLoaded = false;
+		peerNode.getMinLagMS.mockReturnValue(undefined);
+
+		const measurement = PeerNodeToNodeMapper.mapPeerNodeToNodeMeasurement(
+			peerNode,
+			node,
+			time
+		);
+
+		expect(measurement.connectivityError).toBe(true); // Crawler rejected
+		expect(measurement.isValidating).toBe(false); // No validation signals
 		expect(measurement.isActiveInScp).toBe(false);
 		expect(measurement.isActive).toBe(false);
 		expect(measurement.lag).toBe(null);

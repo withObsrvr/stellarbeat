@@ -76,9 +76,10 @@ export class PeerNodeToNodeMapper {
 		const measurement = new NodeMeasurement(time, node);
 		measurement.isActive = peerNode.successfullyConnected;
 		measurement.connectivityError = peerNode.successfullyConnected === false;
-		// Only trust validating status if we could directly connect to verify
-		measurement.isValidating =
-			peerNode.successfullyConnected && peerNode.isValidating;
+		// Trust validating status from both direct connection and relayed SCP messages
+		// (relayed messages are cryptographically signed by the originating node)
+		// Use connectivityError to distinguish: isValidating && connectivityError = relayed only
+		measurement.isValidating = peerNode.isValidating;
 		measurement.isOverLoaded = peerNode.overLoaded;
 		measurement.isActiveInScp =
 			peerNode.successfullyConnected && peerNode.participatingInSCP;
