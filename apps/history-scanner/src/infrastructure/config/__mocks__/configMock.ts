@@ -15,4 +15,5 @@ export class ConfigMock implements Config {
 	stellarArchivistPath = 'stellar-archivist';
 	workerId = 'test-worker-1';
 	useStellarArchivist = false;
+	bucketTimeoutMs = 300000;
 }
