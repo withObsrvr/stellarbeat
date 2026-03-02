@@ -132,7 +132,7 @@ export class CategoryVerificationService {
 			if (expectedHashes.bucketListHash !== bucketListHashes.get(ledger)) {
 				return err({
 					ledger: ledger,
-					category: Category.ledger,
+					category: Category.bucketList,
 					message: 'Wrong bucket list hash'
 				});
 			}

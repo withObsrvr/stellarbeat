@@ -187,6 +187,8 @@ export class RangeScanner {
 				return ScanErrorCategory.TRANSACTION_RESULT_HASH;
 			case Category.ledger:
 				return ScanErrorCategory.LEDGER_HEADER_HASH;
+			case Category.bucketList:
+				return ScanErrorCategory.BUCKET_HASH;
 			default:
 				return ScanErrorCategory.OTHER;
 		}
