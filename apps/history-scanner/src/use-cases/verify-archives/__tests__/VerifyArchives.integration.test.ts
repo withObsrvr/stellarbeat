@@ -6,7 +6,7 @@ import { mock } from 'jest-mock-extended';
 import { ScanCoordinatorService } from '../../../domain/scan/ScanCoordinatorService';
 import { ok } from 'neverthrow';
 import { TYPES } from '../../../infrastructure/di/di-types';
-import { MockHistoryArchive } from '../../../infrastructure/http/MockHistoryArchive';
+import { MockHistoryArchive } from './MockHistoryArchive';
 
 describe('VerifyArchives Integration Tests', () => {
 	let kernel: Kernel;
