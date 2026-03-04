@@ -20,6 +20,7 @@ import { createGunzip } from 'zlib';
 import { XdrStreamReader } from './XdrStreamReader';
 import { pipeline } from 'stream/promises';
 import { CategoryXDRProcessor } from './CategoryXDRProcessor';
+import { Category } from '../history-archive/Category';
 import { ScanError, ScanErrorType } from '../scan/ScanError';
 import { UrlBuilder } from '../history-archive/UrlBuilder';
 import { CheckPointGenerator } from '../check-point/CheckPointGenerator';
@@ -55,6 +56,7 @@ export interface CategoryVerificationData {
 	calculatedTxSetResultHashes: CalculatedTxSetResultHashes;
 	calculatedLedgerHeaderHashes: LedgerHeaderHashes;
 	protocolVersions: Map<number, number>;
+	processingErrors: Array<{ url: string; category: Category; message: string }>;
 }
 
 export interface CategoryScanResult {
@@ -229,7 +231,8 @@ export class CategoryScanner {
 			expectedHashesPerLedger: new Map(),
 			calculatedTxSetResultHashes: new Map(),
 			calculatedLedgerHeaderHashes: new Map(),
-			protocolVersions: new Map()
+			protocolVersions: new Map(),
+			processingErrors: []
 		};
 
 		const processRequestResult = async (
@@ -334,9 +337,16 @@ export class CategoryScanner {
 			);
 		}
 
+		const processingVerificationErrors: VerificationError[] =
+			categoryVerificationData.processingErrors.map((pe) => ({
+				ledger: 0,
+				category: pe.category,
+				message: `XDR processing error: ${pe.message}`
+			}));
+
 		return ok({
 			latestLedgerHeader: verificationResult.latestLedgerHeader,
-			errors: verificationResult.errors
+			errors: [...verificationResult.errors, ...processingVerificationErrors]
 		});
 	}
 
