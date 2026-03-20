@@ -7,7 +7,7 @@ import { Scan } from 'src/domain/scan/Scan';
 import { ScanDTO, ScanJobDTO } from 'history-scanner-dto';
 import { ScanCoordinatorService } from 'src/domain/scan/ScanCoordinatorService';
 import { isObject } from 'shared';
-import { ScanErrorType } from '../../domain/scan/ScanError';
+import { ScanErrorType, ScanErrorCategory } from '../../domain/scan/ScanError';
 
 export class CoordinatorServiceError extends CustomError {
 	constructor(message: string, cause?: Error) {
@@ -78,13 +78,15 @@ export class RESTScanCoordinatorService implements ScanCoordinatorService {
 			latestScannedLedgerHeaderHash: scan.latestScannedLedgerHeaderHash,
 			concurrency: scan.concurrency,
 			isSlowArchive: scan.isSlowArchive,
-			error: scan.error
-				? {
-						message: scan.error.message,
-						type: ScanErrorType[scan.error.type],
-						url: scan.error.url
-					}
-				: null,
+			errors: scan.errors.map((error) => ({
+				message: error.message,
+				type: ScanErrorType[error.type],
+				url: error.url,
+				count: error.count,
+				category: error.category,
+				firstLedger: error.firstLedger,
+				lastLedger: error.lastLedger
+			})),
 			scanJobRemoteId: scan.scanJobRemoteId!
 		};
 	}

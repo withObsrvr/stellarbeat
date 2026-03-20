@@ -16,11 +16,11 @@ import { inject, injectable } from 'inversify';
 import { HASBucketHashExtractor } from '../history-archive/HASBucketHashExtractor';
 import { mapHttpQueueErrorToScanError } from './mapHttpQueueErrorToScanError';
 import { isObject, mapUnknownToError } from 'shared';
-import { Category } from '../history-archive/Category';
 import { createGunzip } from 'zlib';
 import { XdrStreamReader } from './XdrStreamReader';
 import { pipeline } from 'stream/promises';
 import { CategoryXDRProcessor } from './CategoryXDRProcessor';
+import { Category } from '../history-archive/Category';
 import { ScanError, ScanErrorType } from '../scan/ScanError';
 import { UrlBuilder } from '../history-archive/UrlBuilder';
 import { CheckPointGenerator } from '../check-point/CheckPointGenerator';
@@ -28,10 +28,12 @@ import { CategoryScanState } from './ScanState';
 import { LedgerHeader } from './Scanner';
 import { hashBucketList } from '../history-archive/hashBucketList';
 import { WorkerPoolLoadTracker } from './WorkerPoolLoadTracker';
-import { CategoryVerificationService } from './CategoryVerificationService';
+import {
+	CategoryVerificationService,
+	VerificationError
+} from './CategoryVerificationService';
 import { HasherPool } from './HasherPool';
 import { isZLibError } from './isZLibError';
-import { getMaximumNumber } from './getMaximumNumber';
 import { TYPES } from './../../infrastructure/di/di-types';
 
 type Ledger = number;
@@ -54,6 +56,12 @@ export interface CategoryVerificationData {
 	calculatedTxSetResultHashes: CalculatedTxSetResultHashes;
 	calculatedLedgerHeaderHashes: LedgerHeaderHashes;
 	protocolVersions: Map<number, number>;
+	processingErrors: Array<{ url: string; category: Category; message: string }>;
+}
+
+export interface CategoryScanResult {
+	latestLedgerHeader?: LedgerHeader;
+	errors: VerificationError[];
 }
 
 @injectable()
@@ -199,15 +207,19 @@ export class CategoryScanner {
 	async scanOtherCategories(
 		scanState: CategoryScanState,
 		verify = false
-	): Promise<Result<LedgerHeader | undefined, ScanError>> {
-		if (!verify) return await this.otherCategoriesExist(scanState);
+	): Promise<Result<CategoryScanResult, ScanError>> {
+		if (!verify)
+			return (await this.otherCategoriesExist(scanState)).map(() => ({
+				latestLedgerHeader: undefined,
+				errors: []
+			}));
 
 		return await this.verifyOtherCategories(scanState);
 	}
 
 	private async verifyOtherCategories(
 		scanState: CategoryScanState
-	): Promise<Result<undefined | LedgerHeader, ScanError>> {
+	): Promise<Result<CategoryScanResult, ScanError>> {
 		const pool = new HasherPool();
 		const poolLoadTracker = new WorkerPoolLoadTracker(
 			pool,
@@ -219,7 +231,8 @@ export class CategoryScanner {
 			expectedHashesPerLedger: new Map(),
 			calculatedTxSetResultHashes: new Map(),
 			calculatedLedgerHeaderHashes: new Map(),
-			protocolVersions: new Map()
+			protocolVersions: new Map(),
+			processingErrors: []
 		};
 
 		const processRequestResult = async (
@@ -317,20 +330,6 @@ export class CategoryScanner {
 			scanState.previousLedgerHeader
 		);
 
-		if (verificationResult.isErr())
-			return err(
-				this.createVerificationError(
-					scanState.baseUrl,
-					verificationResult.error.ledger,
-					verificationResult.error.category,
-					verificationResult.error.message
-				)
-			);
-
-		const maxLedger = getMaximumNumber([
-			...categoryVerificationData.calculatedLedgerHeaderHashes.keys()
-		]);
-
 		if (poolLoadTracker.getPoolFullPercentage() > 50) {
 			console.log(
 				'Pool full percentage',
@@ -338,11 +337,16 @@ export class CategoryScanner {
 			);
 		}
 
+		const processingVerificationErrors: VerificationError[] =
+			categoryVerificationData.processingErrors.map((pe) => ({
+				ledger: 0,
+				category: pe.category,
+				message: `XDR processing error: ${pe.message}`
+			}));
+
 		return ok({
-			ledger: maxLedger,
-			hash: categoryVerificationData.calculatedLedgerHeaderHashes.get(
-				maxLedger
-			) as string
+			latestLedgerHeader: verificationResult.latestLedgerHeader,
+			errors: [...verificationResult.errors, ...processingVerificationErrors]
 		});
 	}
 
@@ -400,22 +404,5 @@ export class CategoryScanner {
 		}
 
 		return ok(undefined);
-	}
-
-	private createVerificationError(
-		baseUrl: Url,
-		ledger: number,
-		category: Category,
-		message: string
-	): ScanError {
-		return new ScanError(
-			ScanErrorType.TYPE_VERIFICATION,
-			UrlBuilder.getCategoryUrl(
-				baseUrl,
-				this.checkPointGenerator.getClosestHigherCheckPoint(ledger),
-				category
-			).value,
-			message
-		);
 	}
 }

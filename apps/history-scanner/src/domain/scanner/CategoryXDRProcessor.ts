@@ -38,8 +38,11 @@ export class CategoryXDRProcessor extends Writable {
 						);
 					})
 					.catch((error) => {
-						console.log(this.url.value);
-						console.log(error);
+						this.categoryVerificationData.processingErrors.push({
+							url: this.url.value,
+							category: this.category,
+							message: error instanceof Error ? error.message : String(error)
+						});
 					});
 				break;
 			}
@@ -55,8 +58,11 @@ export class CategoryXDRProcessor extends Writable {
 						);
 					})
 					.catch((error) => {
-						console.log(this.url.value);
-						console.log(error);
+						this.categoryVerificationData.processingErrors.push({
+							url: this.url.value,
+							category: this.category,
+							message: error instanceof Error ? error.message : String(error)
+						});
 					});
 				break;
 			}
@@ -87,8 +93,11 @@ export class CategoryXDRProcessor extends Writable {
 						);
 					})
 					.catch((error) => {
-						console.log(this.url.value);
-						console.log(error);
+						this.categoryVerificationData.processingErrors.push({
+							url: this.url.value,
+							category: this.category,
+							message: error instanceof Error ? error.message : String(error)
+						});
 					});
 				break;
 			}

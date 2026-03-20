@@ -11,7 +11,8 @@
 		"build-and-start-api": "pnpm run build; node lib/core/infrastructure/http/api.js",
 		"start-api": "node lib/core/infrastructure/http/api.js",
 		"retrieve-home-domain": "node lib/network-scan/infrastructure/cli/retrieve-home-domain.js",
-		"update-geo-data": "node lib/network-scan/infrastructure/cli/update-geo-data.js"
+		"update-geo-data": "node lib/network-scan/infrastructure/cli/update-geo-data.js",
+		"priority-scan": "node lib/history-scan-coordinator/infrastructure/cli/queue-priority-scan.js"
 	},
 	"author": "pieterjan84@github",
 	"license": "MIT",
@@ -24,7 +25,7 @@
 		"job-monitor": "workspace:*",
 		"exception-logger": "workspace:*",
 		"logger": "workspace:*",
-		"@stellarbeat/stellar-history-archive-hasher": "0.7.0",
+		"@withobsrvr/stellar-history-archive-hasher": "^0.8.1",
 		"@stellarbeat/stellar_analysis_nodejs": "^0.6.2",
 		"ajv": "^8.17.1",
 		"async": "^3.2.6",

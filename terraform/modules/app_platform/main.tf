@@ -208,7 +208,12 @@ resource "digitalocean_app" "radar" {
         http_port = 3000
 
         health_check {
-          http_path = "/health"
+          http_path             = "/health"
+          initial_delay_seconds = 30
+          period_seconds        = 10
+          timeout_seconds       = 10
+          success_threshold     = 1
+          failure_threshold     = 5
         }
 
         run_command = "pnpm start:frontend"
@@ -387,10 +392,22 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
+        # Contact Recipient Email if provided
+        env {
+          key   = "CONTACT_RECIPIENT_EMAIL"
+          value = lookup(var.backend_env, "CONTACT_RECIPIENT_EMAIL", "")
+          type  = "GENERAL"
+        }
+
         http_port = lookup(var.backend_env, "BACKEND_PORT", 3000)
 
         health_check {
-          http_path = "/health"
+          http_path             = "/health"
+          initial_delay_seconds = 30
+          period_seconds        = 10
+          timeout_seconds       = 10
+          success_threshold     = 1
+          failure_threshold     = 5
         }
 
         build_command = "pnpm build"
@@ -755,18 +772,22 @@ resource "digitalocean_app" "radar" {
       }
     }
 
-    # History Scanner as a worker - conditionally deployed based on instance count
+    # History Scanner workers - creates multiple workers with unique WORKER_IDs
+    # Uses Dockerfile to include stellar-archivist binary for archive verification
     dynamic "worker" {
-      for_each = var.history_scanner_instance_count > 0 ? [1] : []
+      for_each = var.history_scanner_worker_count > 0 ? toset([for i in range(var.history_scanner_worker_count) : tostring(i + 1)]) : toset([])
       content {
-        name               = "history-scanner"
-        instance_count     = var.history_scanner_instance_count
+        name               = var.history_scanner_worker_count == 1 ? "history-scanner" : "history-scanner-${worker.value}"
+        instance_count     = 1 # Each worker is a single instance with unique WORKER_ID
         instance_size_slug = coalesce(var.history_scanner_instance_size, var.instance_size)
 
         git {
           repo_clone_url = var.repo_url
           branch         = var.git_branch
         }
+
+        # Use Dockerfile to build stellar-archivist from source
+        dockerfile_path = "apps/history-scanner/Dockerfile"
 
         # Environment variables - explicitly defined
         env {
@@ -777,6 +798,13 @@ resource "digitalocean_app" "radar" {
         env {
           key   = "FEATURE_FLAGS"
           value = jsonencode(var.feature_flags)
+        }
+
+        # Unique WORKER_ID for each instance
+        env {
+          key   = "WORKER_ID"
+          value = "scanner-${worker.value}"
+          type  = "GENERAL"
         }
 
         # Use database connection string with doadmin user (already has all necessary permissions)
@@ -820,9 +848,6 @@ resource "digitalocean_app" "radar" {
           value = lookup(var.history_scanner_env, "COORDINATOR_API_PASSWORD", "")
           type  = "SECRET"
         }
-
-        build_command = "pnpm build"
-        run_command   = "pnpm start:scan-history"
       }
     }
 
@@ -966,7 +991,12 @@ resource "digitalocean_app" "radar" {
         http_port = lookup(var.testnet_backend_env, "BACKEND_PORT", 3000)
 
         health_check {
-          http_path = "/health"
+          http_path             = "/health"
+          initial_delay_seconds = 30
+          period_seconds        = 10
+          timeout_seconds       = 10
+          success_threshold     = 1
+          failure_threshold     = 5
         }
 
         build_command = "pnpm build"
@@ -1094,7 +1124,12 @@ resource "digitalocean_app" "radar" {
         http_port = 7000
 
         health_check {
-          http_path = "/health"
+          http_path             = "/health"
+          initial_delay_seconds = 30
+          period_seconds        = 10
+          timeout_seconds       = 10
+          success_threshold     = 1
+          failure_threshold     = 5
         }
 
         build_command = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
@@ -1138,7 +1173,12 @@ resource "digitalocean_app" "radar" {
         http_port = 8080
 
         health_check {
-          http_path = "/health"
+          http_path             = "/health"
+          initial_delay_seconds = 30
+          period_seconds        = 10
+          timeout_seconds       = 10
+          success_threshold     = 1
+          failure_threshold     = 5
         }
       }
     }

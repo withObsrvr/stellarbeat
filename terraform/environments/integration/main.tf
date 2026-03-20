@@ -19,14 +19,16 @@ module "app_platform" {
   repo_url   = var.repo_url
   git_branch = "main"
 
-  environment                    = "integration"
-  instance_size                  = "apps-s-1vcpu-1gb"
-  history_scanner_instance_size  = "apps-d-2vcpu-8gb"
+  environment                   = "integration"
+  instance_size                 = "apps-s-1vcpu-1gb"
+  history_scanner_instance_size = "apps-d-2vcpu-8gb"
 
-  frontend_instance_count = 1
-  backend_instance_count  = 1
-  scanner_instance_count  = 1
-  users_instance_count    = 1
+  frontend_instance_count        = 1
+  backend_instance_count         = 1
+  scanner_instance_count         = 1
+  history_scanner_instance_count = 0 # Deprecated, use history_scanner_worker_count
+  history_scanner_worker_count   = 1
+  users_instance_count           = 1
 
   database_production = false
 
@@ -44,9 +46,10 @@ module "app_platform" {
 
   # Backend environment variables
   backend_env = {
-    DATABASE_URL = var.integration_database_url
-    JWT_SECRET   = var.integration_jwt_secret
-    NODE_ENV     = "integration"
+    DATABASE_URL            = var.integration_database_url
+    JWT_SECRET              = var.integration_jwt_secret
+    NODE_ENV                = "integration"
+    CONTACT_RECIPIENT_EMAIL = "hello@withobsrvr.com"
   }
 
   # Network Scanner environment variables

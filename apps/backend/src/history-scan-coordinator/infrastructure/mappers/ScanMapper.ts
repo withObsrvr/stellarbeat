@@ -3,7 +3,7 @@ import { injectable } from 'inversify';
 import { Url } from 'http-helper';
 import 'reflect-metadata';
 import { Scan } from '../../domain/scan/Scan';
-import { ScanError, ScanErrorType } from '../../domain/scan/ScanError';
+import { ScanError, ScanErrorType, ScanErrorCategory } from '../../domain/scan/ScanError';
 import { ScanDTO, ScanErrorDTO } from 'history-scanner-dto';
 
 @injectable()
@@ -42,8 +42,8 @@ export class ScanMapper {
 				return err(new Error('concurrency must be a positive integer'));
 			}
 
-			const error = dto.error ? this.mapToScanError(dto.error) : null;
-			if (error && error.isErr()) return err(error.error);
+			const errorsResult = this.mapToScanErrors(dto.errors);
+			if (errorsResult.isErr()) return err(errorsResult.error);
 
 			const baseUrlResult = Url.create(dto.baseUrl);
 			if (baseUrlResult.isErr()) {
@@ -72,7 +72,7 @@ export class ScanMapper {
 					dto.latestScannedLedgerHeaderHash,
 					dto.concurrency,
 					dto.isSlowArchive,
-					error ? error.value : null
+					errorsResult.value
 				)
 			);
 		} catch (e) {
@@ -82,6 +82,16 @@ export class ScanMapper {
 				)
 			);
 		}
+	}
+
+	private mapToScanErrors(errorDTOs: ScanErrorDTO[]): Result<ScanError[], Error> {
+		const errors: ScanError[] = [];
+		for (const errorDTO of errorDTOs) {
+			const errorResult = this.mapToScanError(errorDTO);
+			if (errorResult.isErr()) return err(errorResult.error);
+			errors.push(errorResult.value);
+		}
+		return ok(errors);
 	}
 
 	private mapToScanError(errorDTO: ScanErrorDTO): Result<ScanError, Error> {
@@ -97,7 +107,12 @@ export class ScanMapper {
 			return err(new Error(`Invalid error type: ${errorDTO.type}`));
 		}
 
-		return ok(new ScanError(errorType, errorDTO.url, errorDTO.message));
+		const errorCategory = this.mapErrorCategory(errorDTO.category);
+		const count = typeof errorDTO.count === 'number' ? errorDTO.count : 1;
+		const firstLedger = typeof errorDTO.firstLedger === 'number' ? errorDTO.firstLedger : null;
+		const lastLedger = typeof errorDTO.lastLedger === 'number' ? errorDTO.lastLedger : null;
+
+		return ok(new ScanError(errorType, errorDTO.url, errorDTO.message, count, errorCategory, firstLedger, lastLedger));
 	}
 
 	private mapErrorType(type: string): ScanErrorType | undefined {
@@ -108,6 +123,26 @@ export class ScanMapper {
 				return ScanErrorType.TYPE_CONNECTION;
 			default:
 				return undefined;
+		}
+	}
+
+	private mapErrorCategory(category: string | undefined): ScanErrorCategory {
+		if (!category) return ScanErrorCategory.OTHER;
+		switch (category) {
+			case 'TRANSACTION_SET_HASH':
+				return ScanErrorCategory.TRANSACTION_SET_HASH;
+			case 'TRANSACTION_RESULT_HASH':
+				return ScanErrorCategory.TRANSACTION_RESULT_HASH;
+			case 'LEDGER_HEADER_HASH':
+				return ScanErrorCategory.LEDGER_HEADER_HASH;
+			case 'BUCKET_HASH':
+				return ScanErrorCategory.BUCKET_HASH;
+			case 'MISSING_FILE':
+				return ScanErrorCategory.MISSING_FILE;
+			case 'CONNECTION':
+				return ScanErrorCategory.CONNECTION;
+			default:
+				return ScanErrorCategory.OTHER;
 		}
 	}
 }

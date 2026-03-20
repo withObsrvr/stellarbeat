@@ -29,7 +29,7 @@ it('should verify the bucket hash', async function () {
 		}
 	);
 
-	const scanner = new BucketScanner(httpQueue);
+	const scanner = new BucketScanner(httpQueue, 300000);
 
 	const result = await scan(
 		{
@@ -67,7 +67,7 @@ it('should return verification error when zip archive is corrupt', async functio
 			return new Promise((resolve) => resolve(result));
 		}
 	);
-	const scanner = new BucketScanner(httpQueue);
+	const scanner = new BucketScanner(httpQueue, 300000);
 
 	const result = await scan(
 		{

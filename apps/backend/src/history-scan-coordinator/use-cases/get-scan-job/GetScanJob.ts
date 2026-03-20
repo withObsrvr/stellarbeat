@@ -32,15 +32,13 @@ export class GetScanJob {
 				return ok(null);
 			}
 
-			this.logger.info('Returning next scan job', {
+			this.logger.info('Assigned scan job', {
 				app: 'history-scan-coordinator',
 				url: nextScanJob.url,
-				chainInitDate: nextScanJob.chainInitDate
+				remoteId: nextScanJob.remoteId
 			});
 
-			nextScanJob.status = 'TAKEN';
-			await this.scanJobRepository.save([nextScanJob]);
-
+			// Job already marked as TAKEN atomically by repository
 			return ok({
 				chainInitDate: nextScanJob.chainInitDate,
 				url: nextScanJob.url,

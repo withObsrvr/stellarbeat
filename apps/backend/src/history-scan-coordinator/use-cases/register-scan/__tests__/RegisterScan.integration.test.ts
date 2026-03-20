@@ -42,11 +42,11 @@ describe('RegisterScan.integration', () => {
 			endDate: new Date(),
 			fromLedger: 1,
 			toLedger: 100,
-			error: {
+			errors: [{
 				type: 'TYPE_VERIFICATION',
 				message: 'Invalid URL',
 				url: 'http://example.com/error'
-			},
+			}],
 			baseUrl: urlResult.value.value,
 			scanChainInitDate: new Date(),
 			latestVerifiedLedger: 100,

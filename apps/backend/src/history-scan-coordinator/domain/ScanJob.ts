@@ -12,6 +12,7 @@ import {
 @Index('idx_scanjob_status', ['status'])
 @Index('idx_scanjob_url', ['url'])
 @Index('idx_scanjob_remote_id', ['remoteId'], { unique: true })
+@Index('idx_scanjob_priority', ['priority'])
 export class ScanJob {
 	@PrimaryGeneratedColumn()
 	public id!: number;
@@ -34,6 +35,9 @@ export class ScanJob {
 	@Column({ type: 'varchar', default: 'PENDING' })
 	public status: 'PENDING' | 'TAKEN' | 'DONE';
 
+	@Column({ type: 'int', default: 0 })
+	public priority: number;
+
 	@CreateDateColumn()
 	public createdAt?: Date;
 
@@ -44,13 +48,19 @@ export class ScanJob {
 		url: string,
 		latestScannedLedger = 0,
 		latestScannedLedgerHeaderHash: string | null = null,
-		chainInitDate: Date | null = null
+		chainInitDate: Date | null = null,
+		priority = 0
 	) {
 		this.url = url;
 		this.latestScannedLedger = latestScannedLedger;
 		this.latestScannedLedgerHeaderHash = latestScannedLedgerHeaderHash;
 		this.chainInitDate = chainInitDate;
 		this.status = 'PENDING';
+		this.priority = priority;
+	}
+
+	static createPriorityJob(url: string, priority: number): ScanJob {
+		return new ScanJob(url, 0, null, null, priority);
 	}
 
 	public isNewScanChainJob(): boolean {

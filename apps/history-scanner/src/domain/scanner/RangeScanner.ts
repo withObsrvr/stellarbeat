@@ -7,15 +7,19 @@ import { BucketScanState, CategoryScanState } from './ScanState';
 import { HttpQueue, Url } from 'http-helper';
 import * as http from 'http';
 import * as https from 'https';
-import { CategoryScanner } from './CategoryScanner';
-import { BucketScanner } from './BucketScanner';
-import { ScanError } from '../scan/ScanError';
+import { CategoryScanner, CategoryScanResult } from './CategoryScanner';
+import { BucketScanner, BucketScanResult } from './BucketScanner';
+import { ScanError, ScanErrorCategory, ScanErrorType } from '../scan/ScanError';
 import { LedgerHeader } from './Scanner';
 import { TYPES } from '../../infrastructure/di/di-types';
+import { VerificationError } from './CategoryVerificationService';
+import { Category } from '../history-archive/Category';
 
 export interface RangeScanResult {
 	latestLedgerHeader?: LedgerHeader;
 	scannedBucketHashes: Set<string>;
+	errors: ScanError[];
+	exitCode: number | null; // null for TypeScript scanner
 }
 /**
  * Scan a specific range of a history archive
@@ -47,6 +51,8 @@ export class RangeScanner {
 			concurrency: concurrency
 		});
 
+		const allErrors: ScanError[] = [];
+
 		const httpAgent = new http.Agent({
 			keepAlive: true,
 			scheduling: 'fifo'
@@ -73,7 +79,13 @@ export class RangeScanner {
 
 		const bucketHashesOrError =
 			await this.scanHASFilesAndReturnBucketHashes(hasScanState);
-		if (bucketHashesOrError.isErr()) return err(bucketHashesOrError.error);
+
+		// HAS scan failure is critical - we can't continue without bucket hashes
+		if (bucketHashesOrError.isErr()) {
+			httpAgent.destroy();
+			httpsAgent.destroy();
+			return err(bucketHashesOrError.error);
+		}
 		const bucketHashesToScan = bucketHashesOrError.value.bucketHashes;
 
 		const categoryScanState = new CategoryScanState(
@@ -91,7 +103,21 @@ export class RangeScanner {
 				: undefined
 		);
 		const categoryScanResult = await this.scanCategories(categoryScanState);
-		if (categoryScanResult.isErr()) return err(categoryScanResult.error);
+
+		if (categoryScanResult.isErr()) {
+			// Category scan had a fatal error (connection failure, etc.)
+			httpAgent.destroy();
+			httpsAgent.destroy();
+			return err(categoryScanResult.error);
+		}
+
+		// Collect verification errors from category scan
+		const categoryErrors = this.convertVerificationErrorsToScanErrors(
+			categoryScanResult.value.errors,
+			baseUrl
+		);
+		allErrors.push(...categoryErrors);
+		const latestLedgerHeader = categoryScanResult.value.latestLedgerHeader;
 
 		const bucketScanState = new BucketScanState(
 			baseUrl,
@@ -106,18 +132,66 @@ export class RangeScanner {
 		);
 
 		const bucketScanResult = await this.scanBucketFiles(bucketScanState);
-		if (bucketScanResult.isErr()) return err(bucketScanResult.error);
+
+		if (bucketScanResult.isErr()) {
+			// Bucket scan had a fatal error (connection failure, etc.)
+			httpAgent.destroy();
+			httpsAgent.destroy();
+			return err(bucketScanResult.error);
+		}
+
+		// Collect bucket verification errors
+		allErrors.push(...bucketScanResult.value.errors);
 
 		httpAgent.destroy();
 		httpsAgent.destroy();
 
 		return ok({
-			latestLedgerHeader: categoryScanResult.value,
+			latestLedgerHeader,
 			scannedBucketHashes: new Set([
 				...bucketScanState.bucketHashesToScan,
 				...alreadyScannedBucketHashes
-			])
+			]),
+			errors: allErrors,
+			exitCode: null // TypeScript scanner doesn't have exit codes
 		});
+	}
+
+	private convertVerificationErrorsToScanErrors(
+		verificationErrors: VerificationError[],
+		baseUrl: Url
+	): ScanError[] {
+		return verificationErrors.map((verificationError) => {
+			const category = this.mapCategoryToScanErrorCategory(
+				verificationError.category
+			);
+			return new ScanError(
+				ScanErrorType.TYPE_VERIFICATION,
+				baseUrl.value,
+				verificationError.message,
+				1,
+				category,
+				verificationError.ledger,
+				verificationError.ledger
+			);
+		});
+	}
+
+	private mapCategoryToScanErrorCategory(
+		category: Category
+	): ScanErrorCategory {
+		switch (category) {
+			case Category.transactions:
+				return ScanErrorCategory.TRANSACTION_SET_HASH;
+			case Category.results:
+				return ScanErrorCategory.TRANSACTION_RESULT_HASH;
+			case Category.ledger:
+				return ScanErrorCategory.LEDGER_HEADER_HASH;
+			case Category.bucketList:
+				return ScanErrorCategory.BUCKET_HASH;
+			default:
+				return ScanErrorCategory.OTHER;
+		}
 	}
 
 	private async scanHASFilesAndReturnBucketHashes(
@@ -148,7 +222,7 @@ export class RangeScanner {
 
 	private async scanBucketFiles(
 		scanState: BucketScanState
-	): Promise<Result<void, ScanError>> {
+	): Promise<Result<BucketScanResult, ScanError>> {
 		console.time('bucket');
 		this.logger.info(`Scanning ${scanState.bucketHashesToScan.size} buckets`);
 
@@ -160,7 +234,7 @@ export class RangeScanner {
 
 	private async scanCategories(
 		scanState: CategoryScanState
-	): Promise<Result<LedgerHeader | undefined, ScanError>> {
+	): Promise<Result<CategoryScanResult, ScanError>> {
 		console.time('category');
 		this.logger.info('Scanning other category files');
 

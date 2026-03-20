@@ -1,0 +1,16 @@
+.git
+node_modules
+**/node_modules
+**/.git
+**/lib
+**/*.log
+**/*.tsbuildinfo
+.nix-postgres
+.devcontainer
+.github
+python-*
+docs
+*.png
+*.md
+!README.md
+.env*

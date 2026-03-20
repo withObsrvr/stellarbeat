@@ -85,10 +85,21 @@ export const HistoryScanRouterWrapper = (
 				body('scanJobRemoteId')
 					.isString()
 					.withMessage('Invalid scan job remoteId'),
-				body('error').custom((value) => {
-					if (value === null) return true;
-					return typeof value === 'object';
-				})
+				body('errors')
+					.isArray()
+					.withMessage('errors must be an array')
+					.custom((value) => {
+						if (!Array.isArray(value)) return false;
+						return value.every(
+							(error: unknown) =>
+								typeof error === 'object' &&
+								error !== null &&
+								typeof (error as Record<string, unknown>).url === 'string' &&
+								typeof (error as Record<string, unknown>).message === 'string' &&
+								typeof (error as Record<string, unknown>).type === 'string'
+						);
+					})
+					.withMessage('Each error must have url, message, and type')
 			],
 			async (req: express.Request, res: express.Response) => {
 				const errors = validationResult(req);

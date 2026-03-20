@@ -12,4 +12,8 @@ export class ConfigMock implements Config {
 	coordinatorAPIBaseUrl = 'http://127.0.0.1:3000';
 	coordinatorAPIPassword = 'test-password';
 	coordinatorAPIUsername = 'test-user';
+	stellarArchivistPath = 'stellar-archivist';
+	workerId = 'test-worker-1';
+	useStellarArchivist = false;
+	bucketTimeoutMs = 300000;
 }

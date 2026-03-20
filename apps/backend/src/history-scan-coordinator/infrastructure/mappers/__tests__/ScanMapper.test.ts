@@ -1,6 +1,6 @@
 import { ScanMapper } from '../ScanMapper';
 import { ScanDTO, ScanErrorDTO } from 'history-scanner-dto';
-import { ScanError, ScanErrorType } from '../../../domain/scan/ScanError';
+import { ScanError, ScanErrorType, ScanErrorCategory } from '../../../domain/scan/ScanError';
 
 describe('ScanMapper', () => {
 	let mapper: ScanMapper;
@@ -20,7 +20,7 @@ describe('ScanMapper', () => {
 			latestVerifiedLedger: 49,
 			concurrency: 10,
 			isSlowArchive: false,
-			error: null,
+			errors: [],
 			scanJobRemoteId: 'remoteId'
 		};
 	});
@@ -68,13 +68,17 @@ describe('ScanMapper', () => {
 			const validErrorDTO: ScanErrorDTO = {
 				type: 'TYPE_VERIFICATION',
 				url: 'https://test.com',
-				message: 'Test error'
+				message: 'Test error',
+				count: 1,
+				category: 'OTHER',
+				firstLedger: null,
+				lastLedger: null
 			};
-			const dtoWithError = { ...validScanDTO, error: validErrorDTO };
-			const result = mapper.toDomain(dtoWithError);
+			const dtoWithErrors = { ...validScanDTO, errors: [validErrorDTO] };
+			const result = mapper.toDomain(dtoWithErrors);
 			expect(result.isOk()).toBe(true);
 			if (result.isOk()) {
-				expect(result.value.error).toBeInstanceOf(ScanError);
+				expect(result.value.errors[0]).toBeInstanceOf(ScanError);
 			}
 		});
 
@@ -84,8 +88,8 @@ describe('ScanMapper', () => {
 				url: 'https://test.com',
 				message: 'Test error'
 			};
-			const dtoWithError = { ...validScanDTO, error: invalidErrorDTO };
-			const result = mapper.toDomain(dtoWithError);
+			const dtoWithErrors = { ...validScanDTO, errors: [invalidErrorDTO] };
+			const result = mapper.toDomain(dtoWithErrors);
 			expect(result.isErr()).toBe(true);
 		});
 
@@ -93,14 +97,18 @@ describe('ScanMapper', () => {
 			const validErrorDTO: ScanErrorDTO = {
 				type: 'TYPE_VERIFICATION', // String from REST API
 				url: 'https://test.com',
-				message: 'Test error'
+				message: 'Test error',
+				count: 1,
+				category: 'OTHER',
+				firstLedger: null,
+				lastLedger: null
 			};
-			const dtoWithError = { ...validScanDTO, error: validErrorDTO };
-			const result = mapper.toDomain(dtoWithError);
+			const dtoWithErrors = { ...validScanDTO, errors: [validErrorDTO] };
+			const result = mapper.toDomain(dtoWithErrors);
 			expect(result.isOk()).toBe(true);
 			if (result.isOk()) {
-				expect(result.value.error).toBeInstanceOf(ScanError);
-				expect(result.value.error?.type).toBe(ScanErrorType.TYPE_VERIFICATION);
+				expect(result.value.errors[0]).toBeInstanceOf(ScanError);
+				expect(result.value.errors[0]?.type).toBe(ScanErrorType.TYPE_VERIFICATION);
 			}
 		});
 
@@ -108,14 +116,18 @@ describe('ScanMapper', () => {
 			const validErrorDTO: ScanErrorDTO = {
 				type: 'TYPE_CONNECTION', // String from REST API
 				url: 'https://test.com',
-				message: 'Test error'
+				message: 'Test error',
+				count: 1,
+				category: 'CONNECTION',
+				firstLedger: null,
+				lastLedger: null
 			};
-			const dtoWithError = { ...validScanDTO, error: validErrorDTO };
-			const result = mapper.toDomain(dtoWithError);
+			const dtoWithErrors = { ...validScanDTO, errors: [validErrorDTO] };
+			const result = mapper.toDomain(dtoWithErrors);
 			expect(result.isOk()).toBe(true);
 			if (result.isOk()) {
-				expect(result.value.error).toBeInstanceOf(ScanError);
-				expect(result.value.error?.type).toBe(ScanErrorType.TYPE_CONNECTION);
+				expect(result.value.errors[0]).toBeInstanceOf(ScanError);
+				expect(result.value.errors[0]?.type).toBe(ScanErrorType.TYPE_CONNECTION);
 			}
 		});
 
@@ -125,12 +137,279 @@ describe('ScanMapper', () => {
 				url: 'https://test.com',
 				message: 'Test error'
 			};
-			const dtoWithError = { ...validScanDTO, error: invalidErrorDTO };
-			const result = mapper.toDomain(dtoWithError);
+			const dtoWithErrors = { ...validScanDTO, errors: [invalidErrorDTO] };
+			const result = mapper.toDomain(dtoWithErrors);
 			expect(result.isErr()).toBe(true);
 			if (result.isErr()) {
 				expect(result.error.message).toContain('Invalid error type');
 			}
+		});
+
+		describe('error category mapping', () => {
+			it('should map TRANSACTION_SET_HASH category correctly', () => {
+				const errorDTO: ScanErrorDTO = {
+					type: 'TYPE_VERIFICATION',
+					url: 'https://test.com',
+					message: '100 transaction set hash mismatches',
+					count: 100,
+					category: 'TRANSACTION_SET_HASH',
+					firstLedger: null,
+					lastLedger: null
+				};
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].category).toBe(ScanErrorCategory.TRANSACTION_SET_HASH);
+					expect(result.value.errors[0].count).toBe(100);
+				}
+			});
+
+			it('should map TRANSACTION_RESULT_HASH category correctly', () => {
+				const errorDTO: ScanErrorDTO = {
+					type: 'TYPE_VERIFICATION',
+					url: 'https://test.com',
+					message: '50 transaction result hash mismatches',
+					count: 50,
+					category: 'TRANSACTION_RESULT_HASH',
+					firstLedger: null,
+					lastLedger: null
+				};
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].category).toBe(ScanErrorCategory.TRANSACTION_RESULT_HASH);
+				}
+			});
+
+			it('should map LEDGER_HEADER_HASH category correctly', () => {
+				const errorDTO: ScanErrorDTO = {
+					type: 'TYPE_VERIFICATION',
+					url: 'https://test.com',
+					message: '25 ledger header hash mismatches',
+					count: 25,
+					category: 'LEDGER_HEADER_HASH',
+					firstLedger: null,
+					lastLedger: null
+				};
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].category).toBe(ScanErrorCategory.LEDGER_HEADER_HASH);
+				}
+			});
+
+			it('should map BUCKET_HASH category correctly', () => {
+				const errorDTO: ScanErrorDTO = {
+					type: 'TYPE_VERIFICATION',
+					url: 'https://test.com',
+					message: '10 bucket hash mismatches',
+					count: 10,
+					category: 'BUCKET_HASH',
+					firstLedger: null,
+					lastLedger: null
+				};
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].category).toBe(ScanErrorCategory.BUCKET_HASH);
+				}
+			});
+
+			it('should map MISSING_FILE category correctly', () => {
+				const errorDTO: ScanErrorDTO = {
+					type: 'TYPE_VERIFICATION',
+					url: 'https://test.com',
+					message: '5 missing files',
+					count: 5,
+					category: 'MISSING_FILE',
+					firstLedger: null,
+					lastLedger: null
+				};
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].category).toBe(ScanErrorCategory.MISSING_FILE);
+				}
+			});
+
+			it('should map CONNECTION category correctly', () => {
+				const errorDTO: ScanErrorDTO = {
+					type: 'TYPE_CONNECTION',
+					url: 'https://test.com',
+					message: 'Connection timeout',
+					count: 1,
+					category: 'CONNECTION',
+					firstLedger: null,
+					lastLedger: null
+				};
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].category).toBe(ScanErrorCategory.CONNECTION);
+				}
+			});
+
+			it('should default to OTHER when category is missing', () => {
+				const errorDTO: ScanErrorDTO = {
+					type: 'TYPE_VERIFICATION',
+					url: 'https://test.com',
+					message: 'Test error',
+					count: 1,
+					category: undefined as any,
+					firstLedger: null,
+					lastLedger: null
+				};
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].category).toBe(ScanErrorCategory.OTHER);
+				}
+			});
+
+			it('should default to OTHER when category is unknown', () => {
+				const errorDTO: ScanErrorDTO = {
+					type: 'TYPE_VERIFICATION',
+					url: 'https://test.com',
+					message: 'Test error',
+					count: 1,
+					category: 'UNKNOWN_CATEGORY',
+					firstLedger: null,
+					lastLedger: null
+				};
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].category).toBe(ScanErrorCategory.OTHER);
+				}
+			});
+
+			it('should default count to 1 when count is missing', () => {
+				const errorDTO = {
+					type: 'TYPE_VERIFICATION',
+					url: 'https://test.com',
+					message: 'Test error',
+					category: 'OTHER'
+				} as ScanErrorDTO;
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].count).toBe(1);
+				}
+			});
+
+			it('should map firstLedger and lastLedger correctly', () => {
+				const errorDTO: ScanErrorDTO = {
+					type: 'TYPE_VERIFICATION',
+					url: 'https://test.com',
+					message: '100 tx set errors (ledgers 55999998 - 59499998)',
+					count: 100,
+					category: 'TRANSACTION_SET_HASH',
+					firstLedger: 55999998,
+					lastLedger: 59499998
+				};
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].firstLedger).toBe(55999998);
+					expect(result.value.errors[0].lastLedger).toBe(59499998);
+				}
+			});
+
+			it('should default firstLedger and lastLedger to null when missing', () => {
+				const errorDTO = {
+					type: 'TYPE_VERIFICATION',
+					url: 'https://test.com',
+					message: 'Test error',
+					count: 1,
+					category: 'OTHER'
+				} as ScanErrorDTO;
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].firstLedger).toBeNull();
+					expect(result.value.errors[0].lastLedger).toBeNull();
+				}
+			});
+
+			it('should handle firstLedger without lastLedger', () => {
+				const errorDTO: ScanErrorDTO = {
+					type: 'TYPE_VERIFICATION',
+					url: 'https://test.com',
+					message: 'Error at ledger 100',
+					count: 1,
+					category: 'LEDGER_HEADER_HASH',
+					firstLedger: 100,
+					lastLedger: null
+				};
+				const dtoWithErrors = { ...validScanDTO, errors: [errorDTO] };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors[0].firstLedger).toBe(100);
+					expect(result.value.errors[0].lastLedger).toBeNull();
+				}
+			});
+
+			it('should handle multiple errors with different categories', () => {
+				const errorDTOs: ScanErrorDTO[] = [
+					{
+						type: 'TYPE_VERIFICATION',
+						url: 'https://test.com',
+						message: '100 tx set errors',
+						count: 100,
+						category: 'TRANSACTION_SET_HASH',
+						firstLedger: 100,
+						lastLedger: 200
+					},
+					{
+						type: 'TYPE_VERIFICATION',
+						url: 'https://test.com',
+						message: '50 ledger header errors',
+						count: 50,
+						category: 'LEDGER_HEADER_HASH',
+						firstLedger: 150,
+						lastLedger: 180
+					},
+					{
+						type: 'TYPE_VERIFICATION',
+						url: 'https://test.com',
+						message: '25 bucket errors',
+						count: 25,
+						category: 'BUCKET_HASH',
+						firstLedger: null,
+						lastLedger: null
+					}
+				];
+				const dtoWithErrors = { ...validScanDTO, errors: errorDTOs };
+				const result = mapper.toDomain(dtoWithErrors);
+				expect(result.isOk()).toBe(true);
+				if (result.isOk()) {
+					expect(result.value.errors).toHaveLength(3);
+					expect(result.value.errors[0].category).toBe(ScanErrorCategory.TRANSACTION_SET_HASH);
+					expect(result.value.errors[0].count).toBe(100);
+					expect(result.value.errors[0].firstLedger).toBe(100);
+					expect(result.value.errors[0].lastLedger).toBe(200);
+					expect(result.value.errors[1].category).toBe(ScanErrorCategory.LEDGER_HEADER_HASH);
+					expect(result.value.errors[1].count).toBe(50);
+					expect(result.value.errors[1].firstLedger).toBe(150);
+					expect(result.value.errors[1].lastLedger).toBe(180);
+					expect(result.value.errors[2].category).toBe(ScanErrorCategory.BUCKET_HASH);
+					expect(result.value.errors[2].count).toBe(25);
+					expect(result.value.errors[2].firstLedger).toBeNull();
+					expect(result.value.errors[2].lastLedger).toBeNull();
+				}
+			});
 		});
 	});
 });

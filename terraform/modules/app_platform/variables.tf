@@ -68,8 +68,15 @@ variable "testnet_scanner_instance_count" {
 }
 
 variable "history_scanner_instance_count" {
-  description = "Number of history scanner instances"
+  description = "Number of history scanner instances (deprecated, use history_scanner_worker_count)"
   type        = number
+  default     = 0
+}
+
+variable "history_scanner_worker_count" {
+  description = "Number of parallel history scanner workers (each with unique WORKER_ID)"
+  type        = number
+  default     = 1
 }
 
 variable "users_instance_count" {

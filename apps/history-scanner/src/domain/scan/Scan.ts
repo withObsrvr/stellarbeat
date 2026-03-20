@@ -18,7 +18,7 @@ export class Scan {
 	public readonly latestScannedLedgerHeaderHash: string | null = null;
 	public readonly concurrency: number = 0;
 	public readonly isSlowArchive: boolean | null = null;
-	public readonly error: ScanError | null = null;
+	public readonly errors: ScanError[] = [];
 	public readonly scanJobRemoteId: string | null = null;
 
 	constructor(
@@ -32,7 +32,7 @@ export class Scan {
 		latestScannedLedgerHeaderHash: string | null = null,
 		concurrency = 0,
 		archiveIsSlow: boolean | null = null,
-		error: ScanError | null = null,
+		errors: ScanError[] = [],
 		scanJobRemoteId: string | null = null
 	) {
 		this.baseUrl = url;
@@ -43,7 +43,7 @@ export class Scan {
 		this.isSlowArchive = archiveIsSlow;
 		this.fromLedger = fromLedger;
 		this.toLedger = toLedger;
-		this.error = error;
+		this.errors = errors;
 		this.latestScannedLedger = latestScannedLedger;
 		this.latestScannedLedgerHeaderHash = latestScannedLedgerHeaderHash;
 		this.scanJobRemoteId = scanJobRemoteId;
@@ -61,7 +61,7 @@ export class Scan {
 	}
 
 	hasError(): boolean {
-		return this.error !== null;
+		return this.errors.length > 0;
 	}
 
 	public isStartOfScanChain() {

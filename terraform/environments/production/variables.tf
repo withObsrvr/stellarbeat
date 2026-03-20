@@ -259,7 +259,13 @@ variable "scanner_instance_count" {
 }
 
 variable "history_scanner_instance_count" {
-  description = "Number of instances for the history scanner service"
+  description = "Number of instances for the history scanner service (deprecated, use history_scanner_worker_count)"
+  type        = number
+  default     = 0
+}
+
+variable "history_scanner_worker_count" {
+  description = "Number of parallel history scanner workers (each with unique WORKER_ID)"
   type        = number
   default     = 1
 }

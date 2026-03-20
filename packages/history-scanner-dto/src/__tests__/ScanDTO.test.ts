@@ -15,7 +15,7 @@ describe('ScanDTO', () => {
 				latestScannedLedgerHeaderHash: 'hash123',
 				concurrency: 5,
 				isSlowArchive: false,
-				error: null,
+				errors: [],
 				scanJobRemoteId: 'test'
 			};
 
@@ -37,7 +37,7 @@ describe('ScanDTO', () => {
 			expect(dto.latestScannedLedgerHeaderHash).toBe('hash123');
 			expect(dto.concurrency).toBe(5);
 			expect(dto.isSlowArchive).toBe(false);
-			expect(dto.error).toBeNull();
+			expect(dto.errors).toEqual([]);
 			expect(dto.scanJobRemoteId).toBe('test');
 		});
 
@@ -54,7 +54,7 @@ describe('ScanDTO', () => {
 				latestScannedLedgerHeaderHash: null,
 				concurrency: 5,
 				isSlowArchive: null,
-				error: null,
+				errors: [],
 				scanJobRemoteId: 'test'
 			};
 
@@ -68,7 +68,7 @@ describe('ScanDTO', () => {
 			expect(dto.isSlowArchive).toBeNull();
 		});
 
-		it('should parse JSON with error object', () => {
+		it('should parse JSON with errors array', () => {
 			const json = {
 				startDate: '2024-01-01T00:00:00.000Z',
 				endDate: '2024-01-01T01:00:00.000Z',
@@ -81,11 +81,13 @@ describe('ScanDTO', () => {
 				latestScannedLedgerHeaderHash: 'hash123',
 				concurrency: 5,
 				isSlowArchive: false,
-				error: {
+				errors: [{
 					type: 'validation',
 					url: 'https://history.stellar.org',
-					message: 'Invalid checksum'
-				},
+					message: 'Invalid checksum',
+					count: 1,
+					category: 'verification'
+				}],
 				scanJobRemoteId: 'test'
 			};
 
@@ -94,11 +96,13 @@ describe('ScanDTO', () => {
 			if (!result.isOk()) throw result.error;
 
 			const dto = result.value;
-			expect(dto.error).toEqual({
+			expect(dto.errors).toEqual([{
 				type: 'validation',
 				url: 'https://history.stellar.org',
-				message: 'Invalid checksum'
-			});
+				message: 'Invalid checksum',
+				count: 1,
+				category: 'verification'
+			}]);
 		});
 
 		it('should return error for missing required fields', () => {

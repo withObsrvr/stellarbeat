@@ -22,7 +22,8 @@ module.exports = {
 			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],
 			preset: 'ts-jest',
 			displayName: 'history-scanner',
-			rootDir: 'apps/history-scanner'
+			rootDir: 'apps/history-scanner',
+			testMatch: ['**/__tests__/**/*.test.(ts|tsx)']
 		},
 		{
 			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],

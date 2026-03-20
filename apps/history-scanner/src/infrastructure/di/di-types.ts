@@ -7,5 +7,9 @@ export const TYPES = {
 	JobMonitor: Symbol('JobMonitor'),
 	ExceptionLogger: Symbol('ExceptionLogger'),
 	HttpQueue: Symbol('HttpQueue'),
-	HttpService: Symbol('HttpService')
+	HttpService: Symbol('HttpService'),
+	WorkerId: Symbol('WorkerId'),
+	RangeScannerInterface: Symbol('RangeScannerInterface'),
+	UseStellarArchivist: Symbol('UseStellarArchivist'),
+	BucketTimeoutMs: Symbol('BucketTimeoutMs')
 };

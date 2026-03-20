@@ -74,12 +74,18 @@ export class PeerNodeToNodeMapper {
 		time: Date
 	): NodeMeasurement {
 		const measurement = new NodeMeasurement(time, node);
-		measurement.isActive = true;
+		measurement.isActive = peerNode.successfullyConnected;
 		measurement.connectivityError = peerNode.successfullyConnected === false;
+		// Trust validating status from both direct connection and relayed SCP messages
+		// (relayed messages are cryptographically signed by the originating node)
+		// Use connectivityError to distinguish: isValidating && connectivityError = relayed only
 		measurement.isValidating = peerNode.isValidating;
 		measurement.isOverLoaded = peerNode.overLoaded;
-		measurement.isActiveInScp = peerNode.participatingInSCP;
-		measurement.lag = peerNode.getMinLagMS() ?? null;
+		measurement.isActiveInScp =
+			peerNode.successfullyConnected && peerNode.participatingInSCP;
+		measurement.lag = peerNode.successfullyConnected
+			? (peerNode.getMinLagMS() ?? null)
+			: null;
 
 		return measurement;
 	}
