@@ -7,19 +7,19 @@
       </div>
     </div>
     <div>
-      <b-alert variant="success" show>Unsubscribed</b-alert>
+      <UiAlert variant="success" show>Unsubscribed</UiAlert>
     </div>
   </div>
   <div v-else>
     <h4>{{ errorMessage }}</h4>
-    <button role="button" class="btn btn-primary" @click="confirm">
+    <button role="button" class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors" @click="confirm">
       Try again
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { BAlert } from '@/components/bootstrap-compat';
+
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 

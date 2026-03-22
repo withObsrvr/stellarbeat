@@ -1,92 +1,53 @@
 <template>
   <div
-    class="card"
+    class="rounded-xl border border-gray-200 bg-white relative"
     :class="{
       'card-fullscreen': fullScreen,
       'sb-card-fullscreen': fullScreen,
     }"
     style="height: 600px"
   >
-    <div v-show="menuVisible" class="menu border-right p-3">
+    <div v-show="menuVisible" class="menu border-r border-gray-200 p-3">
       <div
-        class="text-gray collapse-icon"
+        class="text-gray-500 cursor-pointer absolute right-2 top-2.5"
         role="button"
         tabindex="0"
         @click="menuVisible = false"
       >
-        <b-icon-chevron-double-left font-scale="1" />
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>
       </div>
-      <div class="d-flex flex-column justify-content-between h-100">
+      <div class="flex flex-col justify-between h-full">
         <div>
           <h6 class="sb-navbar-heading mt-3 ml-0 pl-0">View</h6>
           <div class="mt-3">
-            <ul style="list-style: none" class="pl-0">
-              <router-link
-                tag="li"
-                :to="{
-                  path: $route.path,
-                  query: {
-                    view: 'graph',
-                    'no-scroll': '1',
-                    network: $route.query.network,
-                    at: $route.query.at,
-                  },
-                }"
-                :class="
-                  isString($route.query.view) &&
-                  ['graph', undefined].includes($route.query.view) &&
-                  'router-link-exact-active'
-                "
+            <ul class="list-none pl-0">
+              <li
                 class="pl-3 mb-1 view-link"
+                :class="isString($route.query.view) && ['graph', undefined].includes($route.query.view) && 'router-link-exact-active'"
                 role="button"
                 tabindex="0"
-                @click.native="menuVisible = false"
+                @click="navigateToViewOption('graph')"
               >
                 Node trust graph
-              </router-link>
-              <router-link
-                tag="li"
-                :to="{
-                  path: $route.path,
-                  query: {
-                    view: 'graph-org',
-                    'no-scroll': '1',
-                    network: $route.query.network,
-                    at: $route.query.at,
-                  },
-                }"
-                :class="
-                  isString($route.query.view) &&
-                  ['graph-org'].includes($route.query.view) &&
-                  'router-link-exact-active'
-                "
+              </li>
+              <li
                 class="pl-3 mb-1 view-link"
+                :class="isString($route.query.view) && ['graph-org'].includes($route.query.view) && 'router-link-exact-active'"
                 role="button"
                 tabindex="0"
-                @click.native="menuVisible = false"
+                @click="navigateToViewOption('graph-org')"
               >
                 Organization trust graph
-              </router-link>
-              <router-link
-                tag="li"
-                :to="{
-                  path: $route.path,
-                  query: {
-                    view: 'map',
-                    'no-scroll': '1',
-                    network: $route.query.network,
-                    at: $route.query.at,
-                  },
-                }"
+              </li>
+              <li
                 class="pl-3 mb-1 view-link"
+                :class="$route.query.view === 'map' && 'router-link-exact-active'"
                 role="button"
                 tabindex="0"
-                :class="
-                  $route.query.view === 'map' && 'router-link-exact-active'
-                "
-                @click.native="menuVisible = false"
-                >Map
-              </router-link>
+                @click="navigateToViewOption('map')"
+              >
+                Map
+              </li>
             </ul>
           </div>
           <h6
@@ -95,44 +56,33 @@
           >
             Options
           </h6>
-          <div v-if="view === 'graph' || view === 'graph-org'">
-            <b-form-checkbox
+          <div v-if="view === 'graph' || view === 'graph-org'" class="space-y-1">
+            <label
               v-show="selectedNode || selectedOrganization"
-              v-model="optionHighlightTrustedNodes"
-              class="sb-nav-item sb-nav-toggle mt-1"
-              switch
+              class="flex items-center gap-2 text-sm cursor-pointer"
             >
+              <input v-model="optionHighlightTrustedNodes" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
               Highlight trusted nodes
-            </b-form-checkbox>
-            <b-form-checkbox
+            </label>
+            <label
               v-show="selectedNode || selectedOrganization"
-              v-model="optionHighlightTrustingNodes"
-              class="sb-nav-item sb-nav-toggle mt-1"
-              switch
+              class="flex items-center gap-2 text-sm cursor-pointer"
             >
+              <input v-model="optionHighlightTrustingNodes" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
               Highlight trusting nodes
-            </b-form-checkbox>
-            <b-form-checkbox
-              v-model="optionShowFailingEdges"
-              class="sb-nav-item sb-nav-toggle mt-1"
-              switch
-            >
+            </label>
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input v-model="optionShowFailingEdges" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
               Show failing edges
-            </b-form-checkbox>
-            <b-form-checkbox
-              v-model="optionTransitiveQuorumSetOnly"
-              class="sb-nav-item sb-nav-toggle mt-1"
-              switch
-            >
+            </label>
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input v-model="optionTransitiveQuorumSetOnly" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
               Transitive quorum set only
-            </b-form-checkbox>
-            <b-form-checkbox
-              v-model="optionFilterTrustCluster"
-              class="sb-nav-item sb-nav-toggle mt-1"
-              switch
-            >
+            </label>
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input v-model="optionFilterTrustCluster" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
               Filter trust cluster
-            </b-form-checkbox>
+            </label>
           </div>
         </div>
         <div>
@@ -140,62 +90,71 @@
         </div>
       </div>
     </div>
-    <div class="card-header m-0 p-0 d-flex border-0">
+    <div class="flex items-center m-0 p-0 border-0">
       <div
-        class="menu-button ml-3 text-gray"
+        class="ml-3 text-gray-500 cursor-pointer"
         role="button"
         tabindex="0"
         @click="menuVisible = true"
       >
-        <b-icon-list font-scale="2" />
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
       </div>
-      <div class="pl-3 sb-bread-crumbs-container py-1">
-        <b-breadcrumb class="sb-bread-crumbs" :items="breadCrumbs">
-        </b-breadcrumb>
+      <div class="pl-3 flex-1 flex items-center overflow-hidden min-w-0 py-1">
+        <nav class="flex items-center text-sm text-gray-500">
+          <template v-for="(crumb, i) in breadCrumbs">
+            <span v-if="i > 0" :key="'sep-' + i" class="mx-1.5 text-gray-300">/</span>
+            <router-link
+              v-if="crumb.to && !crumb.active"
+              :key="'link-' + i"
+              :to="crumb.to"
+              class="hover:text-gray-900 transition-colors truncate"
+            >{{ crumb.text }}</router-link>
+            <span v-else :key="'text-' + i" class="text-gray-900 font-medium truncate">{{ crumb.text }}</span>
+          </template>
+        </nav>
       </div>
       <a
         v-if="!zoomEnabled"
         v-tooltip="'Toggle scroll to zoom'"
         href="#"
-        class="mx-4"
+        class="mx-4 text-gray-400 hover:text-gray-700 transition-colors"
         @click.prevent.stop="zoomEnabled = true"
       >
-        <b-icon-zoom-in />
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
       </a>
       <a
         v-else
         v-tooltip="'Toggle scroll to zoom'"
         href="#"
-        class="mx-4"
+        class="mx-4 text-emerald-600 hover:text-emerald-700 transition-colors"
         @click.prevent.stop="zoomEnabled = false"
       >
-        <b-icon-zoom-in variant="success" />
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
       </a>
 
       <a
         v-if="!fullScreen"
         v-tooltip="'Fullscreen'"
         href="#"
-        class="card-options-fullscreen mx-4"
+        class="mx-4 text-gray-400 hover:text-gray-700 transition-colors"
         @click.prevent.stop="fullScreen = true"
       >
-        <b-icon-fullscreen />
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
       </a>
       <a
         v-else
         v-tooltip="'Exit fullscreen'"
         href="#"
-        class="card-options-fullscreen mx-4"
+        class="mx-4 text-gray-400 hover:text-gray-700 transition-colors"
         @click.prevent.stop="fullScreen = false"
       >
-        <b-icon-fullscreen-exit />
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
       </a>
     </div>
-    <div class="card-body p-0 h-100">
+    <div class="p-0 h-full">
       <div
         v-if="network.nodesTrustGraph.networkTransitiveQuorumSet.size === 0"
-        class="card-alert alert alert-danger"
-        show
+        class="p-4 text-sm text-red-600 bg-red-50/50 ring-1 ring-red-200/60"
       >
         No transitive quorum set detected in network!
       </div>
@@ -244,15 +203,6 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, ref } from "vue";
 import NetworkGraphCard from "@/components/visual-navigator/network-graph-card.vue";
-import {
-  BBreadcrumb,
-  BFormCheckbox,
-  BIconChevronDoubleLeft,
-  BIconFullscreen,
-  BIconFullscreenExit,
-  BIconList,
-  BIconZoomIn,
-} from '@/components/bootstrap-compat';
 import GraphLegend from "@/components/visual-navigator/graph/graph-legend.vue";
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router";
@@ -355,6 +305,20 @@ const breadCrumbs = computed(() => {
   return crumbs;
 });
 
+function navigateToViewOption(viewName: string) {
+  menuVisible.value = false;
+  router.push({
+    name: route.name ? route.name : undefined,
+    params: route.params,
+    query: {
+      view: viewName,
+      "no-scroll": "1",
+      network: route.query.network,
+      at: route.query.at,
+    },
+  });
+}
+
 function navigateToView() {
   const toView = view.value === "map" ? "graph" : "map";
   router.push({
@@ -370,39 +334,9 @@ function navigateToView() {
 }
 </script>
 <style scoped>
-.sb-bread-crumbs {
-  background: white !important;
-  margin: 0;
-  padding: 0;
-  align-self: center;
-}
-
-.sb-bread-crumbs :deep(.breadcrumb) {
-  margin-bottom: 0;
-  background-color: transparent !important;
-}
-
-.sb-bread-crumbs :deep(.breadcrumb-item) a,
-.sb-bread-crumbs :deep(.breadcrumb-item) span,
-.sb-bread-crumbs :deep(.breadcrumb-item.active) a,
-.sb-bread-crumbs :deep(.breadcrumb-item.active) span {
-  color: rgb(134, 142, 150) !important;
-}
-
-.sb-bread-crumbs :deep(.breadcrumb-item + .breadcrumb-item::before) {
-  color: rgb(134, 142, 150) !important;
-}
-
 .sb-card-fullscreen {
   z-index: 4;
   height: 100% !important;
-}
-
-.collapse-icon {
-  cursor: pointer;
-  position: absolute;
-  right: 8px;
-  top: 10px;
 }
 
 .menu {
@@ -413,10 +347,6 @@ function navigateToView() {
   height: 100%;
 }
 
-.menu-button {
-  cursor: pointer;
-}
-
 .view-link {
   text-decoration: none;
   padding-left: 7px;
@@ -424,35 +354,13 @@ function navigateToView() {
   cursor: pointer;
 }
 
-.view-link a {
-  text-decoration: none;
-  color: rgba(0, 0, 0, 0.55);
-}
-
 .view-link:hover {
   background-color: #f8f9fa;
-  text-decoration: none;
 }
 
 .router-link-exact-active {
   color: #206bc4 !important;
-  text-decoration: none;
   background-color: rgba(32, 107, 196, 0.06);
-}
-
-.preview-text {
-  position: absolute;
-  bottom: 0;
-  height: 25px;
-  color: white;
-  width: 100%;
-  text-align: center;
-  border-radius: 5px;
-  background: linear-gradient(
-    0deg,
-    rgba(67, 104, 113, 1) 0%,
-    rgba(170, 211, 223, 1) 100%
-  );
 }
 
 .preview-image {
@@ -470,21 +378,6 @@ function navigateToView() {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   background: white;
-}
-
-.sb-bread-crumbs {
-  background-color: white;
-  margin: 0;
-  padding: 0;
-  align-self: center;
-}
-
-.sb-bread-crumbs-container {
-  display: flex;
-  flex-grow: 1;
-  align-items: center;
-  overflow: hidden;
-  min-width: 0;
 }
 
 .world-loader {

@@ -1,5 +1,5 @@
 <template>
-  <b-modal
+  <UiModal
     id="network-analysis-liveness-info"
     ref="livenessInfoModal"
     lazy
@@ -42,7 +42,7 @@
       >, more specific the section regarding minimal blocking sets.
     </p>
     <template #modal-footer>
-      <div class="w-100">
+      <div class="w-full">
         <p class="float-left">
           Powered by
           <a
@@ -52,20 +52,20 @@
             >wiberlin/fbas_analyzer</a
           >
         </p>
-        <button class="btn btn-primary btn-sm float-right" @click="hideModal">
+        <button class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors float-right" @click="hideModal">
           Close
         </button>
       </div>
     </template>
-  </b-modal>
+  </UiModal>
 </template>
 
 <script setup lang="ts">
-import { BModal } from '@/components/bootstrap-compat';
+
 import { ref } from "vue";
 
 const livenessInfoModal = ref(null);
 function hideModal() {
-  if (livenessInfoModal.value) (livenessInfoModal.value as typeof BModal).hide();
+  if (livenessInfoModal.value) (livenessInfoModal.value as any).hide();
 }
 </script>

@@ -45,12 +45,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import {
-  BIconInfoCircleFill,
-  BIconCheckCircleFill,
-  BIconQuestionCircleFill,
-} from '@/components/bootstrap-compat';
-
 const props = defineProps({
   publicKey: {
     type: String,

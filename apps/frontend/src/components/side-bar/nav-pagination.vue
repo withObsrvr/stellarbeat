@@ -1,6 +1,6 @@
 <template>
   <div v-if="totalRows > 10" class="sb-nav-pagination">
-    <b-pagination
+    <UiPagination
       size="sm"
       :model-value="modelValue"
       :total-rows="totalRows"
@@ -14,9 +14,7 @@
 </template>
 <script setup lang="ts">
 import { withDefaults } from 'vue';
-import { BPagination } from '@/components/bootstrap-compat';
 
-// Allow both modelValue (Vue 3 standard) and value (for vue-tsc compatibility)
 withDefaults(defineProps<{
   modelValue?: number;
   value?: number;

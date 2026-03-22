@@ -1,100 +1,64 @@
 <template>
-  <div class="card">
-    <div class="card-header px-3 d-flex flex-wrap justify-content-between">
-      <div class="d-flex flex-wrap">
-        <div class="btn-group mr-3">
+  <div class="rounded-xl border border-gray-200 bg-white">
+    <div class="flex flex-wrap items-center justify-between border-b border-gray-100 bg-gray-50/80 px-3 py-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="inline-flex rounded-lg shadow-sm">
           <button
-            class="btn btn-sm btn-secondary"
-            role="button"
-            :aria-pressed="bucketSize === '1Y'"
+            class="rounded-l-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            :class="{ 'bg-gray-100 font-semibold': bucketSize === '1Y' }"
             @click="select1YViewDefault"
           >
             1Y
           </button>
           <button
-            class="btn btn-sm btn-secondary"
-            role="button"
-            :aria-pressed="bucketSize === '30D'"
+            class="border-y border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            :class="{ 'bg-gray-100 font-semibold': bucketSize === '30D' }"
             @click="select30DayViewDefault"
           >
             30D
           </button>
           <button
-            class="btn btn-sm btn-secondary"
-            :aria:pressed="bucketSize === '24H'"
+            class="rounded-r-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            :class="{ 'bg-gray-100 font-semibold': bucketSize === '24H' }"
             @click="select24HViewDefault"
           >
             24H
           </button>
         </div>
-        <h1 class="card-title">
+        <h1 class="text-sm font-semibold text-gray-900">
           {{ capitalizeFirstLetter(analysisType) }} thresholds
         </h1>
       </div>
       <button
         v-tooltip:top="'Info'"
-        data-toggle="modal"
-        class="btn btn-sm btn-secondary"
-        :data-target="'#info-modal-' + analysisType"
-        size="sm"
+        class="p-1 text-gray-400 hover:text-gray-600 transition-colors"
         @click="showModal = true"
       >
-        <b-icon-info-circle class="text-muted" />
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
       </button>
-      <div
-        :id="'info-modal-' + analysisType"
-        class="modal fade"
-        tabindex="-1"
-        role="dialog"
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button
-                type="button"
-                class="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <slot name="info"></slot>
-            </div>
-            <div class="modal-footer">
-              <p class="float-left">
-                Powered by
-                <a
-                  target="_blank"
-                  rel="noopener"
-                  href="https://github.com/wiberlin/fbas_analyzer"
-                >
-                  wiberlin/fbas_analyzer
-                </a>
-              </p>
-              <button
-                type="button"
-                class="btn btn-primary btn-sm float-right"
-                data-dismiss="modal"
-              >
-                Close
-              </button>
-            </div>
+      <UiModal v-model="showModal" title="Info">
+        <slot name="info"></slot>
+        <template #modal-footer="{ ok }">
+          <div class="flex justify-between items-center w-full">
+            <p class="text-xs text-gray-400">
+              Powered by
+              <a target="_blank" rel="noopener" href="https://github.com/wiberlin/fbas_analyzer" class="text-emerald-700 hover:underline">
+                wiberlin/fbas_analyzer
+              </a>
+            </p>
+            <button class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors" @click="ok">Close</button>
           </div>
-        </div>
-      </div>
+        </template>
+      </UiModal>
     </div>
-    <div v-if="failed" class="card-alert alert alert-danger mb-0">
-      <b-icon-exclamation-triangle />
+    <div v-if="failed" class="p-4 text-sm text-red-600 bg-red-50/50 ring-1 ring-red-200/60">
+      <svg class="inline h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
       Error fetching data
     </div>
     <div
-      class="card-body d-flex flex-column justify-content-center align-items-center h-100 px-0 pt-0 pb-3"
+      class="flex flex-col justify-center items-center h-full px-0 pt-0 pb-3"
     >
-      <div class="w-100 h-100" :class="dimmerClass">
+      <div class="w-full h-full" :class="dimmerClass">
         <div class="loader"></div>
         <div
           v-if="initialDataLoaded"
@@ -143,7 +107,7 @@
         </div>
       </div>
       <div
-        class="d-flex flex-wrap mt-1"
+        class="flex flex-wrap mt-1"
         :class="{ animated: animated }"
         @animationend="animated = false"
       >
@@ -171,7 +135,6 @@ import {
   type ScatterDataPoint,
   type TooltipItem,
 } from "chart.js";
-import { BIconExclamationTriangle, BIconInfoCircle } from '@/components/bootstrap-compat';
 import DateNavigator from "@/components/date-navigator.vue";
 import AggregationLineChart from "@/components/network/cards/network-risk-analysis-charts/aggregation-line-chart.vue";
 import StatisticsDateTimeNavigator from "@/components/network/cards/network-risk-analysis-charts/StatisticsDateTimeNavigator";

@@ -10,14 +10,14 @@
     </template>
     <template #sub-title>
       {{ nodeType }}
-      <b-badge
+      <UiBadge
         v-if="network.isNodeFailing(selectedNode)"
         v-tooltip="network.getNodeFailingReason(selectedNode).description"
         variant="danger"
         style="vertical-align: bottom"
         >{{ network.getNodeFailingReason(selectedNode).label }}
-      </b-badge>
-      <b-badge
+      </UiBadge>
+      <UiBadge
         v-else-if="NodeWarningDetector.nodeHasWarning(selectedNode, network)"
         v-tooltip="
           NodeWarningDetector.getNodeWarningReasonsConcatenated(
@@ -28,7 +28,7 @@
         variant="warning"
       >
         Warning
-      </b-badge>
+      </UiBadge>
     </template>
     <template #explore-list-items>
       <li v-if="hasOrganization && organization" class="sb-nav-item">
@@ -75,11 +75,10 @@
       </li>
       <li class="sb-nav-item">
         <nav-link
-          data-toggle="modal"
-          data-target="#quorumSlicesModal"
           :title="'Quorum slices'"
           :show-icon="true"
           icon="search"
+          @click="quorumSlicesRef?.show()"
         />
       </li>
       <li v-if="selectedNode.isValidator" class="sb-nav-item">
@@ -98,7 +97,7 @@
           @click="store.showHaltingAnalysis(selectedNode)"
         />
       </li>
-      <quorum-slices :selected-node="selectedNode" />
+      <quorum-slices ref="quorumSlicesRef" :selected-node="selectedNode" />
       <li
         v-if="
           selectedNode.isValidator && store.networkContext.enableConfigExport
@@ -106,29 +105,28 @@
         class="sb-nav-item"
       >
         <nav-link
-          data-toggle="modal"
-          data-target="#tomlExportModal"
           :title="'Stellar core config'"
           :show-icon="true"
           icon="download"
+          @click="showTomlModal = true; loadTomlExport()"
         />
       </li>
-      <b-modal
-        id="tomlExportModal"
+      <UiModal
+        v-model="showTomlModal"
+        :lazy="true"
         size="lg"
         title="Stellar Core Config"
-        ok-only
+        :ok-only="true"
         ok-title="Close"
-        @show="loadTomlExport()"
       >
-        <pre><code>{{tomlNodesExport}}</code></pre>
-      </b-modal>
+        <pre class="text-xs bg-gray-50 rounded-lg p-4 overflow-x-auto"><code>{{tomlNodesExport}}</code></pre>
+      </UiModal>
     </template>
   </side-bar>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, type ComponentPublicInstance } from "vue";
 import { StellarCoreConfigurationGenerator } from "shared";
 import QuorumSetDropdown from "@/components/node/sidebar/quorum-set-dropdown.vue";
 import NavLink from "@/components/side-bar/nav-link.vue";
@@ -136,7 +134,7 @@ import SimulateNewNode from "@/components/node/tools/simulation/simulate-new-nod
 import { Node } from "shared";
 import OrganizationValidatorsDropdown from "@/components/node/sidebar/organization-validators-dropdown.vue";
 import SideBar from "@/components/side-bar/side-bar.vue";
-import { BBadge, BModal } from '@/components/bootstrap-compat';
+
 import QuorumSlices from "@/components/node/tools/quorum-slices.vue";
 import useStore from "@/store/useStore";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
@@ -146,6 +144,8 @@ const store = useStore();
 const quorumSetExpanded = ref(true);
 const organizationValidatorsExpanded = ref(true);
 const tomlNodesExport = ref("");
+const showTomlModal = ref(false);
+const quorumSlicesRef = ref<{ show: () => void } | null>(null);
 
 const selectedNode = computed(() => {
   if (!store.selectedNode) throw new Error("No node selected");

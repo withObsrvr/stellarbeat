@@ -1,15 +1,15 @@
 <template>
-  <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+  <div class="rounded-xl border border-gray-200 bg-white">
     <div
       v-if="title || header || $slots.header"
-      class="border-b border-slate-100 px-4 py-3"
+      class="border-b border-gray-100 bg-gray-50/80 px-4 py-3"
     >
       <slot name="header">
-        <h3 v-if="header" class="text-base font-semibold text-slate-700">
-          {{ header }}
-        </h3>
-        <h3 v-else-if="title" class="text-base font-semibold text-slate-700">
-          {{ title }}
+        <h3
+          v-if="header || title"
+          class="text-2xs font-semibold uppercase tracking-wider text-gray-400"
+        >
+          {{ header || title }}
         </h3>
       </slot>
     </div>

@@ -1,44 +1,60 @@
 <template>
   <div>
-    <b-form-input
+    <input
       id="searchInput"
       v-model="filter"
-      class="form-control search mr-0"
+      class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm w-full mb-2 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-200"
       type="text"
       placeholder="Type name, ... to search"
     />
-    <b-table
-      striped
-      hover
-      responsive
-      :items="organizations"
-      :fields="fields"
-      :sort-by.sync="sortBy"
-      :sort-desc.sync="sortDesc"
-      :per-page="perPage"
-      :filter="filter"
-      selectable
-      :select-mode="mode"
-      :current-page="currentPage"
-      selected-variant="success"
-      @filtered="onFiltered"
-      @row-selected="rowSelected"
-    >
-      <template #cell(name)="row">
-        <span
-          v-if="row.item.hasReliableUptime"
-          v-tooltip.hover="'>99% uptime and at least 3 validators'"
-          class="badge sb-badge badge-success full-validator-badge pt-1 mr-1"
-          title=">99% uptime and at least 3 validators"
-        >
-          <b-icon-shield />
-        </span>
-        {{ row.item.name }}
-      </template>
-    </b-table>
-
-    <b-pagination
-      ref="paginator"
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-gray-700">
+        <thead>
+          <tr class="bg-gray-50/80">
+            <th class="px-4 py-2.5 text-left text-2xs font-mono font-semibold uppercase tracking-widest text-gray-400 w-8"></th>
+            <th
+              v-for="field in fields"
+              :key="field.key"
+              class="px-4 py-2.5 text-left text-2xs font-mono font-semibold uppercase tracking-widest text-gray-400 cursor-pointer select-none hover:text-gray-900"
+              @click="toggleSort(field.key)"
+            >
+              {{ field.label || field.key }}
+              <span v-if="sortBy === field.key">{{ sortDesc ? ' ↓' : ' ↑' }}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr
+            v-for="item in paginatedItems"
+            :key="item.id"
+            class="hover:bg-gray-50/50 cursor-pointer"
+            :class="{ 'bg-emerald-50': selectedIds.has(item.id) }"
+            @click="toggleSelect(item)"
+          >
+            <td class="px-4 py-2.5">
+              <input
+                type="checkbox"
+                :checked="selectedIds.has(item.id)"
+                class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                @click.stop="toggleSelect(item)"
+              />
+            </td>
+            <td class="px-4 py-2.5">
+              <span
+                v-if="item.hasReliableUptime"
+                v-tooltip="'>99% uptime and at least 3 validators'"
+                class="inline-flex items-center justify-center rounded bg-emerald-500 text-white mr-1 p-0.5"
+              >
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              </span>
+              {{ item.name }}
+            </td>
+            <td class="px-4 py-2.5">{{ item.availability }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <UiPagination
       v-model="currentPage"
       :total-rows="totalRows"
       :per-page="perPage"
@@ -48,10 +64,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-
-import { Node, Organization } from "shared";
-import { BFormInput, BIconShield, BPagination, BTable } from '@/components/bootstrap-compat';
+import { computed, onMounted, ref } from "vue";
+import { Organization } from "shared";
 
 const props = defineProps<{
   organizations: Organization[];
@@ -59,29 +73,64 @@ const props = defineProps<{
 
 const emit = defineEmits(["organizations-selected"]);
 
-const mode = ref("multi");
-const sortBy = ref("index");
-const sortDesc = ref(true);
+const sortBy = ref("name");
+const sortDesc = ref(false);
 const perPage = ref(10);
 const currentPage = ref(1);
 const filter = ref("");
-const totalRows = ref(1);
+const totalRows = computed(() => filteredItems.value.length);
+const selectedIds = ref(new Set<string>());
 const fields = ref([
-  { key: "name", sortable: true },
-  { key: "availability", sortable: true, label: "30D availability" },
+  { key: "name", label: "Name", sortable: true },
+  { key: "availability", label: "30D Availability", sortable: true },
 ]);
 
-function rowSelected(items: Node[]) {
-  emit("organizations-selected", items);
+const items = computed(() => {
+  return props.organizations.map((org) => ({
+    name: org.name,
+    id: org.id,
+    availability: org.subQuorum30DaysAvailability + "%",
+    hasReliableUptime: org.hasReliableUptime,
+  }));
+});
+
+const filteredItems = computed(() => {
+  if (!filter.value) return items.value;
+  const q = filter.value.toLowerCase();
+  return items.value.filter(item =>
+    Object.values(item).some(val => String(val).toLowerCase().includes(q))
+  );
+});
+
+const sortedItems = computed(() => {
+  return [...filteredItems.value].sort((a, b) => {
+    const aVal = (a as any)[sortBy.value];
+    const bVal = (b as any)[sortBy.value];
+    let cmp = 0;
+    if (aVal < bVal) cmp = -1;
+    else if (aVal > bVal) cmp = 1;
+    return sortDesc.value ? -cmp : cmp;
+  });
+});
+
+const paginatedItems = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value;
+  return sortedItems.value.slice(start, start + perPage.value);
+});
+
+function toggleSort(key: string) {
+  if (sortBy.value === key) sortDesc.value = !sortDesc.value;
+  else { sortBy.value = key; sortDesc.value = false; }
 }
 
-const onFiltered = (filteredItems: unknown[]) => {
-  totalRows.value = filteredItems.length;
-  currentPage.value = 1;
-};
+function toggleSelect(item: any) {
+  if (selectedIds.value.has(item.id)) {
+    selectedIds.value.delete(item.id);
+  } else {
+    selectedIds.value.add(item.id);
+  }
+  const selectedItems = props.organizations.filter(o => selectedIds.value.has(o.id));
+  emit("organizations-selected", selectedItems);
+}
 
-onMounted(() => {
-  // Set the initial number of items
-  totalRows.value = props.organizations.length;
-});
 </script>

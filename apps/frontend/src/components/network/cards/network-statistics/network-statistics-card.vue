@@ -1,16 +1,16 @@
 <template>
-  <div class="card" :class="dimmerClass">
+  <div class="rounded-xl border border-gray-200 bg-white" :class="dimmerClass">
     <div class="loader"></div>
     <div
-      class="card-body p-0 d-flex flex-column justify-content-between dimmer-content"
+      class="p-0 flex flex-col justify-between dimmer-content"
     >
-      <div class="d-flex justify-content-between align-items-start pt-3 px-3">
-        <div class="">
-          <div class="text-muted">
+      <div class="flex justify-between items-start pt-3 px-3">
+        <div>
+          <div class="text-gray-500 text-sm">
             {{ title }}
           </div>
           <div>
-            <div v-if="hasActiveElement && activeElement" class="d-flex">
+            <div v-if="hasActiveElement && activeElement" class="flex">
               <div class="active-element-value mr-1">
                 {{
                   isBool
@@ -18,7 +18,7 @@
                     : activeElement[statsProperty]
                 }}
               </div>
-              <div class="active-element-time align-self-start text-muted">
+              <div class="active-element-time self-start text-gray-500">
                 {{ formatTime(activeElement?.time) }}
               </div>
             </div>
@@ -27,14 +27,12 @@
                 <div
                   v-if="isBool || unknown"
                   class="value"
-                  style="color: #5eba00"
                 >
-                  <b-badge
+                  <UiBadge
                     v-if="!unknown"
                     :variant="value ? 'success' : 'danger'"
-                    >{{ value ? "Yes" : "No" }}</b-badge
-                  >
-                  <b-badge v-else variant="default">Not analyzed</b-badge>
+                  >{{ value ? "Yes" : "No" }}</UiBadge>
+                  <UiBadge v-else variant="default">Not analyzed</UiBadge>
                 </div>
                 <div v-else class="value">
                   {{ value }}
@@ -44,14 +42,10 @@
           </div>
         </div>
         <button
-          class="btn btn-sm"
-          style="border: none; box-shadow: none"
+          class="p-1 text-gray-400 hover:text-gray-600 transition-colors"
           @click="showModal = true"
         >
-          <b-icon-info-circle
-            v-tooltip:top="'Click for info'"
-            class="text-muted"
-          />
+          <svg v-tooltip:top="'Click for info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </button>
       </div>
       <div
@@ -70,14 +64,13 @@
         class="mb-4"
       ></div>
     </div>
-    <b-modal v-model="showModal" lazy title="Info" ok-only hide-header>
+    <UiModal v-model="showModal" :lazy="true" title="Info" :ok-only="true" :hide-header="true">
       <slot name="info"></slot>
-    </b-modal>
+    </UiModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { BBadge, BIconInfoCircle, BModal } from '@/components/bootstrap-compat';
 import NetworkStatisticsChart from "@/components/network/cards/network-statistics/network-statistics-chart.vue";
 import { NetworkStatisticsAggregation } from "shared";
 import { computed, type Ref, ref, toRefs, withDefaults } from "vue";

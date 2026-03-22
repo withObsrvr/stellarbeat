@@ -40,13 +40,6 @@ import {
   ref,
   watch,
 } from "vue";
-import {
-  BIconPauseFill,
-  BIconPlayFill,
-  BIconSkipBackwardFill,
-  BIconSkipForwardFill,
-  BIconStopFill,
-} from '@/components/bootstrap-compat';
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
 
 const playing = ref(false);

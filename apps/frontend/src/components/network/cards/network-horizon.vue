@@ -1,26 +1,25 @@
 <template>
-  <div id="public-horizon-apis-card" class="card">
-    <div class="card-header pl-3">
-      <h1 class="card-title">Public Horizon APIs</h1>
+  <div id="public-horizon-apis-card" class="rounded-xl border border-gray-200 bg-white">
+    <div class="border-b border-gray-100 bg-gray-50/80 pl-3 py-3">
+      <h1 class="text-sm font-semibold text-gray-900">Public Horizon APIs</h1>
     </div>
-    <div class="card-body p-0">
-      <b-list-group flush class="w-100 mb-4 card-columns">
-        <b-list-group-item
+    <div class="p-0">
+      <div class="w-full mb-4">
+        <div
           v-for="horizon in horizons"
           :key="horizon.name"
-          class="px-3 py-3"
+          class="px-3 py-3 border-b border-gray-100 last:border-b-0"
         >
-          <a :href="horizon.url ?? undefined" target="_blank" rel="noopener">{{
+          <a :href="horizon.url ?? undefined" target="_blank" rel="noopener" class="text-emerald-700 hover:underline">{{
             horizon.name
           }}</a>
-        </b-list-group-item>
-      </b-list-group>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { computed } from "vue";
-import { BListGroup, BListGroupItem } from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 
 const store = useStore();

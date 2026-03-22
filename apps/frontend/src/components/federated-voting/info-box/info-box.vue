@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { infoBoxStore } from "./useInfoBoxStore";
-import { BModal } from '@/components/bootstrap-compat';
+
 
 const isOpen = computed({
   get: () => infoBoxStore.state.isOpen,

@@ -2,13 +2,13 @@
   <div>
     <portal-target name="simulate-node-modal"> </portal-target>
     <div v-if="organization">
-      <b-alert
+      <UiAlert
         :show="network.isOrganizationFailing(organization)"
         variant="danger"
       >
         {{ store.getOrganizationFailingReason(organization) }}
-      </b-alert>
-      <b-alert
+      </UiAlert>
+      <UiAlert
         :show="
           OrganizationWarningDetector.organizationHasWarnings(
             organization,
@@ -29,12 +29,12 @@
             {{ reason }}.
           </li>
         </ul>
-      </b-alert>
-      <div v-if="!store.isSimulation" class="row row-cards row-deck">
-        <div class="col-12">
+      </UiAlert>
+      <div v-if="!store.isSimulation" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="lg:col-span-2">
           <organization-profile :organization="organization" />
         </div>
-        <div v-if="!store.isSimulation" class="col-md-12 col-lg-6">
+        <div v-if="!store.isSimulation" class="">
           <OrganizationStatisticsSubQuorum24hAvailability
             :organization="organization"
           />
@@ -42,7 +42,7 @@
             :organization="organization"
           />
         </div>
-        <div v-if="!store.isSimulation" class="col-md-12 col-lg-6">
+        <div v-if="!store.isSimulation" class="">
           <history-card
             :subject="'Availability history'"
             :entity-id="organization.id"
@@ -62,13 +62,13 @@
         </div>
       </div>
 
-      <div class="row row-cards">
-        <div class="col-lg-12 col-xl-12">
+      <div class="mt-4">
+        <div>
           <organization-validators :organization="organization" />
         </div>
       </div>
-      <div v-if="!store.isSimulation" class="row row-cards">
-        <div v-if="!store.isSimulation" class="col-lg-12 col-xl-12">
+      <div v-if="!store.isSimulation" class="mt-4">
+        <div v-if="!store.isSimulation">
           <organization-latest-updates :organization="organization" />
         </div>
       </div>
@@ -83,7 +83,6 @@ import OrganizationValidators from "@/components/organization/organization-cards
 import OrganizationStatisticsSubQuorum24hAvailability from "@/components/organization/organization-cards/statistics/organization-statistics-subquorum-24h-availability.vue";
 import OrganizationStatisticsSubQuorum30DAvailability from "@/components/organization/organization-cards/statistics/organization-statistics-subquorum-30D-availability.vue";
 import OrganizationLatestUpdates from "@/components/organization/organization-cards/organization-latest-updates.vue";
-import { BAlert } from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 import useOrganizationMeasurementsStore from "@/store/useOrganizationMeasurementsStore";
 import { OrganizationWarningDetector } from "@/services/OrganizationWarningDetector";

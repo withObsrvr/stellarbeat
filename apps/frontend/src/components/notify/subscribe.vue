@@ -8,20 +8,19 @@
     </div>
     <div v-else>
       <h4>Subscribe to</h4>
-      <b-form
+      <form
         novalidate
-        :validated="validated"
         @submit.prevent="onSubscribe"
         @reset="onReset"
       >
-        <b-alert variant="success" :show="requested"
-          >Request received, you will receive an email shortly.</b-alert
+        <UiAlert variant="success" :show="requested"
+          >Request received, you will receive an email shortly.</UiAlert
         >
-        <b-alert variant="danger" :show="submitError"
+        <UiAlert variant="danger" :show="submitError"
           >Something went wrong, please try again later or contact
-          support.</b-alert
+          support.</UiAlert
         >
-        <b-form-group
+        <div class="mb-4"
           id="nodes-group"
           label="Node events"
           label-for="nodes-select"
@@ -41,9 +40,9 @@
             @search-change="searchNodes"
           >
           </multiselect>
-        </b-form-group>
+        </div>
 
-        <b-form-group
+        <div class="mb-4"
           id="organizations-group"
           label="Organization events"
           label-for="organization-select"
@@ -62,33 +61,33 @@
             :options="organizations"
           >
           </multiselect>
-        </b-form-group>
-        <b-form-group
+        </div>
+        <div class="mb-4"
           id="network-group"
           description="Triggered when transitive quorumSet changes, when liveness or danger risks drop below
             thresholds."
         >
-          <b-form-checkbox
+          <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox"
             id="network-checkbox"
             v-model="networkSubscription"
             name="network-checkbox"
             unchecked-value="not_subscribed"
           >
             Network events
-          </b-form-checkbox>
-        </b-form-group>
-        <b-form-group id="email-group" class="mt-6">
-          <b-form-input
+          </label>
+        </div>
+        <div class="mb-4 mt-6" id="email-group">
+          <input
             id="email-address"
-            v-model="emailAddress"
-            :state="emailAddressState"
+            v-model.trim="emailAddress"
+            class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm w-full"
             placeholder="Enter your email address"
             required
-            trim
-          ></b-form-input>
-        </b-form-group>
-        <b-form-group id="consent-group">
-          <b-form-checkbox
+            type="email"
+          />
+        </div>
+        <div class="mb-4" id="consent-group">
+          <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox"
             id="consent-checkbox"
             v-model="consented"
             name="consent-checkbox"
@@ -98,18 +97,18 @@
             <a :href="termsLink" target="_blank">Terms and Conditions</a>
             and our
             <a :href="privacyLink" target="_blank">Privacy Policy</a>
-          </b-form-checkbox>
-        </b-form-group>
+          </label>
+        </div>
         <button
           type="submit"
-          class="btn-primary btn"
+          class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
           role="button"
           @click="onSubscribe"
         >
           Create or update subscriptions
         </button>
         <button
-          class="btn btn-danger ml-2"
+          class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 transition-colors ml-2"
           type="submit"
           :disabled="
             !(emailAddressState === true && consented !== 'not_accepted')
@@ -118,10 +117,10 @@
         >
           Unsubscribe and remove email address
         </button>
-        <button class="btn btn-secondary ml-3" type="reset">Clear form</button>
-      </b-form>
+        <button class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors ml-3" type="reset">Clear form</button>
+      </form>
     </div>
-    <b-alert class="mt-5" variant="info" :show="true"
+    <UiAlert class="mt-5" variant="info" :show="true"
       ><ul>
         <li>
           Events are triggered when they first occur. For example a node that is
@@ -162,19 +161,12 @@
           >.
         </li>
       </ul>
-    </b-alert>
+    </UiAlert>
   </div>
 </template>
 
 <script setup lang="ts">
 import Multiselect from "@vueform/multiselect";
-import {
-  BAlert,
-  BForm,
-  BFormCheckbox,
-  BFormGroup,
-  BFormInput,
-} from '@/components/bootstrap-compat';
 import { computed, type ComputedRef, onMounted, type Ref, ref } from "vue";
 import useStore from "@/store/useStore";
 

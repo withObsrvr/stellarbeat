@@ -1,9 +1,9 @@
 <template>
-  <div class="card">
-    <div class="card-header">
-      <h1 class="card-title">
+  <div class="rounded-xl border border-gray-200 bg-white">
+    <div class="border-b border-gray-100 bg-gray-50/80 px-3 py-3">
+      <h1 class="text-sm font-semibold text-gray-900">
         Trusted by
-        <b-badge variant="success">{{ nodes.length }}</b-badge> nodes
+        <UiBadge variant="success">{{ nodes.length }}</UiBadge> nodes
       </h1>
     </div>
     <nodes-table :nodes="nodes" :fields="fields" :per-page="5" />
@@ -13,7 +13,7 @@
 import { computed } from "vue";
 import { Node } from "shared";
 import NodesTable, { type TableNode } from "@/components/node/nodes-table.vue";
-import { BBadge } from '@/components/bootstrap-compat';
+
 import useStore from "@/store/useStore";
 
 const props = defineProps<{

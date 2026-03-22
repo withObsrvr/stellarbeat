@@ -1,7 +1,7 @@
 <template>
-  <div class="card">
-    <div class="text-muted mx-3 mt-3">Crawler rejected</div>
-    <div class="card-body d-flex flex-row justify-content-center p-1">
+  <div class="rounded-xl border border-gray-200 bg-white">
+    <div class="text-gray-500 text-sm mx-3 mt-3">Crawler rejected</div>
+    <div class="flex justify-center p-1">
       <div
         class="canvas-container"
         style="position: relative; height: 150px; width: 150px"

@@ -1,9 +1,9 @@
 <template>
-  <div class="card">
-    <div class="card-body py-0 d-flex align-items-center">
-      <table class="table card-table">
+  <div class="rounded-xl border border-gray-200 bg-white">
+    <div class="py-0 flex items-center px-4">
+      <table class="w-full text-sm">
         <tbody>
-          <tr class="text-gray">
+          <tr class="text-gray-500">
             <td class="px-0" style="font-weight: 600; font-size: 0.875rem">
               Domain
             </td>
@@ -11,7 +11,7 @@
               {{ node.homeDomain ? node.homeDomain : "N/A" }}
             </td>
           </tr>
-          <tr class="text-gray">
+          <tr class="text-gray-500">
             <td class="px-0" style="font-weight: 600; font-size: 0.875rem">
               Organization
             </td>
@@ -40,7 +40,7 @@
             </td>
             <td v-else class="px-0 text-right">N/A</td>
           </tr>
-          <tr class="text-gray">
+          <tr class="text-gray-500">
             <td class="px-0" style="font-weight: 600; font-size: 0.875rem">
               History url
             </td>
@@ -48,7 +48,7 @@
               {{ node.historyUrl ? node.historyUrl : "N/A" }}
             </td>
           </tr>
-          <tr v-if="node.overlayVersion" class="text-gray">
+          <tr v-if="node.overlayVersion" class="text-gray-500">
             <td class="px-0" style="font-weight: 600; font-size: 0.875rem">
               Overlay version
             </td>
@@ -56,7 +56,7 @@
               {{ node.overlayVersion }}
             </td>
           </tr>
-          <tr v-if="node.overlayMinVersion" class="text-gray">
+          <tr v-if="node.overlayMinVersion" class="text-gray-500">
             <td class="px-0" style="font-weight: 600; font-size: 0.875rem">
               Overlay min version
             </td>
@@ -64,7 +64,7 @@
               {{ node.overlayMinVersion }}
             </td>
           </tr>
-          <tr v-if="node.ledgerVersion" class="text-gray">
+          <tr v-if="node.ledgerVersion" class="text-gray-500">
             <td class="px-0" style="font-weight: 600; font-size: 0.875rem">
               Ledger version
             </td>
@@ -72,7 +72,7 @@
               {{ node.ledgerVersion }}
             </td>
           </tr>
-          <tr v-if="node.isValidator" class="text-gray">
+          <tr v-if="node.isValidator" class="text-gray-500">
             <td class="px-0" style="font-weight: 600; font-size: 0.875rem">
               Externalize lag
             </td>

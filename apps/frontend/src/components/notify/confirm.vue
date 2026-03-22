@@ -7,20 +7,20 @@
       </div>
     </div>
     <div v-else-if="!alreadyConfirmed">
-      <b-alert variant="success" show>Subscription confirmed!</b-alert>
+      <UiAlert variant="success" show>Subscription confirmed!</UiAlert>
     </div>
     <div v-else>
-      <b-alert variant="warning" show>Stale confirmation link</b-alert>
+      <UiAlert variant="warning" show>Stale confirmation link</UiAlert>
     </div>
   </div>
   <div v-else>
     <h4>Something went wrong...</h4>
-    <button role="button" class="btn" @click="confirm">Try again</button>
+    <button role="button" class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" @click="confirm">Try again</button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { BAlert } from '@/components/bootstrap-compat';
+
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 

@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-template-shadow -->
 <template>
-  <b-modal v-model="modalVisible" size="xl">
+  <UiModal v-model="modalVisible" size="xl">
     <template #modal-header="{ close }">
       <h5 class="modal-title">Modify the network</h5>
       <!-- Emulate built in modal header close button action -->
@@ -9,7 +9,7 @@
         aria-label="Close"
         @click="close()"
       >
-        <b-icon-x />
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
       </button>
     </template>
     <template #default>
@@ -32,7 +32,7 @@
           >
         </li>
       </ul>
-      <b-form-textarea
+      <textarea
         id="textarea"
         v-model="modifiedNetworkString"
         placeholder="Paste your custom network here"
@@ -40,16 +40,16 @@
         :max-rows="20"
         :state="modified ? null : isValid"
         @input="modified = true"
-      ></b-form-textarea>
+      ></textarea>
       <div v-if="!isValid" class="mt-2">
-        <b-list-group>
-          <b-list-group-item
+        <div>
+          <div-item
             v-for="(error, index) in validationErrors"
             :key="index"
             variant="danger"
             >{{ formatErrorMessage(error) }}
-          </b-list-group-item>
-        </b-list-group>
+          </div-item>
+        </div>
       </div>
       <div class="mt-2">
         <button
@@ -90,17 +90,10 @@
         Validate JSON
       </button>
     </template>
-  </b-modal>
+  </UiModal>
 </template>
 
 <script setup lang="ts">
-import {
-  BFormTextarea,
-  BIconX,
-  BListGroup,
-  BListGroupItem,
-  BModal,
-} from '@/components/bootstrap-compat';
 import { Node, Organization, QuorumSet } from "shared";
 import { ModifyNetwork as ModifyNetworkChange } from "@/services/change-queue/changes/modify-network";
 import useStore from "@/store/useStore";

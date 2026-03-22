@@ -1,62 +1,58 @@
 <template>
   <div>
-    <nav class="navbar navbar-expand-lg m-0 p-0">
-      <div class="header py-4 my-header">
-        <div class="container-fluid" style="max-width: 1360px">
-          <div class="d-flex justify-content-between w-100">
-            <div class="d-flex">
-              <router-link
-                class="header-brand mr-0 mt-0"
-                :to="{ name: 'network-dashboard' }"
-              >
-                <img
-                  rel="preload"
-                  src="@/assets/logo.svg"
-                  class="header-brand-img mr-0"
-                  width="400"
-                  height="460"
-                  :alt="brandLogo ? brandLogo.alt : undefined"
-                />
-              </router-link>
-              <h2 class="brand-title mb-0">{{ brandName }}</h2>
-            </div>
-            <div class="d-none d-lg-flex">
-              <div class="d-flex">
-                <div class="nav-item pr-0" style="cursor: default">
-                  <nav-network-selector />
-                  <a
-                    href="https://github.com/withObsrvr/stellarbeat"
-                    class="btn btn-sm btn-outline-primary"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <span style="display: inline-flex; align-items: center;"><github />Github</span>
-                  </a>
-                  <a
-                    :href="`mailto:${store.appConfig.brandEmail}`"
-                    class="btn btn-sm btn-outline-primary ml-2"
-                    target="_blank"
-                  >
-                    Mail
-                  </a>
-                </div>
-              </div>
-            </div>
-            <button
-              v-b-toggle="'nav_collapse'"
-              class="navbar-toggler"
-              type="button"
-              aria-controls="nav_collapse"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <b-icon-list />
-            </button>
-          </div>
+    <!-- Bar 1: Brand + Actions -->
+    <header class="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-md">
+      <div class="mx-auto flex h-14 w-full max-w-content items-center justify-between px-4">
+        <!-- Left: Logo + Brand -->
+        <router-link
+          :to="{ name: 'network-dashboard' }"
+          class="flex items-center gap-2"
+        >
+          <img
+            rel="preload"
+            src="@/assets/logo.svg"
+            class="h-7 w-7"
+            :alt="brandLogo ? brandLogo.alt : undefined"
+          />
+          <span class="text-[15px] font-bold tracking-tight text-gray-900">{{ brandName }}</span>
+        </router-link>
+
+        <!-- Right: Network selector + GitHub + Mail + Mobile toggle -->
+        <div class="flex items-center gap-2">
+          <nav-network-selector />
+          <a
+            href="https://github.com/withObsrvr/stellarbeat"
+            class="prism-icon-btn hidden sm:flex items-center justify-center h-9 w-9 flex-shrink-0 p-0 rounded-lg border border-gray-200 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+            target="_blank"
+            rel="noopener"
+            title="GitHub"
+          >
+            <github class="h-4 w-4" />
+          </a>
+          <a
+            :href="`mailto:${store.appConfig.brandEmail}`"
+            class="prism-icon-btn hidden sm:flex items-center justify-center h-9 w-9 flex-shrink-0 p-0 rounded-lg border border-gray-200 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+            target="_blank"
+            rel="noopener"
+            title="Mail"
+          >
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+          </a>
+          <button
+            class="flex lg:hidden items-center justify-center h-9 w-9 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            type="button"
+            aria-label="Toggle navigation"
+            @click="mobileNavOpen = !mobileNavOpen"
+          >
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
         </div>
       </div>
-    </nav>
+    </header>
+
+    <!-- Bar 2: Navigation -->
     <NavCollapse
+      :mobile-open="mobileNavOpen"
       :api-doc-url="apiDocUrl"
       :blog-url="blogUrl"
       :github-url="githubUrl"
@@ -73,12 +69,11 @@
   </div>
 </template>
 <script setup lang="ts">
-import { type PropType } from "vue";
+import { ref, type PropType } from "vue";
 import NavNetworkSelector from "@/components/layout/NavNetworkSelector.vue";
 import NavCollapse from "@/components/layout/NavCollapse.vue";
 import Github from "@/components/organization/logo/github.vue";
 import useStore from "@/store/useStore";
-import { BIconList } from '@/components/bootstrap-compat';
 
 export interface BrandLogo {
   src: string;
@@ -138,32 +133,24 @@ defineProps({
   },
 });
 const store = useStore();
+const mobileNavOpen = ref(false);
 </script>
 
-<style lang="scss" scoped>
-.brand-title {
-  color: #4a4a4a; // $primary;
-  font-weight: normal;
-  font-style: normal;
-  font-family: "Poppins", sans-serif;
-  font-size: 23px;
-  margin-top: 4px;
-  margin-left: 3px;
-  //filter: brightness(1.5);
-}
-.brand-tagline {
-  font-weight: 600;
+<style>
+/* Override Bootstrap styles on Prism icon buttons */
+.prism-icon-btn,
+.prism-icon-btn:hover,
+.prism-icon-btn:focus {
+  padding: 0 !important;
+  text-decoration: none !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  max-width: 2.25rem !important;
+  max-height: 2.25rem !important;
 }
 
-.collapser {
-  background: white;
-}
-
-.my-header {
-  width: 100%;
-}
-
-.my-navbar-toggle {
-  border: none;
+/* Reset Bootstrap link color in header */
+header a {
+  text-decoration: none;
 }
 </style>

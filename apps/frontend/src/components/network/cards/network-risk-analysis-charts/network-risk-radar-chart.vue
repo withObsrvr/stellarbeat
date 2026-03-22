@@ -1,66 +1,44 @@
 <template>
-  <div class="card" style="height: 320px" :class="dimmerClass">
-    <div class="mx-4 mt-4 my-header">
-      <div class="text-muted">Network analysis</div>
+  <div class="rounded-xl border border-gray-200 bg-white" style="height: 320px" :class="dimmerClass">
+    <div class="mx-4 mt-4 flex justify-between">
+      <div class="text-gray-500 text-sm">Network analysis</div>
       <button
-        data-toggle="modal"
-        data-target="#infoModal"
         type="button"
-        class="btn btn-secondary btn-sm info"
+        class="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+        @click="showInfoModal = true"
       >
-        <b-icon-info-circle v-tooltip:top="'Info'" class="text-muted" />
+        <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
       </button>
     </div>
     <div class="loader"></div>
-    <div class="card-body d-flex flex-row justify-content-center p-1 my-body">
+    <div class="flex justify-center p-1 flex-1">
       <div class="canvas-container">
         <canvas :ref="(el) => (chartElement = el)"></canvas>
       </div>
     </div>
 
-    <div
-      id="infoModal"
-      ref="infoModal"
-      class="modal fade"
-      tabindex="-1"
-      aria-labelledby="modalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-body">
-            <h3>What does this chart show?</h3>
-            <p class="my-4">
-              This chart shows liveness and safety buffers for the whole
-              network. For example if the node liveness data point shows that a
-              set of two nodes is found, this means that two specific nodes
-              could halt the network if they fail. If you want to find out what
-              these nodes are, click on a datapoint and run the network
-              analysis.
-            </p>
-          </div>
-          <div class="modal-footer d-flex justify-content-between">
-            <p>
-              Powered by
-              <a
-                target="_blank"
-                rel="noopener"
-                href="https://github.com/wiberlin/fbas_analyzer"
-              >
-                wiberlin/fbas_analyzer
-              </a>
-            </p>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <UiModal v-model="showInfoModal" :hide-header="true" :ok-only="true">
+      <h3 class="text-lg font-semibold mb-2">What does this chart show?</h3>
+      <p class="my-4 text-sm text-gray-600">
+        This chart shows liveness and safety buffers for the whole
+        network. For example if the node liveness data point shows that a
+        set of two nodes is found, this means that two specific nodes
+        could halt the network if they fail. If you want to find out what
+        these nodes are, click on a datapoint and run the network
+        analysis.
+      </p>
+      <p class="text-xs text-gray-400">
+        Powered by
+        <a
+          target="_blank"
+          rel="noopener"
+          href="https://github.com/wiberlin/fbas_analyzer"
+          class="text-emerald-700 hover:underline"
+        >
+          wiberlin/fbas_analyzer
+        </a>
+      </p>
+    </UiModal>
   </div>
 </template>
 
@@ -86,12 +64,12 @@ import {
   watch,
 } from "vue";
 
-import { BIconInfoCircle } from '@/components/bootstrap-compat';
 import { AutomaticNetworkAnalysis } from "@/services/NetworkAnalyzer";
 import useStore from "@/store/useStore";
 import { MergeBy } from "@stellarbeat/stellar_analysis_web";
 import useScrollTo from "@/composables/useScrollTo";
 
+const showInfoModal = ref(false);
 const chart = ref<Chart>();
 const store = useStore();
 const network = store.network;
@@ -255,9 +233,3 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style scoped>
-.my-header {
-  display: flex;
-  justify-content: space-between;
-}
-</style>

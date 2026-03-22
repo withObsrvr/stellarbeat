@@ -2,7 +2,7 @@
   <div v-if="errors.length > 0">
     <button
       type="button"
-      class="btn btn-sm btn-outline-secondary"
+      class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
       @click="expanded = !expanded"
     >
       {{ formatCount(totalErrorCount) }} error(s) detected
@@ -14,7 +14,7 @@
       <ul class="list-unstyled error-list">
         <li v-for="(error, index) in errors" :key="index" class="error-item">
           <div class="error-header">
-            <span class="badge bg-warning text-dark me-2">{{
+            <span class="inline-flex items-center rounded px-1.5 py-0.5 text-2xs font-bold text-amber-700 bg-amber-50 ring-1 ring-amber-200/60 mr-2">{{
               formatCategory(error.category)
             }}</span>
             <span class="error-count">Count: {{ formatCount(error.count) }}</span>

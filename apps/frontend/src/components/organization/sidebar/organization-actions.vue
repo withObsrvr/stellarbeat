@@ -1,96 +1,70 @@
 <template>
-  <div>
-    <b-dropdown
-      right
-      size="sm"
-      text="More"
-      class="p-0 m-0"
-      boundary="viewport"
-      toggle-class="more-button btn-thin"
-      no-caret
+  <div class="relative inline-block">
+    <button
+      class="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+      @click.stop="open = !open"
     >
-      <template #button-content>
-        <b-icon-three-dots-vertical scale="0.9" />
-      </template>
-      <b-dropdown-header> Simulation options </b-dropdown-header>
-      <div v-if="supportsHalt">
-        <b-dropdown-item
-          v-if="!store.network.isOrganizationBlocked(organization)"
-          @click.prevent.stop="
-            store.toggleOrganizationAvailability(organization)
-          "
-        >
-          <b-icon-lightning scale="0.9" />
-          {{
-            organization.subQuorumAvailable
-              ? "Halt this organization"
-              : "Start validating"
-          }}
-        </b-dropdown-item>
-        <b-dropdown-text v-else>
-          Organization blocked: not enough validators are reaching their
-          quorumSet threshold.
-        </b-dropdown-text>
+      <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 16 16"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
+    </button>
+    <div
+      v-show="open"
+      class="absolute right-0 top-full mt-1 z-50 w-56 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden"
+    >
+      <div class="px-3 py-1.5 text-2xs font-semibold uppercase tracking-wider text-gray-400">
+        Simulation options
       </div>
-      <b-dropdown-item
+      <div v-if="supportsHalt">
+        <a
+          v-if="!store.network.isOrganizationBlocked(organization)"
+          class="flex items-center gap-1.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+          @click.prevent.stop="store.toggleOrganizationAvailability(organization); open = false"
+        >
+          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+          {{ organization.subQuorumAvailable ? "Halt this organization" : "Start validating" }}
+        </a>
+        <div v-else class="px-3 py-2 text-xs text-gray-400">
+          Organization blocked: not enough validators are reaching their quorumSet threshold.
+        </div>
+      </div>
+      <a
         v-if="supportsDelete && store.selectedOrganization"
-        @click="
-          store.removeOrganizationFromOrganization(
-            organization,
-            store.selectedOrganization,
-          )
-        "
-        @click.prevent.stop
+        class="flex items-center gap-1.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+        @click.prevent.stop="store.removeOrganizationFromOrganization(organization, store.selectedOrganization); open = false"
       >
-        <b-icon-x-circle scale="0.9" />
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         Remove
-      </b-dropdown-item>
-      <b-dropdown-item
+      </a>
+      <a
         v-if="supportsAdd"
-        v-b-modal="'add-organizations-modal-' + id"
-        @click.prevent.stop
+        class="flex items-center gap-1.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+        @click.prevent.stop="showAddOrgModal = true; open = false"
       >
-        <b-icon-plus-circle scale="0.9" />
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         Add organization
-      </b-dropdown-item>
-    </b-dropdown>
-    <b-modal
-      :id="'add-organizations-modal-' + id"
-      v-slot="{ visible }"
-      lazy
+      </a>
+    </div>
+    <UiModal
+      v-model="showAddOrgModal"
+      :lazy="true"
       size="lg"
       title="Select organization to add"
       ok-title="Add"
       @ok="organizationsToAddModalOk"
     >
       <AddOrganizationsTable
-        v-if="visible"
+        v-if="showAddOrgModal"
         :organizations="possibleOrganizationsToAdd"
         @organizations-selected="onOrganizationsSelected"
       />
-    </b-modal>
+    </UiModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  BDropdown,
-  BDropdownHeader,
-  BDropdownItem,
-  BDropdownText,
-  BIconLightning,
-  BIconPlusCircle,
-  BIconThreeDotsVertical,
-  BIconXCircle,
-  BModal,
-  VBModal,
-} from '@/components/bootstrap-compat';
-
 import { Organization } from "shared";
 import AddOrganizationsTable from "@/components/node/tools/simulation/add-organizations-table.vue";
-import { computed, ref, type Ref, toRefs } from "vue";
+import { computed, onMounted, onUnmounted, ref, type Ref, toRefs } from "vue";
 import useStore from "@/store/useStore";
-
 
 interface Props {
   organization: Organization;
@@ -109,9 +83,10 @@ const { organization, supportsDelete, supportsAdd, supportsHalt } =
   toRefs(props);
 
 const store = useStore();
+const open = ref(false);
+const showAddOrgModal = ref(false);
 
 const organizationsToAdd: Ref<Organization[]> = ref([]);
-const id: Ref<number> = ref(store.getUniqueId());
 
 const trustedOrganizationIds = computed(() => {
   const trustedOrganizationIds = new Set<string>();
@@ -145,4 +120,12 @@ function organizationsToAddModalOk() {
 function onOrganizationsSelected(organizations: Organization[]) {
   organizationsToAdd.value = organizations;
 }
+
+function closeOnOutsideClick(e: Event) {
+  const el = (e.target as HTMLElement).closest('.relative.inline-block');
+  if (!el) open.value = false;
+}
+
+onMounted(() => document.addEventListener('click', closeOnOutsideClick));
+onUnmounted(() => document.removeEventListener('click', closeOnOutsideClick));
 </script>

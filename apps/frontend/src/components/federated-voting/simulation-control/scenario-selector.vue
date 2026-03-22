@@ -128,13 +128,6 @@
 
 <script setup lang="ts">
 import { federatedVotingStore } from "@/store/useFederatedVotingStore";
-import {
-  BIconArrowClockwise,
-  BIconGear,
-  BIconDownload,
-  BIconUpload,
-} from '@/components/bootstrap-compat';
-import { BModal, BDropdown, BDropdownItem } from '@/components/bootstrap-compat';
 import { computed, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
@@ -163,10 +156,10 @@ const selectedScenarioId = computed({
 
 const isFullyConnected = ref(federatedVotingStore.overlayIsFullyConnected);
 const isGossipEnabled = ref(federatedVotingStore.overlayIsGossipEnabled);
-const settingsModal = ref<typeof BModal | null>(null);
-const exportModal = ref<typeof BModal | null>(null);
+const settingsModal = ref<any | null>(null);
+const exportModal = ref<any | null>(null);
 const exportedScenario = ref("");
-const importModal = ref<typeof BModal | null>(null);
+const importModal = ref<any | null>(null);
 const importJsonText = ref("");
 const importError = ref("");
 

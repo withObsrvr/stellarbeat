@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="page-header d-flex justify-content-between py-3">
-      <div class="d-flex align-items-center">
-        <h2 class="page-title">Network explorer</h2>
+    <div class="flex justify-between items-center py-3">
+      <div class="flex items-center">
+        <h2 class="text-xl font-semibold text-gray-900">Network explorer</h2>
         <simulation-badge />
         <time-travel-badge />
         <div v-if="store.networkAnalyzer.analyzing">
@@ -13,7 +13,7 @@
     </div>
     <div
       v-if="selectedNode && selectedNode.unknown"
-      class="alert alert-warning"
+      class="p-4 mb-4 rounded-xl text-sm text-amber-700 bg-amber-50/50 ring-1 ring-amber-200/60"
       role="alert"
     >
       Selected node with public key:
@@ -25,7 +25,7 @@
 
     <div
       v-if="selectedOrganization && selectedOrganization.unknown"
-      class="alert alert-warning"
+      class="p-4 mb-4 rounded-xl text-sm text-amber-700 bg-amber-50/50 ring-1 ring-amber-200/60"
       role="alert"
     >
       Selected organization with id:
@@ -40,44 +40,38 @@
         !network.getNodeByPublicKey(store.haltingAnalysisPublicKey).unknown
       "
       id="halting-analysis-card"
-      class="row row-cards row-deck"
+      class="grid grid-cols-12 gap-4 mb-4"
     >
-      <div class="col-12">
+      <div class="col-span-12">
         <HaltingAnalysis
           :public-key="store.haltingAnalysisPublicKey ?? 'unknown'"
         >
         </HaltingAnalysis>
       </div>
     </div>
-    <div class="row h-100">
-      <aside class="col-xs-12 col-sm-5 col-lg-3 col-xl-auto mb-5">
-        <div class="card pt-0 sidebar-card h-100">
+    <div class="flex flex-col lg:flex-row gap-4 h-full">
+      <aside class="w-full lg:w-auto flex-shrink-0 mb-5 lg:mb-0">
+        <div class="rounded-xl border border-gray-200 bg-white pt-0 sidebar-card h-full">
           <router-view v-slot="{ Component }" name="sideBar">
             <transition name="fade" mode="out-in">
-              <component :is="Component" class="h-100 side-bar" />
+              <component :is="Component" class="h-full side-bar" />
             </transition>
           </router-view>
         </div>
       </aside>
-      <div id="content" class="col-sm-7 col-lg-9 col-xl">
-        <div class="row">
-          <div class="col">
-            <network-visual-navigator :view="view" />
-          </div>
+      <div id="content" class="flex-1 min-w-0">
+        <div class="mb-4">
+          <network-visual-navigator :view="view" />
         </div>
         <div
           v-if="store.isNetworkAnalysisVisible"
           id="network-analysis-card"
-          class="row"
+          class="mb-4"
         >
-          <div class="col-12">
-            <network-analysis :dummy="'compiler_gives_error_if_no_props??'" />
-          </div>
+          <network-analysis :dummy="'compiler_gives_error_if_no_props??'" />
         </div>
-        <div class="row">
-          <div class="col-12">
-            <router-view name="dashboard" />
-          </div>
+        <div>
+          <router-view name="dashboard" />
         </div>
       </div>
     </div>

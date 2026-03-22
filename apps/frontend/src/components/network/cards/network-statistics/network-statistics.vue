@@ -1,6 +1,6 @@
 <template>
-  <div class="row row-cards row-deck">
-    <div class="col-md-6 col-lg-3 col-xl-3">
+  <div class="grid grid-cols-12 gap-4">
+    <div class="col-span-12 md:col-span-6 lg:col-span-3">
       <network-statistics-card
         :value="network.networkStatistics.nrOfConnectableNodes"
         :is-loading="isLoading"
@@ -32,7 +32,7 @@
         </template>
       </network-statistics-card>
     </div>
-    <div class="col-md-6 col-lg-3 col-xl-3">
+    <div class="col-span-12 md:col-span-6 lg:col-span-3">
       <network-statistics-card
         :value="network.networkStatistics.nrOfActiveValidators"
         :is-loading="isLoading"
@@ -99,7 +99,7 @@
         </template>
       </network-statistics-card>
     </div>
-    <div class="col-md-6 col-lg-3 col-xl-3">
+    <div class="col-span-12 md:col-span-6 lg:col-span-3">
       <network-statistics-card
         :value="network.networkStatistics.nrOfActiveFullValidators"
         :is-loading="isLoading"
@@ -137,7 +137,7 @@
         </template>
       </network-statistics-card>
     </div>
-    <div class="col-md-6 col-lg-3 col-xl-3">
+    <div class="col-span-12 md:col-span-6 lg:col-span-3">
       <network-statistics-card
         :value="network.networkStatistics.nrOfActiveOrganizations"
         :is-loading="isLoading"
@@ -174,7 +174,7 @@
         </template>
       </network-statistics-card>
     </div>
-    <div class="col-md-6 col-lg-3 col-xl-3">
+    <div class="col-span-12 md:col-span-6 lg:col-span-3">
       <network-statistics-card
         :value="network.networkStatistics.topTierSize ?? false"
         :is-loading="isLoading || store.networkAnalyzer.analyzing"
@@ -206,7 +206,7 @@
         </template>
       </network-statistics-card>
     </div>
-    <div class="col-md-6 col-lg-3 col-xl-3">
+    <div class="col-span-12 md:col-span-6 lg:col-span-3">
       <network-statistics-card
         :value="network.networkStatistics.topTierOrgsSize ?? false"
         :is-loading="isLoading || store.networkAnalyzer.analyzing"
@@ -235,7 +235,7 @@
         </template>
       </network-statistics-card>
     </div>
-    <div class="col-md-6 col-lg-3 col-xl-3">
+    <div class="col-span-12 md:col-span-6 lg:col-span-3">
       <network-statistics-card
         :value="network.networkStatistics.hasTransitiveQuorumSet"
         :is-loading="isLoading"
@@ -258,7 +258,7 @@
         </template>
       </network-statistics-card>
     </div>
-    <div class="col-md-6 col-lg-3 col-xl-3">
+    <div class="col-span-12 md:col-span-6 lg:col-span-3">
       <network-statistics-card
         :value="network.networkStatistics.hasQuorumIntersection ?? false"
         :unknown="store.networkAnalyzer.manualMode"

@@ -1,33 +1,35 @@
 <template>
-  <div class="d-flex flex-column align-items-center justify-content-end">
-    <b-table
+  <div class="flex flex-col items-center justify-end">
+    <UiTable
       striped
       hover
-      :responsive="true"
+      responsive
       :items="nodes"
       :fields="fields"
-      :sort-by.sync="sortBy"
-      :sort-desc.sync="sortDesc"
+      :sort-by="sortByRef"
+      :sort-desc="sortDesc"
       :per-page="perPage"
       :current-page="currentPage"
       :filter="filter"
       class="mb-0"
+      @update:sort-by="sortByRef = $event"
+      @update:sort-desc="sortDesc = $event"
     >
-      <template #cell(name)="data">
-        <div class="d-flex flex-row justify-content-start align-items-center">
+      <template #cell(name)="{ item }">
+        <div class="flex items-center">
           <span
-            v-if="data.item.isFullValidator"
+            v-if="item.isFullValidator"
             v-tooltip="'Full validator'"
-            class="badge sb-badge badge-success mr-1"
+            class="inline-flex items-center justify-center rounded bg-emerald-500 text-white mr-1 p-0.5"
             title="Full validator"
           >
-            <b-icon-shield />
+            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           </span>
           <div class="mr-1">
             <router-link
               :to="{
                 name: 'node-dashboard',
-                params: { publicKey: data.item.publicKey },
+                params: { publicKey: item.publicKey },
                 query: {
                   center: '1',
                   view: $route.query.view,
@@ -36,120 +38,119 @@
                 },
               }"
             >
-              {{ data.item.name }}
+              {{ item.name }}
             </router-link>
           </div>
-          <b-badge
+          <UiBadge
             v-if="
               network.isNodeFailing(
-                network.getNodeByPublicKey(data.item.publicKey),
+                network.getNodeByPublicKey(item.publicKey),
               )
             "
             v-tooltip="
               network.getNodeFailingReason(
-                network.getNodeByPublicKey(data.item.publicKey),
+                network.getNodeByPublicKey(item.publicKey),
               ).description
             "
             variant="danger"
           >
             {{
               network.getNodeFailingReason(
-                network.getNodeByPublicKey(data.item.publicKey),
+                network.getNodeByPublicKey(item.publicKey),
               ).label
             }}
-          </b-badge>
-          <b-badge
+          </UiBadge>
+          <UiBadge
             v-else-if="
               NodeWarningDetector.nodeHasWarning(
-                network.getNodeByPublicKey(data.item.publicKey),
+                network.getNodeByPublicKey(item.publicKey),
                 network,
               )
             "
             v-tooltip="
               NodeWarningDetector.getNodeWarningReasonsConcatenated(
-                network.getNodeByPublicKey(data.item.publicKey),
+                network.getNodeByPublicKey(item.publicKey),
                 network,
               )
             "
             variant="warning"
           >
             Warning
-          </b-badge>
-          
+          </UiBadge>
         </div>
       </template>
-      
-      <template #cell(trustScore)="data">
-        <div class="d-flex align-items-center">
+
+      <template #cell(trustScore)="{ item }">
+        <div class="flex items-center">
           <div class="trust-score-bar mr-2">
-            <div 
+            <div
               class="trust-score-fill"
-              :style="{ 
-                width: `${Math.min(100, data.item.trustCentralityScore || 0)}%`,
-                backgroundColor: getTrustProgressColor(data.item.trustCentralityScore || 0)
+              :style="{
+                width: `${Math.min(100, item.trustCentralityScore || 0)}%`,
+                backgroundColor: getTrustProgressColor(item.trustCentralityScore || 0)
               }"
             ></div>
           </div>
           <span class="trust-score-text">
-            {{ formatTrustScore(data.item.trustCentralityScore) }}
+            {{ formatTrustScore(item.trustCentralityScore) }}
           </span>
         </div>
       </template>
 
-      <template #cell(trustRank)="data">
+      <template #cell(trustRank)="{ item }">
         <span class="trust-rank">
-          {{ formatTrustRank(data.item.trustRank) }}
+          {{ formatTrustRank(item.trustRank) }}
         </span>
       </template>
 
-      <template #cell(trustedBy)="data">
+      <template #cell(trustedBy)="{ item }">
         <span class="trusted-by">
-          {{ data.item.incomingTrustCount || 0 }} 
-          <small class="text-muted">connections</small>
+          {{ item.incomingTrustCount || 0 }}
+          <small class="text-gray-500">connections</small>
         </span>
       </template>
 
-      <template #cell(seededTrustScore)="data">
+      <template #cell(seededTrustScore)="{ item }">
         <div v-if="trustStore.isSeededViewActive" class="seeded-trust-score">
           <div class="trust-progress">
-            <div 
-              class="trust-progress-bar" 
-              :class="getSeededTrustColorClass(data.item)"
-              :style="{ width: getSeededTrustScore(data.item) + '%' }"
+            <div
+              class="trust-progress-bar"
+              :class="getSeededTrustColorClass(item)"
+              :style="{ width: getSeededTrustScore(item) + '%' }"
             ></div>
           </div>
           <span class="seeded-trust-score-text">
-            {{ formatTrustScore(getSeededTrustScore(data.item)) }}
+            {{ formatTrustScore(getSeededTrustScore(item)) }}
           </span>
         </div>
-        <span v-else class="text-muted">-</span>
+        <span v-else class="text-gray-500">-</span>
       </template>
 
-      <template #cell(seededTrustRank)="data">
+      <template #cell(seededTrustRank)="{ item }">
         <span v-if="trustStore.isSeededViewActive" class="seeded-trust-rank">
-          {{ formatSeededTrustRank(data.item) }}
+          {{ formatSeededTrustRank(item) }}
         </span>
-        <span v-else class="text-muted">-</span>
+        <span v-else class="text-gray-500">-</span>
       </template>
 
-      <template #cell(distanceFromSeeds)="data">
-        <b-badge 
+      <template #cell(distanceFromSeeds)="{ item }">
+        <UiBadge
           v-if="trustStore.isSeededViewActive"
-          :variant="getDistanceBadgeVariant(getDistanceFromSeeds(data.item))"
+          :variant="getDistanceBadgeVariant(getDistanceFromSeeds(item))"
           class="distance-badge"
         >
-          {{ getDistanceLabel(getDistanceFromSeeds(data.item)) }}
-        </b-badge>
-        <span v-else class="text-muted">-</span>
+          {{ getDistanceLabel(getDistanceFromSeeds(item)) }}
+        </UiBadge>
+        <span v-else class="text-gray-500">-</span>
       </template>
 
-      <template #cell(organization)="data">
+      <template #cell(organization)="{ item }">
         <router-link
-          v-if="data.item.organizationId"
+          v-if="item.organizationId"
           :to="{
             name: 'organization-dashboard',
             params: {
-              organizationId: data.item.organizationId,
+              organizationId: item.organizationId,
             },
             query: {
               view: $route.query.view,
@@ -159,26 +160,26 @@
             },
           }"
         >
-          {{ data.item.organization }}
+          {{ item.organization }}
         </router-link>
       </template>
-      <template #cell(type)="row">
-        {{ row.item.type }}
+      <template #cell(type)="{ item }">
+        {{ item.type }}
       </template>
-      <template #cell(version)="data">
-        {{ truncate(data.value, 28) || " " }}
+      <template #cell(version)="{ value }">
+        {{ truncate(value, 28) || " " }}
       </template>
-      <template #cell(action)="data">
+      <template #cell(action)="{ item }">
         <node-actions
-          :node="network.getNodeByPublicKey(data.item.publicKey)"
+          :node="network.getNodeByPublicKey(item.publicKey)"
         ></node-actions>
       </template>
-    </b-table>
+    </UiTable>
     <div
       v-show="nodes.length >= perPage"
-      class="d-flex justify-content-end m-1"
+      class="flex justify-end m-1"
     >
-      <b-pagination
+      <UiPagination
         v-model="currentPage"
         size="sm"
         :limit="3"
@@ -193,13 +194,6 @@
 <script setup lang="ts">
 import { computed, ref, toRefs, withDefaults } from "vue";
 
-import {
-  BBadge,
-  BIconShield,
-  BPagination,
-  BTable,
-  type BvTableFieldArray,
-} from '@/components/bootstrap-compat';
 import NodeActions from "@/components/node/sidebar/node-actions.vue";
 import useStore from "@/store/useStore";
 import { useTruncate } from "@/composables/useTruncate";
@@ -208,25 +202,36 @@ import { TrustStyleCalculator } from "@/utils/TrustStyleCalculator";
 import { useTrustStore } from "@/store/TrustStore";
 import { Node } from "shared";
 
+interface TableField {
+  key: string;
+  label?: string;
+  sortable?: boolean;
+  class?: string;
+  tdClass?: string;
+}
+
 export interface Props {
   filter?: string;
-  fields: BvTableFieldArray;
+  fields: (string | TableField)[];
   nodes: TableNode[];
   perPage?: number;
   sortBy?: string;
+  sortByDesc?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   filter: "",
   perPage: 200,
   sortBy: "index",
+  sortByDesc: true,
 });
 
-const { filter, fields, nodes, perPage, sortBy } = toRefs(props);
+const { filter, fields, nodes, perPage } = toRefs(props);
 
 const truncate = useTruncate();
 
-const sortDesc = ref(true);
+const sortByRef = ref(props.sortBy);
+const sortDesc = ref(props.sortByDesc);
 
 const currentPage = ref(1);
 
@@ -266,17 +271,6 @@ export type TableNode = {
   lastTrustCalculation?: Date;
 };
 
-// Trust-related computed properties and methods
-const networkAverageTrust = computed(() => {
-  const trustScores = nodes.value
-    .map(node => node.trustCentralityScore || 0)
-    .filter(score => score > 0);
-  
-  if (trustScores.length === 0) return 50;
-  
-  return trustScores.reduce((sum, score) => sum + score, 0) / trustScores.length;
-});
-
 // Trust helper functions
 
 const formatTrustScore = (score: number | undefined): string => {
@@ -289,27 +283,6 @@ const formatTrustRank = (rank: number | undefined): string => {
 
 const getTrustProgressColor = (score: number): string => {
   return TrustStyleCalculator.getTrustProgressColor(score);
-};
-
-const getNodeObject = (tableNode: TableNode): Node => {
-  // Convert TableNode to Node object for trust calculations
-  const node = network.getNodeByPublicKey(tableNode.publicKey);
-  if (node) {
-    // Ensure trust properties are available
-    node.trustCentralityScore = tableNode.trustCentralityScore || 0;
-    node.pageRankScore = tableNode.pageRankScore || 0;
-    node.trustRank = tableNode.trustRank || 0;
-    node.lastTrustCalculation = tableNode.lastTrustCalculation || null;
-    return node;
-  }
-  
-  // Create a minimal Node-like object for trust calculations
-  return {
-    trustCentralityScore: tableNode.trustCentralityScore || 0,
-    pageRankScore: tableNode.pageRankScore || 0,
-    trustRank: tableNode.trustRank || 0,
-    lastTrustCalculation: tableNode.lastTrustCalculation || null
-  } as unknown as Node;
 };
 
 // Seeded trust helper functions
@@ -348,11 +321,11 @@ const getDistanceLabel = (distance: number): string => {
 };
 
 const getDistanceBadgeVariant = (distance: number): string => {
-  if (distance === 0) return 'warning'; // Orange for seeds
-  if (distance === 1) return 'info';    // Blue for direct
-  if (distance === 2) return 'secondary'; // Gray for 2nd degree
-  if (distance >= 3) return 'light';     // Light gray for distant
-  return 'dark'; // Dark for unreachable
+  if (distance === 0) return 'warning';
+  if (distance === 1) return 'info';
+  if (distance === 2) return 'secondary';
+  if (distance >= 3) return 'default';
+  return 'default';
 };
 </script>
 
@@ -380,55 +353,34 @@ const getDistanceBadgeVariant = (distance: number): string => {
   text-align: right;
 }
 
-/* Trust rank styling */
 .trust-rank {
   font-size: 0.875rem;
   font-weight: 500;
   color: #212529;
 }
 
-/* Trusted by styling */
 .trusted-by {
   font-size: 0.875rem;
   color: #212529;
 }
 
-/* Trust badge styling in table */
-.ml-1 {
-  margin-left: 0.25rem;
-}
-
-/* Mobile responsive */
 @media (max-width: 768px) {
   .trust-score-bar {
     width: 40px;
     height: 4px;
   }
-  
+
   .trust-score-text {
     font-size: 0.75rem;
     min-width: 30px;
   }
-  
+
   .trust-rank,
   .trusted-by {
     font-size: 0.75rem;
   }
 }
 
-/* High contrast mode */
-@media (prefers-contrast: high) {
-  .trust-score-bar {
-    border: 1px solid #000;
-  }
-  
-  .trust-score-fill {
-    border: 1px solid #000;
-  }
-}
-
-
-/* Seeded trust styling */
 .seeded-trust-score {
   display: flex;
   flex-direction: column;

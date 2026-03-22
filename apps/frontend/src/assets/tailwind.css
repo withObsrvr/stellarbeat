@@ -2,13 +2,90 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom utilities to match existing design */
-@layer utilities {
-  .card {
-    @apply rounded-lg border border-slate-200 bg-white shadow-sm;
+/* ──────────────────────────────────────────────
+   Prism Design System — CSS Custom Properties
+   ────────────────────────────────────────────── */
+:root {
+  --color-surface-page: #FAFAFA;
+  --color-surface-card: #FFFFFF;
+  --color-surface-subtle: #F3F4F6;
+  --color-border-default: #E5E7EB;
+  --color-border-subtle: #F3F4F6;
+  --color-text-primary: #111111;
+  --color-text-strong: #374151;
+  --color-text-body: #6B7280;
+  --color-text-muted: #9CA3AF;
+}
+
+/* Dark mode infrastructure (no toggle yet) */
+.dark {
+  --color-surface-page: #09090B;
+  --color-surface-card: #141414;
+  --color-surface-subtle: #1E1E1E;
+  --color-border-default: #2A2A2A;
+  --color-border-subtle: #1E1E1E;
+  --color-text-primary: #F3F4F6;
+  --color-text-strong: #D1D5DB;
+  --color-text-body: #9CA3AF;
+  --color-text-muted: #6B7280;
+}
+
+/* ──────────────────────────────────────────────
+   Base Utilities
+   ────────────────────────────────────────────── */
+@layer base {
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
   }
 
-  .btn {
-    @apply inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1;
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
+}
+
+/* ──────────────────────────────────────────────
+   Prism Animations & Utilities
+   ────────────────────────────────────────────── */
+@layer utilities {
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.35); }
+    70%  { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+
+  .anim-fade-up {
+    animation: fade-up 0.3s ease-out forwards;
+    opacity: 0;
+  }
+
+  .pulse-dot {
+    animation: pulse-ring 2s infinite;
+  }
+
+  /* Detail row hover */
+  .detail-row {
+    transition: background-color 80ms;
+  }
+  .detail-row:hover {
+    background-color: var(--color-surface-subtle);
+  }
+
+  /* Staggered fade-up animation */
+  .anim {
+    animation: fade-up 0.4s ease-out forwards;
+    opacity: 0;
+  }
+  .d1 { animation-delay: .08s; }
+  .d2 { animation-delay: .16s; }
+  .d3 { animation-delay: .24s; }
+  .d4 { animation-delay: .32s; }
+  .d5 { animation-delay: .4s; }
+  .d6 { animation-delay: .48s; }
+  .d7 { animation-delay: .56s; }
+  .d8 { animation-delay: .64s; }
 }
