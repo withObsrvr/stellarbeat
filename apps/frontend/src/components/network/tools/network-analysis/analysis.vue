@@ -2,7 +2,7 @@
   <div class="">
     <slot name="title"></slot>
     <div>
-      <b-table
+      <UiTable
         id="network-analysis-table"
         :items="tableItems"
         :fields="fields"
@@ -28,19 +28,19 @@
             </li>
           </ul>
         </template>
-      </b-table>
-      <b-pagination
+      </UiTable>
+      <UiPagination
         v-model="currentPage"
         :total-rows="rows"
         :per-page="perPage"
         aria-controls="network-analysis-table"
-      ></b-pagination>
+      ></UiPagination>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { BPagination, BTable, type BvTableFieldArray } from '@/components/bootstrap-compat';
+
 import { computed, type ComputedRef, type PropType, ref, toRefs } from "vue";
 
 const props = defineProps({
@@ -74,7 +74,7 @@ const getNodesPartitionTooltip = (
   return nodesPartition.get(node)?.join(", ") || "";
 };
 
-const fields: ComputedRef<BvTableFieldArray> = computed(() => {
+const fields: ComputedRef<(string | { key: string; label?: string; sortable?: boolean; tdClass?: string })[]> = computed(() => {
   return [
     {
       key: "key",

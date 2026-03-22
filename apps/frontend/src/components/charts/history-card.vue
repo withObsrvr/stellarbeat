@@ -1,46 +1,46 @@
 <template>
-  <div class="card">
-    <div class="card-header pl-3 d-flex flex-wrap">
-      <div class="btn-group mr-3" role="group" aria-label="Chart view">
+  <div class="rounded-xl border border-gray-200 bg-white">
+    <div class="flex flex-wrap items-center gap-3 border-b border-gray-100 bg-gray-50/80 pl-3 py-3">
+      <div class="inline-flex rounded-lg shadow-sm" role="group" aria-label="Chart view">
         <button
           type="button"
-          class="btn btn-sm btn-secondary"
-          :class="{ active: chartView === '30D' }"
+          class="rounded-l-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          :class="{ 'bg-gray-100 font-semibold': chartView === '30D' }"
           @click="select30DayViewDefault"
         >
           30D
         </button>
         <button
           type="button"
-          class="btn btn-sm btn-secondary"
-          :class="{ active: chartView === '24H' }"
+          class="border-y border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          :class="{ 'bg-gray-100 font-semibold': chartView === '24H' }"
           @click="select24HViewDefault"
         >
           24H
         </button>
         <button
           type="button"
-          class="btn btn-sm btn-secondary"
-          :class="{ active: chartView === '1H' }"
+          class="rounded-r-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          :class="{ 'bg-gray-100 font-semibold': chartView === '1H' }"
           @click="select1HViewDefault"
         >
           1H
         </button>
       </div>
-      <h5 class="card-title pt-1">
+      <h5 class="text-sm font-semibold text-gray-900">
         {{ subject }}
       </h5>
     </div>
-    <div v-if="failed" class="card-alert alert alert-danger mb-0">
-      <b-icon-exclamation-triangle />
+    <div v-if="failed" class="p-4 text-sm text-red-600 bg-red-50/50 ring-1 ring-red-200/60">
+      <svg class="inline h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
       Error fetching data
     </div>
-    <div class="card-body p-2">
-      <div :class="dimmerClass" class="h-100">
+    <div class="p-2">
+      <div :class="dimmerClass" class="h-full">
         <div class="loader"></div>
         <div
           ref="chartContainer"
-          class="dimmer-content h-100 d-flex flex-column align-items-center justify-content-center"
+          class="dimmer-content h-full flex flex-col items-center justify-center"
         >
           <div v-if="rendered">
             <BarChartDay
@@ -70,7 +70,7 @@
           </div>
 
           <div
-            class="d-flex flex-wrap mt-1"
+            class="flex flex-wrap mt-1"
             :class="{ animated: animated }"
             @animationend="animated = false"
           >

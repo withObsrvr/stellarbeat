@@ -1,7 +1,7 @@
 <template>
-  <div class="card h-100">
-    <div class="text-muted mx-3 mt-3">Versions</div>
-    <div class="card-body d-flex flex-row justify-content-center p-1">
+  <div class="rounded-xl border border-gray-200 bg-white h-full">
+    <div class="text-gray-500 text-sm mx-3 mt-3">Versions</div>
+    <div class="flex justify-center p-1">
       <div
         class="canvas-container"
         style="position: relative; height: 150px; width: 200px"

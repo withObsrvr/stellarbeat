@@ -1,32 +1,34 @@
 <template>
-  <div class="d-flex flex-column align-items-center justify-content-end">
-    <b-table
+  <div class="flex flex-col items-center justify-end">
+    <UiTable
       striped
       hover
-      :responsive="true"
+      responsive
       :items="organizations"
       :fields="fields"
-      :sort-by.sync="sortBy"
-      :sort-desc.sync="sortDesc"
+      :sort-by="sortByRef"
+      :sort-desc="sortDesc"
       :per-page="perPage"
       :current-page="currentPage"
       :filter="filter"
       class="mb-0"
+      @update:sort-by="sortByRef = $event"
+      @update:sort-desc="sortDesc = $event"
     >
-      <template #cell(validators)="row">
+      <template #cell(validators)="{ item }">
         <ul class="validator-list">
           <li
-            v-for="validator in row.item.validators"
+            v-for="validator in item.validators"
             :key="validator.publicKey"
           >
-            <div class="">
+            <div>
               <span
                 v-if="validator.isFullValidator"
                 v-tooltip="'Full validator'"
-                class="badge sb-badge badge-success pt-1 mr-1"
+                class="inline-flex items-center justify-center rounded bg-emerald-500 text-white mr-1 p-0.5"
                 title="Full validator"
               >
-                <b-icon-shield />
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
               </span>
 
               <router-link
@@ -43,67 +45,48 @@
               >
                 {{ validator.displayName }}
               </router-link>
-              <span
+              <UiBadge
                 v-if="network.isNodeFailing(validator)"
                 v-tooltip="network.getNodeFailingReason(validator).description"
-                class="badge sb-badgebadge-danger ml-1"
-                >{{ network.getNodeFailingReason(validator).label }}</span
-              >
-              <span
-                v-else-if="
-                  NodeWarningDetector.nodeHasWarning(validator, network)
-                "
-                v-tooltip="
-                  NodeWarningDetector.getNodeWarningReasonsConcatenated(
-                    validator,
-                    network,
-                  )
-                "
-                class="badge sb-badge badge-warning ml-1"
+                variant="danger"
+                class="ml-1"
+              >{{ network.getNodeFailingReason(validator).label }}</UiBadge>
+              <UiBadge
+                v-else-if="NodeWarningDetector.nodeHasWarning(validator, network)"
+                v-tooltip="NodeWarningDetector.getNodeWarningReasonsConcatenated(validator, network)"
+                variant="warning"
+                class="ml-1"
               >
                 Warning
-              </span>
+              </UiBadge>
             </div>
           </li>
         </ul>
       </template>
-      <template #head(subQuorum24HAvailability)="data">
-        <span class=""
-          >{{ data.label }}
-          <b-icon-info-circle
-            v-tooltip="
-              'Availability: more than or equal to 50% of the organization validators are validating.'
-            "
-            class="text-gray"
-          />
+      <template #head(subQuorum24HAvailability)="{ label }">
+        <span>{{ label }}
+          <svg v-tooltip="'Availability: more than or equal to 50% of the organization validators are validating.'" class="inline h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </span>
       </template>
-      <template #head(subQuorum30DAvailability)="data">
-        <span class=""
-          >{{ data.label }}
-          <b-icon-info-circle
-            v-tooltip="
-              'Availability: more than or equal to 50% of the organization validators are validating.'
-            "
-            class="text-gray"
-          />
+      <template #head(subQuorum30DAvailability)="{ label }">
+        <span>{{ label }}
+          <svg v-tooltip="'Availability: more than or equal to 50% of the organization validators are validating.'" class="inline h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </span>
       </template>
-      <template #cell(name)="row">
-        <div class="d-flex flex-row justify-content-start align-items-center">
+      <template #cell(name)="{ item }">
+        <div class="flex items-center">
           <span
-            v-if="row.item.hasReliableUptime"
+            v-if="item.hasReliableUptime"
             v-tooltip="'>99% uptime with at least 3 validators'"
-            title=">99% uptime with at least 3 validators"
-            class="badge sb-badge badge-primary mr-1"
+            class="inline-flex items-center justify-center rounded bg-primary text-white mr-1 p-0.5"
           >
-            <b-icon-shield />
+            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           </span>
           <div class="mr-1">
             <router-link
               :to="{
                 name: 'organization-dashboard',
-                params: { organizationId: row.item.id },
+                params: { organizationId: item.id },
                 query: {
                   view: $route.query.view,
                   network: $route.query.network,
@@ -111,69 +94,60 @@
                 },
               }"
             >
-              {{ row.item.name }}
+              {{ item.name }}
             </router-link>
           </div>
-          <span
-            v-if="row.item.failAt === 1"
-            v-tooltip="
-              'If one more validator fails, this organization will fail'
-            "
-            class="badge sb-badge badge-warning ml-1"
-            title="If one more validator fails, this organization will fail"
-            >Warning
-          </span>
-          <span
-            v-else-if="row.item.failAt < 1"
-            v-tooltip="row.item.dangers"
-            class="badge sb-badge badge-danger ml-1"
-            :title="row.item.dangers"
-            >{{ row.item.blocked ? "Blocked" : "Failing" }}
-          </span>
-          <span
-            v-else-if="row.item.hasWarning"
-            v-tooltip="row.item.warning"
-            class="badge sb-badge badge-warning ml-1"
-            :title="row.item.warning"
-            >Warning
-          </span>
+          <UiBadge
+            v-if="item.failAt === 1"
+            v-tooltip="'If one more validator fails, this organization will fail'"
+            variant="warning"
+            class="ml-1"
+          >Warning</UiBadge>
+          <UiBadge
+            v-else-if="item.failAt < 1"
+            v-tooltip="item.dangers"
+            variant="danger"
+            class="ml-1"
+          >{{ item.blocked ? "Blocked" : "Failing" }}</UiBadge>
+          <UiBadge
+            v-else-if="item.hasWarning"
+            v-tooltip="item.warning"
+            variant="warning"
+            class="ml-1"
+          >Warning</UiBadge>
         </div>
       </template>
-      <template #cell(url)="row">
-        <a :href="row.item.url" target="_blank" rel="noopener">{{
-          row.item.url
+      <template #cell(url)="{ item }">
+        <a :href="item.url" target="_blank" rel="noopener">{{
+          item.url
         }}</a>
       </template>
-      https://keybase.io/
-      <template #cell(keybase)="row">
+      <template #cell(keybase)="{ item }">
         <a
-          :href="'https://keybase.io/' + row.item.keybase"
+          :href="'https://keybase.io/' + item.keybase"
           target="_blank"
           rel="noopener"
-          >{{ row.item.keybase }}</a
-        >
+        >{{ item.keybase }}</a>
       </template>
-      <template #cell(email)="row">
+      <template #cell(email)="{ item }">
         <a
-          v-if="row.item.email"
-          :href="'mailto:' + row.item.email"
-          class=""
+          v-if="item.email"
+          :href="'mailto:' + item.email"
           target="_blank"
           rel="noopener"
-          >{{ row.item.email }}</a
-        >
+        >{{ item.email }}</a>
       </template>
-      <template #cell(action)="data">
+      <template #cell(action)="{ item }">
         <organization-actions
-          :organization="network.getOrganizationById(data.item.id)"
+          :organization="network.getOrganizationById(item.id)"
         ></organization-actions>
       </template>
-    </b-table>
+    </UiTable>
     <div
       v-show="organizations.length >= perPage"
-      class="d-flex justify-content-end m-1"
+      class="flex justify-end m-1"
     >
-      <b-pagination
+      <UiPagination
         v-model="currentPage"
         size="sm"
         :limit="3"
@@ -188,21 +162,22 @@
 <script setup lang="ts">
 import { computed, ref, toRefs } from "vue";
 
-import {
-  BIconInfoCircle,
-  BIconShield,
-  BPagination,
-  BTable,
-  type BvTableFieldArray,
-} from '@/components/bootstrap-compat';
 import OrganizationActions from "@/components/organization/sidebar/organization-actions.vue";
 import useStore from "@/store/useStore";
 import { NodeWarningDetector } from "@/services/NodeWarningDetector";
 import { Node } from "shared";
 
+interface TableField {
+  key: string;
+  label?: string;
+  sortable?: boolean;
+  class?: string;
+  tdClass?: string;
+}
+
 export interface Props {
   filter?: string;
-  fields: BvTableFieldArray;
+  fields: (string | TableField)[];
   organizations: TableOrganization[];
   perPage?: number;
   sortBy?: string;
@@ -214,8 +189,9 @@ const props = withDefaults(defineProps<Props>(), {
   sortBy: "subQuorum30DAvailability",
 });
 
-const { filter, fields, organizations, perPage, sortBy } = toRefs(props);
+const { filter, fields, organizations, perPage } = toRefs(props);
 
+const sortByRef = ref(props.sortBy);
 const sortDesc = ref(true);
 const currentPage = ref(1);
 

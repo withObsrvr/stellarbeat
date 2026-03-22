@@ -8,18 +8,18 @@
         </div>
       </div>
       <div v-else>
-        <b-alert variant="success" show>Event unmuted!</b-alert>
+        <UiAlert variant="success" show>Event unmuted!</UiAlert>
       </div>
     </div>
     <div v-else>
       <h4>{{ errorMessage }}</h4>
-      <button class="btn btn-primary" @click="unmute">Try again</button>
+      <button class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors" @click="unmute">Try again</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { BAlert } from '@/components/bootstrap-compat';
+
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 

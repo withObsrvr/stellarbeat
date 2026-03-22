@@ -2,11 +2,11 @@
   <div v-if="selectedNode">
     <portal-target name="simulate-node-modal"> </portal-target>
     <portal-target name="quorum-set-modals" multiple></portal-target>
-    <b-alert :show="network.isNodeFailing(selectedNode)" variant="danger">
+    <UiAlert :show="network.isNodeFailing(selectedNode)" variant="danger">
       {{ network.getNodeFailingReason(selectedNode).description }}
-    </b-alert>
+    </UiAlert>
 
-    <b-alert
+    <UiAlert
       :show="NodeWarningDetector.nodeHasWarning(selectedNode, network)"
       variant="warning"
     >
@@ -22,9 +22,9 @@
           {{ reason }}.
         </li>
       </ul>
-    </b-alert>
+    </UiAlert>
 
-    <b-alert
+    <UiAlert
       :show="network.historyArchiveHasError(selectedNode)"
       variant="warning"
     >
@@ -53,40 +53,40 @@
         v-if="historyArchiveScan"
         :errors="historyArchiveScan.errors"
       />
-    </b-alert>
-    <b-alert
+    </UiAlert>
+    <UiAlert
       :show="historyArchiveScan ? historyArchiveScan.isSlow : false"
       variant="info"
     >
       Only latest ledgers in history archive are scanned for errors because
       archive has limited throughput.
-    </b-alert>
-    <div v-if="!store.isSimulation" class="row row-cards row-deck">
-      <div class="col-sm-12 col-md-6 col-xl-3">
+    </UiAlert>
+    <div v-if="!store.isSimulation" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div>
         <node-index :node="selectedNode" />
       </div>
 
-      <div v-if="selectedNode.isValidator" class="col-sm-12 col-md-6 col-xl-3">
+      <div v-if="selectedNode.isValidator" class="">
         <NodeStatistics24HValidating :node="selectedNode" />
       </div>
 
-      <div v-else class="col-sm-12 col-md-6 col-xl-3">
+      <div v-else class="">
         <NodeStatistics24HActive :node="selectedNode" />
       </div>
 
-      <div v-if="selectedNode.isValidator" class="col-sm-12 col-md-6 col-xl-3">
+      <div v-if="selectedNode.isValidator" class="">
         <NodeStatistics30DValidating :node="selectedNode" />
       </div>
 
-      <div v-else class="col-sm-12 col-md-6 col-xl-3">
+      <div v-else class="">
         <NodeStatistics30DActive :node="selectedNode" />
       </div>
 
-      <div class="col-sm-12 col-md-6 col-xl-3">
+      <div class="">
         <NodeStatistics30DOverloaded :node="selectedNode" />
       </div>
 
-      <div v-if="selectedNode.isValidator" class="col-md-12 col-lg-6 col-xl-4">
+      <div v-if="selectedNode.isValidator" class="col-span-1">
         <history-card
           :subject="'Validating'"
           :entity-id="selectedNode.publicKey"
@@ -104,7 +104,7 @@
         >
         </history-card>
       </div>
-      <div v-else class="col-md-12 col-lg-6 col-xl-4">
+      <div v-else class="col-span-1">
         <history-card
           :subject="'Active'"
           :entity-id="selectedNode.publicKey"
@@ -123,7 +123,7 @@
         </history-card>
       </div>
 
-      <div v-if="selectedNode.isValidator" class="col-md-12 col-lg-6 col-xl-4">
+      <div v-if="selectedNode.isValidator" class="col-span-1">
         <history-card
           :subject="'History Archive up-to-date'"
           :entity-id="selectedNode.publicKey"
@@ -140,7 +140,7 @@
         >
         </history-card>
       </div>
-      <div v-if="selectedNode.isValidator" class="col-md-12 col-lg-6 col-xl-4">
+      <div v-if="selectedNode.isValidator" class="col-span-1">
         <history-card
           :subject="'Crawler rejected'"
           :entity-id="selectedNode.publicKey"
@@ -159,25 +159,25 @@
         </history-card>
       </div>
 
-      <div class="col-md-12 col-lg-6 col-xl-4">
+      <div class="col-span-1">
         <node-info :node="selectedNode" />
       </div>
-      <div class="col-md-12 col-lg-6 col-xl-4">
+      <div class="col-span-1">
         <node-extra-info :node="selectedNode" />
       </div>
 
-      <div v-if="selectedNode.isValidator" class="col-md-12 col-lg-6 col-xl-4">
+      <div v-if="selectedNode.isValidator" class="col-span-1">
         <node-trusted-by :node="selectedNode" />
       </div>
     </div>
-    <div class="row row-cards">
-      <div v-if="selectedNode.isValidator" class="col-lg-12 col-xl-12">
+    <div class="grid grid-cols-1 gap-4 mt-4">
+      <div v-if="selectedNode.isValidator">
         <node-quorum-set-validators :node="selectedNode" />
       </div>
-      <div v-if="!store.isSimulation" class="col-lg-12 col-xl-12">
+      <div v-if="!store.isSimulation" class="">
         <node-latest-updates :node="selectedNode" />
       </div>
-      <div v-else class="col-lg-12 col-xl-12">
+      <div v-else class="">
         <node-trusted-by :node="selectedNode" />
       </div>
     </div>
@@ -194,7 +194,6 @@ import NodeStatistics24HActive from "@/components/node/node-cards/statistics/nod
 import NodeTrustedBy from "@/components/node/node-cards/node-trusted-by.vue";
 import NodeLatestUpdates from "@/components/node/node-cards/node-latest-updates.vue";
 import HistoryArchiveErrorList from "@/components/node/node-cards/history-archive-error-list.vue";
-import { BAlert } from '@/components/bootstrap-compat';
 import { HistoryArchiveScan } from "shared";
 import useStore from "@/store/useStore";
 import NodeStatistics30DOverloaded from "@/components/node/node-cards/statistics/node-statistics-30D-overloaded.vue";

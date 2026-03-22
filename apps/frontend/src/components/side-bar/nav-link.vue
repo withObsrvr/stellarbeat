@@ -4,30 +4,31 @@
     :class="classObject"
     role="button"
     tabindex="0"
-    class="d-flex justify-content-between"
+    class="flex justify-between"
     @click="handleClick"
     @keyup.enter="handleKeyup"
     @keyup.space="handleKeyup"
     @mouseenter="hover = true"
     @mouseleave="hover = false"
   >
-    <div
-      class="w-100 d-flex flex-row justify-content-between align-items-center"
-    >
-      <div class="w-100 d-flex flex-column align-items-stretch">
-        <div class="w-100 d-flex align-items-center align-content-center">
-          <div class="sb-nav-link-icon align-content-center">
-            <b-icon
-              v-if="showDropdownToggle"
-              :icon="chevronDirection"
-              scale="0.8"
-            />
-            <b-icon v-else-if="showIcon" :icon="icon" scale="0.8" />
+    <div class="w-full flex justify-between items-center">
+      <div class="w-full flex flex-col items-stretch">
+        <div class="w-full flex items-center">
+          <div class="sb-nav-link-icon flex items-center">
+            <svg v-if="showDropdownToggle && dropDownShowing" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            <svg v-else-if="showDropdownToggle" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            <svg v-else-if="showIcon && icon === 'info-circle'" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <svg v-else-if="showIcon && icon === 'bullseye'" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="8" cy="8" r="4" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="8" cy="8" r="1" fill="currentColor"/></svg>
+            <svg v-else-if="showIcon && icon === 'building'" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            <svg v-else-if="showIcon && icon === 'download'" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+            <svg v-else-if="showIcon && icon === 'broadcast'" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.858 15.355-5.858 21.213 0" /></svg>
+            <svg v-else-if="showIcon && icon === 'plus'" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+            <svg v-else-if="showIcon && icon === 'gear-wide'" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            <svg v-else-if="showIcon && icon === 'pencil'" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+            <svg v-else-if="showIcon" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </div>
 
-          <div
-            class="w-100 d-flex justify-content-between align-content-center"
-          >
+          <div class="w-full flex justify-between items-center">
             <nav-title
               :title="title"
               :classes="'w-100 pb-0 m-height ' + (secondary ? 'secondary' : '')"
@@ -39,7 +40,7 @@
             />
           </div>
         </div>
-        <div v-if="showSubTitle" class="text-muted sub-title">
+        <div v-if="showSubTitle" class="text-gray-500 sub-title">
           {{ subTitle }}
         </div>
       </div>

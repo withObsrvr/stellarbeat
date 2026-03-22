@@ -13,13 +13,13 @@ const props = defineProps<{
 }>();
 
 const alertClasses = computed(() => {
-  const base = 'p-4 mb-4 rounded-lg border';
+  const base = 'p-4 mb-4 rounded-xl text-sm ring-1';
 
   const variants = {
-    success: 'bg-success-light border-success text-success',
-    danger: 'bg-danger-light border-danger text-danger',
-    warning: 'bg-warning-light border-warning text-warning',
-    info: 'bg-info-light border-info text-info',
+    success: 'bg-emerald-50/50 text-emerald-700 ring-emerald-200/60',
+    danger: 'bg-red-50/50 text-red-600 ring-red-200/60',
+    warning: 'bg-amber-50/50 text-amber-700 ring-amber-200/60',
+    info: 'bg-cyan-50/50 text-cyan-700 ring-cyan-200/60',
   };
 
   return [base, variants[props.variant || 'info']];

@@ -1,146 +1,76 @@
 <template>
-  <div class="card this-card">
-    <div class="card-header">
-      <h4 class="card-title">Latest node updates</h4>
+  <div class="rounded-xl border border-gray-200 bg-white this-card">
+    <div class="border-b border-gray-100 bg-gray-50/80 px-3 py-3">
+      <h4 class="text-sm font-semibold text-gray-900">Latest node updates</h4>
     </div>
-    <div v-if="failed" class="card-alert alert alert-danger mb-0">
-      <b-icon-exclamation-triangle />
+    <div v-if="failed" class="p-4 text-sm text-red-600 bg-red-50/50 ring-1 ring-red-200/60">
+      <svg class="inline h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
       Error fetching data
     </div>
-    <div class="card-body py-0 overflow-auto">
-      <b-list-group
-        v-if="!isLoading"
-        flush
-        class="w-100 mb-4 list-group-striped"
-      >
-        <b-list-group-item
+    <div class="py-0 overflow-auto px-4">
+      <div v-if="!isLoading" class="w-full mb-4">
+        <div
           v-for="updatesOnDate in updatesPerDate"
           :key="new Date(updatesOnDate.date).getTime()"
-          class="px-0 pb-0 dimmer-content"
+          class="px-0 pb-0 border-b border-gray-100 last:border-b-0 py-2"
         >
-          <div class="d-flex justify-content-between flex-wrap">
-            <div class="w-75">
-              <div class="text-muted mb-1" style="font-size: small">
+          <div class="flex justify-between flex-wrap">
+            <div class="w-3/4">
+              <div class="text-gray-500 mb-1 text-xs">
                 {{ new Date(updatesOnDate.date).toLocaleString() }}
               </div>
               <div class="mb-2">
                 <div v-for="update in updatesOnDate.updates" :key="update.key">
-                  <div v-if="update.key === 'ip'">
-                    IP changed to
-                    {{ update.value || "empty" }}
-                  </div>
-                  <div v-else-if="update.key === 'port'">
-                    Port changed to
-                    {{ update.value || "empty" }}
-                  </div>
-                  <div v-else-if="update.key === 'quorumSet'">
-                    QuorumSet updated
-                  </div>
-                  <div v-else-if="update.key === 'ledgerVersion'">
-                    Ledger updated to version
-                    {{ update.value || "empty" }}
-                  </div>
-                  <div v-else-if="update.key === 'overlayVersion'">
-                    Overlay updated to version
-                    {{ update.value || "empty" }}
-                  </div>
-                  <div v-else-if="update.key === 'overlayMinVersion'">
-                    Minimum required overlay version is now
-                    {{ update.value || "empty" }}
-                  </div>
-                  <div v-else-if="update.key === 'name'">
-                    Name changed to
-                    {{ update.value || "empty" }}
-                  </div>
-                  <div v-else-if="update.key === 'host'">
-                    Host changed to
-                    {{ update.value || "empty" }}
-                  </div>
-                  <div v-else-if="update.key === 'homeDomain'">
-                    Home domain changed to
-                    <a :href="update.value">{{ update.value || "empty" }}</a>
-                  </div>
-                  <div v-else-if="update.key === 'historyUrl'">
-                    History url changed to
-                    <a :href="update.value">{{ update.value || "empty" }}</a>
-                  </div>
-                  <div v-else-if="update.key === 'alias'">
-                    Alias changed to
-                    {{ update.value || "empty" }}
-                  </div>
-                  <div v-else-if="update.key === 'isp'">
-                    ISP changed to
-                    {{ update.value || "empty" }}
-                  </div>
-                  <div v-else-if="update.key === 'versionStr' && update.value">
-                    Stellar core updated to version
-                    {{
-                      update.value
-                        .replace("stellar-core ", "")
-                        .replace("v", "")
-                        .replace(/ \(.*$/, "")
-                        .replace(/\-.*$/, "")
-                    }}
-                  </div>
-                  <div v-else-if="update.key === 'countryName'">
-                    Geo location: country changed to
-                    {{ update.value || "empty" }}
-                  </div>
-                  <div v-else-if="update.key === 'organizationId'">
-                    Organization changed to
-                    {{
-                      network.getOrganizationById(update.value)
-                        ? network.getOrganizationById(update.value).name
-                        : "N/A"
-                    }}
-                  </div>
-                  <div v-else-if="update.key === 'archival'">
-                    Node unarchived after period of inactivity
-                  </div>
-                  <div v-else-if="update.key === 'longitude'">
-                    Longitude updated to
-                    {{ update.value || "empty" }}
-                  </div>
-                  <div v-else-if="update.key === 'latitude'">
-                    Latitude updated to
-                    {{ update.value || "empty" }}
-                  </div>
+                  <div v-if="update.key === 'ip'">IP changed to {{ update.value || "empty" }}</div>
+                  <div v-else-if="update.key === 'port'">Port changed to {{ update.value || "empty" }}</div>
+                  <div v-else-if="update.key === 'quorumSet'">QuorumSet updated</div>
+                  <div v-else-if="update.key === 'ledgerVersion'">Ledger updated to version {{ update.value || "empty" }}</div>
+                  <div v-else-if="update.key === 'overlayVersion'">Overlay updated to version {{ update.value || "empty" }}</div>
+                  <div v-else-if="update.key === 'overlayMinVersion'">Minimum required overlay version is now {{ update.value || "empty" }}</div>
+                  <div v-else-if="update.key === 'name'">Name changed to {{ update.value || "empty" }}</div>
+                  <div v-else-if="update.key === 'host'">Host changed to {{ update.value || "empty" }}</div>
+                  <div v-else-if="update.key === 'homeDomain'">Home domain changed to <a :href="update.value">{{ update.value || "empty" }}</a></div>
+                  <div v-else-if="update.key === 'historyUrl'">History url changed to <a :href="update.value">{{ update.value || "empty" }}</a></div>
+                  <div v-else-if="update.key === 'alias'">Alias changed to {{ update.value || "empty" }}</div>
+                  <div v-else-if="update.key === 'isp'">ISP changed to {{ update.value || "empty" }}</div>
+                  <div v-else-if="update.key === 'versionStr' && update.value">Stellar core updated to version {{ update.value.replace("stellar-core ", "").replace("v", "").replace(/ \(.*$/, "").replace(/\-.*$/, "") }}</div>
+                  <div v-else-if="update.key === 'countryName'">Geo location: country changed to {{ update.value || "empty" }}</div>
+                  <div v-else-if="update.key === 'organizationId'">Organization changed to {{ network.getOrganizationById(update.value) ? network.getOrganizationById(update.value).name : "N/A" }}</div>
+                  <div v-else-if="update.key === 'archival'">Node unarchived after period of inactivity</div>
+                  <div v-else-if="update.key === 'longitude'">Longitude updated to {{ update.value || "empty" }}</div>
+                  <div v-else-if="update.key === 'latitude'">Latitude updated to {{ update.value || "empty" }}</div>
                 </div>
               </div>
             </div>
-            <div class="d-flex align-items-center mb-2">
-              <b-button-toolbar>
-                <b-button-group size="sm">
-                  <button
-                    v-tooltip="'View diff'"
-                    class="btn"
-                    @click="showDiff(updatesOnDate.snapshot)"
-                  >
-                    <b-icon-file-diff />
-                  </button>
-                  <button
-                    v-tooltip="'Travel to this point in time'"
-                    class="btn"
-                    @click="timeTravel(updatesOnDate.snapshot)"
-                  >
-                    <b-icon-clock />
-                  </button>
-                </b-button-group>
-              </b-button-toolbar>
+            <div class="flex items-center mb-2 gap-1">
+              <button
+                v-tooltip="'View diff'"
+                class="p-1.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                @click="showDiff(updatesOnDate.snapshot)"
+              >
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              </button>
+              <button
+                v-tooltip="'Travel to this point in time'"
+                class="p-1.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                @click="timeTravel(updatesOnDate.snapshot)"
+              >
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </button>
             </div>
           </div>
-        </b-list-group-item>
-        <b-list-group-item v-if="updatesPerDate.length === 0 && !isLoading">
+        </div>
+        <div v-if="updatesPerDate.length === 0 && !isLoading" class="py-3 text-gray-500 text-sm">
           No recent updates...
-        </b-list-group-item>
-      </b-list-group>
-      <div v-else class="d-flex justify-content-center mt-5">
+        </div>
+      </div>
+      <div v-else class="flex justify-center mt-5">
         <div class="loader"></div>
       </div>
     </div>
-    <b-modal ref="modalDiff" title="Diff" size="lg">
+    <UiModal v-model="showDiffModal" title="Diff" size="lg">
       <div v-html="diffModalHtml"></div>
-    </b-modal>
+    </UiModal>
   </div>
 </template>
 <script setup lang="ts">
@@ -152,17 +82,6 @@ import * as htmlFormatter from "jsondiffpatch/formatters/html";
 import "jsondiffpatch/formatters/styles/html.css";
 import "jsondiffpatch/formatters/styles/annotated.css";
 
-import {
-  BButtonGroup,
-  BButtonToolbar,
-  BIconClock,
-  BIconExclamationTriangle,
-  BIconFileDiff,
-  BListGroup,
-  BListGroupItem,
-  BModal,
-  VBModal,
-} from '@/components/bootstrap-compat';
 import { isArray } from "shared";
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router";
@@ -198,7 +117,6 @@ interface SnapshotForDelta {
   quorumSetHashKey: string | null;
 }
 
-
 const props = defineProps<{
   node: Node;
 }>();
@@ -214,6 +132,7 @@ const differ = jsondiffpatch.create({
 });
 
 const diffModalHtml = ref("<p>No update selected</p>");
+const showDiffModal = ref(false);
 const deltas: Map<string, jsondiffpatch.Delta | undefined> = new Map();
 
 const updatesPerDate: Ref<
@@ -232,16 +151,13 @@ const route = useRoute();
 const isLoading = ref(true);
 const failed = ref(false);
 
-const modalDiff: Ref<typeof BModal | null> = ref(null);
-
 function showDiff(snapShot: SnapshotForDelta) {
-  if (!modalDiff.value) return;
   htmlFormatter.showUnchanged(true);
   diffModalHtml.value = htmlFormatter.format(
     deltas.get(snapShot.startDate.toISOString()) as jsondiffpatch.Delta,
     snapShot,
   ) as string;
-  modalDiff.value.show();
+  showDiffModal.value = true;
 }
 
 function mapValidatorsToNames(quorumSet: QuorumSet) {
@@ -315,31 +231,16 @@ async function getSnapshots() {
     for (let i = snapshots.length - 2; i >= 0; i--) {
       const updates: Update[] = [];
       [
-        "latitude",
-        "longitude",
-        "quorumSet",
-        "ip",
-        "port",
-        "countryName",
-        "countryCode",
-        "host",
-        "name",
-        "homeDomain",
-        "historyUrl",
-        "alias",
-        "isp",
-        "ledgerVersion",
-        "overlayVersion",
-        "overlayMinVersion",
-        "versionStr",
-        "organizationId",
+        "latitude", "longitude", "quorumSet", "ip", "port", "countryName",
+        "countryCode", "host", "name", "homeDomain", "historyUrl", "alias",
+        "isp", "ledgerVersion", "overlayVersion", "overlayMinVersion",
+        "versionStr", "organizationId",
       ]
         .filter((key) =>
           key !== "quorumSet"
             ? //@ts-ignore
               snapshots[i][key] !== snapshots[i + 1][key]
-            : snapshots[i].quorumSetHashKey !==
-              snapshots[i + 1].quorumSetHashKey,
+            : snapshots[i].quorumSetHashKey !== snapshots[i + 1].quorumSetHashKey,
         )
         .forEach((changedKey) =>
           updates.push({
@@ -349,10 +250,7 @@ async function getSnapshots() {
           }),
         );
 
-      if (
-        snapshots[i]["startDate"].getTime() !==
-        snapshots[i + 1]["endDate"].getTime()
-      ) {
+      if (snapshots[i]["startDate"].getTime() !== snapshots[i + 1]["endDate"].getTime()) {
         updates.push({ key: "archival", value: "unArchived" });
       }
 

@@ -1,5 +1,5 @@
 <template>
-  <b-modal
+  <UiModal
     id="network-analysis-top-tier-info"
     ref="topTierInfoModal"
     lazy
@@ -30,7 +30,7 @@
       >
     </p>
     <template #modal-footer>
-      <div class="w-100">
+      <div class="w-full">
         <p class="float-left">
           Powered by
           <a
@@ -40,21 +40,21 @@
             >wiberlin/fbas_analyzer</a
           >
         </p>
-        <button class="btn btn-sm btn-primary float-right" @click="hideModal">
+        <button class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors float-right" @click="hideModal">
           Close
         </button>
       </div>
     </template>
-  </b-modal>
+  </UiModal>
 </template>
 
 <script setup lang="ts">
-import { BModal } from '@/components/bootstrap-compat';
+
 
 import { ref } from "vue";
 
 const topTierInfoModal = ref(null);
 function hideModal() {
-  if (topTierInfoModal.value) (topTierInfoModal.value as typeof BModal).hide();
+  if (topTierInfoModal.value) (topTierInfoModal.value as any).hide();
 }
 </script>

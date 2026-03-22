@@ -1,7 +1,7 @@
 <template>
-  <div class="card">
-    <div class="text-muted mx-3 mt-3">Countries</div>
-    <div class="card-body d-flex flex-row justify-content-center p-1">
+  <div class="rounded-xl border border-gray-200 bg-white">
+    <div class="text-gray-500 text-sm mx-3 mt-3">Countries</div>
+    <div class="flex justify-center p-1">
       <div
         class="canvas-container"
         style="position: relative; height: 150px; width: 250px"
@@ -116,22 +116,21 @@ function initializeDoughnut() {
   Chart.register(Tooltip, Legend, ArcElement, DoughnutController);
   chart.value = new Chart(countryDistributionGraph.value, {
     type: "doughnut",
-    // The data for our dataset
     data: {
       labels: labels.value,
       datasets: [
         {
           label: "Node countries",
           backgroundColor: [
-            "rgba(25, 151, 198,0.7)", // primary blue
-            "rgba(27, 201, 141,0.7)", // success green
-            "rgba(228, 216, 54,0.7)", // warning yellow
+            "rgba(25, 151, 198,0.7)",
+            "rgba(27, 201, 141,0.7)",
+            "rgba(228, 216, 54,0.7)",
             "#e5e5e5",
           ],
           borderColor: [
-            "rgba(25, 151, 198,1)", // primary blue
-            "#1bc98e", // success green
-            "#e4d836", // warning yellow
+            "rgba(25, 151, 198,1)",
+            "#1bc98e",
+            "#e4d836",
             "#e5e5e5",
           ],
           borderWidth: 0,
@@ -139,8 +138,6 @@ function initializeDoughnut() {
         },
       ],
     },
-
-    // Configuration options go here
     options: {
       layout: {
         padding: {
@@ -158,7 +155,7 @@ function initializeDoughnut() {
         },
       },
       animation: {
-        duration: 0, // general animation time
+        duration: 0,
       },
     },
   });
@@ -174,5 +171,3 @@ onBeforeUnmount(() => {
   }
 });
 </script>
-
-<style scoped></style>

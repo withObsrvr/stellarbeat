@@ -1,6 +1,6 @@
 <template>
-  <div class="card">
-    <div class="card-body d-flex flex-row flex-wrap align-items-center p-3">
+  <div class="rounded-xl border border-gray-200 bg-white">
+    <div class="flex flex-wrap items-center p-3">
       <gauge
         width="65px"
         height="65px"
@@ -14,14 +14,13 @@
         <div class="strong">
           {{ +organization.subQuorum30DaysAvailability.toFixed(2) }}%
         </div>
-        <div class="text-muted">
+        <div class="text-gray-500">
           30D Availability
-          <b-icon-info-circle
-            v-tooltip="
-              'Availability: more than or equal to 50% of the organization validators are validating.'
-            "
-            class="text-gray"
-          />
+          <svg
+            v-tooltip="'Availability: more than or equal to 50% of the organization validators are validating.'"
+            class="inline h-3.5 w-3.5 text-gray-400"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </div>
       </div>
     </div>
@@ -30,18 +29,13 @@
 <script setup lang="ts">
 import { Organization } from "shared";
 import Gauge from "@/components/charts/gauge.vue";
-import { BIconInfoCircle } from '@/components/bootstrap-compat';
 
 defineProps<{
   organization: Organization;
 }>();
 </script>
-
 <style scoped>
 .strong {
   font-weight: 500;
-}
-.text-muted {
-  color: #6e7582 !important;
 }
 </style>

@@ -1,23 +1,18 @@
 <template>
-  <div>
-    <div class="page-header mt-2 py-3">
-      <h1 class="page-title mr-2">Contact Us</h1>
-    </div>
-    <div class="card">
-      <div class="card-body">
+  <div class="mx-auto max-w-3xl px-4 py-6">
+    <h1 class="text-2xl font-bold text-gray-900 mb-1">Contact Us</h1>
+    <p class="text-sm text-gray-500 mb-6">Get in touch about validator hosting and setup services.</p>
+    <div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div class="p-6">
         <router-view />
       </div>
-      <div class="card-footer">
-        <div class="d-flex privacy-link">
-          <a
-            :href="privacyLink"
-            class="nav-link"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Privacy policy
-          </a>
-        </div>
+      <div class="border-t border-gray-100 px-6 py-3 flex justify-end">
+        <a
+          :href="privacyLink"
+          class="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Privacy policy</a>
       </div>
     </div>
   </div>
@@ -32,9 +27,3 @@ useMetaTags(
   "Get in touch about validator hosting and setup services"
 );
 </script>
-
-<style scoped>
-.privacy-link {
-  justify-content: flex-end;
-}
-</style>

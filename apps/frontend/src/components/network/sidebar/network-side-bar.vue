@@ -9,23 +9,23 @@
     </template>
     <template #sub-title>
       Overview
-      <b-badge v-if="store.networkAnalyzer.manualMode" variant="default"
-        >Risks not analyzed</b-badge
+      <UiBadge v-if="store.networkAnalyzer.manualMode" variant="default"
+        >Risks not analyzed</UiBadge
       >
-      <b-badge
+      <UiBadge
         v-else-if="store.networkHasDangers()"
         v-tooltip:right="store.getNetworkDangers().description"
         variant="danger"
         style="vertical-align: bottom"
         >{{ store.getNetworkDangers().label }}
-      </b-badge>
-      <b-badge
+      </UiBadge>
+      <UiBadge
         v-else-if="store.networkHasWarnings()"
         v-tooltip:right="store.getNetworkWarnings().description"
         variant="warning"
         style="vertical-align: bottom"
         >{{ store.getNetworkWarnings().label }}
-      </b-badge>
+      </UiBadge>
     </template>
     <template #explore-list-items>
       <li
@@ -49,22 +49,22 @@
     <template #tool-list-items>
       <li v-if="store.networkContext.enableConfigExport" class="sb-nav-item">
         <nav-link
-          v-b-modal.tomlExportModal
+          @click="showTomlModal = true"
           :title="'Stellar core quorum set'"
           :show-icon="true"
           icon="download"
         />
       </li>
-      <b-modal
-        id="tomlExportModal"
-        lazy
+      <UiModal
+        v-model="showTomlModal"
+        :lazy="true"
         size="lg"
         title="Stellar Core quorum set"
-        ok-only
+        :ok-only="true"
         ok-title="Close"
       >
-        <pre><code>{{tomlNodesExport}}</code></pre>
-      </b-modal>
+        <pre class="text-xs bg-gray-50 rounded-lg p-4 overflow-x-auto"><code>{{tomlNodesExport}}</code></pre>
+      </UiModal>
       <li class="sb-nav-item">
         <nav-link
           title="Horizon APIs"
@@ -75,8 +75,6 @@
       </li>
       <li class="sb-nav-item">
         <nav-link
-          data-toggle="modal"
-          data-target="#simulate-node-modal"
           :title="'Simulate new node'"
           :show-icon="true"
           icon="plus"
@@ -119,6 +117,7 @@ import useScrollTo from "@/composables/useScrollTo";
 import ModifyNetwork from "@/components/network/tools/modify-network.vue";
 
 const organizationsExpanded = ref(true);
+const showTomlModal = ref(false);
 const store = useStore();
 const network = store.network;
 const scrollTo = useScrollTo();

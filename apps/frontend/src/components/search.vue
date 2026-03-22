@@ -29,7 +29,7 @@
         :class="{ active: i === arrowCounter }"
         @click.prevent.stop="navigate(match)"
       >
-        <div class="w-100">
+        <div class="w-full">
           <h5 class="mb-1 mr-2 name">{{ match.name }}</h5>
         </div>
         <small>{{ match.type }}</small>
@@ -37,7 +37,7 @@
     </div>
 
     <div class="input-icon-addon">
-      <b-icon-search />
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
     </div>
   </div>
 </template>
@@ -47,7 +47,6 @@ import { computed, type ComputedRef, ref } from "vue";
 import { type RouteLocationRaw } from "vue-router";
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router";
-import { BIconSearch } from '@/components/bootstrap-compat';
 
 type Match = { name: string; type: string; route: RouteLocationRaw };
 const searchString = ref("");
@@ -59,10 +58,7 @@ const route = useRoute();
 const network = store.network;
 
 const showSuggestions = computed(() => {
-  if (searchString.value === "") {
-    return false;
-  }
-
+  if (searchString.value === "") return false;
   return filteredList.value.length !== 0;
 });
 
@@ -71,48 +67,28 @@ const filteredList: ComputedRef<Match[]> = computed(() => {
     text.toLowerCase().includes(searchString.value.toLowerCase().trim());
 
   const matchedOrganizations = network.organizations
-    .filter((organization) => {
-      return match(organization.name);
-    })
-    .map((organization) => {
-      return {
-        name: organization.name,
-        type: "organization",
-        route: {
-          name: "organization-dashboard",
-          params: { organizationId: organization.id },
-          query: {
-            center: "1",
-            "no-scroll": "1",
-            view: route.query.view,
-            network: route.query.network,
-          },
-        } as RouteLocationRaw,
-      };
-    });
+    .filter((organization) => match(organization.name))
+    .map((organization) => ({
+      name: organization.name,
+      type: "organization",
+      route: {
+        name: "organization-dashboard",
+        params: { organizationId: organization.id },
+        query: { center: "1", "no-scroll": "1", view: route.query.view, network: route.query.network },
+      } as RouteLocationRaw,
+    }));
 
   const matchedNodes = network.nodes
-    .filter((node) => {
-      return (
-        match(node.displayName) || match(node.publicKey) || match(node.key)
-      );
-    })
-    .map((node) => {
-      return {
-        name: node.displayName,
-        type: node.isValidator ? "validator node" : "Non-validating node",
-        route: {
-          name: "node-dashboard",
-          params: { publicKey: node.publicKey },
-          query: {
-            center: "1",
-            "no-scroll": "1",
-            view: route.query.view,
-            network: route.query.network,
-          },
-        } as RouteLocationRaw,
-      };
-    });
+    .filter((node) => match(node.displayName) || match(node.publicKey) || match(node.key))
+    .map((node) => ({
+      name: node.displayName,
+      type: node.isValidator ? "validator node" : "Non-validating node",
+      route: {
+        name: "node-dashboard",
+        params: { publicKey: node.publicKey },
+        query: { center: "1", "no-scroll": "1", view: route.query.view, network: route.query.network },
+      } as RouteLocationRaw,
+    }));
 
   return matchedOrganizations.concat(matchedNodes).slice(0, 10);
 });
@@ -123,22 +99,17 @@ function navigate(match: Match) {
 }
 
 function onArrowDown() {
-  if (arrowCounter.value < filteredList.value.length - 1) {
-    arrowCounter.value = arrowCounter.value + 1;
-  } else arrowCounter.value = 0;
+  if (arrowCounter.value < filteredList.value.length - 1) arrowCounter.value++;
+  else arrowCounter.value = 0;
 }
 
 function onArrowUp() {
-  if (arrowCounter.value > 0) {
-    arrowCounter.value = arrowCounter.value - 1;
-  } else arrowCounter.value = filteredList.value.length - 1;
+  if (arrowCounter.value > 0) arrowCounter.value--;
+  else arrowCounter.value = filteredList.value.length - 1;
 }
 
 function onEnter() {
-  if (arrowCounter.value !== -1) {
-    navigate(filteredList.value[arrowCounter.value]);
-  }
-
+  if (arrowCounter.value !== -1) navigate(filteredList.value[arrowCounter.value]);
   arrowCounter.value = -1;
 }
 </script>

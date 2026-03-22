@@ -1,6 +1,6 @@
 <template>
-  <div class="card">
-    <div class="card-body d-flex flex-row flex-wrap align-items-center p-4">
+  <div class="rounded-xl border border-gray-200 bg-white">
+    <div class="flex flex-wrap items-center p-4">
       <gauge
         width="45px"
         height="45px"

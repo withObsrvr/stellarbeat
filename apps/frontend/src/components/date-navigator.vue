@@ -1,53 +1,43 @@
 <template>
-  <div class="d-flex">
-    <div class="btn-group" role="group">
+  <div class="flex">
+    <div class="inline-flex rounded-lg shadow-sm" role="group">
       <button
-        size="sm"
         :disabled="!canGoBack()"
-        class="btn btn-sm btn-secondary left"
+        class="rounded-l-lg border border-gray-200 bg-white px-2 py-1 text-gray-500 hover:bg-gray-50 disabled:opacity-50 transition-colors"
         @click="goBack"
       >
-        <b-icon-chevron-left />
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
       </button>
       <div>
-        <b-form-datepicker
+        <input
           v-if="!showTime"
-          v-model="datePickerDate"
-          size="sm"
-          :dark="true"
-          class="date-picker"
-          :date-format-options="{
-            year: 'numeric',
-            month: 'short',
-            day: '2-digit',
-          }"
-          :min="statisticsDateTimeNavigator.getMinSelectedDate(bucketSize)"
-          :max="new Date()"
-        >
-          <template #button-content
-            ><b-icon-calendar class="text-gray"
-          /></template>
-        </b-form-datepicker>
-        <b-form-timepicker
+          v-model="dateInputValue"
+          type="date"
+          :min="formatDateForInput(statisticsDateTimeNavigator.getMinSelectedDate(bucketSize))"
+          :max="formatDateForInput(new Date())"
+          class="border-y border-gray-200 bg-white px-2 py-1 text-xs text-gray-600 h-[31px] focus:outline-none"
+          @change="onDateInputChange"
+        />
+        <input
           v-else
-          :key="timeKey"
           v-model="time"
-          size="sm"
-          class="time-picker"
-          @hidden="timeInputHandler"
-        >
-          <template #button-content></template>
-        </b-form-timepicker>
+          type="time"
+          class="border-y border-gray-200 bg-white px-2 py-1 text-xs text-gray-600 h-[31px] w-[100px] focus:outline-none"
+          @change="timeInputHandler"
+        />
       </div>
       <button
         v-tooltip="'Travel to selected time'"
-        class="btn btn-sm btn-secondary time-travel-btn"
+        class="border-y border-gray-200 bg-white px-2 py-1 text-gray-400 hover:text-gray-700 transition-colors"
         @click="timeTravel"
       >
-        <b-icon-clock />
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
       </button>
-      <button class="btn btn-sm btn-secondary right" @click="goForward">
-        <b-icon-chevron-right />
+      <button
+        class="rounded-r-lg border border-gray-200 bg-white px-2 py-1 text-gray-500 hover:bg-gray-50 transition-colors"
+        @click="goForward"
+      >
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
       </button>
     </div>
   </div>
@@ -55,14 +45,6 @@
 
 <script setup lang="ts">
 import { nextTick, type Ref, ref, toRefs, watch } from "vue";
-import {
-  BFormDatepicker,
-  BFormTimepicker,
-  BIconCalendar,
-  BIconChevronLeft,
-  BIconChevronRight,
-  BIconClock,
-} from '@/components/bootstrap-compat';
 import StatisticsDateTimeNavigator from "@/components/network/cards/network-risk-analysis-charts/StatisticsDateTimeNavigator";
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router";
@@ -93,16 +75,21 @@ const statisticsDateTimeNavigator = new StatisticsDateTimeNavigator(
 
 const datePickerDate: Ref<Date | string> = ref(selectedDate.value);
 
-// Extract the hours and minutes from the selectedDate value
 const hours = selectedDate.value.getHours().toString().padStart(2, "0");
 const minutes = selectedDate.value.getMinutes().toString().padStart(2, "0");
+const time = ref(`${hours}:${minutes}`);
 
-// Combine the hours and minutes into a time string
-const timeString = `${hours}:${minutes}`;
+const dateInputValue = ref(formatDateForInput(selectedDate.value));
 
-// Create a ref with the time string
-const time = ref(timeString);
-const timeKey = ref(time.value);
+function formatDateForInput(date: Date | string): string {
+  const d = new Date(date);
+  return d.toISOString().split('T')[0];
+}
+
+function onDateInputChange() {
+  datePickerDate.value = new Date(dateInputValue.value);
+  emit("dateChanged", new Date(dateInputValue.value));
+}
 
 function canGoBack() {
   return statisticsDateTimeNavigator.canGoBack(
@@ -117,8 +104,8 @@ function goBack() {
       bucketSize.value,
       new Date(datePickerDate.value),
     );
-    time.value = datePickerDate.value.toISOString().substring(11, 16);
-    timeKey.value = time.value;
+    dateInputValue.value = formatDateForInput(datePickerDate.value);
+    time.value = new Date(datePickerDate.value).toISOString().substring(11, 16);
     emit("dateChanged", datePickerDate.value);
   });
 }
@@ -129,58 +116,27 @@ function goForward() {
       bucketSize.value,
       new Date(datePickerDate.value),
     );
-    time.value = datePickerDate.value.toISOString().substring(11, 16);
-    timeKey.value = time.value;
+    dateInputValue.value = formatDateForInput(datePickerDate.value);
+    time.value = new Date(datePickerDate.value).toISOString().substring(11, 16);
     emit("dateChanged", datePickerDate.value);
   });
 }
 
 watch(selectedDate, async () => {
   datePickerDate.value = selectedDate.value;
-  const selectedHours = selectedDate.value
-    .getHours()
-    .toString()
-    .padStart(2, "0");
-  const selectedMinutes = selectedDate.value
-    .getMinutes()
-    .toString()
-    .padStart(2, "0");
+  dateInputValue.value = formatDateForInput(selectedDate.value);
+  const selectedHours = selectedDate.value.getHours().toString().padStart(2, "0");
+  const selectedMinutes = selectedDate.value.getMinutes().toString().padStart(2, "0");
   time.value = `${selectedHours}:${selectedMinutes}`;
-  timeKey.value = time.value;
-});
-
-watch(datePickerDate, async () => {
-  if (datePickerDate.value && selectedDate.value !== datePickerDate.value) {
-    const selectedHours = new Date(datePickerDate.value)
-      .getHours()
-      .toString()
-      .padStart(2, "0");
-    const selectedMinutes = new Date(datePickerDate.value)
-      .getMinutes()
-      .toString()
-      .padStart(2, "0");
-    time.value = `${selectedHours}:${selectedMinutes}`;
-    timeKey.value = time.value;
-    emit("dateChanged", new Date(datePickerDate.value));
-  }
 });
 
 function timeInputHandler() {
   const selectedHours = Number(time.value.substring(0, 2));
   const selectedMinutes = Number(time.value.substring(3, 5));
-  if (
-    new Date(datePickerDate.value).getHours() !== selectedHours ||
-    new Date(datePickerDate.value).getMinutes() !== selectedMinutes
-  ) {
-    new Date(datePickerDate.value).setHours(selectedHours, selectedMinutes);
-    const date = new Date(datePickerDate.value);
-    time.value = date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    timeKey.value = time.value;
-    emit("dateChanged", datePickerDate.value);
-  }
+  const date = new Date(datePickerDate.value);
+  date.setHours(selectedHours, selectedMinutes);
+  datePickerDate.value = date;
+  emit("dateChanged", date);
 }
 
 const route = useRoute();
@@ -197,24 +153,3 @@ function timeTravel() {
   });
 }
 </script>
-
-<style scoped>
-.time-travel-btn {
-  color: #1997c6;
-  border-radius: 0;
-}
-
-.time-picker {
-  height: 31px;
-  border-radius: 0;
-  border-left: 0;
-  width: 100px;
-  animation: highlight 1s;
-}
-
-.date-picker {
-  border-radius: 0;
-  border-left: 0;
-  height: 31px;
-}
-</style>

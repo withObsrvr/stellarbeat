@@ -9,7 +9,7 @@
     </template>
     <template #sub-title>
       {{ organizationType }}
-      <b-badge
+      <UiBadge
         v-if="network.isOrganizationFailing(selectedOrganization)"
         v-tooltip="store.getOrganizationFailingReason(selectedOrganization)"
         variant="danger"
@@ -19,8 +19,8 @@
             ? "Blocked"
             : "Failing"
         }}
-      </b-badge>
-      <b-badge
+      </UiBadge>
+      <UiBadge
         v-else-if="
           OrganizationWarningDetector.organizationHasWarnings(
             selectedOrganization,
@@ -36,7 +36,7 @@
         variant="warning"
       >
         Warning
-      </b-badge>
+      </UiBadge>
     </template>
     <template #explore-list-items>
       <li class="sb-nav-item">
@@ -76,10 +76,10 @@
       </li>
       <li v-if="store.networkContext.enableConfigExport" class="sb-nav-item">
         <nav-link
-          v-b-modal.tomlExportModal
           :title="'Stellar core config'"
           :show-icon="true"
           icon="download"
+          @click="showTomlModal = true"
         />
       </li>
       <li class="sb-nav-item">
@@ -92,16 +92,16 @@
         />
         <simulate-new-node />
       </li>
-      <b-modal
-        id="tomlExportModal"
-        lazy
+      <UiModal
+        v-model="showTomlModal"
+        :lazy="true"
         size="lg"
         title="Stellar Core Config"
-        ok-only
+        :ok-only="true"
         ok-title="Close"
       >
         <pre><code>{{tomlNodesExport}}</code></pre>
-      </b-modal>
+      </UiModal>
     </template>
   </side-bar>
 </template>
@@ -113,7 +113,7 @@ import OrganizationValidatorsDropdown from "@/components/organization/sidebar/or
 import NavLink from "@/components/side-bar/nav-link.vue";
 import SimulateNewNode from "@/components/node/tools/simulation/simulate-new-node.vue";
 import SideBar from "@/components/side-bar/side-bar.vue";
-import { BBadge, BModal, VBModal } from '@/components/bootstrap-compat';
+
 import TrustedOrganizationsDropdown from "@/components/organization/sidebar/trusted-organizations-dropdown.vue";
 import useStore from "@/store/useStore";
 import { OrganizationWarningDetector } from "@/services/OrganizationWarningDetector";
@@ -124,6 +124,7 @@ const network = store.network;
 
 const validatorsExpanded = ref(true);
 const trustedOrganizationsExpanded = ref(true);
+const showTomlModal = ref(false);
 
 const selectedOrganization = computed(() => {
   if (!store.selectedOrganization) throw new Error("No organization selected");

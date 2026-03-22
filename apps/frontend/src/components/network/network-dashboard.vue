@@ -27,30 +27,30 @@
       >
       for details.
     </UiAlert>
-    <div class="row row-cards row-deck">
-      <div class="col-12">
+    <div class="grid grid-cols-12 gap-4">
+      <div class="col-span-12">
         <network-statistics :network="network" />
       </div>
     </div>
-    <div class="row row-cards row-deck gauges">
-      <div v-if="!store.isSimulation" class="col-lg-4 col-xl-4">
+    <div class="grid grid-cols-12 gap-4 mt-4">
+      <div v-if="!store.isSimulation" class="col-span-12 lg:col-span-4">
         <NodesCountryDistribution />
       </div>
 
-      <div v-if="!store.isSimulation" class="col-lg-4 col-xl-4">
+      <div v-if="!store.isSimulation" class="col-span-12 lg:col-span-4">
         <NodesVersions />
       </div>
-      <div v-if="!store.isSimulation" class="col-lg-4 col-xl-4">
+      <div v-if="!store.isSimulation" class="col-span-12 lg:col-span-4">
         <ValidatorLoad />
       </div>
     </div>
-    <div class="row row-cards row-deck">
-      <div v-if="!store.networkAnalyzer.manualMode" class="col-lg-6">
+    <div class="grid grid-cols-12 gap-4 mt-4">
+      <div v-if="!store.networkAnalyzer.manualMode" class="col-span-12 lg:col-span-6">
         <NetworkRiskRadarChart />
       </div>
       <div
         v-if="!store.isSimulation && store.networkContext.enableHistory"
-        class="col-lg-6"
+        class="col-span-12 lg:col-span-6"
       >
         <NetworkAnalysis analysis-type="safety">
           <template #info>
@@ -60,7 +60,7 @@
       </div>
       <div
         v-if="!store.isSimulation && store.networkContext.enableHistory"
-        class="col-lg-12"
+        class="col-span-12"
       >
         <NetworkAnalysis analysis-type="liveness" default-bucket-size="30D">
           <template #info>
@@ -69,11 +69,11 @@
         </NetworkAnalysis>
       </div>
 
-      <div v-if="network.organizations.length > 0" class="col-lg-6 col-xl-6">
+      <div v-if="network.organizations.length > 0" class="col-span-12 lg:col-span-6">
         <network-organizations />
       </div>
 
-      <div class="col-lg-6 col-xl-6">
+      <div class="col-span-12 lg:col-span-6">
         <network-nodes />
       </div>
 
@@ -83,25 +83,25 @@
           !store.isSimulation &&
           store.networkContext.enableHistory
         "
-        class="col-lg-6 col-xl-6"
+        class="col-span-12 lg:col-span-6"
       >
         <network-organization-updates />
       </div>
 
       <div
         v-if="!store.isSimulation && store.networkContext.enableHistory"
-        class="col-lg-6 col-xl-6"
+        class="col-span-12 lg:col-span-6"
       >
         <network-validator-updates />
       </div>
 
       <div
         v-if="!store.isSimulation && store.networkContext.enableHorizon"
-        class="col-lg-6 col-12"
+        class="col-span-12 lg:col-span-6"
       >
         <network-horizon />
       </div>
-      <div class="col-lg-6 col-12">
+      <div class="col-span-12 lg:col-span-6">
         <network-isps />
       </div>
     </div>
@@ -127,4 +127,3 @@ import NetworkIsps from "@/components/network/cards/network-isps.vue";
 const store = useStore();
 const network = store.network;
 </script>
-<style scoped></style>

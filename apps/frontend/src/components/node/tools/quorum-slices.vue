@@ -1,59 +1,38 @@
 <template>
-  <Teleport to="body">
-    <div
-      id="quorumSlicesModal"
-      ref="quorumSlicesModal"
-      class="modal fade"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="exampleModalLabel"
-      aria-hidden="true"
+  <UiModal v-model="showModal" :lazy="true" title="Quorum Slices" size="xl" :hide-header="false" @shown="loadSlices">
+    <UiAlert variant="info" :show="true">
+      The node itself is added to every slice
+    </UiAlert>
+    <UiTable
+      id="network-analysis-table"
+      striped
+      hover
+      :fields="fields"
+      :items="items"
+      :per-page="perPage"
+      :current-page="currentPage"
     >
-      <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content">
-          <div class="modal-body">
-            <b-alert variant="info" show
-              >The node itself is added to every slice
-            </b-alert>
-            <b-table
-              id="network-analysis-table"
-              striped
-              hover
-              :fields="fields"
-              :items="items"
-              :per-page="perPage"
-              thead-class="my-thead"
-              tbody-class="my-tbody"
-              :current-page="currentPage"
-            >
-              <template #cell(slice)="data">
-                {{ mapSlice(data.item.slice) }}
-              </template>
-            </b-table>
-            <b-pagination
-              v-model="currentPage"
-              :total-rows="rows"
-              :per-page="perPage"
-              aria-controls="network-analysis-table"
-            ></b-pagination>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Teleport>
+      <template #cell(slice)="{ item }">
+        {{ mapSlice(item.slice) }}
+      </template>
+    </UiTable>
+    <UiPagination
+      v-model="currentPage"
+      :total-rows="rows"
+      :per-page="perPage"
+      class="mt-2"
+    />
+  </UiModal>
 </template>
 
 <script setup lang="ts">
-import $ from "jquery";
-import { BAlert, BPagination, BTable, VBToggle } from '@/components/bootstrap-compat';
 import {
   Node,
   QuorumSet,
   QuorumSlicesGenerator,
 } from "shared";
-import { computed, nextTick, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import useStore from "@/store/useStore";
-
 
 const props = defineProps<{
   selectedNode: Node;
@@ -62,8 +41,7 @@ const props = defineProps<{
 const store = useStore();
 const network = store.network;
 
-const quorumSlicesModal = ref<HTMLElement>();
-
+const showModal = ref(false);
 const perPage = ref(10);
 const currentPage = ref(1);
 const items = ref<{ slice: string[] }[]>([{ slice: ["loading..."] }]);
@@ -93,30 +71,5 @@ function mapSlice(slice: string[]) {
     .join(", ");
 }
 
-onMounted(() => {
-  nextTick(() => {
-    if (!quorumSlicesModal.value) return;
-
-    $(quorumSlicesModal.value).on("show.bs.modal", loadSlices);
-  });
-});
+defineExpose({ show: () => { showModal.value = true; } });
 </script>
-<style scoped>
-.modal {
-  z-index: 2000 !important;
-}
-</style>
-<style>
-/* Ensure modal backdrop is below the modal but above everything else */
-.modal-backdrop {
-  z-index: 1999 !important;
-}
-</style>
-<style>
-.my-thead tr th {
-  color: #495057;
-  text-transform: none;
-  font-size: 0.9375rem;
-  font-weight: 700;
-}
-</style>

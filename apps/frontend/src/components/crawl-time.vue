@@ -1,49 +1,30 @@
 <template>
-  <div class="crawl-time-component">
-    <b-form-datepicker
-      v-model="time"
-      size="sm"
-      class="date-picker"
-      :date-format-options="{
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit',
-      }"
-      :min="minSelectedDate"
-      :max="new Date()"
-      no-highlight-today
-    >
-      <template #button-content>
-        <b-icon-calendar class="text-gray" />
-      </template>
-    </b-form-datepicker>
-    <b-form-timepicker
+  <div class="flex items-center">
+    <input
+      v-model="dateValue"
+      type="date"
+      :min="formatDateInput(minSelectedDate)"
+      :max="formatDateInput(new Date())"
+      class="rounded-l-md border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-500 h-7 focus:outline-none focus:ring-1 focus:ring-gray-200 focus:border-gray-300"
+    />
+    <input
       v-model="crawlTime"
-      size="sm"
-      class="time-picker"
-      dropleft
-    >
-      <template #button-content></template>
-    </b-form-timepicker>
+      type="time"
+      step="1"
+      class="border-y border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-500 h-7 w-[100px] focus:outline-none focus:ring-1 focus:ring-gray-200 focus:border-gray-300"
+    />
     <button
       v-tooltip:top="'Travel to selected time'"
-      class="btn btn-sm btn-secondary time-travel-btn"
+      class="flex items-center justify-center h-7 px-1.5 rounded-r-md border border-gray-200 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
       @click="timeTravel"
     >
-      <b-icon-clock />
+      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
-//@todo: https://github.com/Vuepic/vue-datepicker for vue3
-import { ref, type Ref } from "vue";
-import {
-  BFormDatepicker,
-  BFormTimepicker,
-  BIconCalendar,
-  BIconClock,
-} from '@/components/bootstrap-compat';
+import { ref, computed } from "vue";
 import useStore from "@/store/useStore";
 import { useRoute, useRouter } from "vue-router";
 
@@ -51,14 +32,16 @@ const store = useStore();
 const router = useRouter();
 const route = useRoute();
 
-const time: Ref<Date | number | string> = ref(
-  new Date(store.network.time.getTime()),
-);
-const crawlTime: Ref<string> = ref(formatCrawlTime());
 const minSelectedDate: Date = store.measurementsStartDate;
 
-function formatCrawlTime() {
-  const date = timeToDateObject();
+const dateValue = ref(formatDateInput(new Date(store.network.time.getTime())));
+const crawlTime = ref(formatCrawlTime(new Date(store.network.time.getTime())));
+
+function formatDateInput(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+function formatCrawlTime(date: Date): string {
   return (
     date.getHours().toString().padStart(2, "0") +
     ":" +
@@ -67,7 +50,13 @@ function formatCrawlTime() {
     date.getSeconds().toString().padStart(2, "0")
   );
 }
+
 function timeTravel() {
+  const date = new Date(dateValue.value);
+  date.setHours(Number(crawlTime.value.substring(0, 2)));
+  date.setMinutes(Number(crawlTime.value.substring(3, 5)));
+  date.setSeconds(Number(crawlTime.value.substring(5, 7) || "0"));
+
   router.push({
     name: route.name ? route.name : undefined,
     params: route.params,
@@ -75,69 +64,8 @@ function timeTravel() {
       view: route.query.view,
       "no-scroll": "1",
       network: route.query.network,
-      at: getTimeTravelAt(),
+      at: date.toISOString(),
     },
   });
 }
-
-function getTimeTravelAt() {
-  const date = timeToDateObject();
-  // Set the hours of the date object to the hours part of the crawlTime value
-  date.setHours(Number(crawlTime.value.substring(0, 2)));
-  // Set the minutes of the date object to the minutes part of the crawlTime value
-  date.setMinutes(Number(crawlTime.value.substring(3, 5)));
-  return date.toISOString();
-}
-
-function timeToDateObject() {
-  let date = time.value;
-  if (date instanceof Date) {
-    return date;
-  }
-  if (typeof date === "number") {
-    // If networkTime is a timestamp
-    date = new Date(date);
-  } else {
-    {
-      // If networkTime is a string
-      date = new Date(Date.parse(date));
-    }
-  }
-
-  return date;
-}
 </script>
-
-<style lang="scss" scoped>
-.date-picker {
-  width: auto;
-  height: 31px;
-  border-bottom-right-radius: 0;
-  border-top-right-radius: 0;
-  border-right: 0;
-  color: green !important;
-}
-
-.crawl-time-component {
-  display: flex;
-}
-
-.time-travel-btn {
-  color: #1997c6;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.time-picker {
-  width: 120px;
-  height: 31px;
-  border-radius: 0;
-  border-right: none;
-}
-</style>
-
-<style>
-.crawl-time-component {
-  color: #868e96ff;
-}
-</style>

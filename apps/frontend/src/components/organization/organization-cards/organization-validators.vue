@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="rounded-xl border border-gray-200 bg-white">
     <nodes-table :nodes="validators" :fields="fields" />
   </div>
 </template>

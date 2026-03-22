@@ -1,23 +1,23 @@
 <template>
-  <div class="card">
-    <div class="card-header pl-3">
-      <h1 class="card-title">
-        <b-badge variant="success">{{ numberOfActiveNodes }}</b-badge>
+  <div class="rounded-xl border border-gray-200 bg-white">
+    <div class="flex items-center justify-between border-b border-gray-100 bg-gray-50/80 pl-3 pr-3 py-3">
+      <h1 class="text-sm font-semibold text-gray-900">
+        <UiBadge variant="success">{{ numberOfActiveNodes }}</UiBadge>
         active
         {{ store.includeAllNodes ? "nodes" : "validators" }}
       </h1>
-      <div class="card-options">
+      <div class="ml-auto">
         <form>
-          <div class="input-group">
+          <div class="relative">
             <input
               v-model="filter"
               type="text"
-              class="form-control form-control-sm"
+              class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm placeholder-gray-400 focus:border-gray-300 focus:outline-none focus:ring-1 focus:ring-gray-200 w-40"
               placeholder="Search"
               name="s"
             />
-            <div class="input-icon-addon">
-              <b-icon-search />
+            <div class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </div>
           </div>
         </form>
@@ -36,7 +36,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import NodesTable, { type TableNode } from "@/components/node/nodes-table.vue";
-import { BBadge, BIconSearch } from '@/components/bootstrap-compat';
 import useStore from "@/store/useStore";
 
 const store = useStore();
@@ -81,7 +80,7 @@ const validators = computed(() => {
       // Calculate incoming trust count
       const trustingNodes = network.getTrustingNodes(node);
       const incomingTrustCount = trustingNodes.length;
-      
+
       // Calculate organizational diversity
       const trustingOrganizations = new Set<string>();
       trustingNodes.forEach(trustingNode => {
