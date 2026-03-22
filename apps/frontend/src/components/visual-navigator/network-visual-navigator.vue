@@ -1,6 +1,6 @@
 <template>
   <div
-    class="rounded-xl border border-gray-200 bg-white relative"
+    class="rounded-xl border border-gray-200 bg-white relative overflow-hidden"
     :class="{
       'card-fullscreen': fullScreen,
       'sb-card-fullscreen': fullScreen,

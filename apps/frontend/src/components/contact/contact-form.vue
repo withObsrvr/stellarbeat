@@ -1,193 +1,168 @@
 <template>
   <div>
-    <!-- Introduction Section -->
-    <div class="mb-4">
-      <h3>Professional Validator Services for Stellar Network</h3>
-      <p class="lead">
+    <!-- Introduction -->
+    <div class="mb-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-2">Professional Validator Services</h3>
+      <p class="text-sm text-gray-500 mb-4">
         We offer enterprise-grade validator hosting and setup assistance for
-        organizations running validators on the Stellar network. Whether you
-        need help setting up your first validator or want us to manage your
-        infrastructure, we're here to help.
+        organizations running validators on the Stellar network.
       </p>
-
-      <div class="mt-3">
-        <h5>Why Choose Obsrvr for Validator Services?</h5>
-        <ul>
-          <li>99.99% uptime SLA for hosted validators</li>
-          <li>Expert setup assistance and configuration review</li>
-          <li>24/7 monitoring and alerting</li>
-          <li>Secure, compliant infrastructure</li>
-          <li>Multi-region redundancy options</li>
-          <li>Professional support from Stellar network experts</li>
-        </ul>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
+        <div class="flex items-center gap-2">
+          <svg class="h-4 w-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+          99.99% uptime SLA
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="h-4 w-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+          Expert setup assistance
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="h-4 w-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+          24/7 monitoring and alerting
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="h-4 w-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+          Multi-region redundancy
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="h-4 w-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+          Secure, compliant infrastructure
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="h-4 w-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+          Stellar network experts
+        </div>
       </div>
     </div>
 
-    <hr class="my-4" />
+    <div class="border-t border-gray-100 my-6"></div>
 
-    <!-- Contact Form -->
-    <div v-if="submitting">
-      <h4>Sending your message...</h4>
-      <div>
-        <div class="loader"></div>
-      </div>
+    <!-- Form -->
+    <div v-if="submitting" class="flex flex-col items-center py-8">
+      <div class="loader"></div>
+      <p class="text-sm text-gray-500 mt-3">Sending your message...</p>
     </div>
     <div v-else>
-      <h4>Get in Touch</h4>
-      <p class="text-muted mb-3">
-        Tell us about your validator needs and we'll get back to you within 24
-        hours.
+      <h3 class="text-lg font-bold text-gray-900 mb-1">Get in Touch</h3>
+      <p class="text-sm text-gray-400 mb-5">
+        Tell us about your validator needs and we'll get back to you within 24 hours.
       </p>
 
-      <b-form
-        novalidate
-        :validated="validated"
-        @submit.prevent="onSubmit"
-        @reset="onReset"
-      >
-        <b-alert variant="success" :show="submitted">
-          <strong>Thank you for contacting us!</strong><br />
-          We've received your inquiry and will respond within 24 hours. Check
-          your email for a confirmation.
-        </b-alert>
+      <form novalidate @submit.prevent="onSubmit" @reset="onReset">
+        <UiAlert variant="success" :show="submitted">
+          <strong>Thank you for contacting us!</strong> We've received your inquiry and will respond within 24 hours.
+        </UiAlert>
+        <UiAlert variant="danger" :show="submitError">
+          <strong>Something went wrong.</strong> Please try again or contact us at {{ contactEmail }}
+        </UiAlert>
 
-        <b-alert variant="danger" :show="submitError">
-          <strong>Something went wrong submitting your request.</strong><br />
-          Please try again or contact us directly at
-          {{ contactEmail }}
-        </b-alert>
-
-        <!-- Name and Email (two columns on desktop) -->
-        <div class="row">
-          <div class="col-md-6">
-            <b-form-group
-              id="name-group"
-              label="Name"
-              label-for="name-input"
-              description="Your full name"
-            >
-              <b-form-input
-                id="name-input"
-                v-model="name"
-                :state="nameState"
-                placeholder="Enter your name"
-                required
-                trim
-              ></b-form-input>
-            </b-form-group>
+        <!-- Name + Email (two columns) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label for="name-input" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <input
+              id="name-input"
+              v-model.trim="name"
+              class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300"
+              :class="{ 'border-red-300 ring-1 ring-red-200': nameState === false }"
+              placeholder="Your full name"
+              required
+            />
           </div>
-
-          <div class="col-md-6">
-            <b-form-group
-              id="email-group"
-              label="Email"
-              label-for="email-input"
-              description="Your email address"
-            >
-              <b-form-input
-                id="email-input"
-                v-model="emailAddress"
-                type="email"
-                :state="emailAddressState"
-                placeholder="Enter your email"
-                required
-                trim
-              ></b-form-input>
-            </b-form-group>
+          <div>
+            <label for="email-input" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              id="email-input"
+              v-model.trim="emailAddress"
+              type="email"
+              class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300"
+              :class="{ 'border-red-300 ring-1 ring-red-200': emailAddressState === false }"
+              placeholder="you@example.com"
+              required
+            />
           </div>
         </div>
 
-        <!-- Company (optional) -->
-        <b-form-group
-          id="company-group"
-          label="Company/Organization (Optional)"
-          label-for="company-input"
-          description="Your company or organization name"
-        >
-          <b-form-input
+        <!-- Company -->
+        <div class="mb-4">
+          <label for="company-input" class="block text-sm font-medium text-gray-700 mb-1">Company / Organization <span class="text-gray-400 font-normal">(optional)</span></label>
+          <input
             id="company-input"
-            v-model="company"
-            placeholder="Enter your company or organization"
-            trim
-          ></b-form-input>
-        </b-form-group>
+            v-model.trim="company"
+            class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            placeholder="Your company or organization"
+          />
+        </div>
 
         <!-- Service Interest -->
-        <b-form-group
-          id="service-interest-group"
-          label="Service Interest"
-          label-for="service-interest-select"
-          description="What are you interested in?"
-        >
-          <b-form-select
-            id="service-interest-select"
+        <div class="mb-4">
+          <label for="service-select" class="block text-sm font-medium text-gray-700 mb-1">Service Interest</label>
+          <select
+            id="service-select"
             v-model="serviceInterest"
-            :state="serviceInterestState"
-            :options="serviceOptions"
+            class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            :class="{ 'border-red-300 ring-1 ring-red-200': serviceInterestState === false }"
             required
-          ></b-form-select>
-        </b-form-group>
+          >
+            <option value="" disabled>-- Please select --</option>
+            <option value="host-validator">Host my validator</option>
+            <option value="help-setup">Help me set up</option>
+            <option value="both">Both hosting and setup</option>
+            <option value="general">General inquiry</option>
+          </select>
+        </div>
 
         <!-- Message -->
-        <b-form-group
-          id="message-group"
-          label="Message"
-          label-for="message-input"
-          description="Tell us about your validator needs"
-        >
-          <b-form-textarea
+        <div class="mb-4">
+          <label for="message-input" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+          <textarea
             id="message-input"
-            v-model="message"
-            :state="messageState"
+            v-model.trim="message"
+            class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            :class="{ 'border-red-300 ring-1 ring-red-200': messageState === false }"
             placeholder="Describe your requirements..."
-            :rows="5"
+            rows="5"
             required
-            trim
-          ></b-form-textarea>
-        </b-form-group>
+          ></textarea>
+        </div>
 
-        <!-- Consent Checkbox -->
-        <b-form-group id="consent-group">
-          <b-form-checkbox
-            id="consent-checkbox"
-            v-model="consented"
-            name="consent-checkbox"
-          >
-            I have read, understood, and agree to be bound by the
-            <a :href="termsLink" target="_blank">Terms and Conditions</a>
-            and our
-            <a :href="privacyLink" target="_blank">Privacy Policy</a>
-          </b-form-checkbox>
-        </b-form-group>
+        <!-- Consent -->
+        <div class="mb-6">
+          <label class="flex items-start gap-2 text-sm cursor-pointer">
+            <input
+              v-model="consented"
+              type="checkbox"
+              class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500 mt-0.5"
+            />
+            <span class="text-gray-600">
+              I have read, understood, and agree to be bound by the
+              <a :href="termsLink" target="_blank" class="text-gray-900 underline">Terms and Conditions</a>
+              and our
+              <a :href="privacyLink" target="_blank" class="text-gray-900 underline">Privacy Policy</a>
+            </span>
+          </label>
+        </div>
 
-        <!-- Submit and Reset Buttons -->
-        <button
-          type="submit"
-          class="btn-primary btn"
-          role="button"
-          :disabled="!isFormValid"
-        >
-          Submit Contact Request
-        </button>
-        <button class="btn btn-secondary ml-3" type="reset">Clear form</button>
-      </b-form>
+        <!-- Actions -->
+        <div class="flex gap-2">
+          <button
+            type="submit"
+            class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors disabled:opacity-40"
+            :disabled="!isFormValid"
+          >Submit Contact Request</button>
+          <button
+            type="reset"
+            class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >Clear form</button>
+        </div>
+      </form>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  BAlert,
-  BForm,
-  BFormCheckbox,
-  BFormGroup,
-  BFormInput,
-  BFormSelect,
-  BFormTextarea,
-} from "@/components/bootstrap-compat";
 import { computed, ref } from "vue";
 
-// Form data
 const name = ref("");
 const emailAddress = ref("");
 const company = ref("");
@@ -195,28 +170,16 @@ const serviceInterest = ref("");
 const message = ref("");
 const consented = ref(false);
 
-// State flags
 const submitting = ref(false);
 const submitted = ref(false);
 const submitError = ref(false);
 const validated = ref(false);
 
-// Config
 const privacyLink = import.meta.env.VUE_APP_PRIVACY_LINK;
 const termsLink = import.meta.env.VUE_APP_TERMS_LINK;
 const contactEmail =
   import.meta.env.VUE_APP_CONTACT_EMAIL || "hello@withobsrvr.com";
 
-// Service options for dropdown
-const serviceOptions = [
-  { value: "", text: "-- Please select --", disabled: true },
-  { value: "host-validator", text: "Host my validator" },
-  { value: "help-setup", text: "Help me set up" },
-  { value: "both", text: "Both hosting and setup" },
-  { value: "general", text: "General inquiry" },
-];
-
-// Validation states (for display purposes - returns null if not yet validated)
 const nameState = computed(() => {
   if (!validated.value) return null;
   return name.value.trim().length > 0;
@@ -239,28 +202,16 @@ const messageState = computed(() => {
   return message.value.trim().length > 0;
 });
 
-// Form validity check (for enabling submit button - doesn't require validated flag)
 const isFormValid = computed(() => {
-  const nameValid = name.value.trim().length > 0;
-  const emailValid =
-    emailAddress.value !== "" &&
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-      emailAddress.value.toLowerCase()
-    );
-  const serviceInterestValid = serviceInterest.value !== "";
-  const messageValid = message.value.trim().length > 0;
-  const consentValid = consented.value;
-
   return (
-    nameValid &&
-    emailValid &&
-    serviceInterestValid &&
-    messageValid &&
-    consentValid
+    name.value.trim().length > 0 &&
+    emailAddressState.value === true &&
+    serviceInterest.value !== "" &&
+    message.value.trim().length > 0 &&
+    consented.value
   );
 });
 
-// Form handlers
 function onReset(event: Event) {
   event.preventDefault();
   resetForm();
@@ -283,20 +234,15 @@ async function onSubmit(event: Event) {
   event.preventDefault();
   submitError.value = false;
   submitted.value = false;
-
-  // Validate form
   if (!isFormValid.value) return;
 
   try {
     submitting.value = true;
-
     const response = await fetch(
       import.meta.env.VUE_APP_PUBLIC_API_URL + "/v1/contact",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.value,
           emailAddress: emailAddress.value,
@@ -304,15 +250,13 @@ async function onSubmit(event: Event) {
           serviceInterest: serviceInterest.value,
           message: message.value,
         }),
-      }
+      },
     );
-
     if (!response.ok) {
       submitting.value = false;
       submitError.value = true;
       return;
     }
-
     submitted.value = true;
     submitting.value = false;
     resetForm();
@@ -322,29 +266,3 @@ async function onSubmit(event: Event) {
   }
 }
 </script>
-
-<style scoped>
-.lead {
-  font-size: 1.1rem;
-  color: #6c757d;
-}
-
-.loader {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #1997c6;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin: 20px auto;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-</style>

@@ -3,7 +3,7 @@
       <div class="mx-auto w-full max-w-content px-4">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
           <!-- Nav links -->
-          <nav class="flex flex-col lg:flex-row lg:items-center lg:h-10 lg:-ml-3 text-[13px] font-medium text-gray-500">
+          <nav class="flex flex-col lg:flex-row lg:items-stretch lg:h-10 lg:-ml-3 text-[13px] font-medium text-gray-500">
             <router-link
               :to="{
                 name: 'network-dashboard',
@@ -195,11 +195,11 @@ const homeActiveClass = computed(() => {
 
 function navClass(isActive: boolean) {
   const base = 'relative flex items-center transition-colors';
-  const layout = 'px-4 py-2.5 lg:px-3 lg:py-0 lg:h-10';
+  const layout = 'px-4 py-2.5 lg:px-3 lg:py-0 lg:h-full';
   if (isActive) {
-    return `${base} ${layout} text-gray-900 font-semibold bg-gray-50 lg:bg-transparent border-l-2 border-gray-900 lg:border-l-0 lg:after:content-[''] lg:after:absolute lg:after:bottom-0 lg:after:left-0 lg:after:right-0 lg:after:h-[2px] lg:after:bg-gray-900`;
+    return `${base} ${layout} text-gray-900 font-semibold bg-gray-50 lg:bg-transparent border-l-2 border-gray-900 lg:border-l-0 lg:border-b-2 lg:border-b-gray-900 lg:-mb-px`;
   }
-  return `${base} ${layout} text-gray-500 hover:text-gray-900 hover:bg-gray-50 lg:hover:bg-transparent border-l-2 border-transparent lg:border-l-0`;
+  return `${base} ${layout} text-gray-500 hover:text-gray-900 hover:bg-gray-50 lg:hover:bg-transparent border-l-2 border-transparent lg:border-l-0 lg:border-b-2 lg:border-b-transparent lg:-mb-px`;
 }
 </script>
 

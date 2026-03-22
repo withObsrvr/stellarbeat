@@ -70,7 +70,7 @@
           </div>
 
           <div
-            class="d-flex flex-wrap mt-1"
+            class="flex flex-wrap mt-1"
             :class="{ animated: animated }"
             @animationend="animated = false"
           >

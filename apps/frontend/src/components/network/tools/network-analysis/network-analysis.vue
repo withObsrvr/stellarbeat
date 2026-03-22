@@ -1,326 +1,221 @@
 <template>
-  <b-card no-body>
-    <b-card-header class="p-3">
-      <h3 class="card-title">Network analysis</h3>
-      <div class="card-options">
-        <a
-          href="#"
-          class="card-options-remove"
-          data-toggle="card-remove"
-          @click.prevent.stop="store.isNetworkAnalysisVisible = false"
-        >
-          <b-icon-x class="mr-2" />
-        </a>
-      </div>
-    </b-card-header>
-    <b-card-body class="px-3 pt-4 pb-2">
+  <div class="rounded-xl border border-gray-200 bg-white">
+    <div class="flex items-center justify-between border-b border-gray-100 bg-gray-50/80 p-3">
+      <h3 class="text-sm font-semibold text-gray-900">Network analysis</h3>
+      <a
+        href="#"
+        class="text-gray-400 hover:text-gray-600 transition-colors"
+        @click.prevent.stop="store.isNetworkAnalysisVisible = false"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </a>
+    </div>
+    <div class="px-3 pt-4 pb-2">
       <div :class="dimmerClass">
         <div class="loader mt-2"></div>
         <div class="dimmer-content">
           <div v-if="hasResult">
-            <div class="accordion" role="tablist">
-              <b-card
-                v-if="quorumIntersectionAnalyzed"
-                no-body
-                class="mb-1 border-0"
+            <!-- Accordion sections -->
+            <div v-if="quorumIntersectionAnalyzed" class="mb-1">
+              <button
+                class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                @click="activeSection = activeSection === 'quorum' ? '' : 'quorum'"
               >
-                <b-card-header header-tag="header" class="p-0" role="tab">
-                  <button
-                    v-b-toggle.accordion-quorum
-                    class="btn btn-block btn-outline-primary"
-                  >
-                    Quorum intersection
-                  </button>
-                </b-card-header>
-                <b-collapse
-                  id="accordion-quorum"
-                  visible
-                  accordion="my-accordion"
-                  role="tabpanel"
+                Quorum intersection
+              </button>
+              <div v-show="activeSection === 'quorum'" class="px-0 pb-0">
+                <analysis
+                  title="Minimal quorums"
+                  :items="minimalQuorums"
+                  :nodes-partition="nodesPartition"
+                  :show-nodes-partition="resultMergedBy !== MyMergeBy.DoNotMerge"
                 >
-                  <b-card-body class="px-0 pb-0">
-                    <analysis
-                      title="Minimal quorums"
-                      :items="minimalQuorums"
-                      :nodes-partition="nodesPartition"
-                      :show-nodes-partition="
-                        resultMergedBy !== MyMergeBy.DoNotMerge
-                      "
-                    >
-                      <template #title>
-                        <div
-                          class="d-flex justify-content-between align-items-baseline"
-                        >
-                          <h3>
-                            <b-badge
-                              :variant="
-                                hasQuorumIntersection ? 'success' : 'danger'
-                              "
-                            >
-                              {{
-                                hasQuorumIntersection
-                                  ? "All quorums intersect"
-                                  : "No quorum intersection"
-                              }}
-                            </b-badge>
-                          </h3>
-                          <button class="btn btn-sm" @click="showModal = true">
-                            <b-icon-info-circle
-                              v-b-modal="'network-analysis-qi-info'"
-                              v-tooltip:top="'Info'"
-                              class="text-muted"
-                            />
-                          </button>
-                          <quorum-intersection-info />
-                        </div>
-                      </template>
-                    </analysis>
-                  </b-card-body>
-                </b-collapse>
-              </b-card>
-              <b-card v-if="livenessAnalyzed" no-body class="mb-1 border-0">
-                <b-card-header header-tag="header" class="p-0" role="tab">
-                  <button
-                    v-b-toggle.accordion-liveness
-                    class="btn-primary btn btn-block"
-                  >
-                    Liveness risk
-                  </button>
-                </b-card-header>
-                <b-collapse
-                  id="accordion-liveness"
-                  visible
-                  accordion="my-accordion"
-                  role="tabpanel"
-                >
-                  <b-card-body class="px-0 pb-0">
-                    <analysis
-                      title="Blocking sets"
-                      :items="blockingSets"
-                      :nodes-partition="nodesPartition"
-                      :show-nodes-partition="
-                        resultMergedBy !== MyMergeBy.DoNotMerge
-                      "
-                    >
-                      <template #title>
-                        <div
-                          class="d-flex justify-content-between align-items-baseline"
-                        >
-                          <h3 v-if="blockingSetsMinSize <= 0">
-                            Network halted.
-                          </h3>
-                          <h3 v-else>
-                            Found set(s) of size
-                            {{ blockingSetsMinSize }}
-                            that could impact liveness.
-                          </h3>
-                          <button class="btn btn-sm" @click="showModal = true">
-                            <b-icon-info-circle
-                              v-b-modal="'network-analysis-liveness-info'"
-                              v-tooltip:top="'Info'"
-                              class="text-muted"
-                            />
-                          </button>
-                        </div>
-                        <liveness-info />
-                      </template>
-                    </analysis>
-                  </b-card-body>
-                </b-collapse>
-              </b-card>
-              <b-card v-if="safetyAnalyzed" no-body class="mb-1 border-0">
-                <b-card-header header-tag="header" class="p-0" role="tab">
-                  <button
-                    v-b-toggle.accordion-safety
-                    class="btn btn-block btn-outline-primary"
-                  >
-                    Safety risk
-                  </button>
-                </b-card-header>
-                <b-collapse
-                  id="accordion-safety"
-                  visible
-                  accordion="my-accordion"
-                  role="tabpanel"
-                >
-                  <b-card-body class="px-0 pb-0">
-                    <analysis
-                      title="Splitting sets"
-                      :items="splittingSets"
-                      :nodes-partition="nodesPartition"
-                      :show-nodes-partition="
-                        resultMergedBy !== MyMergeBy.DoNotMerge
-                      "
-                    >
-                      <template #title>
-                        <div
-                          class="d-flex justify-content-between align-items-baseline"
-                        >
-                          <h3 v-if="splittingSetsMinSize <= 0">
-                            No intersection between quorums found.
-                          </h3>
-                          <h3 v-else>
-                            Found set(s) of size
-                            {{ splittingSetsMinSize }}
-                            that could impact safety.
-                          </h3>
-                          <button class="btn btn-sm" @click="showModal = true">
-                            <b-icon-info-circle
-                              v-b-modal="'network-analysis-safety-info'"
-                              v-tooltip:top="'Info'"
-                              class="text-muted"
-                            />
-                          </button>
-                        </div>
-                        <safety-info />
-                      </template>
-                    </analysis>
-                  </b-card-body>
-                </b-collapse>
-              </b-card>
-              <b-card v-if="topTierAnalyzed" no-body class="mb-1 border-0">
-                <b-card-header header-tag="header" class="p-0" role="tab">
-                  <button
-                    v-b-toggle.accordion-top-tier
-                    class="btn btn-block btn-outline-primary"
-                  >
-                    Top tier
-                  </button>
-                </b-card-header>
-                <b-collapse
-                  id="accordion-top-tier"
-                  visible
-                  accordion="my-accordion"
-                  role="tabpanel"
-                >
-                  <b-card-body class="px-0 pb-0">
-                    <analysis
-                      title="Top tier"
-                      :items="topTier"
-                      :nodes-partition="nodesPartition"
-                      :show-nodes-partition="
-                        resultMergedBy !== MyMergeBy.DoNotMerge
-                      "
-                    >
-                      <template #title>
-                        <div
-                          class="d-flex justify-content-between align-items-baseline"
-                        >
-                          <h3 class="mb-0">
-                            Top tier has size
-                            {{ topTier.length }}
-                          </h3>
+                  <template #title>
+                    <div class="flex justify-between items-baseline">
+                      <h3>
+                        <UiBadge :variant="hasQuorumIntersection ? 'success' : 'danger'">
+                          {{ hasQuorumIntersection ? "All quorums intersect" : "No quorum intersection" }}
+                        </UiBadge>
+                      </h3>
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showQiInfo = true">
+                        <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </button>
+                      <quorum-intersection-info />
+                    </div>
+                  </template>
+                </analysis>
+              </div>
+            </div>
 
-                          <button class="btn btn-sm" @click="showModal = true">
-                            <b-icon-info-circle
-                              v-b-modal="'network-analysis-top-tier-info'"
-                              v-tooltip:top="'Info'"
-                              class="text-muted"
-                            />
-                          </button>
-                          <top-tier-info />
-                        </div>
-                        <b-badge variant="info">
-                          {{
-                            topTierIsSymmetric ? "Symmetric" : "Not symmetric"
-                          }}
-                        </b-badge>
-                      </template>
-                    </analysis>
-                  </b-card-body>
-                </b-collapse>
-              </b-card>
+            <div v-if="livenessAnalyzed" class="mb-1">
+              <button
+                class="w-full rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors text-left"
+                @click="activeSection = activeSection === 'liveness' ? '' : 'liveness'"
+              >
+                Liveness risk
+              </button>
+              <div v-show="activeSection === 'liveness'" class="px-0 pb-0">
+                <analysis
+                  title="Blocking sets"
+                  :items="blockingSets"
+                  :nodes-partition="nodesPartition"
+                  :show-nodes-partition="resultMergedBy !== MyMergeBy.DoNotMerge"
+                >
+                  <template #title>
+                    <div class="flex justify-between items-baseline">
+                      <h3 v-if="blockingSetsMinSize <= 0">Network halted.</h3>
+                      <h3 v-else>Found set(s) of size {{ blockingSetsMinSize }} that could impact liveness.</h3>
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showLivenessInfo = true">
+                        <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </button>
+                    </div>
+                    <liveness-info />
+                  </template>
+                </analysis>
+              </div>
+            </div>
+
+            <div v-if="safetyAnalyzed" class="mb-1">
+              <button
+                class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                @click="activeSection = activeSection === 'safety' ? '' : 'safety'"
+              >
+                Safety risk
+              </button>
+              <div v-show="activeSection === 'safety'" class="px-0 pb-0">
+                <analysis
+                  title="Splitting sets"
+                  :items="splittingSets"
+                  :nodes-partition="nodesPartition"
+                  :show-nodes-partition="resultMergedBy !== MyMergeBy.DoNotMerge"
+                >
+                  <template #title>
+                    <div class="flex justify-between items-baseline">
+                      <h3 v-if="splittingSetsMinSize <= 0">No intersection between quorums found.</h3>
+                      <h3 v-else>Found set(s) of size {{ splittingSetsMinSize }} that could impact safety.</h3>
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showSafetyInfo = true">
+                        <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </button>
+                    </div>
+                    <safety-info />
+                  </template>
+                </analysis>
+              </div>
+            </div>
+
+            <div v-if="topTierAnalyzed" class="mb-1">
+              <button
+                class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                @click="activeSection = activeSection === 'top-tier' ? '' : 'top-tier'"
+              >
+                Top tier
+              </button>
+              <div v-show="activeSection === 'top-tier'" class="px-0 pb-0">
+                <analysis
+                  title="Top tier"
+                  :items="topTier"
+                  :nodes-partition="nodesPartition"
+                  :show-nodes-partition="resultMergedBy !== MyMergeBy.DoNotMerge"
+                >
+                  <template #title>
+                    <div class="flex justify-between items-baseline">
+                      <h3 class="mb-0">Top tier has size {{ topTier.length }}</h3>
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showTopTierInfo = true">
+                        <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </button>
+                      <top-tier-info />
+                    </div>
+                    <UiBadge variant="info">
+                      {{ topTierIsSymmetric ? "Symmetric" : "Not symmetric" }}
+                    </UiBadge>
+                  </template>
+                </analysis>
+              </div>
             </div>
           </div>
         </div>
         <div class="mb-2">
-          <b-alert
+          <UiAlert
             :show="!store.network.networkStatistics.hasSymmetricTopTier"
             variant="warning"
-            >Warning: top tier is not symmetric, analysis could be slow.
+          >
+            Warning: top tier is not symmetric, analysis could be slow.
             Execution time increases exponentially with top tier size. For very
             large networks you can export the current network through the
             'modify network' tool and run the analysis offline with the
-            <a href="https://github.com/wiberlin/fbas_analyzer" target="_blank"
-              >fbas analyzer tool</a
-            ></b-alert
-          >
-          <b-form-group label="Analysis target: ">
-            <b-form-checkbox
+            <a href="https://github.com/wiberlin/fbas_analyzer" target="_blank" class="underline">fbas analyzer tool</a>
+          </UiAlert>
+          <div class="mb-3">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Analysis target:</label>
+            <label
               v-if="store.selectedNode"
-              v-model="analyzeTrustCluster"
-              class="pb-1"
+              class="flex items-center gap-2 text-sm cursor-pointer pb-1"
             >
+              <input v-model="analyzeTrustCluster" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
               Analyze trust cluster of selected node (Could be slow!)
-            </b-form-checkbox>
-            <b-form-radio-group
-              id="radio-group-2"
-              v-model="store.networkAnalysisMergeBy"
-              name="radio-sub-component"
-            >
-              <b-form-radio :value="MyMergeBy.DoNotMerge"
-                >{{ getMergeByFriendlyName(MyMergeBy.DoNotMerge) }}
-              </b-form-radio>
-              <b-form-radio :value="MyMergeBy.Orgs"
-                >{{ getMergeByFriendlyName(MyMergeBy.Orgs) }}
-              </b-form-radio>
-              <b-form-radio :value="MyMergeBy.Countries"
-                >{{ getMergeByFriendlyName(MyMergeBy.Countries) }}
-              </b-form-radio>
-              <b-form-radio :value="MyMergeBy.ISPs"
-                >{{ getMergeByFriendlyName(MyMergeBy.ISPs) }}
-              </b-form-radio>
-            </b-form-radio-group>
-          </b-form-group>
-          <b-form-group label="Analysis type: ">
-            <b-form-checkbox v-model="analyzeQuorumIntersection"
-              >Quorum Intersection</b-form-checkbox
-            >
-            <b-form-checkbox v-model="analyzeLiveness"
-              >Liveness</b-form-checkbox
-            >
-            <b-form-checkbox v-model="analyzeSafety">Safety</b-form-checkbox>
-            <b-form-checkbox v-model="analyzeTopTier">Top Tier</b-form-checkbox>
-          </b-form-group>
+            </label>
+            <div class="flex flex-col gap-1 mt-1">
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input v-model="store.networkAnalysisMergeBy" :value="MyMergeBy.DoNotMerge" type="radio" name="merge-by" class="h-4 w-4 text-gray-900 focus:ring-gray-500" />
+                {{ getMergeByFriendlyName(MyMergeBy.DoNotMerge) }}
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input v-model="store.networkAnalysisMergeBy" :value="MyMergeBy.Orgs" type="radio" name="merge-by" class="h-4 w-4 text-gray-900 focus:ring-gray-500" />
+                {{ getMergeByFriendlyName(MyMergeBy.Orgs) }}
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input v-model="store.networkAnalysisMergeBy" :value="MyMergeBy.Countries" type="radio" name="merge-by" class="h-4 w-4 text-gray-900 focus:ring-gray-500" />
+                {{ getMergeByFriendlyName(MyMergeBy.Countries) }}
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input v-model="store.networkAnalysisMergeBy" :value="MyMergeBy.ISPs" type="radio" name="merge-by" class="h-4 w-4 text-gray-900 focus:ring-gray-500" />
+                {{ getMergeByFriendlyName(MyMergeBy.ISPs) }}
+              </label>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Analysis type:</label>
+            <div class="flex flex-col gap-1">
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input v-model="analyzeQuorumIntersection" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
+                Quorum Intersection
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input v-model="analyzeLiveness" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
+                Liveness
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input v-model="analyzeSafety" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
+                Safety
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input v-model="analyzeTopTier" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500" />
+                Top Tier
+              </label>
+            </div>
+          </div>
 
           <button
             v-if="!isLoading"
-            class="btn btn-primary btn"
+            class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
             @click="performAnalysis"
           >
             Perform analysis
           </button>
           <button
             v-else
-            class="btn btn-danger"
-            variant="danger"
+            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 transition-colors"
             @click="stopAnalysis"
           >
             Stop analysis
           </button>
         </div>
       </div>
-    </b-card-body>
-  </b-card>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import {
-  BAlert,
-  BBadge,
-  BCard,
-  BCardBody,
-  BCardHeader,
-  BCollapse,
-  BFormCheckbox,
-  BFormGroup,
-  BFormRadio,
-  BFormRadioGroup,
-  BIconInfoCircle,
-  BIconX,
-  VBModal,
-  VBToggle,
-} from '@/components/bootstrap-compat';
 import {
   BaseQuorumSet,
   Node,
@@ -339,18 +234,22 @@ import { useIsLoading } from "@/composables/useIsLoading";
 import useStore from "@/store/useStore";
 import useScrollTo from "@/composables/useScrollTo";
 
-
 const { isLoading, dimmerClass } = useIsLoading();
 const store = useStore();
 
 const showModal = ref(false);
+const showQiInfo = ref(false);
+const showLivenessInfo = ref(false);
+const showSafetyInfo = ref(false);
+const showTopTierInfo = ref(false);
+const activeSection = ref('quorum');
 
 const MyMergeBy: {
   DoNotMerge: number;
   Orgs: number;
   ISPs: number;
   Countries: number;
-} = MergeBy; //for use in template as enums not supported
+} = MergeBy;
 
 const fbasAnalysisWorker = new Worker(
   new URL("./../../../../workers/fbas-analysis-v3.worker.ts", import.meta.url),
@@ -446,15 +345,12 @@ function getNodesToQuorumSetMap(nodes: Node[]): Map<PublicKey, BaseQuorumSet> {
 }
 
 function updatePartitions() {
-  //todo should come from fbas analysis
   const removeSpecialCharsFromGroupingName = (name: string) => {
-    //copied from fbas analysis, to handle isp naming differences
     name = name.replace(",", "");
     const start = name.substring(0, name.length - 1);
     let end = name.substring(name.length - 1);
     end = end.replace(".", "");
     name = start + end;
-
     return name;
   };
   nodesPartition.value = new Map<string, string[]>();
@@ -564,7 +460,6 @@ onMounted(() => {
             }
 
             topTierAnalyzed.value = analysisResult.topTierAnalyzed;
-            //@ts-ignore;
             if (analysisResult.topTierAnalyzed) {
               topTier.value = analysisResult.topTier.map((member) => [member]);
               if (resultMergedBy.value === MyMergeBy.DoNotMerge)
@@ -579,11 +474,3 @@ onMounted(() => {
   };
 });
 </script>
-<style scoped>
-.my-thead tr th {
-  color: #495057;
-  text-transform: none;
-  font-size: 0.9375rem;
-  font-weight: 700;
-}
-</style>

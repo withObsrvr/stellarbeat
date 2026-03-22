@@ -1,27 +1,21 @@
 <template>
-  <div>
-    <!--consent /!-->
-    <div class="page-header mt-2 py-3">
-      <h1 class="page-title mr-2">Notify</h1>
-    </div>
-    <div class="card">
-      <div class="card-body">
+  <div class="mx-auto max-w-3xl px-4 py-6">
+    <h1 class="text-2xl font-bold text-gray-900 mb-1">Notify</h1>
+    <p class="text-sm text-gray-500 mb-6">Get notified on network, node, or organization events.</p>
+    <div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div class="p-6">
         <router-view />
       </div>
       <div
         v-show="$route.name && typeof $route.name === 'string' && !$route.name.match('privacy')"
-        class="card-footer"
+        class="border-t border-gray-100 px-6 py-3 flex justify-end"
       >
-        <div class="d-flex privacy-link">
-          <a
-            :href="privacyLink"
-            class="nav-link"
-            target="_blank"
-            rel="noopener"
-          >
-            Privacy policy
-          </a>
-        </div>
+        <a
+          :href="privacyLink"
+          class="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+          target="_blank"
+          rel="noopener"
+        >Privacy policy</a>
       </div>
     </div>
   </div>
@@ -33,8 +27,3 @@ import useMetaTags from "@/composables/useMetaTags";
 const privacyLink = import.meta.env.VUE_APP_PRIVACY_LINK;
 useMetaTags("Notify", "Get notified on network, node or organization events");
 </script>
-<style scoped>
-.privacy-link {
-  justify-content: flex-end;
-}
-</style>

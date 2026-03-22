@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex justify-between items-center py-3">
+    <div v-if="!isDetailView" class="flex justify-between items-center py-3">
       <div class="flex items-center">
         <h2 class="text-xl font-semibold text-gray-900">Network explorer</h2>
         <simulation-badge />
@@ -50,7 +50,7 @@
       </div>
     </div>
     <div class="flex flex-col lg:flex-row gap-4 h-full">
-      <aside class="w-full lg:w-auto flex-shrink-0 mb-5 lg:mb-0">
+      <aside v-if="!isDetailView" class="w-full lg:w-auto flex-shrink-0 mb-5 lg:mb-0">
         <div class="rounded-xl border border-gray-200 bg-white pt-0 sidebar-card h-full">
           <router-view v-slot="{ Component }" name="sideBar">
             <transition name="fade" mode="out-in">
@@ -60,7 +60,7 @@
         </div>
       </aside>
       <div id="content" class="flex-1 min-w-0">
-        <div class="mb-4">
+        <div v-if="!isDetailView" class="mb-4">
           <network-visual-navigator :view="view" />
         </div>
         <div
@@ -109,6 +109,18 @@ const route = useRoute();
 const router = useRouter();
 
 const scrollTo = useScrollTo();
+
+const isNodeDetailView = computed(
+  () => route.name === "node-dashboard" && !!store.selectedNode,
+);
+
+const isOrgDetailView = computed(
+  () => route.name === "organization-dashboard" && !!store.selectedOrganization,
+);
+
+const isDetailView = computed(
+  () => isNodeDetailView.value || isOrgDetailView.value,
+);
 
 watch(
   route,

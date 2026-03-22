@@ -31,11 +31,7 @@ export function createRouter() {
             components: {
               dashboard: () =>
                 import(
-                  /* webpackChunkName: "node-dashboard" */ "@/components/node/node-dashboard.vue"
-                ),
-              sideBar: () =>
-                import(
-                  /* webpackChunkName: "node-dashboard" */ "@/components/node/sidebar/node-side-bar.vue"
+                  /* webpackChunkName: "node-detail" */ "@/components/node/node-detail/NodeDetailPage.vue"
                 ),
             },
             props: (route) => ({ view: route.query.view }),
@@ -46,11 +42,7 @@ export function createRouter() {
             components: {
               dashboard: () =>
                 import(
-                  /* webpackChunkName: "organization-dashboard" */ "@/components/organization/organization-dashboard.vue"
-                ),
-              sideBar: () =>
-                import(
-                  /* webpackChunkName: "organization-dashboard" */ "@/components/organization/sidebar/organization-side-bar.vue"
+                  /* webpackChunkName: "organization-detail" */ "@/components/organization/organization-detail/OrganizationDetailPage.vue"
                 ),
             },
             props: (route) => ({ view: route.query.view }),

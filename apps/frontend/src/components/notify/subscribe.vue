@@ -1,167 +1,138 @@
 <template>
   <div>
-    <div v-if="requesting">
-      <h4>Requesting subscription</h4>
-      <div>
-        <div class="loader"></div>
-      </div>
+    <div v-if="requesting" class="flex flex-col items-center py-8">
+      <div class="loader"></div>
+      <p class="text-sm text-gray-500 mt-3">Requesting subscription...</p>
     </div>
     <div v-else>
-      <h4>Subscribe to</h4>
-      <form
-        novalidate
-        @submit.prevent="onSubscribe"
-        @reset="onReset"
-      >
-        <UiAlert variant="success" :show="requested"
-          >Request received, you will receive an email shortly.</UiAlert
-        >
-        <UiAlert variant="danger" :show="submitError"
-          >Something went wrong, please try again later or contact
-          support.</UiAlert
-        >
-        <div class="mb-4"
-          id="nodes-group"
-          label="Node events"
-          label-for="nodes-select"
-          description="Triggered when inactive, not validating or history archive not up-to-date for three consecutive updates or when history archive verification error is detected"
-        >
+      <h3 class="text-lg font-bold text-gray-900 mb-4">Subscribe to events</h3>
+      <form novalidate @submit.prevent="onSubscribe" @reset="onReset">
+        <UiAlert variant="success" :show="requested">
+          Request received, you will receive an email shortly.
+        </UiAlert>
+        <UiAlert variant="danger" :show="submitError">
+          Something went wrong, please try again later or contact support.
+        </UiAlert>
+
+        <!-- Node events -->
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Node events</label>
+          <p class="text-2xs text-gray-400 mb-2">
+            Triggered when inactive, not validating, or history archive not up-to-date for three consecutive updates.
+          </p>
           <multiselect
             id="nodes-select"
             v-model="selectedNodes"
             mode="tags"
             :close-on-select="false"
             :searchable="true"
-            placeholder="Nodes"
+            placeholder="Search nodes..."
             label="name"
             valueProp="publicKey"
             :object="true"
             :options="nodes"
             @search-change="searchNodes"
-          >
-          </multiselect>
+          />
         </div>
 
-        <div class="mb-4"
-          id="organizations-group"
-          label="Organization events"
-          label-for="organization-select"
-          description="Triggered when organization unavailable for three consecutive updates"
-        >
+        <!-- Organization events -->
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Organization events</label>
+          <p class="text-2xs text-gray-400 mb-2">
+            Triggered when organization unavailable for three consecutive updates.
+          </p>
           <multiselect
             id="organization-select"
             v-model="selectedOrganizations"
             mode="tags"
             :close-on-select="false"
             :searchable="true"
-            placeholder="Organizations"
+            placeholder="Search organizations..."
             label="name"
             valueProp="id"
             :object="true"
             :options="organizations"
-          >
-          </multiselect>
+          />
         </div>
-        <div class="mb-4"
-          id="network-group"
-          description="Triggered when transitive quorumSet changes, when liveness or danger risks drop below
-            thresholds."
-        >
-          <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox"
-            id="network-checkbox"
-            v-model="networkSubscription"
-            name="network-checkbox"
-            unchecked-value="not_subscribed"
-          >
-            Network events
+
+        <!-- Network events -->
+        <div class="mb-5">
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              v-model="networkSubscription"
+              type="checkbox"
+              class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
+            />
+            <span class="font-medium text-gray-700">Network events</span>
           </label>
+          <p class="text-2xs text-gray-400 mt-1 ml-6">
+            Triggered when transitive quorum set changes or when liveness/danger risks drop below thresholds.
+          </p>
         </div>
-        <div class="mb-4 mt-6" id="email-group">
+
+        <!-- Email -->
+        <div class="mb-5">
+          <label for="email-address" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
           <input
             id="email-address"
             v-model.trim="emailAddress"
-            class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm w-full"
-            placeholder="Enter your email address"
+            class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            placeholder="you@example.com"
             required
             type="email"
           />
         </div>
-        <div class="mb-4" id="consent-group">
-          <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox"
-            id="consent-checkbox"
-            v-model="consented"
-            name="consent-checkbox"
-            unchecked-value="not_accepted"
-          >
-            I have read, understood, and agree to be bound by the
-            <a :href="termsLink" target="_blank">Terms and Conditions</a>
-            and our
-            <a :href="privacyLink" target="_blank">Privacy Policy</a>
+
+        <!-- Consent -->
+        <div class="mb-6">
+          <label class="flex items-start gap-2 text-sm cursor-pointer">
+            <input
+              v-model="consented"
+              type="checkbox"
+              class="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-500 mt-0.5"
+              true-value="accepted"
+              false-value="not_accepted"
+            />
+            <span class="text-gray-600">
+              I have read, understood, and agree to be bound by the
+              <a :href="termsLink" target="_blank" class="text-gray-900 underline">Terms and Conditions</a>
+              and our
+              <a :href="privacyLink" target="_blank" class="text-gray-900 underline">Privacy Policy</a>
+            </span>
           </label>
         </div>
-        <button
-          type="submit"
-          class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
-          role="button"
-          @click="onSubscribe"
-        >
-          Create or update subscriptions
-        </button>
-        <button
-          class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 transition-colors ml-2"
-          type="submit"
-          :disabled="
-            !(emailAddressState === true && consented !== 'not_accepted')
-          "
-          @click="onUnsubscribe"
-        >
-          Unsubscribe and remove email address
-        </button>
-        <button class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors ml-3" type="reset">Clear form</button>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="submit"
+            class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+            @click="onSubscribe"
+          >Create or update subscriptions</button>
+          <button
+            type="button"
+            class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-40"
+            :disabled="!(emailAddressState === true && consented !== 'not_accepted')"
+            @click="onUnsubscribe"
+          >Unsubscribe</button>
+          <button
+            type="reset"
+            class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >Clear form</button>
+        </div>
       </form>
     </div>
-    <UiAlert class="mt-5" variant="info" :show="true"
-      ><ul>
-        <li>
-          Events are triggered when they first occur. For example a node that is
-          down for three days, will only trigger one event at the start.
-        </li>
-        <li>
-          To prevent notification overload, notifications for a specific event
-          are muted (not sent) for 24H after they are first sent. You can
-          however unmute event notifications by following the link in the
-          notification email. For example if you resolve a reported issue with
-          your node, and wish to be notified immediately when the issue should
-          reappear.
-        </li>
-        <li>
-          This service is provided best effort. If network issues are reported,
-          be sure to check the
-          <a href="https://dashboard.stellar.org" target="_blank"
-            >official Stellar network dashboard</a
-          >. There could be an issue with the OBSRVR Radar crawler, which itself
-          is in essence a non-validating node.
-        </li>
-        <li>
-          To improve the chances of the OBSRVR Radar crawler connecting to your
-          node, add the crawler public keys to your PREFERRED_PEER_KEYS in your
-          <a
-            href="https://github.com/stellar/stellar-core/blob/ecd0a7462c84bd1d2445cdfd48aa9b38b1bbfd20/docs/stellar-core_example.cfg#L170"
-            target="_blank"
-            >Stellar core configuration file. </a
-          >: GCMFBFXLCVWMYZL64U75DTRT6YNPFTG5ZV5P2PL2GTI3GNMEV4WC53JC and
-          GAK7ZMDHKKEOYGZH3OSZQERK6UG5UDG5WEJV7GTN3Z4OIFXS3DXPUCRY
-        </li>
-        <li>
-          The OBSRVR Radar notification service does not replace the monitoring
-          setup advised in the
-          <a
-            href="https://developers.stellar.org/docs/run-core-node/monitoring/"
-            >Stellar monitoring docs</a
-          >.
-        </li>
+
+    <!-- Info notes -->
+    <div class="mt-6 rounded-xl border border-gray-200 bg-gray-50/50 p-4 text-sm text-gray-600">
+      <h4 class="text-2xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Important notes</h4>
+      <ul class="space-y-2 list-disc pl-4">
+        <li>Events are triggered when they first occur. A node down for three days triggers only one event at the start.</li>
+        <li>Notifications for a specific event are muted for 24H after first sent. Unmute via the link in the notification email.</li>
+        <li>This service is provided best effort. Check the <a href="https://dashboard.stellar.org" target="_blank" class="text-gray-900 underline">official Stellar dashboard</a> if network issues are reported.</li>
+        <li>This does not replace <a href="https://developers.stellar.org/docs/run-core-node/monitoring/" target="_blank" class="text-gray-900 underline">Stellar monitoring docs</a> recommendations.</li>
       </ul>
-    </UiAlert>
+    </div>
   </div>
 </template>
 
@@ -203,12 +174,10 @@ const privacyLink = import.meta.env.VUE_APP_PRIVACY_LINK;
 const termsLink = import.meta.env.VUE_APP_TERMS_LINK;
 
 const organizations: ComputedRef<SelectedOrganization[]> = computed(() => {
-  return network.organizations.map((org) => {
-    return {
-      name: org.name,
-      id: org.id,
-    };
-  });
+  return network.organizations.map((org) => ({
+    name: org.name,
+    id: org.id,
+  }));
 });
 
 function searchNodes(query: string) {
@@ -218,9 +187,7 @@ function searchNodes(query: string) {
         node.publicKey.toLowerCase().search(query.toLowerCase()) !== -1 ||
         node.displayName.toLowerCase().search(query.toLowerCase()) !== -1,
     )
-    .map((node) => {
-      return { name: node.displayName, publicKey: node.publicKey };
-    });
+    .map((node) => ({ name: node.displayName, publicKey: node.publicKey }));
 }
 
 const emailAddressState = computed(() => {
@@ -253,25 +220,16 @@ function getSelectedEventSourceIds(): EventSourceId[] {
         : "Public Global Stellar Network ; September 2015",
     });
   }
-
   if (selectedNodes.value !== null) {
     selectedNodes.value.forEach((node: SelectNode) => {
-      eventSourceIds.push({
-        type: "node",
-        id: node.publicKey,
-      });
+      eventSourceIds.push({ type: "node", id: node.publicKey });
     });
   }
-
   if (selectedOrganizations.value !== null) {
     selectedOrganizations.value.forEach((org: SelectedOrganization) => {
-      eventSourceIds.push({
-        type: "organization",
-        id: org.id,
-      });
+      eventSourceIds.push({ type: "organization", id: org.id });
     });
   }
-
   return eventSourceIds;
 }
 
@@ -287,9 +245,7 @@ async function onSubscribe(event: Event) {
       import.meta.env.VUE_APP_PUBLIC_API_URL + "/v1/subscription",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           emailAddress: emailAddress.value,
           eventSourceIds: getSelectedEventSourceIds(),
@@ -317,16 +273,11 @@ async function onUnsubscribe(event: Event) {
   try {
     requesting.value = true;
     const response = await fetch(
-      import.meta.env.VUE_APP_PUBLIC_API_URL +
-        "/v1/subscription/request-unsubscribe",
+      import.meta.env.VUE_APP_PUBLIC_API_URL + "/v1/subscription/request-unsubscribe",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          emailAddress: emailAddress.value,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emailAddress: emailAddress.value }),
       },
     );
     if (!response.ok) {
@@ -341,16 +292,13 @@ async function onUnsubscribe(event: Event) {
     submitError.value = true;
   }
 }
+
 onMounted(() => {
-  nodes.value = network.nodes.map((node) => {
-    return {
-      name: node.displayName,
-      publicKey: node.publicKey,
-    };
-  });
+  nodes.value = network.nodes.map((node) => ({
+    name: node.displayName,
+    publicKey: node.publicKey,
+  }));
 });
 </script>
 
 <style src="@vueform/multiselect/themes/default.css"></style>
-
-<style scoped></style>

@@ -36,9 +36,8 @@
         id="textarea"
         v-model="modifiedNetworkString"
         placeholder="Paste your custom network here"
-        :rows="20"
-        :max-rows="20"
-        :state="modified ? null : isValid"
+        rows="20"
+        class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 font-mono text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300 resize-y"
         @input="modified = true"
       ></textarea>
       <div v-if="!isValid" class="mt-2">
@@ -51,9 +50,9 @@
           </div-item>
         </div>
       </div>
-      <div class="mt-2">
+      <div class="mt-3 flex gap-2">
         <button
-          class="btn"
+          class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           @click="
             modifiedNetworkString = '';
             isValid = false;
@@ -62,13 +61,13 @@
         >
           Clear
         </button>
-        <button class="btn" @click="initModifiedNetworkString">Reset</button>
-        <button class="btn" @click="copyJson">Copy JSON</button>
+        <button class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" @click="initModifiedNetworkString">Reset</button>
+        <button class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" @click="copyJson">Copy JSON</button>
       </div>
     </template>
     <template #modal-footer="{ ok, cancel }">
       <button
-        class="btn btn-secondary"
+        class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         @click="
           initModifiedNetworkString();
           cancel();
@@ -78,7 +77,7 @@
       </button>
       <button
         v-if="isValid && !modified"
-        class="btn btn-success"
+        class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
         @click="
           load();
           ok();
@@ -86,7 +85,7 @@
       >
         Load network
       </button>
-      <button v-else class="btn btn-primary" @click="validate">
+      <button v-else class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors" @click="validate">
         Validate JSON
       </button>
     </template>

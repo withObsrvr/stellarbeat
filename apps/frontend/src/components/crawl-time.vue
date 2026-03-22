@@ -5,17 +5,17 @@
       type="date"
       :min="formatDateInput(minSelectedDate)"
       :max="formatDateInput(new Date())"
-      class="rounded-l-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 h-8 focus:outline-none focus:ring-1 focus:ring-gray-200 focus:border-gray-300"
+      class="rounded-l-md border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-500 h-7 focus:outline-none focus:ring-1 focus:ring-gray-200 focus:border-gray-300"
     />
     <input
       v-model="crawlTime"
       type="time"
       step="1"
-      class="border-y border-gray-200 bg-white px-2 py-1 text-xs text-gray-500 h-8 w-[110px] focus:outline-none focus:ring-1 focus:ring-gray-200 focus:border-gray-300"
+      class="border-y border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-500 h-7 w-[100px] focus:outline-none focus:ring-1 focus:ring-gray-200 focus:border-gray-300"
     />
     <button
       v-tooltip:top="'Travel to selected time'"
-      class="flex items-center justify-center h-8 px-2 rounded-r-lg border border-gray-200 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+      class="flex items-center justify-center h-7 px-1.5 rounded-r-md border border-gray-200 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
       @click="timeTravel"
     >
       <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
