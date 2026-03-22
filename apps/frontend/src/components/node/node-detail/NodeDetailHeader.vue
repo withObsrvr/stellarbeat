@@ -111,20 +111,63 @@
     <!-- Expanded warning details (collapsed by default) -->
     <div
       v-if="hasWarnings && warningExpanded"
-      class="mb-3 rounded-lg px-4 py-3 text-sm ring-1"
-      :class="isFailing
-        ? 'text-red-600 bg-red-50/50 ring-red-200/60'
-        : 'text-amber-700 bg-amber-50/50 ring-amber-200/60'"
+      class="mb-3 space-y-2"
     >
-      <div v-if="isFailing" class="mb-1">
+      <!-- Failing reason -->
+      <div
+        v-if="isFailing"
+        class="rounded-lg px-4 py-3 text-sm text-red-600 bg-red-50/50 ring-1 ring-red-200/60"
+      >
         {{ network.getNodeFailingReason(node).description }}
       </div>
-      <ul v-if="warningReasons.length > 0" class="pl-3 ml-0 mb-0 list-disc">
-        <li v-for="reason in warningReasons" :key="reason">{{ reason }}.</li>
-      </ul>
-      <div v-if="hasHistoryArchiveError" class="mt-1">
-        History archive verification error detected.
-        <slot name="history-archive-details" />
+
+      <!-- Warning reasons (connectivity, version, lag, etc.) -->
+      <div
+        v-if="nonArchiveWarnings.length > 0"
+        class="rounded-lg px-4 py-3 text-sm text-amber-700 bg-amber-50/50 ring-1 ring-amber-200/60"
+      >
+        <ul class="pl-3 ml-0 mb-0 list-disc space-y-0.5">
+          <li v-for="reason in nonArchiveWarnings" :key="reason">{{ reason }}.</li>
+        </ul>
+      </div>
+
+      <!-- History archive errors (detailed, with error list) -->
+      <div
+        v-if="hasHistoryArchiveError"
+        class="rounded-lg px-4 py-3 text-sm text-amber-700 bg-amber-50/50 ring-1 ring-amber-200/60"
+      >
+        <div class="font-semibold mb-1">History archive issue</div>
+        <p v-if="historyArchiveScan && historyArchiveScan.errors.length > 0" class="mb-2">
+          Archive verification errors detected. Start repair at ledger
+          {{ historyArchiveScan.latestVerifiedLedger }} with
+          <a
+            href="https://github.com/stellar/go/tree/master/tools/stellar-archivist"
+            target="_blank"
+            class="underline"
+          >Stellar Archivist</a>
+          and purge your cache afterwards.
+        </p>
+        <p v-else class="mb-2">
+          Verification error in history archive detected. Repair with
+          <a
+            href="https://github.com/stellar/go/tree/master/tools/stellar-archivist"
+            target="_blank"
+            class="underline"
+          >Stellar Archivist</a>
+          and purge your cache afterwards.
+        </p>
+        <history-archive-error-list
+          v-if="historyArchiveScan"
+          :errors="historyArchiveScan.errors"
+        />
+      </div>
+
+      <!-- Slow archive info -->
+      <div
+        v-if="historyArchiveScan && historyArchiveScan.isSlow"
+        class="rounded-lg px-4 py-3 text-sm text-cyan-700 bg-cyan-50/50 ring-1 ring-cyan-200/60"
+      >
+        Only latest ledgers in history archive are scanned for errors because archive has limited throughput.
       </div>
     </div>
 
@@ -162,13 +205,15 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Node, QuorumSet } from 'shared';
+import { Node, QuorumSet, type HistoryArchiveScan } from 'shared';
 import useStore from '@/store/useStore';
 import { NodeWarningDetector } from '@/services/NodeWarningDetector';
+import HistoryArchiveErrorList from '@/components/node/node-cards/history-archive-error-list.vue';
 import { useRoute } from 'vue-router';
 
 const props = defineProps<{
   node: Node;
+  historyArchiveScan?: HistoryArchiveScan | null;
 }>();
 
 defineEmits<{
@@ -203,6 +248,13 @@ const warningReasons = computed(() =>
   NodeWarningDetector.getNodeWarningReasons(props.node, network),
 );
 
+// Separate archive warnings from other warnings to avoid duplication
+const nonArchiveWarnings = computed(() =>
+  warningReasons.value.filter(
+    (r) => r !== 'History archive issue detected' && r !== 'History archive behind',
+  ),
+);
+
 const hasHistoryArchiveError = computed(() =>
   network.historyArchiveHasError(props.node),
 );
@@ -215,7 +267,7 @@ const warningCount = computed(() => {
   let count = 0;
   if (isFailing.value) count++;
   count += warningReasons.value.length;
-  if (hasHistoryArchiveError.value) count++;
+  // Don't double-count: archive warnings are already in warningReasons
   return count;
 });
 

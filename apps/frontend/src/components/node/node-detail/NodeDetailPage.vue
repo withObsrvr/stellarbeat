@@ -6,21 +6,11 @@
     <!-- Header (includes inline warning indicators) -->
     <NodeDetailHeader
       :node="selectedNode"
+      :history-archive-scan="historyArchiveScan"
       @simulate-node="openSimulateModal"
       @quorum-slices="quorumSlicesRef?.show()"
       @stellar-config="showTomlModal = true; loadTomlExport()"
-    >
-      <template #history-archive-details>
-        <template v-if="historyArchiveScan && historyArchiveScan.errors.length > 0">
-          Start repair at ledger {{ historyArchiveScan.latestVerifiedLedger }} with
-          <a href="https://github.com/stellar/go/tree/master/tools/stellar-archivist" target="_blank" class="underline">Stellar Archivist</a>.
-        </template>
-        <template v-else>
-          Repair with
-          <a href="https://github.com/stellar/go/tree/master/tools/stellar-archivist" target="_blank" class="underline">Stellar Archivist</a>.
-        </template>
-      </template>
-    </NodeDetailHeader>
+    />
 
     <!-- Tab Bar -->
     <UiTabBar
