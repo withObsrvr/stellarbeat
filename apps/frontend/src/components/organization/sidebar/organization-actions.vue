@@ -1,5 +1,5 @@
 <template>
-  <div class="relative inline-block">
+  <div ref="rootRef" class="relative inline-block">
     <button
       class="p-1 text-gray-400 hover:text-gray-600 transition-colors"
       @click.stop="open = !open"
@@ -84,6 +84,7 @@ const { organization, supportsDelete, supportsAdd, supportsHalt } =
 
 const store = useStore();
 const open = ref(false);
+const rootRef = ref<HTMLElement | null>(null);
 const showAddOrgModal = ref(false);
 
 const organizationsToAdd: Ref<Organization[]> = ref([]);
@@ -122,8 +123,7 @@ function onOrganizationsSelected(organizations: Organization[]) {
 }
 
 function closeOnOutsideClick(e: Event) {
-  const el = (e.target as HTMLElement).closest('.relative.inline-block');
-  if (!el) open.value = false;
+  if (rootRef.value && !rootRef.value.contains(e.target as Node)) open.value = false;
 }
 
 onMounted(() => document.addEventListener('click', closeOnOutsideClick));

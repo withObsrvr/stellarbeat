@@ -186,4 +186,9 @@ onBeforeUnmount(() => {
     document.removeEventListener('show-modal-global', handleGlobalEvent);
   }
 });
+
+defineExpose({
+  show: showModal,
+  hide: close,
+});
 </script>

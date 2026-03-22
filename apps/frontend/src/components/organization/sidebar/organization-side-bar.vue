@@ -76,10 +76,10 @@
       </li>
       <li v-if="store.networkContext.enableConfigExport" class="sb-nav-item">
         <nav-link
-          v-b-modal.tomlExportModal
           :title="'Stellar core config'"
           :show-icon="true"
           icon="download"
+          @click="showTomlModal = true"
         />
       </li>
       <li class="sb-nav-item">
@@ -93,11 +93,11 @@
         <simulate-new-node />
       </li>
       <UiModal
-        id="tomlExportModal"
-        lazy
+        v-model="showTomlModal"
+        :lazy="true"
         size="lg"
         title="Stellar Core Config"
-        ok-only
+        :ok-only="true"
         ok-title="Close"
       >
         <pre><code>{{tomlNodesExport}}</code></pre>
@@ -124,6 +124,7 @@ const network = store.network;
 
 const validatorsExpanded = ref(true);
 const trustedOrganizationsExpanded = ref(true);
+const showTomlModal = ref(false);
 
 const selectedOrganization = computed(() => {
   if (!store.selectedOrganization) throw new Error("No organization selected");

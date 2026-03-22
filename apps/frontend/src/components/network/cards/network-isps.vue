@@ -22,28 +22,18 @@
         @update:sort-desc="sortDesc = $event"
       >
         <template #cell(action)="{ item }">
-          <div class="relative dropdown">
-            <button
-              class="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
+          <UiDropdown right :no-caret="true" size="sm" variant="outline" toggle-class="p-1 text-gray-400 hover:text-gray-600">
+            <template #button-content>
               <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 16 16"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden p-1">
-              <div class="px-3 py-1.5 text-2xs font-semibold uppercase tracking-wider text-gray-400">
-                Simulation options
-              </div>
-              <a
-                class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-                @click.prevent.stop="simulateFailure(item.ispKey)"
-              >
+            </template>
+            <UiDropdownHeader>Simulation options</UiDropdownHeader>
+            <UiDropdownItemButton @click="simulateFailure(item.ispKey)">
+              <span class="flex items-center gap-1.5">
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                 Halt nodes with ISP
-              </a>
-            </div>
-          </div>
+              </span>
+            </UiDropdownItemButton>
+          </UiDropdown>
         </template>
       </UiTable>
       <div

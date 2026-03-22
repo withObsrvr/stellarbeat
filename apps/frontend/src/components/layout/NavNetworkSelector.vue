@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div ref="rootRef" class="relative">
     <div v-if="store.networkContexts.size > 1 && !store.isLoading">
       <button
         class="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
@@ -37,6 +37,7 @@ import { onMounted, onUnmounted, ref } from "vue";
 const store = useStore();
 const router = useRouter();
 const open = ref(false);
+const rootRef = ref<HTMLElement | null>(null);
 
 const navigateToNetwork = (networkId: string) => {
   if (networkId === store.networkContext.networkId) return;
@@ -49,7 +50,7 @@ const navigateToNetwork = (networkId: string) => {
 };
 
 function closeOnOutsideClick(e: Event) {
-  if (!(e.target as HTMLElement).closest('.relative')) open.value = false;
+  if (rootRef.value && !rootRef.value.contains(e.target as Node)) open.value = false;
 }
 
 onMounted(() => document.addEventListener('click', closeOnOutsideClick));

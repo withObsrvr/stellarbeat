@@ -40,15 +40,12 @@
         class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 font-mono text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300 resize-y"
         @input="modified = true"
       ></textarea>
-      <div v-if="!isValid" class="mt-2">
-        <div>
-          <div-item
-            v-for="(error, index) in validationErrors"
-            :key="index"
-            variant="danger"
-            >{{ formatErrorMessage(error) }}
-          </div-item>
-        </div>
+      <div v-if="!isValid" class="mt-2 space-y-1">
+        <div
+          v-for="(error, index) in validationErrors"
+          :key="index"
+          class="rounded-lg px-3 py-2 text-sm text-red-600 bg-red-50/50 ring-1 ring-red-200/60"
+        >{{ formatErrorMessage(error) }}</div>
       </div>
       <div class="mt-3 flex gap-2">
         <button
