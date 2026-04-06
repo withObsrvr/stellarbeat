@@ -1145,14 +1145,12 @@ resource "digitalocean_app" "radar" {
         instance_count     = var.python_fbas_instance_count
         instance_size_slug = var.instance_size
 
-        git {
-          repo_clone_url = var.repo_url
-          branch         = var.git_branch
+        image {
+          registry      = var.python_fbas_image.registry
+          registry_type = var.python_fbas_image.registry_type
+          repository    = var.python_fbas_image.repository
+          tag           = var.python_fbas_image.tag
         }
-
-        # Use Dockerfile for Python FBAS service
-        dockerfile_path = "python-fbas-service/Dockerfile"
-        source_dir      = "python-fbas-service"
 
         # Environment variables - minimal configuration
         env {
