@@ -60,8 +60,23 @@
           <UiDetailRow label="ISP">
             <span class="text-gray-700">{{ node.isp || 'N/A' }}</span>
           </UiDetailRow>
-          <UiDetailRow label="Discovered" :last="true">
+          <UiDetailRow label="Discovered">
             <span class="text-gray-700">{{ node.dateDiscovered.toDateString() }}</span>
+          </UiDetailRow>
+          <UiDetailRow label="History URL">
+            <span class="font-mono text-xs text-gray-700 break-all">{{ node.historyUrl || 'N/A' }}</span>
+          </UiDetailRow>
+          <UiDetailRow v-if="node.overlayVersion" label="Overlay Version">
+            <span class="text-gray-900">{{ node.overlayVersion }}</span>
+          </UiDetailRow>
+          <UiDetailRow v-if="node.overlayMinVersion" label="Overlay Min Version">
+            <span class="text-gray-900">{{ node.overlayMinVersion }}</span>
+          </UiDetailRow>
+          <UiDetailRow v-if="node.ledgerVersion" label="Ledger Version">
+            <span class="text-gray-900">{{ node.ledgerVersion }}</span>
+          </UiDetailRow>
+          <UiDetailRow v-if="node.isValidator" label="Externalize Lag" :last="true">
+            <span class="text-gray-900">{{ node.lag !== null ? node.lag + ' ms' : 'Not detected' }}</span>
           </UiDetailRow>
         </div>
       </div>

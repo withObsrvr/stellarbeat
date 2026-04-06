@@ -45,8 +45,14 @@
               <UiBadge v-if="validator.isFullValidator" variant="gray" tier="meta">Full</UiBadge>
               <UiBadge
                 v-if="network.isNodeFailing(validator)"
+                v-tooltip="network.getNodeFailingReason(validator).description"
                 variant="danger"
               >{{ network.getNodeFailingReason(validator).label }}</UiBadge>
+              <UiBadge
+                v-else-if="NodeWarningDetector.nodeHasWarning(validator, network)"
+                v-tooltip="NodeWarningDetector.getNodeWarningReasonsConcatenated(validator, network)"
+                variant="warning"
+              >Warning</UiBadge>
             </div>
             <div class="flex items-center gap-4 text-xs text-gray-500">
               <span class="tabular hidden sm:inline">
@@ -119,6 +125,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { Organization, Node } from 'shared';
 import useStore from '@/store/useStore';
+import { NodeWarningDetector } from '@/services/NodeWarningDetector';
 import useOrganizationMeasurementsStore from '@/store/useOrganizationMeasurementsStore';
 import BarChart30D, { type Bar } from '@/components/node/node-detail/BarChart30D.vue';
 import { useRoute } from 'vue-router';

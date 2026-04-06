@@ -42,7 +42,7 @@
         :class="isFailing
           ? 'text-red-600 bg-red-50 ring-red-200 hover:bg-red-100'
           : 'text-amber-700 bg-amber-50 ring-amber-200 hover:bg-amber-100'"
-        @click="warningExpanded = !warningExpanded"
+        @click="warningManuallyCollapsed = !warningManuallyCollapsed"
       >
         <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -50,7 +50,7 @@
         {{ warningCount }} {{ warningCount === 1 ? 'issue' : 'issues' }}
         <svg
           class="h-3 w-3 transition-transform"
-          :class="{ 'rotate-180': warningExpanded }"
+          :class="{ 'rotate-180': !warningManuallyCollapsed }"
           fill="none" viewBox="0 0 24 24" stroke="currentColor"
         >
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -91,7 +91,7 @@
 
     <!-- Expanded warning details -->
     <div
-      v-if="hasWarnings && warningExpanded"
+      v-if="hasWarnings && !warningManuallyCollapsed"
       class="mb-3 rounded-lg px-4 py-3 text-sm ring-1"
       :class="isFailing
         ? 'text-red-600 bg-red-50/50 ring-red-200/60'
@@ -160,7 +160,8 @@ const store = useStore();
 const network = store.network;
 const route = useRoute();
 
-const warningExpanded = ref(false);
+// Warnings open by default when issues exist, user can toggle closed
+const warningManuallyCollapsed = ref(false);
 
 const routeQuery = computed(() => ({
   view: route.query.view,
