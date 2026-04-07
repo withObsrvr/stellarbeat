@@ -84,16 +84,19 @@ export class BucketScanner {
 				return ok(undefined);
 			} catch (error: unknown) {
 				if (isZLibError(error)) {
-					return err(
-						new RetryableQueueError(
-							request,
-							new ScanError(
-								ScanErrorType.TYPE_VERIFICATION,
-								request.url.value,
-								error.message
-							)
+					// Collect corrupted bucket as verification error and continue
+					// scanning. Retrying won't help for genuinely corrupted files,
+					// and aborting the entire scan loses all other collected errors.
+					bucketErrors.push(
+						new ScanError(
+							ScanErrorType.TYPE_VERIFICATION,
+							request.url.value,
+							'Corrupted bucket file: ' + error.message,
+							1,
+							ScanErrorCategory.BUCKET_HASH
 						)
 					);
+					return ok(undefined);
 				} else {
 					return err(
 						new RetryableQueueError(request, mapUnknownToError(error))

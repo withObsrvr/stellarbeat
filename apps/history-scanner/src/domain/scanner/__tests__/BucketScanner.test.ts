@@ -8,7 +8,11 @@ import { BucketScanner } from '../BucketScanner';
 import { BucketScanState } from '../ScanState';
 import * as http from 'http';
 import * as https from 'https';
-import { ScanError, ScanErrorType } from '../../scan/ScanError';
+import {
+	ScanError,
+	ScanErrorCategory,
+	ScanErrorType
+} from '../../scan/ScanError';
 
 it('should verify the bucket hash', async function () {
 	const bucketPath = path.join(__dirname, '../__fixtures__/bucket.xdr.gz');
@@ -81,10 +85,15 @@ it('should return verification error when zip archive is corrupt', async functio
 		},
 		scanner
 	);
-	expect(result.isErr()).toBeTruthy();
-	if (!result.isErr()) throw Error();
-	expect(result.error).toBeInstanceOf(ScanError);
-	expect(result.error.type).toEqual(ScanErrorType.TYPE_VERIFICATION);
+	expect(result.isOk()).toBeTruthy();
+	if (!result.isOk()) throw Error();
+	expect(result.value.errors).toHaveLength(1);
+	expect(result.value.errors[0]).toBeInstanceOf(ScanError);
+	expect(result.value.errors[0].type).toEqual(ScanErrorType.TYPE_VERIFICATION);
+	expect(result.value.errors[0].category).toEqual(
+		ScanErrorCategory.BUCKET_HASH
+	);
+	expect(result.value.errors[0].message).toContain('Corrupted bucket file');
 });
 
 const scan = async (scanState: BucketScanState, scanner: BucketScanner) => {
