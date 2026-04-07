@@ -5,15 +5,27 @@
 # the overlay protocol (not HTTP) on its peer port.
 #
 # Usage:
-#   ./creit-connectivity-test.sh <host> <port>
-#   ./creit-connectivity-test.sh gamma.validator.stellar.creit.tech 11625
-#   ./creit-connectivity-test.sh 51.83.237.125 11625
+#   ./node-connectivity-test.sh <host> [port]
+#   ./node-connectivity-test.sh gamma.validator.stellar.creit.tech 11625
+#   ./node-connectivity-test.sh 51.83.237.125 11625
 #
 
 set -euo pipefail
 
-HOST="${1:?Usage: $0 <host> <port>}"
+HOST="${1:?Usage: $0 <host> [port]}"
 PORT="${2:-11625}"
+
+# Portable timeout: prefer GNU timeout, fall back to gtimeout (macOS + coreutils)
+if command -v timeout &>/dev/null; then
+    TIMEOUT_CMD="timeout"
+elif command -v gtimeout &>/dev/null; then
+    TIMEOUT_CMD="gtimeout"
+else
+    echo "WARNING: neither 'timeout' nor 'gtimeout' found. Install coreutils (brew install coreutils on macOS)."
+    echo "Continuing without timeouts — commands may hang."
+    TIMEOUT_CMD=""
+fi
+timeout_run() { if [ -n "$TIMEOUT_CMD" ]; then "$TIMEOUT_CMD" "$@"; else shift; "$@"; fi; }
 
 echo "=== Stellar Validator Connectivity Test ==="
 echo "Target: ${HOST}:${PORT}"
@@ -39,7 +51,7 @@ echo ""
 
 # 2. TCP connectivity
 echo "--- TCP Connectivity ---"
-if timeout 5 bash -c "echo > /dev/tcp/${HOST}/${PORT}" 2>/dev/null; then
+if timeout_run 5 bash -c "echo > /dev/tcp/${HOST}/${PORT}" 2>/dev/null; then
     echo "OK: TCP connection to ${HOST}:${PORT} succeeded"
 else
     echo "FAIL: Cannot establish TCP connection to ${HOST}:${PORT}"
@@ -50,7 +62,7 @@ echo ""
 
 # 3. Check first bytes of response (HTTP vs Stellar overlay)
 echo "--- Protocol Detection ---"
-FIRST_BYTES=$(timeout 3 bash -c "exec 3<>/dev/tcp/${HOST}/${PORT}; head -c 4 <&3 2>/dev/null" 2>/dev/null | cat -v || echo "")
+FIRST_BYTES=$(timeout_run 3 bash -c "exec 3<>/dev/tcp/${HOST}/${PORT}; head -c 4 <&3 2>/dev/null" 2>/dev/null | cat -v || echo "")
 
 if [ -z "$FIRST_BYTES" ]; then
     echo "OK: No immediate response (expected for Stellar overlay - it waits for client hello)"
@@ -64,7 +76,7 @@ elif echo "$FIRST_BYTES" | grep -qi "HTTP"; then
     # Try to get full HTTP response for debugging
     echo ""
     echo "  Full HTTP response:"
-    timeout 3 bash -c "exec 3<>/dev/tcp/${HOST}/${PORT}; cat <&3" 2>/dev/null | head -20 || true
+    timeout_run 3 bash -c "exec 3<>/dev/tcp/${HOST}/${PORT}; cat <&3" 2>/dev/null | head -20 || true
     exit 1
 elif echo "$FIRST_BYTES" | grep -q "^<"; then
     echo "FAIL: Server responded with HTML/XML!"
@@ -79,14 +91,14 @@ echo ""
 
 # 4. Check with curl if HTTP is served
 echo "--- HTTP Proxy Detection ---"
-HTTP_RESPONSE=$(timeout 5 curl -s -o /dev/null -w "%{http_code}" "http://${HOST}:${PORT}/" 2>/dev/null || echo "000")
+HTTP_RESPONSE=$(timeout_run 5 curl -s -o /dev/null -w "%{http_code}" "http://${HOST}:${PORT}/" 2>/dev/null || echo "000")
 if [ "$HTTP_RESPONSE" != "000" ]; then
     echo "FAIL: Port ${PORT} is serving HTTP (status ${HTTP_RESPONSE})"
     echo "  -> This confirms a web proxy is intercepting the Stellar overlay port"
     echo "  -> stellar-core overlay protocol does NOT speak HTTP"
     echo ""
     echo "  Response headers:"
-    timeout 5 curl -sI "http://${HOST}:${PORT}/" 2>/dev/null | head -10 || true
+    timeout_run 5 curl -sI "http://${HOST}:${PORT}/" 2>/dev/null | head -10 || true
     exit 1
 else
     echo "OK: Port ${PORT} does not serve HTTP (expected for Stellar overlay)"
@@ -96,7 +108,7 @@ echo ""
 # 5. Check stellar-core HTTP port (usually 11626)
 HTTP_PORT=$((PORT + 1))
 echo "--- Stellar Core Admin API (port ${HTTP_PORT}) ---"
-INFO_RESPONSE=$(timeout 5 curl -s "http://${HOST}:${HTTP_PORT}/info" 2>/dev/null || echo "")
+INFO_RESPONSE=$(timeout_run 5 curl -s "http://${HOST}:${HTTP_PORT}/info" 2>/dev/null || echo "")
 if echo "$INFO_RESPONSE" | grep -q '"state"'; then
     STATE=$(echo "$INFO_RESPONSE" | grep -o '"state" *: *"[^"]*"' | head -1)
     VERSION=$(echo "$INFO_RESPONSE" | grep -o '"build" *: *"[^"]*"' | head -1)
