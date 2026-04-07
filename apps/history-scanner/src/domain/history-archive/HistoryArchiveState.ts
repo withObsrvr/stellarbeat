@@ -1,19 +1,39 @@
 import { JSONSchemaType } from 'ajv';
 
+export interface BucketEntry {
+	curr: string;
+	snap: string;
+	next: {
+		state: number;
+		output?: string;
+	};
+}
+
 export interface HistoryArchiveState {
 	version: number;
 	server: string;
 	currentLedger: number;
 	networkPassphrase?: string;
-	currentBuckets: {
-		curr: string;
-		snap: string;
-		next: {
-			state: number;
-			output?: string;
-		};
-	}[];
+	currentBuckets: BucketEntry[];
+	hotArchiveBuckets?: BucketEntry[];
 }
+
+const bucketEntrySchema = {
+	type: 'object' as const,
+	properties: {
+		curr: { type: 'string' as const },
+		snap: { type: 'string' as const },
+		next: {
+			type: 'object' as const,
+			properties: {
+				state: { type: 'number' as const },
+				output: { type: 'string' as const, nullable: true as const }
+			},
+			required: ['state' as const]
+		}
+	},
+	required: ['curr' as const, 'snap' as const, 'next' as const]
+};
 
 export const HistoryArchiveStateSchema: JSONSchemaType<HistoryArchiveState> = {
 	type: 'object',
@@ -24,23 +44,14 @@ export const HistoryArchiveStateSchema: JSONSchemaType<HistoryArchiveState> = {
 		networkPassphrase: { type: 'string', nullable: true },
 		currentBuckets: {
 			type: 'array',
-			items: {
-				type: 'object',
-				properties: {
-					curr: { type: 'string' },
-					snap: { type: 'string' },
-					next: {
-						type: 'object',
-						properties: {
-							state: { type: 'number' },
-							output: { type: 'string', nullable: true }
-						},
-						required: ['state']
-					}
-				},
-				required: ['curr', 'snap', 'next']
-			},
+			items: bucketEntrySchema,
 			minItems: 0
+		},
+		hotArchiveBuckets: {
+			type: 'array',
+			items: bucketEntrySchema,
+			minItems: 0,
+			nullable: true
 		}
 	},
 	required: ['version', 'server', 'currentLedger', 'currentBuckets']

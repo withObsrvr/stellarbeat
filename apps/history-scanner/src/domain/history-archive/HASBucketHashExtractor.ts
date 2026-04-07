@@ -3,7 +3,11 @@ import { HistoryArchiveState } from './HistoryArchiveState';
 export class HASBucketHashExtractor {
 	static getNonZeroHashes(historyArchiveState: HistoryArchiveState): string[] {
 		const bucketHashes: string[] = [];
-		historyArchiveState.currentBuckets.forEach((bucket) => {
+		const allBuckets = [
+			...historyArchiveState.currentBuckets,
+			...(historyArchiveState.hotArchiveBuckets ?? [])
+		];
+		allBuckets.forEach((bucket) => {
 			bucketHashes.push(bucket.curr);
 			bucketHashes.push(bucket.snap);
 

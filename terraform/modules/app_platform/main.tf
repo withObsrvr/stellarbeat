@@ -410,7 +410,7 @@ resource "digitalocean_app" "radar" {
           failure_threshold     = 5
         }
 
-        build_command = "pnpm build"
+        build_command = "NODE_ENV=development pnpm install && pnpm build"
         run_command   = "pnpm start:api"
       }
     }
@@ -615,7 +615,7 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
-        build_command = "pnpm build"
+        build_command = "NODE_ENV=development pnpm install && pnpm build"
         run_command   = "pnpm start:scan-network 1"
       }
     }
@@ -767,7 +767,7 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
-        build_command = "pnpm build"
+        build_command = "NODE_ENV=development pnpm install && pnpm build"
         run_command   = "pnpm start:scan-network 1"
       }
     }
@@ -999,7 +999,7 @@ resource "digitalocean_app" "radar" {
           failure_threshold     = 5
         }
 
-        build_command = "pnpm build"
+        build_command = "NODE_ENV=development pnpm install && pnpm build"
         run_command   = "pnpm start:api"
       }
     }
