@@ -99,9 +99,9 @@ variable "python_fbas_image" {
     tag           = string
   })
   default = {
-    registry      = "docker.io"
+    registry      = "withobsrvr"
     registry_type = "DOCKER_HUB"
-    repository    = "withobsrvr/python-fbas"
+    repository    = "python-fbas"
     tag           = "0.1.0"
   }
 }
