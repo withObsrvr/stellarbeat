@@ -426,8 +426,8 @@ importers:
   apps/history-scanner:
     dependencies:
       '@withobsrvr/stellar-history-archive-hasher':
-        specifier: ^0.8.1
-        version: 0.8.1
+        specifier: ^0.9.1
+        version: 0.9.1
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -2250,6 +2250,9 @@ packages:
 
   '@withobsrvr/stellar-history-archive-hasher@0.8.1':
     resolution: {integrity: sha512-AptXs+u+Jwqm+35Gr68z6B2e+c0IYDXxNoX/kOo6DJeVAJETIkMuhF/NHaHOOLapuFk2VMRE44DmLuCBtpOuIQ==}
+
+  '@withobsrvr/stellar-history-archive-hasher@0.9.1':
+    resolution: {integrity: sha512-5kKbW9uXA5vznpDk0cU0HzttE0gOfBSjLgo5d68qiiEfDeiQ+1/Eb044dFONdh5Nttf+ZvJ1Ba0EhWIF+TOA/g==}
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -7508,6 +7511,8 @@ snapshots:
   '@vueform/multiselect@2.6.11': {}
 
   '@withobsrvr/stellar-history-archive-hasher@0.8.1': {}
+
+  '@withobsrvr/stellar-history-archive-hasher@0.9.1': {}
 
   abort-controller@3.0.0:
     dependencies:

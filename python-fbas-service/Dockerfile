@@ -11,9 +11,17 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Install Python dependencies
+# pyqbf: upstream python-fbas pins a private GitLab URL that requires auth.
+# We install pyqbf from PyPI first, then python-fbas without its own deps,
+# then the remaining transitive deps separately.
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --no-deps git+https://github.com/withObsrvr/python-fbas.git@main#egg=python-fbas
+RUN pip install --no-cache-dir networkx==3.3 platformdirs==4.3.6 \
+    py-aiger==6.2.3 py-aiger-cnf==5.0.8 pyapproxmc==4.1.24 \
+    pycryptosat==5.11.21 python-sat==1.8.dev13 requests==2.32.3 \
+    z3-solver==4.13.3.0 matplotlib==3.9.2
 
 # Copy application code
 COPY app.py .

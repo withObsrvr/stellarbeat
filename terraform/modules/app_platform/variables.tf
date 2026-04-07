@@ -90,6 +90,22 @@ variable "python_fbas_instance_count" {
   default     = 0
 }
 
+variable "python_fbas_image" {
+  description = "Pre-built Docker image for Python FBAS service (e.g. ghcr.io/org/python-fbas:0.1.0)"
+  type = object({
+    registry      = string
+    registry_type = string
+    repository    = string
+    tag           = string
+  })
+  default = {
+    registry      = "withobsrvr"
+    registry_type = "DOCKER_HUB"
+    repository    = "python-fbas"
+    tag           = "0.1.0"
+  }
+}
+
 variable "database_production" {
   description = "Whether to use production database"
   type        = bool

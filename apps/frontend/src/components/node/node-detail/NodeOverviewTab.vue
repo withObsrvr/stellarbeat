@@ -60,8 +60,23 @@
           <UiDetailRow label="ISP">
             <span class="text-gray-700">{{ node.isp || 'N/A' }}</span>
           </UiDetailRow>
-          <UiDetailRow label="Discovered" :last="true">
+          <UiDetailRow label="Discovered">
             <span class="text-gray-700">{{ node.dateDiscovered.toDateString() }}</span>
+          </UiDetailRow>
+          <UiDetailRow label="History URL" :last="lastDetailRow === 'historyUrl'">
+            <span class="font-mono text-xs text-gray-700 break-all">{{ node.historyUrl || 'N/A' }}</span>
+          </UiDetailRow>
+          <UiDetailRow v-if="node.overlayVersion" label="Overlay Version" :last="lastDetailRow === 'overlayVersion'">
+            <span class="text-gray-900">{{ node.overlayVersion }}</span>
+          </UiDetailRow>
+          <UiDetailRow v-if="node.overlayMinVersion" label="Overlay Min Version" :last="lastDetailRow === 'overlayMinVersion'">
+            <span class="text-gray-900">{{ node.overlayMinVersion }}</span>
+          </UiDetailRow>
+          <UiDetailRow v-if="node.ledgerVersion" label="Ledger Version" :last="lastDetailRow === 'ledgerVersion'">
+            <span class="text-gray-900">{{ node.ledgerVersion }}</span>
+          </UiDetailRow>
+          <UiDetailRow v-if="node.isValidator" label="Externalize Lag" :last="lastDetailRow === 'lag'">
+            <span class="text-gray-900">{{ node.lag !== null ? node.lag + ' ms' : 'Not detected' }}</span>
           </UiDetailRow>
         </div>
       </div>
@@ -290,6 +305,15 @@ const crawlerRejectedValue = computed(() => {
   const count = dayStats.value.reduce((s, d) => s + d.isOverloadedCount, 0);
   if (total === 0) return 'N/A';
   return (((total - count) / total) * 100).toFixed(1) + '%';
+});
+
+// Determine which detail row is last (for removing bottom border)
+const lastDetailRow = computed(() => {
+  if (props.node.isValidator) return 'lag';
+  if (props.node.ledgerVersion) return 'ledgerVersion';
+  if (props.node.overlayMinVersion) return 'overlayMinVersion';
+  if (props.node.overlayVersion) return 'overlayVersion';
+  return 'historyUrl';
 });
 
 // Organization
