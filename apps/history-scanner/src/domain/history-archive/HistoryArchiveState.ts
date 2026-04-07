@@ -50,7 +50,8 @@ export const HistoryArchiveStateSchema: JSONSchemaType<HistoryArchiveState> = {
 		hotArchiveBuckets: {
 			type: 'array',
 			items: bucketEntrySchema,
-			minItems: 0
+			minItems: 0,
+			nullable: true
 		}
 	},
 	required: ['version', 'server', 'currentLedger', 'currentBuckets']
