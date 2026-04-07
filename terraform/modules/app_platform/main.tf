@@ -1132,7 +1132,7 @@ resource "digitalocean_app" "radar" {
           failure_threshold     = 5
         }
 
-        build_command = "npm install -g pnpm@9.15.0 && pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
+        build_command = "npm install -g pnpm@9.15.0 && NODE_ENV=development pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
         run_command   = "pnpm --filter users start"
       }
     }
