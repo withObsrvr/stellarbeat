@@ -410,7 +410,7 @@ resource "digitalocean_app" "radar" {
           failure_threshold     = 5
         }
 
-        build_command = "NODE_ENV=development pnpm install && pnpm build"
+        build_command = "pnpm build"
         run_command   = "pnpm start:api"
       }
     }
@@ -615,7 +615,7 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
-        build_command = "NODE_ENV=development pnpm install && pnpm build"
+        build_command = "pnpm build"
         run_command   = "pnpm start:scan-network 1"
       }
     }
@@ -767,7 +767,7 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
-        build_command = "NODE_ENV=development pnpm install && pnpm build"
+        build_command = "pnpm build"
         run_command   = "pnpm start:scan-network 1"
       }
     }
@@ -999,7 +999,7 @@ resource "digitalocean_app" "radar" {
           failure_threshold     = 5
         }
 
-        build_command = "NODE_ENV=development pnpm install && pnpm build"
+        build_command = "pnpm build"
         run_command   = "pnpm start:api"
       }
     }
@@ -1132,7 +1132,7 @@ resource "digitalocean_app" "radar" {
           failure_threshold     = 5
         }
 
-        build_command = "npm install -g pnpm@9.15.0 && NODE_ENV=development pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
+        build_command = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
         run_command   = "pnpm --filter users start"
       }
     }
