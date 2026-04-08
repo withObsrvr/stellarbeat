@@ -9,7 +9,7 @@ FROM node:20-alpine AS app-builder
 WORKDIR /app
 
 # Install pnpm
-RUN npm install -g pnpm@9.15.0
+RUN npm install -g pnpm@10.33.0
 
 # Copy workspace files
 COPY pnpm-workspace.yaml ./
