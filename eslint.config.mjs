@@ -1,5 +1,4 @@
 import eslintJs from '@eslint/js';
-import eslintTs from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting';
 import vueTsEslintConfig from '@vue/eslint-config-typescript';
@@ -26,7 +25,6 @@ const customTypescriptConfig = {
 export default [
 	{ ignores: ['**/lib/*', '**/dist/*', 'node_modules', '**/venv/**'] }, // global ignores
 	eslintJs.configs.recommended,
-	...eslintTs.configs.recommended,
 	...pluginVue.configs['flat/vue2-recommended'],
 	...vueTsEslintConfig(),
 	skipFormatting,
