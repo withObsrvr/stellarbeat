@@ -1035,7 +1035,7 @@ resource "digitalocean_app" "radar" {
 
         env {
           key   = "PNPM_VERSION"
-          value = "9.15.0"
+          value = "10.33.0"
         }
 
         # Use database connection string with doadmin user (already has all necessary permissions)
@@ -1132,7 +1132,7 @@ resource "digitalocean_app" "radar" {
           failure_threshold     = 5
         }
 
-        build_command = "npm install -g pnpm@9.15.0 && NODE_ENV=development pnpm install --frozen-lockfile && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
+        build_command = "corepack enable && corepack prepare pnpm@10.33.0 --activate && NODE_ENV=development pnpm install --frozen-lockfile && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
         run_command   = "pnpm --filter users start"
       }
     }

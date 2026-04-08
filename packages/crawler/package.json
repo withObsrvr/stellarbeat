@@ -11,9 +11,13 @@
 	"author": "pieterjan84@github",
 	"license": "MIT",
 	"dependencies": {
+		"@stellar/stellar-base": "15.0.0",
+		"async": "^3.2.6",
+		"lru-cache": "^11.0.2",
+		"neverthrow": "^8.2.0",
 		"node-connector": "workspace:*",
-		"shared": "workspace:*",
-		"async": "^3.2.6"
+		"pino": "^9.6.0",
+		"shared": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/async": "^3.2.7"

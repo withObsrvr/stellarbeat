@@ -16,12 +16,12 @@
           };
         };
         nodejs = pkgs.nodejs_20;
-        # Pin pnpm to version 9.15.0
+        # Pin pnpm to version 10.33.0
         pnpm = (pkgs.nodePackages.pnpm.override { nodejs = nodejs; }).overrideAttrs (old: {
-          version = "9.15.0";
+          version = "10.33.0";
           src = pkgs.fetchurl {
-            url = "https://registry.npmjs.org/pnpm/-/pnpm-9.15.0.tgz";
-            sha256 = "0a7xy0qwixjfs9035yfzvbvcwk1g03s1j1k8aiip1njglcqzxa09";
+            url = "https://registry.npmjs.org/pnpm/-/pnpm-10.33.0.tgz";
+            sha256 = "100sfl5ya58h858ijynm8m5r1djq7idsfin42sji76r7mp5ipk5z";
           };
         });
 
