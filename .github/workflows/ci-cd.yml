@@ -374,20 +374,21 @@ jobs:
           network_passphrase        = "${{ secrets.NETWORK_PASSPHRASE || 'Public Global Stellar Network ; September 2015' }}"
           network_id               = "${{ secrets.NETWORK_ID || 'public' }}"
           network_name             = "${{ secrets.NETWORK_NAME || 'Public Stellar Network' }}"
-          network_overlay_version   = "${{ secrets.NETWORK_OVERLAY_VERSION || 37 }}"
-          network_ledger_version       = "${{ secrets.NETWORK_LEDGER_VERSION || 22 }}"
-          network_overlay_min_version   = "${{ secrets.NETWORK_OVERLAY_MIN_VERSION || 35 }}"
-          network_stellar_core_version   = "${{ secrets.NETWORK_STELLAR_CORE_VERSION || '22.2.0' }}"
+          # *_version fields below are typed as number in variables.tf — must NOT be quoted.
+          network_overlay_version   = ${{ secrets.NETWORK_OVERLAY_VERSION || 40 }}
+          network_ledger_version    = ${{ secrets.NETWORK_LEDGER_VERSION || 25 }}
+          network_overlay_min_version = ${{ secrets.NETWORK_OVERLAY_MIN_VERSION || 35 }}
+          network_stellar_core_version   = "${{ secrets.NETWORK_STELLAR_CORE_VERSION || '25.0.0' }}"
           network_quorum_set   = "${{ secrets.NETWORK_QUORUM_SET || '' }}"
           network_known_peers = "${{ secrets.NETWORK_KNOWN_PEERS || ''}}"
           testnet_horizon_url             = "${{ secrets.TESTNET_HORIZON_URL || 'https://horizon-testnet.stellar.org' }}"
           testnet_network_passphrase        = "${{ secrets.TESTNET_NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015' }}"
           testnet_network_id               = "${{ secrets.TESTNET_NETWORK_ID || 'testnet' }}"
           testnet_network_name             = "${{ secrets.TESTNET_NETWORK_NAME || 'Stellar Testnet' }}"
-          testnet_network_overlay_version   = "${{ secrets.TESTNET_NETWORK_OVERLAY_VERSION || 37 }}"
-          testnet_network_ledger_version       = "${{ secrets.TESTNET_NETWORK_LEDGER_VERSION || 22 }}"
-          testnet_network_overlay_min_version   = "${{ secrets.TESTNET_NETWORK_OVERLAY_MIN_VERSION || 35 }}"
-          testnet_network_stellar_core_version   = "${{ secrets.TESTNET_NETWORK_STELLAR_CORE_VERSION || '22.2.0' }}"
+          testnet_network_overlay_version   = ${{ secrets.TESTNET_NETWORK_OVERLAY_VERSION || 40 }}
+          testnet_network_ledger_version    = ${{ secrets.TESTNET_NETWORK_LEDGER_VERSION || 25 }}
+          testnet_network_overlay_min_version = ${{ secrets.TESTNET_NETWORK_OVERLAY_MIN_VERSION || 35 }}
+          testnet_network_stellar_core_version   = "${{ secrets.TESTNET_NETWORK_STELLAR_CORE_VERSION || '25.0.0' }}"
           testnet_network_quorum_set   = "${{ secrets.TESTNET_NETWORK_QUORUM_SET || '' }}"
           testnet_network_known_peers = "${{ secrets.TESTNET_NETWORK_KNOWN_PEERS || '54.166.220.249:11625,44.223.45.116:11625,54.159.138.198:11625' }}"
           EOF
