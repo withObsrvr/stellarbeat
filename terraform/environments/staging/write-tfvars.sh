@@ -15,6 +15,7 @@ cat > terraform.auto.tfvars <<EOF
 # Core credentials
 do_token                 = "${DIGITALOCEAN_ACCESS_TOKEN}"
 git_branch               = "${GIT_BRANCH}"
+deployed_sha             = "${DEPLOYED_SHA:-}"
 region                   = "${REGION:-nyc3}"
 aws_access_key           = "${AWS_ACCESS_KEY_ID}"
 aws_secret_access_key    = "${AWS_SECRET_ACCESS_KEY}"

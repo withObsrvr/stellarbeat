@@ -297,6 +297,12 @@ variable "git_branch" {
   default     = "main"
 }
 
+variable "deployed_sha" {
+  description = "Commit SHA forcing function for DO App Platform redeploys. See module docs."
+  type        = string
+  default     = ""
+}
+
 variable "domain_name" {
   description = "Domain name for the application"
   type        = string

@@ -171,6 +171,7 @@ jobs:
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
           GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+          DEPLOYED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           REGION: ${{ vars.REGION || 'nyc3' }}
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
           AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
@@ -297,6 +298,7 @@ jobs:
           # Core credentials
           do_token                 = "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}"
           git_branch               = "main"
+          deployed_sha             = "${{ github.sha }}"
           region                   = "${{ vars.REGION || 'nyc3' }}"
           aws_access_key           = "${{ secrets.AWS_ACCESS_KEY_ID }}"
           aws_secret_access_key    = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"

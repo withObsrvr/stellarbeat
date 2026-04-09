@@ -20,6 +20,7 @@ module "app_platform" {
   repo_url                  = var.repo_url
   domain_name               = var.domain_name
   git_branch                = var.git_branch
+  deployed_sha              = var.deployed_sha
   database_version_postgres = var.database_version_postgres
 
   environment                   = "production"

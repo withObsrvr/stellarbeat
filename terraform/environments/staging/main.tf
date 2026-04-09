@@ -15,11 +15,12 @@ provider "digitalocean" {
 module "app_platform" {
   source = "../../modules/app_platform"
 
-  app_name    = "radar-staging"
-  region      = var.region
-  repo_url    = var.repo_url
-  domain_name = var.domain_name
-  git_branch  = var.git_branch
+  app_name     = "radar-staging"
+  region       = var.region
+  repo_url     = var.repo_url
+  domain_name  = var.domain_name
+  git_branch   = var.git_branch
+  deployed_sha = var.deployed_sha
 
   environment                   = "staging"
   instance_size                 = "apps-s-1vcpu-1gb"
