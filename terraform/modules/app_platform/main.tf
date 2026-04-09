@@ -209,8 +209,32 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
+        # Contact form feature flag
+        env {
+          key   = "VUE_APP_PUBLIC_ENABLE_CONTACT_US"
+          value = lookup(var.frontend_env, "VUE_APP_PUBLIC_ENABLE_CONTACT_US", "")
+          type  = "GENERAL"
+        }
 
+        # Contact form display email
+        env {
+          key   = "VUE_APP_CONTACT_EMAIL"
+          value = lookup(var.frontend_env, "VUE_APP_CONTACT_EMAIL", "")
+          type  = "GENERAL"
+        }
 
+        # Legal page links
+        env {
+          key   = "VUE_APP_TERMS_LINK"
+          value = lookup(var.frontend_env, "VUE_APP_TERMS_LINK", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "VUE_APP_PRIVACY_LINK"
+          value = lookup(var.frontend_env, "VUE_APP_PRIVACY_LINK", "")
+          type  = "GENERAL"
+        }
 
 
         http_port = 3000
