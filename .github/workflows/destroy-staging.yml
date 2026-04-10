@@ -1,0 +1,191 @@
+name: Destroy Staging on PR Close
+
+# Triggered when a PR targeting main is closed. The plan-destroy job is gated
+# on `merged == true` so only merged PRs trigger a destroy (abandoned PRs
+# leave staging alone).
+#
+# The destroy is split into two jobs so the destroy plan can be reviewed
+# in the job logs before the apply runs:
+#
+#   1. plan-destroy-staging  — generates and prints the destroy plan
+#   2. destroy-staging       — applies the plan; gated on the
+#                              `obsrvr-radar-staging-destroy` environment,
+#                              which is configured with required reviewers
+#                              in GitHub → Settings → Environments.
+#
+# Once you are comfortable with the destroys, remove the required reviewer
+# from the environment (no workflow change needed).
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  plan-destroy-staging:
+    name: 'Plan Staging Destroy'
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment: obsrvr-radar-staging
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init - Staging
+        working-directory: ./terraform/environments/staging
+        run:
+          terraform init -backend-config="access_key=${{
+          secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{
+          secrets.AWS_SECRET_ACCESS_KEY }}"
+
+      # Use the same shared script as plan-staging so the tfvars stay in sync.
+      - name: Generate tfvars for Staging
+        working-directory: ./terraform/environments/staging
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+          DEPLOYED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          REGION: ${{ vars.REGION || 'nyc3' }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
+          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+          STAGING_API_KEY: ${{ secrets.STAGING_API_KEY }}
+          STAGING_JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
+          STAGING_DOMAIN: ${{ secrets.STAGING_DOMAIN }}
+          IPSTACK_ACCESS_KEY: ${{ secrets.IPSTACK_ACCESS_KEY }}
+          MAILGUN_SECRET: ${{ secrets.MAILGUN_SECRET }}
+          MAILGUN_DOMAIN: ${{ secrets.MAILGUN_DOMAIN }}
+          MAILGUN_FROM: ${{ secrets.MAILGUN_FROM }}
+          MAILGUN_BASE_URL: ${{ secrets.MAILGUN_BASE_URL }}
+          ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+          HASH_SECRET: ${{ secrets.HASH_SECRET }}
+          CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
+          CONSUMER_NAME: ${{ secrets.CONSUMER_NAME }}
+          DATABASE_POOL_SIZE: ${{ vars.DATABASE_POOL_SIZE }}
+          DATABASE_TEST_URL: ${{ secrets.DATABASE_TEST_URL }}
+          DEBUG: ${{ secrets.DEBUG }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          DEADMAN_URL: ${{ secrets.DEADMAN_URL }}
+          COORDINATOR_API_USERNAME: ${{ secrets.COORDINATOR_API_USERNAME }}
+          COORDINATOR_API_PASSWORD: ${{ secrets.COORDINATOR_API_PASSWORD }}
+          COORDINATOR_API_BASE_URL: ${{ secrets.COORDINATOR_API_BASE_URL }}
+          HISTORY_SCAN_API_USERNAME: ${{ secrets.HISTORY_SCAN_API_USERNAME }}
+          HISTORY_SCAN_API_PASSWORD: ${{ secrets.HISTORY_SCAN_API_PASSWORD }}
+          USER_SERVICE_USERNAME: ${{ secrets.USER_SERVICE_USERNAME }}
+          USER_SERVICE_PASSWORD: ${{ secrets.USER_SERVICE_PASSWORD }}
+          INSTANCE_SIZE: ${{ secrets.INSTANCE_SIZE }}
+          HISTORY_SCANNER_INSTANCE_SIZE: ${{ secrets.HISTORY_SCANNER_INSTANCE_SIZE }}
+          HISTORY_SCANNER_WORKER_COUNT: ${{ vars.HISTORY_SCANNER_WORKER_COUNT }}
+          CRAWLER_BLACKLIST: ${{ secrets.CRAWLER_BLACKLIST }}
+          USER_SERVICE_BASE_URL: ${{ secrets.USER_SERVICE_BASE_URL }}
+          FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
+          HORIZON_URL: ${{ secrets.HORIZON_URL }}
+          NETWORK_PASSPHRASE: ${{ secrets.NETWORK_PASSPHRASE }}
+          NETWORK_ID: ${{ secrets.NETWORK_ID }}
+          NETWORK_NAME: ${{ secrets.NETWORK_NAME }}
+          NETWORK_OVERLAY_VERSION: ${{ secrets.NETWORK_OVERLAY_VERSION }}
+          NETWORK_LEDGER_VERSION: ${{ secrets.NETWORK_LEDGER_VERSION }}
+          NETWORK_OVERLAY_MIN_VERSION: ${{ secrets.NETWORK_OVERLAY_MIN_VERSION }}
+          NETWORK_STELLAR_CORE_VERSION: ${{ secrets.NETWORK_STELLAR_CORE_VERSION }}
+          NETWORK_QUORUM_SET: ${{ secrets.NETWORK_QUORUM_SET }}
+          NETWORK_KNOWN_PEERS: ${{ secrets.NETWORK_KNOWN_PEERS }}
+          TESTNET_HORIZON_URL: ${{ secrets.TESTNET_HORIZON_URL }}
+          TESTNET_NETWORK_PASSPHRASE: ${{ secrets.TESTNET_NETWORK_PASSPHRASE }}
+          TESTNET_NETWORK_ID: ${{ secrets.TESTNET_NETWORK_ID }}
+          TESTNET_NETWORK_NAME: ${{ secrets.TESTNET_NETWORK_NAME }}
+          TESTNET_NETWORK_OVERLAY_VERSION: ${{ secrets.TESTNET_NETWORK_OVERLAY_VERSION }}
+          TESTNET_NETWORK_LEDGER_VERSION: ${{ secrets.TESTNET_NETWORK_LEDGER_VERSION }}
+          TESTNET_NETWORK_OVERLAY_MIN_VERSION: ${{ secrets.TESTNET_NETWORK_OVERLAY_MIN_VERSION }}
+          TESTNET_NETWORK_STELLAR_CORE_VERSION: ${{ secrets.TESTNET_NETWORK_STELLAR_CORE_VERSION }}
+          TESTNET_NETWORK_QUORUM_SET: ${{ secrets.TESTNET_NETWORK_QUORUM_SET }}
+          TESTNET_NETWORK_KNOWN_PEERS: ${{ secrets.TESTNET_NETWORK_KNOWN_PEERS }}
+        run: ./write-tfvars.sh
+
+      - name: Terraform Plan Destroy - Staging
+        working-directory: ./terraform/environments/staging
+        run: terraform plan -destroy -input=false -no-color -out=tf-plan-destroy-staging
+
+      # Print the destroy plan to the job logs so reviewers can read it
+      # before approving the destroy-staging job.
+      - name: Show Destroy Plan
+        working-directory: ./terraform/environments/staging
+        run: terraform show -no-color tf-plan-destroy-staging
+
+      - name: Encrypt Terraform plan
+        working-directory: ./terraform/environments/staging
+        env:
+          PLAN_ENCRYPTION_KEY: ${{ secrets.PLAN_ENCRYPTION_KEY }}
+        run: |
+          echo "$PLAN_ENCRYPTION_KEY" > passphrase.txt
+          gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase-file passphrase.txt --output tf-plan-destroy-staging.gpg tf-plan-destroy-staging
+          rm tf-plan-destroy-staging passphrase.txt
+
+      - name: Save Destroy Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-destroy-staging
+          path: ./terraform/environments/staging/tf-plan-destroy-staging.gpg
+          retention-days: 1
+          if-no-files-found: error
+          overwrite: true
+
+  destroy-staging:
+    name: 'Destroy Staging Environment'
+    needs: [plan-destroy-staging]
+    if: needs.plan-destroy-staging.result == 'success'
+    runs-on: ubuntu-latest
+    # Share the staging-deploy concurrency group so a destroy can't race
+    # against a deploy that's in flight.
+    concurrency:
+      group: staging-deploy
+      cancel-in-progress: false
+    # Dedicated environment so you can require reviewers on destroys
+    # without gating normal staging deploys. Configure required reviewers
+    # in GitHub → Settings → Environments → obsrvr-radar-staging-destroy.
+    environment: obsrvr-radar-staging
+    permissions:
+      contents: read
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init - Staging
+        working-directory: ./terraform/environments/staging
+        run: |
+          terraform init -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+
+      - name: Download Destroy Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan-destroy-staging
+          path: ./terraform/environments/staging
+
+      - name: Decrypt Terraform plan
+        working-directory: ./terraform/environments/staging
+        env:
+          PLAN_ENCRYPTION_KEY: ${{ secrets.PLAN_ENCRYPTION_KEY }}
+        run: |
+          echo "$PLAN_ENCRYPTION_KEY" > passphrase.txt
+          gpg --batch --yes --decrypt --passphrase-file passphrase.txt --output tf-plan-destroy-staging tf-plan-destroy-staging.gpg
+          rm passphrase.txt
+
+      - name: Apply Destroy Plan
+        working-directory: ./terraform/environments/staging
+        run: terraform apply -auto-approve tf-plan-destroy-staging

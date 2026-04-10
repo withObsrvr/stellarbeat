@@ -71,6 +71,14 @@ resource "digitalocean_app" "radar" {
           branch         = var.git_branch
         }
 
+        # Forcing function: DO App Platform's git block has no webhook, so
+        # bumping DEPLOYED_SHA per commit is what produces a terraform diff
+        # → DO creates a new deployment → DO re-clones HEAD of git_branch.
+        env {
+          key   = "DEPLOYED_SHA"
+          value = var.deployed_sha
+        }
+
         # Environment variables - explicitly defined
         env {
           key   = "NODE_ENV"
@@ -201,8 +209,32 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
+        # Contact form feature flag
+        env {
+          key   = "VUE_APP_PUBLIC_ENABLE_CONTACT_US"
+          value = lookup(var.frontend_env, "VUE_APP_PUBLIC_ENABLE_CONTACT_US", "")
+          type  = "GENERAL"
+        }
 
+        # Contact form display email
+        env {
+          key   = "VUE_APP_CONTACT_EMAIL"
+          value = lookup(var.frontend_env, "VUE_APP_CONTACT_EMAIL", "")
+          type  = "GENERAL"
+        }
 
+        # Legal page links
+        env {
+          key   = "VUE_APP_TERMS_LINK"
+          value = lookup(var.frontend_env, "VUE_APP_TERMS_LINK", "")
+          type  = "GENERAL"
+        }
+
+        env {
+          key   = "VUE_APP_PRIVACY_LINK"
+          value = lookup(var.frontend_env, "VUE_APP_PRIVACY_LINK", "")
+          type  = "GENERAL"
+        }
 
 
         http_port = 3000
@@ -231,6 +263,14 @@ resource "digitalocean_app" "radar" {
         git {
           repo_clone_url = var.repo_url
           branch         = var.git_branch
+        }
+
+        # Forcing function: DO App Platform's git block has no webhook, so
+        # bumping DEPLOYED_SHA per commit is what produces a terraform diff
+        # → DO creates a new deployment → DO re-clones HEAD of git_branch.
+        env {
+          key   = "DEPLOYED_SHA"
+          value = var.deployed_sha
         }
 
         # Environment variables - explicitly defined
@@ -426,6 +466,14 @@ resource "digitalocean_app" "radar" {
         git {
           repo_clone_url = var.repo_url
           branch         = var.git_branch
+        }
+
+        # Forcing function: DO App Platform's git block has no webhook, so
+        # bumping DEPLOYED_SHA per commit is what produces a terraform diff
+        # → DO creates a new deployment → DO re-clones HEAD of git_branch.
+        env {
+          key   = "DEPLOYED_SHA"
+          value = var.deployed_sha
         }
 
         # Environment variables - explicitly defined
@@ -633,6 +681,14 @@ resource "digitalocean_app" "radar" {
           branch         = var.git_branch
         }
 
+        # Forcing function: DO App Platform's git block has no webhook, so
+        # bumping DEPLOYED_SHA per commit is what produces a terraform diff
+        # → DO creates a new deployment → DO re-clones HEAD of git_branch.
+        env {
+          key   = "DEPLOYED_SHA"
+          value = var.deployed_sha
+        }
+
         # Environment variables - explicitly defined
         env {
           key   = "NODE_ENV"
@@ -786,6 +842,14 @@ resource "digitalocean_app" "radar" {
           branch         = var.git_branch
         }
 
+        # Forcing function: DO App Platform's git block has no webhook, so
+        # bumping DEPLOYED_SHA per commit is what produces a terraform diff
+        # → DO creates a new deployment → DO re-clones HEAD of git_branch.
+        env {
+          key   = "DEPLOYED_SHA"
+          value = var.deployed_sha
+        }
+
         # Use Dockerfile to build stellar-archivist from source
         dockerfile_path = "apps/history-scanner/Dockerfile"
 
@@ -862,6 +926,14 @@ resource "digitalocean_app" "radar" {
         git {
           repo_clone_url = var.repo_url
           branch         = var.git_branch
+        }
+
+        # Forcing function: DO App Platform's git block has no webhook, so
+        # bumping DEPLOYED_SHA per commit is what produces a terraform diff
+        # → DO creates a new deployment → DO re-clones HEAD of git_branch.
+        env {
+          key   = "DEPLOYED_SHA"
+          value = var.deployed_sha
         }
 
         # Environment variables - explicitly defined
@@ -1017,6 +1089,14 @@ resource "digitalocean_app" "radar" {
           branch         = var.git_branch
         }
 
+        # Forcing function: DO App Platform's git block has no webhook, so
+        # bumping DEPLOYED_SHA per commit is what produces a terraform diff
+        # → DO creates a new deployment → DO re-clones HEAD of git_branch.
+        env {
+          key   = "DEPLOYED_SHA"
+          value = var.deployed_sha
+        }
+
         # Environment variables - explicitly defined
         env {
           key   = "NODE_ENV"
@@ -1035,7 +1115,7 @@ resource "digitalocean_app" "radar" {
 
         env {
           key   = "PNPM_VERSION"
-          value = "9.15.0"
+          value = "10.33.0"
         }
 
         # Use database connection string with doadmin user (already has all necessary permissions)
@@ -1132,7 +1212,7 @@ resource "digitalocean_app" "radar" {
           failure_threshold     = 5
         }
 
-        build_command = "npm install -g pnpm@9.15.0 && NODE_ENV=development pnpm install --frozen-lockfile && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
+        build_command = "corepack enable && corepack prepare pnpm@10.33.0 --activate && NODE_ENV=development pnpm install --frozen-lockfile && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter users run build && pnpm --filter users run post-build"
         run_command   = "pnpm --filter users start"
       }
     }

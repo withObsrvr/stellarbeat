@@ -15,11 +15,12 @@ provider "digitalocean" {
 module "app_platform" {
   source = "../../modules/app_platform"
 
-  app_name    = "radar-staging"
-  region      = var.region
-  repo_url    = var.repo_url
-  domain_name = var.domain_name
-  git_branch  = var.git_branch
+  app_name     = "radar-staging"
+  region       = var.region
+  repo_url     = var.repo_url
+  domain_name  = var.domain_name
+  git_branch   = var.git_branch
+  deployed_sha = var.deployed_sha
 
   environment                   = "staging"
   instance_size                 = "apps-s-1vcpu-1gb"
@@ -63,6 +64,10 @@ module "app_platform" {
     VUE_APP_PUBLIC_ENABLE_HORIZON       = 1
     VUE_APP_PUBLIC_ENABLE_CONFIG_EXPORT = 1
     VUE_APP_ENABLE_DEMO_NETWORKS        = 1
+    VUE_APP_PUBLIC_ENABLE_CONTACT_US    = 1
+    VUE_APP_CONTACT_EMAIL               = "hello@withobsrvr.com"
+    VUE_APP_TERMS_LINK                  = "/terms"
+    VUE_APP_PRIVACY_LINK                = "/privacy"
   }
 
   # Backend environment variables

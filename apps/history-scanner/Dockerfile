@@ -9,7 +9,7 @@ FROM node:20-alpine AS app-builder
 WORKDIR /app
 
 # Install pnpm
-RUN npm install -g pnpm@9.15.0
+RUN npm install -g pnpm@10.33.0
 
 # Copy workspace files
 COPY pnpm-workspace.yaml ./
@@ -38,7 +38,7 @@ RUN pnpm --filter shared build && \
 RUN mkdir -p /prod/history-scanner
 
 # Use pnpm deploy for dependencies
-RUN pnpm --filter history-scanner deploy --prod /prod/history-scanner
+RUN pnpm --filter history-scanner deploy --legacy --prod /prod/history-scanner
 
 # Explicitly copy the built lib/ directory (pnpm deploy may not include it)
 RUN cp -r /app/apps/history-scanner/lib /prod/history-scanner/lib

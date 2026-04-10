@@ -25,6 +25,21 @@ variable "git_branch" {
   type        = string
 }
 
+variable "deployed_sha" {
+  description = <<-EOT
+    Commit SHA forcing function. DO App Platform's git { } source has no
+    webhook, so the app only re-clones when the app spec changes. We inject
+    this value as a DEPLOYED_SHA env var into every service — when the SHA
+    changes between terraform applies, DO sees a spec diff and creates a new
+    deployment, which re-clones HEAD of git_branch.
+
+    Leave blank if you're applying locally and don't care about the forcing
+    behavior; CI workflows should set this to the commit SHA.
+  EOT
+  type        = string
+  default     = ""
+}
+
 variable "environment" {
   description = "Environment name (staging, integration, production)"
   type        = string

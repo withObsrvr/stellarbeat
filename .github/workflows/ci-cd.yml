@@ -40,10 +40,10 @@ jobs:
       HORIZON_URL: https://horizon-testnet.stellar.org
 
       # Network configuration (required by Config.ts)
-      NETWORK_LEDGER_VERSION: 24
-      NETWORK_OVERLAY_VERSION: 38
+      NETWORK_LEDGER_VERSION: 25
+      NETWORK_OVERLAY_VERSION: 40
       NETWORK_OVERLAY_MIN_VERSION: 35
-      NETWORK_STELLAR_CORE_VERSION: 24.0.0
+      NETWORK_STELLAR_CORE_VERSION: 25.0.0
       NETWORK_QUORUM_SET: '["GCGB2S2KGYARPVIA37HYZXVRM2YZUEXA6S33ZU5BUDC6THSB62LZSTYH"]'
       NETWORK_KNOWN_PEERS: '[["localhost", 11625]]'
       NETWORK_ID: testnet
@@ -60,7 +60,7 @@ jobs:
         uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
         with:
-          version: 9.15.0
+          version: 10.33.0
           run_install: false
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -130,9 +130,9 @@ jobs:
   plan-staging:
     name: 'Plan Staging Environment'
     needs: [test]
-    # Skip the terraform-lint dependency for push events to main
+    # Staging is only deployed from PRs, so only plan it on PR events
     if: >
-      always() &&  
+      github.event_name == 'pull_request' &&
       needs.test.result == 'success'
     runs-on: ubuntu-latest
     environment: obsrvr-radar-staging
@@ -162,105 +162,70 @@ jobs:
         working-directory: ./terraform/environments/staging
         run: terraform validate
 
-      # Create tfvars file for staging from environment secrets
-      - name: Create tfvars file for Staging
+      # Generate tfvars for staging by calling the shared script.
+      # The heredoc that used to live inline has been extracted to
+      # terraform/environments/staging/write-tfvars.sh so the same script
+      # is used by the destroy workflow (single source of truth).
+      - name: Generate tfvars for Staging
         working-directory: ./terraform/environments/staging
-        run: |
-          cat > terraform.auto.tfvars <<EOF
-          # Core credentials
-          do_token                 = "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}"
-          git_branch               = "${{ github.head_ref || github.ref_name }}"
-          region                   = "${{ vars.REGION || 'nyc3' }}"
-          aws_access_key           = "${{ secrets.AWS_ACCESS_KEY_ID }}"
-          aws_secret_access_key    = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-          aws_region               = "${{ secrets.AWS_REGION }}"
-          aws_bucket_name          = "${{ secrets.AWS_BUCKET_NAME || 'stellarbeat-backup' }}"
-          repo_url                 = "${{ github.server_url }}/${{ github.repository }}.git"
-
-          # Environment specific
-          environment              = "staging"
-          app_api_key          = "${{ secrets.STAGING_API_KEY }}"
-          app_jwt_secret       = "${{ secrets.STAGING_JWT_SECRET }}"
-          app_url              = "${{ secrets.STAGING_DOMAIN }}"
-          app_api_url          = "${{ secrets.STAGING_DOMAIN }}"
-          domain_name              = "radar-staging.withobsrvr.com"
-
-          # Service credentials
-          ipstack_access_key       = "${{ secrets.IPSTACK_ACCESS_KEY }}"
-          mailgun_secret           = "${{ secrets.MAILGUN_SECRET }}"
-          mailgun_domain           = "${{ secrets.MAILGUN_DOMAIN || 'mail.example.com' }}"
-          mailgun_from             = "${{ secrets.MAILGUN_FROM || 'noreply@example.com' }}"
-          mailgun_base_url         = "${{ secrets.MAILGUN_BASE_URL || 'https://api.mailgun.net' }}"
-          encryption_secret        = "${{ secrets.ENCRYPTION_SECRET }}"
-          hash_secret              = "${{ secrets.HASH_SECRET }}"
-          consumer_secret          = "${{ secrets.CONSUMER_SECRET }}"
-          consumer_name            = "${{ secrets.CONSUMER_NAME || '' }}"
-
-          # Database configuration
-          database_pool_size       = ${{ vars.DATABASE_POOL_SIZE || 10 }}
-          database_test_url        = "${{ secrets.DATABASE_TEST_URL }}"
-
-          # Service configuration
-          enable_s3_backup         = false
-          enable_heart_beat        = false
-          enable_sentry            = false
-          notifications_enabled    = true
-          debug                    = ${{ secrets.DEBUG || 'false' }}
-          sentry_dsn               = "${{ secrets.SENTRY_DSN || '' }}"
-          sentry_environment       = "staging"
-          deadman_url              = "${{ secrets.DEADMAN_URL || '' }}"
-
-          # API credentials
-          coordinator_api_username = "${{ secrets.COORDINATOR_API_USERNAME || '' }}"
-          coordinator_api_password = "${{ secrets.COORDINATOR_API_PASSWORD || '' }}"
-          coordinator_api_base_url = "${{ secrets.COORDINATOR_API_BASE_URL || 'http://localhost:7000' }}"
-          history_scan_api_username = "${{ secrets.HISTORY_SCAN_API_USERNAME || '' }}"
-          history_scan_api_password = "${{ secrets.HISTORY_SCAN_API_PASSWORD || '' }}"
-          user_service_username    = "${{ secrets.USER_SERVICE_USERNAME || '' }}"
-          user_service_password    = "${{ secrets.USER_SERVICE_PASSWORD || '' }}"
-
-          # Infrastructure settings
-          instance_size            = "${{ secrets.INSTANCE_SIZE || 'apps-s-1vcpu-1gb' }}"
-          history_scanner_instance_size = "${{ secrets.HISTORY_SCANNER_INSTANCE_SIZE || 'apps-d-2vcpu-8gb' }}"
-          frontend_instance_count  = 1
-          backend_instance_count   = 1
-          scanner_instance_count   = 1
-          history_scanner_instance_count = 0
-          history_scanner_worker_count = ${{ vars.HISTORY_SCANNER_WORKER_COUNT || 2 }}
-          users_instance_count     = 1
-
-          # Service configuration
-          backend_port             = 3000
-          user_agent               = "radar-agent"
-          history_scanner_user_agent = "radar-history-scanner"
-          crawler_max_connections  = 25
-          crawler_max_crawl_time   = 900000
-          crawler_blacklist        = "${{ secrets.CRAWLER_BLACKLIST || 'test' }}"
-          network_scan_loop_interval_ms = 300000
-          user_service_base_url    = "${{ secrets.USER_SERVICE_BASE_URL || 'http://localhost:7000' }}"
-          frontend_base_url        = "${{ secrets.FRONTEND_BASE_URL || 'http://localhost:3000' }}"
-          users_port               = 7000
-          horizon_url             = "${{ secrets.HORIZON_URL || 'https://horizon.stellar.org' }}"
-          network_passphrase        = "${{ secrets.NETWORK_PASSPHRASE || 'Public Global Stellar Network ; September 2015' }}"
-          network_id               = "${{ secrets.NETWORK_ID || 'public' }}"
-          network_name             = "${{ secrets.NETWORK_NAME || 'Public Stellar Network' }}"
-          network_overlay_version   = "${{ secrets.NETWORK_OVERLAY_VERSION || 37 }}"
-          network_ledger_version       = "${{ secrets.NETWORK_LEDGER_VERSION || 22 }}"
-          network_overlay_min_version   = "${{ secrets.NETWORK_OVERLAY_MIN_VERSION || 35 }}"
-          network_stellar_core_version   = "${{ secrets.NETWORK_STELLAR_CORE_VERSION || '22.2.0' }}"
-          network_quorum_set   = "${{ secrets.NETWORK_QUORUM_SET || '' }}"
-          network_known_peers = "${{ secrets.NETWORK_KNOWN_PEERS || ''}}"
-          testnet_horizon_url             = "${{ secrets.TESTNET_HORIZON_URL || 'https://horizon-testnet.stellar.org' }}"
-          testnet_network_passphrase        = "${{ secrets.TESTNET_NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015' }}"
-          testnet_network_id               = "${{ secrets.TESTNET_NETWORK_ID || 'testnet' }}"
-          testnet_network_name             = "${{ secrets.TESTNET_NETWORK_NAME || 'Stellar Testnet' }}"
-          testnet_network_overlay_version   = "${{ secrets.TESTNET_NETWORK_OVERLAY_VERSION || 37 }}"
-          testnet_network_ledger_version       = "${{ secrets.TESTNET_NETWORK_LEDGER_VERSION || 22 }}"
-          testnet_network_overlay_min_version   = "${{ secrets.TESTNET_NETWORK_OVERLAY_MIN_VERSION || 35 }}"
-          testnet_network_stellar_core_version   = "${{ secrets.TESTNET_NETWORK_STELLAR_CORE_VERSION || '22.2.0' }}"
-          testnet_network_quorum_set   = "${{ secrets.TESTNET_NETWORK_QUORUM_SET || '' }}"
-          testnet_network_known_peers = "${{ secrets.TESTNET_NETWORK_KNOWN_PEERS || '54.166.220.249:11625,44.223.45.116:11625,54.159.138.198:11625' }}"
-          EOF
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+          DEPLOYED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          REGION: ${{ vars.REGION || 'nyc3' }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
+          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+          STAGING_API_KEY: ${{ secrets.STAGING_API_KEY }}
+          STAGING_JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
+          STAGING_DOMAIN: ${{ secrets.STAGING_DOMAIN }}
+          IPSTACK_ACCESS_KEY: ${{ secrets.IPSTACK_ACCESS_KEY }}
+          MAILGUN_SECRET: ${{ secrets.MAILGUN_SECRET }}
+          MAILGUN_DOMAIN: ${{ secrets.MAILGUN_DOMAIN }}
+          MAILGUN_FROM: ${{ secrets.MAILGUN_FROM }}
+          MAILGUN_BASE_URL: ${{ secrets.MAILGUN_BASE_URL }}
+          ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+          HASH_SECRET: ${{ secrets.HASH_SECRET }}
+          CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
+          CONSUMER_NAME: ${{ secrets.CONSUMER_NAME }}
+          DATABASE_POOL_SIZE: ${{ vars.DATABASE_POOL_SIZE }}
+          DATABASE_TEST_URL: ${{ secrets.DATABASE_TEST_URL }}
+          DEBUG: ${{ secrets.DEBUG }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          DEADMAN_URL: ${{ secrets.DEADMAN_URL }}
+          COORDINATOR_API_USERNAME: ${{ secrets.COORDINATOR_API_USERNAME }}
+          COORDINATOR_API_PASSWORD: ${{ secrets.COORDINATOR_API_PASSWORD }}
+          COORDINATOR_API_BASE_URL: ${{ secrets.COORDINATOR_API_BASE_URL }}
+          HISTORY_SCAN_API_USERNAME: ${{ secrets.HISTORY_SCAN_API_USERNAME }}
+          HISTORY_SCAN_API_PASSWORD: ${{ secrets.HISTORY_SCAN_API_PASSWORD }}
+          USER_SERVICE_USERNAME: ${{ secrets.USER_SERVICE_USERNAME }}
+          USER_SERVICE_PASSWORD: ${{ secrets.USER_SERVICE_PASSWORD }}
+          INSTANCE_SIZE: ${{ secrets.INSTANCE_SIZE }}
+          HISTORY_SCANNER_INSTANCE_SIZE: ${{ secrets.HISTORY_SCANNER_INSTANCE_SIZE }}
+          HISTORY_SCANNER_WORKER_COUNT: ${{ vars.HISTORY_SCANNER_WORKER_COUNT }}
+          CRAWLER_BLACKLIST: ${{ secrets.CRAWLER_BLACKLIST }}
+          USER_SERVICE_BASE_URL: ${{ secrets.USER_SERVICE_BASE_URL }}
+          FRONTEND_BASE_URL: ${{ secrets.FRONTEND_BASE_URL }}
+          HORIZON_URL: ${{ secrets.HORIZON_URL }}
+          NETWORK_PASSPHRASE: ${{ secrets.NETWORK_PASSPHRASE }}
+          NETWORK_ID: ${{ secrets.NETWORK_ID }}
+          NETWORK_NAME: ${{ secrets.NETWORK_NAME }}
+          NETWORK_OVERLAY_VERSION: ${{ secrets.NETWORK_OVERLAY_VERSION }}
+          NETWORK_LEDGER_VERSION: ${{ secrets.NETWORK_LEDGER_VERSION }}
+          NETWORK_OVERLAY_MIN_VERSION: ${{ secrets.NETWORK_OVERLAY_MIN_VERSION }}
+          NETWORK_STELLAR_CORE_VERSION: ${{ secrets.NETWORK_STELLAR_CORE_VERSION }}
+          NETWORK_QUORUM_SET: ${{ secrets.NETWORK_QUORUM_SET }}
+          NETWORK_KNOWN_PEERS: ${{ secrets.NETWORK_KNOWN_PEERS }}
+          TESTNET_HORIZON_URL: ${{ secrets.TESTNET_HORIZON_URL }}
+          TESTNET_NETWORK_PASSPHRASE: ${{ secrets.TESTNET_NETWORK_PASSPHRASE }}
+          TESTNET_NETWORK_ID: ${{ secrets.TESTNET_NETWORK_ID }}
+          TESTNET_NETWORK_NAME: ${{ secrets.TESTNET_NETWORK_NAME }}
+          TESTNET_NETWORK_OVERLAY_VERSION: ${{ secrets.TESTNET_NETWORK_OVERLAY_VERSION }}
+          TESTNET_NETWORK_LEDGER_VERSION: ${{ secrets.TESTNET_NETWORK_LEDGER_VERSION }}
+          TESTNET_NETWORK_OVERLAY_MIN_VERSION: ${{ secrets.TESTNET_NETWORK_OVERLAY_MIN_VERSION }}
+          TESTNET_NETWORK_STELLAR_CORE_VERSION: ${{ secrets.TESTNET_NETWORK_STELLAR_CORE_VERSION }}
+          TESTNET_NETWORK_QUORUM_SET: ${{ secrets.TESTNET_NETWORK_QUORUM_SET }}
+          TESTNET_NETWORK_KNOWN_PEERS: ${{ secrets.TESTNET_NETWORK_KNOWN_PEERS }}
+        run: ./write-tfvars.sh
 
       # Create and save the Terraform plan for staging
       - name: Terraform Plan - Staging
@@ -333,6 +298,7 @@ jobs:
           # Core credentials
           do_token                 = "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}"
           git_branch               = "main"
+          deployed_sha             = "${{ github.sha }}"
           region                   = "${{ vars.REGION || 'nyc3' }}"
           aws_access_key           = "${{ secrets.AWS_ACCESS_KEY_ID }}"
           aws_secret_access_key    = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
@@ -408,20 +374,20 @@ jobs:
           network_passphrase        = "${{ secrets.NETWORK_PASSPHRASE || 'Public Global Stellar Network ; September 2015' }}"
           network_id               = "${{ secrets.NETWORK_ID || 'public' }}"
           network_name             = "${{ secrets.NETWORK_NAME || 'Public Stellar Network' }}"
-          network_overlay_version   = "${{ secrets.NETWORK_OVERLAY_VERSION || 37 }}"
-          network_ledger_version       = "${{ secrets.NETWORK_LEDGER_VERSION || 22 }}"
-          network_overlay_min_version   = "${{ secrets.NETWORK_OVERLAY_MIN_VERSION || 35 }}"
-          network_stellar_core_version   = "${{ secrets.NETWORK_STELLAR_CORE_VERSION || '22.2.0' }}"
+          network_overlay_version   = "${{ secrets.NETWORK_OVERLAY_VERSION || 40 }}"
+          network_ledger_version    = "${{ secrets.NETWORK_LEDGER_VERSION || 25 }}"
+          network_overlay_min_version = "${{ secrets.NETWORK_OVERLAY_MIN_VERSION || 35 }}"
+          network_stellar_core_version   = "${{ secrets.NETWORK_STELLAR_CORE_VERSION || '25.0.0' }}"
           network_quorum_set   = "${{ secrets.NETWORK_QUORUM_SET || '' }}"
           network_known_peers = "${{ secrets.NETWORK_KNOWN_PEERS || ''}}"
           testnet_horizon_url             = "${{ secrets.TESTNET_HORIZON_URL || 'https://horizon-testnet.stellar.org' }}"
           testnet_network_passphrase        = "${{ secrets.TESTNET_NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015' }}"
           testnet_network_id               = "${{ secrets.TESTNET_NETWORK_ID || 'testnet' }}"
           testnet_network_name             = "${{ secrets.TESTNET_NETWORK_NAME || 'Stellar Testnet' }}"
-          testnet_network_overlay_version   = "${{ secrets.TESTNET_NETWORK_OVERLAY_VERSION || 37 }}"
-          testnet_network_ledger_version       = "${{ secrets.TESTNET_NETWORK_LEDGER_VERSION || 22 }}"
-          testnet_network_overlay_min_version   = "${{ secrets.TESTNET_NETWORK_OVERLAY_MIN_VERSION || 35 }}"
-          testnet_network_stellar_core_version   = "${{ secrets.TESTNET_NETWORK_STELLAR_CORE_VERSION || '22.2.0' }}"
+          testnet_network_overlay_version   = "${{ secrets.TESTNET_NETWORK_OVERLAY_VERSION || 40 }}"
+          testnet_network_ledger_version    = "${{ secrets.TESTNET_NETWORK_LEDGER_VERSION || 25 }}"
+          testnet_network_overlay_min_version = "${{ secrets.TESTNET_NETWORK_OVERLAY_MIN_VERSION || 35 }}"
+          testnet_network_stellar_core_version   = "${{ secrets.TESTNET_NETWORK_STELLAR_CORE_VERSION || '25.0.0' }}"
           testnet_network_quorum_set   = "${{ secrets.TESTNET_NETWORK_QUORUM_SET || '' }}"
           testnet_network_known_peers = "${{ secrets.TESTNET_NETWORK_KNOWN_PEERS || '54.166.220.249:11625,44.223.45.116:11625,54.159.138.198:11625' }}"
           EOF
@@ -457,6 +423,7 @@ jobs:
   deploy-staging:
     needs: [plan-production, plan-staging]
     if: >
+      github.event_name == 'pull_request' &&
       needs.plan-staging.result == 'success' &&
       needs.plan-production.result == 'success'
     runs-on: ubuntu-latest
@@ -516,8 +483,10 @@ jobs:
           echo "Running staging tests..."
 
   approve-production-deployment:
-    needs: [deploy-staging]
-    if: github.ref == 'refs/heads/main'
+    needs: [plan-production]
+    if: >
+      github.ref == 'refs/heads/main' &&
+      needs.plan-production.result == 'success'
     runs-on: ubuntu-latest
     environment:
       name: obsrvr-radar-production-approval
