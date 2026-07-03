@@ -20,7 +20,7 @@
         title="Crawler Rejected"
         :value="crawlerRejectedValue"
         :bars="crawlerRejectedBars"
-        color-scheme="red"
+        :color-scheme="crawlerRejectedColorScheme"
       />
     </div>
 
@@ -295,17 +295,37 @@ const historyArchiveValue = computed(() => {
   return ((count / total) * 100).toFixed(1) + '%';
 });
 
-const crawlerRejectedBars = computed<Bar[]>(() =>
-  makeBars('isOverloadedCount', 'bg-red-400', 'bg-red-400', true),
-);
+const crawlerRejectedTotals = computed(() => {
+  const total = dayStats.value.reduce((s, d) => s + d.crawlCount, 0);
+  const count = dayStats.value.reduce((s, d) => s + d.isOverloadedCount, 0);
+  return { total, count };
+});
+
+const crawlerRejectedBars = computed<Bar[]>(() => {
+  if (dayStats.value.length === 0) {
+    return Array(30).fill({ height: '4px', color: 'bg-gray-200' });
+  }
+  return dayStats.value.map((stat) => {
+    const ratio = stat.crawlCount === 0
+      ? 0
+      : stat.isOverloadedCount / stat.crawlCount;
+    return {
+      height: Math.max(4, Math.round(ratio * 100)) + '%',
+      color: ratio > 0 ? 'bg-red-400' : 'bg-gray-200',
+    };
+  });
+});
 
 const crawlerRejectedValue = computed(() => {
   if (dayStats.value.length === 0) return 'N/A';
-  const total = dayStats.value.reduce((s, d) => s + d.crawlCount, 0);
-  const count = dayStats.value.reduce((s, d) => s + d.isOverloadedCount, 0);
+  const { total, count } = crawlerRejectedTotals.value;
   if (total === 0) return 'N/A';
-  return (((total - count) / total) * 100).toFixed(1) + '%';
+  return ((count / total) * 100).toFixed(1) + '%';
 });
+
+const crawlerRejectedColorScheme = computed<'emerald' | 'red'>(() =>
+  crawlerRejectedTotals.value.count === 0 ? 'emerald' : 'red',
+);
 
 // Determine which detail row is last (for removing bottom border)
 const lastDetailRow = computed(() => {
