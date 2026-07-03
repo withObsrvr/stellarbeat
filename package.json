@@ -2,6 +2,7 @@
 	"name": "radar",
 	"private": true,
 	"version": "0.1.0",
+	"packageManager": "pnpm@10.33.0",
 	"description": "OBSRVR Radar - Stellar Network Explorer",
 	"scripts": {
 		"build:ts": "tsc --build",
