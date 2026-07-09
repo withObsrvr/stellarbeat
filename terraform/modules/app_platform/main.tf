@@ -450,7 +450,7 @@ resource "digitalocean_app" "radar" {
           failure_threshold     = 5
         }
 
-        build_command = "pnpm build"
+        build_command = "export CI=true && corepack enable && corepack prepare pnpm@10.33.0 --activate && NODE_ENV=development pnpm install --frozen-lockfile && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter backend run post-build"
         run_command   = "pnpm start:api"
       }
     }
@@ -663,7 +663,7 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
-        build_command = "pnpm build"
+        build_command = "export CI=true && corepack enable && corepack prepare pnpm@10.33.0 --activate && NODE_ENV=development pnpm install --frozen-lockfile && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter backend run post-build"
         run_command   = "pnpm start:scan-network 1"
       }
     }
@@ -752,28 +752,28 @@ resource "digitalocean_app" "radar" {
         # Network Overlay Version if provided
         env {
           key   = "NETWORK_OVERLAY_VERSION"
-          value = lookup(var.testnet_scanner_env, "NETWORK_OVERLAY_VERSION", "37")
+          value = lookup(var.testnet_scanner_env, "NETWORK_OVERLAY_VERSION", "41")
           type  = "GENERAL"
         }
 
         # Network Ledger Version if provided
         env {
           key   = "NETWORK_LEDGER_VERSION"
-          value = lookup(var.testnet_scanner_env, "NETWORK_LEDGER_VERSION", "22")
+          value = lookup(var.testnet_scanner_env, "NETWORK_LEDGER_VERSION", "27")
           type  = "GENERAL"
         }
 
         # Network Overlay Min Version if provided
         env {
           key   = "NETWORK_OVERLAY_MIN_VERSION"
-          value = lookup(var.testnet_scanner_env, "NETWORK_OVERLAY_MIN_VERSION", "35")
+          value = lookup(var.testnet_scanner_env, "NETWORK_OVERLAY_MIN_VERSION", "40")
           type  = "GENERAL"
         }
 
         # Network Stellar Core Version if provided
         env {
           key   = "NETWORK_STELLAR_CORE_VERSION"
-          value = lookup(var.testnet_scanner_env, "NETWORK_STELLAR_CORE_VERSION", "22.2.0")
+          value = lookup(var.testnet_scanner_env, "NETWORK_STELLAR_CORE_VERSION", "27.0.0")
           type  = "GENERAL"
         }
 
@@ -823,7 +823,7 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
-        build_command = "pnpm build"
+        build_command = "export CI=true && corepack enable && corepack prepare pnpm@10.33.0 --activate && NODE_ENV=development pnpm install --frozen-lockfile && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter backend run post-build"
         run_command   = "pnpm start:scan-network 1"
       }
     }
@@ -1000,25 +1000,25 @@ resource "digitalocean_app" "radar" {
         # Network Overlay Version if provided
         env {
           key   = "NETWORK_OVERLAY_VERSION"
-          value = lookup(var.testnet_backend_env, "NETWORK_OVERLAY_VERSION", "37")
+          value = lookup(var.testnet_backend_env, "NETWORK_OVERLAY_VERSION", "41")
           type  = "GENERAL"
         }
         # Network Ledger Version if provided
         env {
           key   = "NETWORK_LEDGER_VERSION"
-          value = lookup(var.testnet_backend_env, "NETWORK_LEDGER_VERSION", "22")
+          value = lookup(var.testnet_backend_env, "NETWORK_LEDGER_VERSION", "27")
           type  = "GENERAL"
         }
         # Network Overlay Min Version if provided
         env {
           key   = "NETWORK_OVERLAY_MIN_VERSION"
-          value = lookup(var.testnet_backend_env, "NETWORK_OVERLAY_MIN_VERSION", "35")
+          value = lookup(var.testnet_backend_env, "NETWORK_OVERLAY_MIN_VERSION", "40")
           type  = "GENERAL"
         }
         # Network Stellar Core Version if provided
         env {
           key   = "NETWORK_STELLAR_CORE_VERSION"
-          value = lookup(var.testnet_backend_env, "NETWORK_STELLAR_CORE_VERSION", "22.2.0")
+          value = lookup(var.testnet_backend_env, "NETWORK_STELLAR_CORE_VERSION", "27.0.0")
           type  = "GENERAL"
         }
         # Network Quorum Set if provided - use testnet values
@@ -1071,7 +1071,7 @@ resource "digitalocean_app" "radar" {
           failure_threshold     = 5
         }
 
-        build_command = "pnpm build"
+        build_command = "export CI=true && corepack enable && corepack prepare pnpm@10.33.0 --activate && NODE_ENV=development pnpm install --frozen-lockfile && pnpm build:ts && pnpm --filter shared run post-build && pnpm --filter backend run post-build"
         run_command   = "pnpm start:api"
       }
     }
