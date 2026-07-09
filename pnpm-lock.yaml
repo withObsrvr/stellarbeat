@@ -435,8 +435,8 @@ importers:
         specifier: 15.0.0
         version: 15.0.0
       '@withobsrvr/stellar-history-archive-hasher':
-        specifier: ^0.9.1
-        version: 0.9.1
+        specifier: ^0.9.2
+        version: 0.9.2
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -2267,8 +2267,8 @@ packages:
   '@withobsrvr/stellar-history-archive-hasher@0.8.1':
     resolution: {integrity: sha512-AptXs+u+Jwqm+35Gr68z6B2e+c0IYDXxNoX/kOo6DJeVAJETIkMuhF/NHaHOOLapuFk2VMRE44DmLuCBtpOuIQ==}
 
-  '@withobsrvr/stellar-history-archive-hasher@0.9.1':
-    resolution: {integrity: sha512-5kKbW9uXA5vznpDk0cU0HzttE0gOfBSjLgo5d68qiiEfDeiQ+1/Eb044dFONdh5Nttf+ZvJ1Ba0EhWIF+TOA/g==}
+  '@withobsrvr/stellar-history-archive-hasher@0.9.2':
+    resolution: {integrity: sha512-XXj45ZHm+V4gfP5ofNybpW/t5dwSU1hbBL/GPyGpj66zCLttt44OR+ldpxv+6HU5iu/KCJYItnnQLeS4POzopg==}
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -7461,7 +7461,7 @@ snapshots:
 
   '@withobsrvr/stellar-history-archive-hasher@0.8.1': {}
 
-  '@withobsrvr/stellar-history-archive-hasher@0.9.1': {}
+  '@withobsrvr/stellar-history-archive-hasher@0.9.2': {}
 
   abort-controller@3.0.0:
     dependencies:
