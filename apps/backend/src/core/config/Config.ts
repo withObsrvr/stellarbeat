@@ -55,6 +55,11 @@ export interface Config {
 	enablePythonFbas: boolean;
 	pythonFbasServiceUrl?: string;
 	contactRecipientEmail?: string;
+	adminApiUsername?: string;
+	adminApiPassword?: string;
+	endpointProbeTimeoutMs: number;
+	allowPrivateEndpointCandidates: boolean;
+	endpointDeltaProbeBudget: number;
 }
 
 export class DefaultConfig implements Config {
@@ -85,6 +90,11 @@ export class DefaultConfig implements Config {
 	enablePythonFbas = false;
 	pythonFbasServiceUrl?: string;
 	contactRecipientEmail?: string;
+	adminApiUsername?: string;
+	adminApiPassword?: string;
+	endpointProbeTimeoutMs = 5000;
+	allowPrivateEndpointCandidates = false;
+	endpointDeltaProbeBudget = 24;
 
 	constructor(
 		public networkConfig: NetworkConfig,
@@ -295,9 +305,11 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		config.frontendBaseUrl = frontendBaseUrl;
 	} else {
 		config.enableNotifications = false;
-		config.userServiceBaseUrl = process.env.USER_SERVICE_BASE_URL || 'http://127.0.0.1:6000';
+		config.userServiceBaseUrl =
+			process.env.USER_SERVICE_BASE_URL || 'http://127.0.0.1:6000';
 		config.userServiceUsername = process.env.USER_SERVICE_USERNAME || 'user';
-		config.userServicePassword = process.env.USER_SERVICE_PASSWORD || 'password';
+		config.userServicePassword =
+			process.env.USER_SERVICE_PASSWORD || 'password';
 		config.frontendBaseUrl = 'http://localhost:3000';
 	}
 
@@ -330,16 +342,12 @@ export function getConfigFromEnv(): Result<Config, Error> {
 			const urlObj = new URL(pythonFbasServiceUrl);
 			if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
 				return err(
-					new Error(
-						'PYTHON_FBAS_SERVICE_URL must be a valid HTTP or HTTPS URL'
-					)
+					new Error('PYTHON_FBAS_SERVICE_URL must be a valid HTTP or HTTPS URL')
 				);
 			}
 		} catch (e) {
 			return err(
-				new Error(
-					'PYTHON_FBAS_SERVICE_URL is not a valid URL: ' + String(e)
-				)
+				new Error('PYTHON_FBAS_SERVICE_URL is not a valid URL: ' + String(e))
 			);
 		}
 
@@ -351,6 +359,27 @@ export function getConfigFromEnv(): Result<Config, Error> {
 	if (isString(contactRecipientEmail)) {
 		config.contactRecipientEmail = contactRecipientEmail;
 	}
+
+	const adminApiUsername = process.env.RADAR_ADMIN_API_USERNAME;
+	const adminApiPassword = process.env.RADAR_ADMIN_API_PASSWORD;
+	if (isString(adminApiUsername)) config.adminApiUsername = adminApiUsername;
+	if (isString(adminApiPassword)) config.adminApiPassword = adminApiPassword;
+
+	const endpointProbeTimeoutMs = Number(process.env.ENDPOINT_PROBE_TIMEOUT_MS);
+	if (!Number.isNaN(endpointProbeTimeoutMs) && endpointProbeTimeoutMs >= 1000)
+		config.endpointProbeTimeoutMs = endpointProbeTimeoutMs;
+
+	const allowPrivateEndpointCandidates = yn(
+		process.env.ALLOW_PRIVATE_ENDPOINT_CANDIDATES
+	);
+	config.allowPrivateEndpointCandidates =
+		allowPrivateEndpointCandidates ?? config.nodeEnv !== 'production';
+
+	const endpointDeltaProbeBudget = Number(
+		process.env.ENDPOINT_DELTA_PROBE_BUDGET
+	);
+	if (!Number.isNaN(endpointDeltaProbeBudget) && endpointDeltaProbeBudget >= 0)
+		config.endpointDeltaProbeBudget = Math.min(endpointDeltaProbeBudget, 256);
 
 	return ok(config);
 }

@@ -231,5 +231,6 @@ module "app_platform" {
     BACKEND_PORT                 = var.backend_port
     USER_AGENT                   = var.user_agent
     TYPEORM_MIGRATIONS_RUN       = "true"
+    CONTACT_RECIPIENT_EMAIL      = "hello@withobsrvr.com"
   }
 }

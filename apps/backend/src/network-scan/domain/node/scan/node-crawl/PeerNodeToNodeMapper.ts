@@ -5,13 +5,19 @@ import PublicKey from '../../PublicKey';
 import NodeMeasurement from '../../NodeMeasurement';
 import { err, ok, Result } from 'neverthrow';
 export class InvalidPeerNode {
-	constructor(public publicKey: string, public reason: string) {}
+	constructor(
+		public publicKey: string,
+		public reason: string
+	) {}
 }
 
 export class PeerNodeToNodeMapper {
 	static updateNodeFromPeerNode(node: Node, peerNode: PeerNode, time: Date) {
-		if (peerNode.ip && peerNode.port)
-			node.updateIpPort(peerNode.ip, peerNode.port, time);
+		if (peerNode.ip && peerNode.port) {
+			if (peerNode.successfullyConnected)
+				node.updateAuthenticatedIpPort(peerNode.ip, peerNode.port, time);
+			else node.updateIpPort(peerNode.ip, peerNode.port, time);
+		}
 
 		if (peerNode.quorumSetHash && peerNode.quorumSet) {
 			const quorumSet = NodeQuorumSet.create(

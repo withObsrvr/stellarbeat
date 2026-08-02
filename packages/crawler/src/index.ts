@@ -135,3 +135,11 @@ export { CrawlFactory } from './crawl-factory';
 export { NodeAddress } from './node-address';
 export { Ledger } from './crawler';
 export { Crawl } from './crawl';
+export {
+	ConnectionAttempt,
+	ConnectionAttemptOutcome,
+	ConnectionFailureStage,
+	classifyConnectionError,
+	sanitizeConnectionErrorDetail
+} from './connection-attempt';
+export { probeOverlayEndpoint, OverlayProbeOptions } from './overlay-probe';

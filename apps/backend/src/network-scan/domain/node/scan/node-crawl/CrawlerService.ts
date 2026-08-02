@@ -14,16 +14,21 @@ import { NetworkQuorumSetConfigurationMapper } from '../../../network/NetworkQuo
 import { QuorumSet } from 'shared';
 import { CrawlFactory } from 'crawler';
 import { injectable } from 'inversify';
+import { ConnectionAttempt } from 'crawler';
 
 export interface CrawlResult {
 	latestClosedLedger: Ledger;
 	processedLedgers: number[];
 	peerNodes: Map<string, PeerNode>;
+	connectionAttempts?: ConnectionAttempt[];
 }
 
 @injectable()
 export class CrawlerService {
-	constructor(private crawler: Crawler, private crawlFactory: CrawlFactory) {}
+	constructor(
+		private crawler: Crawler,
+		private crawlFactory: CrawlFactory
+	) {}
 
 	async crawl(
 		networkQuorumSet: NetworkQuorumSetConfiguration,
@@ -59,7 +64,8 @@ export class CrawlerService {
 			processedLedgers: crawlResultOrError.value.closedLedgers.map((sequence) =>
 				Number(sequence)
 			),
-			peerNodes: crawlResultOrError.value.peers
+			peerNodes: crawlResultOrError.value.peers,
+			connectionAttempts: crawlResultOrError.value.connectionAttempts ?? []
 		});
 	}
 

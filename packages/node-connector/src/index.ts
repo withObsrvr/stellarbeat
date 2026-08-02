@@ -7,6 +7,11 @@ import { pino } from 'pino';
 
 export { Node } from './node';
 export { Connection } from './connection/connection';
+export {
+	classifyOverlayFrameHeader,
+	ConnectionProtocolError,
+	ConnectionProtocolErrorCode
+} from './connection/connection-protocol-error';
 export { UniqueSCPStatementTransform } from './unique-scp-statement-transform';
 export {
 	StellarMessageRouter,

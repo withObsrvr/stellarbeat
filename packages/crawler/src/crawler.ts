@@ -9,6 +9,7 @@ import { CrawlTask } from './crawl-task';
 import { MaxCrawlTimeManager } from './max-crawl-time-manager';
 import { ClosePayload } from './network-observer/connection-manager';
 import { NetworkObserver } from './network-observer/network-observer';
+import { ConnectionAttempt } from './connection-attempt';
 
 export interface Ledger {
 	sequence: bigint;
@@ -66,6 +67,9 @@ export class Crawler {
 				this.crawl.failedConnections.push(data.address);
 			}
 		});
+		this.networkObserver.on('connectionAttempt', (attempt: ConnectionAttempt) =>
+			this.crawl.connectionAttempts.push(attempt)
+		);
 	}
 
 	private onPeerAddressesReceived(peerAddresses: NodeAddress[]) {
@@ -176,7 +180,8 @@ export class Crawler {
 			peers: this.crawl.observation.peerNodes.getAll(),
 			closedLedgers:
 				this.crawl.observation.slots.getConfirmedClosedSlotIndexes(),
-			latestClosedLedger: this.crawl.observation.latestConfirmedClosedLedger
+			latestClosedLedger: this.crawl.observation.latestConfirmedClosedLedger,
+			connectionAttempts: this.crawl.connectionAttempts
 		};
 	}
 
