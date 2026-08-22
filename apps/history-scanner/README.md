@@ -1,3 +1,25 @@
+| `HISTORY_SLOW_ARCHIVE_MAX_LEDGERS` | Maximum ledgers to scan for slow archives                       | `1000`  |
+| `HISTORY_MAX_CONCURRENCY`          | Ceiling for the concurrency ladder the performance test probes  | `100`   |
+| `UV_THREADPOOL_SIZE`               | libuv thread pool size; overrides the value derived above        | derived |
+
+#### Concurrency and the libuv thread pool
+
+Each checkpoint and bucket file is verified with a `gunzip -> sha256` pipeline,
+and Node runs zlib on the libuv thread pool, which defaults to **4** threads.
+Raising `HISTORY_MAX_CONCURRENCY` on its own therefore buys very little: dozens
+of in-flight downloads still queue behind four threads.
+
+The scanner sizes the pool at startup to
+`max(4, min(HISTORY_MAX_CONCURRENCY, 2 x cpu count))`, which is why the two are
+documented together. Set `UV_THREADPOOL_SIZE` explicitly to override. Because
+libuv reads the variable the first time the pool is used, it is applied by
+`src/infrastructure/uv-thread-pool.ts`, which must stay the **first import** of
+every entry point.
+
+`HISTORY_MAX_CONCURRENCY` is a ceiling, not a target: `ArchivePerformanceTester`
+still benchmarks a descending ladder and picks the fastest rung, so a slow or
+rate-limited archive settles on a lower value by itself. Raise it with care when
+scanning archives you do not operate.
 # History Scanner
 
 A standalone application for scanning and verifying Stellar history archives in
@@ -108,6 +130,27 @@ This command starts the scanning process. It will:
 | ---------------------------------- | --------------------------------------------------------------- | ------- |
 | `HISTORY_MAX_FILE_MS`              | Maximum time (ms) allowed for downloading a single history file | `60000` |
 | `HISTORY_SLOW_ARCHIVE_MAX_LEDGERS` | Maximum ledgers to scan for slow archives                       | `1000`  |
+| `HISTORY_MAX_CONCURRENCY`          | Ceiling for the concurrency ladder the performance test probes  | `100`   |
+| `UV_THREADPOOL_SIZE`               | libuv thread pool size; overrides the value derived below       | derived |
+
+#### Concurrency and the libuv thread pool
+
+Each checkpoint and bucket file is verified with a `gunzip -> sha256` pipeline,
+and Node runs zlib on the libuv thread pool, which defaults to **4** threads.
+Raising `HISTORY_MAX_CONCURRENCY` on its own therefore buys very little: dozens
+of in-flight downloads still queue behind four threads.
+
+The scanner sizes the pool at startup to
+`max(4, min(HISTORY_MAX_CONCURRENCY, 2 x cpu count))`, which is why the two are
+documented together. Set `UV_THREADPOOL_SIZE` explicitly to override. Because
+libuv reads the variable the first time the pool is used, it is applied by
+`src/infrastructure/uv-thread-pool.ts`, which must stay the **first import** of
+every entry point.
+
+`HISTORY_MAX_CONCURRENCY` is a ceiling, not a target: `ArchivePerformanceTester`
+still benchmarks a descending ladder and picks the fastest rung, so a slow or
+rate-limited archive settles on a lower value by itself. Raise it with care when
+scanning archives you do not operate.
 
 ### Error Tracking
 

@@ -2,6 +2,10 @@ import { config } from 'dotenv';
 import { err, ok, Result } from 'neverthrow';
 import yn from 'yn';
 import path from 'path';
+import {
+	DEFAULT_MAX_CONCURRENCY,
+	uvThreadPoolSize
+} from '../uv-thread-pool';
 
 config({
 	path: path.resolve(__dirname + '../../../../.env')
@@ -22,6 +26,10 @@ export interface Config {
 	workerId: string;
 	useStellarArchivist: boolean;
 	bucketTimeoutMs: number;
+	maxConcurrency: number;
+	// Reported for observability only. The pool is sized in uv-thread-pool.ts,
+	// which has to run before this module to beat libuv to the punch.
+	uvThreadPoolSize: number;
 }
 
 // Default values
@@ -34,7 +42,11 @@ const defaultConfig = {
 	historySlowArchiveMaxLedgers: 1000,
 	stellarArchivistPath: 'stellar-archivist',
 	useStellarArchivist: false,
-	bucketTimeoutMs: 300000 // 5 minutes - handles large bucket files
+	bucketTimeoutMs: 300000, // 5 minutes - handles large bucket files
+	// Ceiling for the concurrency ladder ArchivePerformanceTester probes. The
+	// tester still measures and picks a lower rung when the archive is happier
+	// with less, so this is a ceiling and not a target.
+	maxConcurrency: DEFAULT_MAX_CONCURRENCY
 };
 
 export function getConfigFromEnv(): Result<Config, Error> {
@@ -82,6 +94,14 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		return err(new Error('BUCKET_TIMEOUT_MS must be a number'));
 	}
 
+	const maxConcurrency = process.env.HISTORY_MAX_CONCURRENCY
+		? Number(process.env.HISTORY_MAX_CONCURRENCY)
+		: defaultConfig.maxConcurrency;
+
+	if (!Number.isInteger(maxConcurrency) || maxConcurrency < 1) {
+		return err(new Error('HISTORY_MAX_CONCURRENCY must be a positive integer'));
+	}
+
 	return ok({
 		nodeEnv: process.env.NODE_ENV ?? defaultConfig.nodeEnv,
 		enableSentry,
@@ -98,6 +118,8 @@ export function getConfigFromEnv(): Result<Config, Error> {
 		workerId: process.env.WORKER_ID ?? `worker-${process.pid}`,
 		useStellarArchivist:
 			yn(process.env.USE_STELLAR_ARCHIVIST) ?? defaultConfig.useStellarArchivist,
-		bucketTimeoutMs
+		bucketTimeoutMs,
+		maxConcurrency,
+		uvThreadPoolSize
 	});
 }

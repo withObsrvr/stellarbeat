@@ -30,20 +30,40 @@ interface TestSettings {
 
 @injectable()
 export class ArchivePerformanceTester {
+	// Rungs of the ladder that gets probed, as a fraction of the configured
+	// ceiling. Kept at six steps so the benchmark costs the same as it always
+	// did; only the ceiling moves. At maxConcurrency 50 this reproduces the
+	// historical [50, 35, 25, 20, 15, 10] exactly.
+	static readonly CONCURRENCY_LADDER_RATIOS = [1, 0.7, 0.5, 0.4, 0.3, 0.2];
+
+	static buildConcurrencyRange(maxConcurrency: number): number[] {
+		return [
+			...new Set(
+				ArchivePerformanceTester.CONCURRENCY_LADDER_RATIOS.map((ratio) =>
+					Math.max(1, Math.round(maxConcurrency * ratio))
+				)
+			)
+		];
+	}
+
 	constructor(
 		private checkPointGenerator: CheckPointGenerator,
 		private httpQueue: HttpQueue,
-		private maxTimeMSPerFile = 30 //how much time can we spend on downloading a small file on average with concurrency.
+		private maxTimeMSPerFile = 30, //how much time can we spend on downloading a small file on average with concurrency.
+		private maxConcurrency = 50 //ceiling the ladder below is derived from.
 	) {}
 
 	async test(
 		baseUrl: Url,
 		highestLedger: number,
 		largeFiles = false,
-		concurrencyRange = [50, 35, 25, 20, 15, 10],
+		concurrencyRange?: number[],
 		nrOfCheckPoints = 5000
 	): Promise<Result<PerformanceTestResult, Error>> {
-		const concurrencyRangeSorted = sortDescending(concurrencyRange);
+		const concurrencyRangeSorted = sortDescending(
+			concurrencyRange ??
+				ArchivePerformanceTester.buildConcurrencyRange(this.maxConcurrency)
+		);
 		let concurrencyRangeIndex = 0;
 		const concurrencyTimings: number[] = [];
 		let consecutiveIncreasingCount = 0; //we will stop after three consecutive increasing timings.
