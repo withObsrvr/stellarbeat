@@ -56,7 +56,14 @@ export interface CategoryVerificationData {
 	calculatedTxSetResultHashes: CalculatedTxSetResultHashes;
 	calculatedLedgerHeaderHashes: LedgerHeaderHashes;
 	protocolVersions: Map<number, number>;
-	processingErrors: Array<{ url: string; category: Category; message: string }>;
+	// Entries the scanner could not process at all. Their hashes are unknown, not
+	// wrong, so they must never be compared - see CategoryVerificationService.
+	processingErrors: Array<{
+		url: string;
+		category: Category;
+		message: string;
+		ledger: number | null;
+	}>;
 }
 
 export interface CategoryScanResult {
@@ -337,12 +344,20 @@ export class CategoryScanner {
 			);
 		}
 
+		// Failures with a known ledger are already reported by the verifier above,
+		// as scanner errors against that ledger. Re-reporting them here double
+		// counts them, and the hardcoded ledger 0 both mislabels them as archive
+		// hash mismatches and drags the aggregated firstLedger down to 0. Only the
+		// ones that could not be tied to a ledger remain.
 		const processingVerificationErrors: VerificationError[] =
-			categoryVerificationData.processingErrors.map((pe) => ({
-				ledger: 0,
-				category: pe.category,
-				message: `XDR processing error: ${pe.message}`
-			}));
+			categoryVerificationData.processingErrors
+				.filter((pe) => pe.ledger === null)
+				.map((pe) => ({
+					ledger: 0,
+					category: pe.category,
+					message: `XDR processing error: ${pe.message}`,
+					isScannerError: true
+				}));
 
 		return ok({
 			latestLedgerHeader: verificationResult.latestLedgerHeader,

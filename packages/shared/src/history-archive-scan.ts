@@ -9,6 +9,11 @@ export interface HistoryArchiveScanError {
     lastLedger: number | null;
 }
 
+// Reported by the scanner when it could not process an entry at all - for
+// example when its hasher is a protocol behind the network. It says nothing
+// about the archive, so it must never drive a repair prompt.
+export const SCANNER_ERROR_CATEGORY = 'SCANNER_ERROR';
+
 export class HistoryArchiveScan {
     constructor(
         public readonly url: string,
@@ -19,6 +24,21 @@ export class HistoryArchiveScan {
         public readonly errors: HistoryArchiveScanError[],
         public readonly isSlow: boolean
     ) {
+    }
+
+    // Defects in the archive itself. Only these justify asking an operator to
+    // repair.
+    get archiveErrors(): HistoryArchiveScanError[] {
+        return this.errors.filter(e => e.category !== SCANNER_ERROR_CATEGORY);
+    }
+
+    // Faults on Radar's side while scanning.
+    get scannerErrors(): HistoryArchiveScanError[] {
+        return this.errors.filter(e => e.category === SCANNER_ERROR_CATEGORY);
+    }
+
+    get hasArchiveError(): boolean {
+        return this.archiveErrors.length > 0;
     }
 
     static fromHistoryArchiveScanV1(historyArchiveScanV1DTO: HistoryArchiveScanV1): HistoryArchiveScan {

@@ -108,6 +108,7 @@ function formatCategory(category: string): string {
     LEDGER_HEADER_HASH: "Ledger Header Hash Mismatch",
     BUCKET_HASH: "Bucket Hash Mismatch",
     MISSING_FILE: "Missing File",
+    SCANNER_ERROR: "Unverified (scanner limitation)",
     CONNECTION: "Connection Error",
     OTHER: "Other",
   };

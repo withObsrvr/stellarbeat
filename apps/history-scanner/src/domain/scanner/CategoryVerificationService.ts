@@ -16,6 +16,9 @@ export interface VerificationError {
 	ledger: number;
 	category: Category;
 	message: string;
+	// True when the scanner failed to process the entry rather than the archive
+	// failing to verify. Never report these as archive defects.
+	isScannerError?: boolean;
 }
 
 export interface VerificationResult {
@@ -37,10 +40,34 @@ export class CategoryVerificationService {
 
 		const errors: VerificationError[] = [];
 
+		// Ledgers the scanner could not process. Their hashes were never
+		// calculated, so they are unknown - not wrong. Comparing them anyway makes
+		// the verifiers fall back to the empty-transaction-set / zero hash and
+		// report a healthy archive as corrupt, which is how a hasher that lags the
+		// network protocol turns into "archive verification errors" for every
+		// operator Radar scans.
+		const unprocessed =
+			CategoryVerificationService.groupProcessingErrorsByLedger(
+				categoryVerificationData
+			);
+
 		for (const [
 			ledger,
 			expectedHashes
 		] of categoryVerificationData.expectedHashesPerLedger) {
+			const failedCategories = unprocessed.get(ledger);
+			if (failedCategories !== undefined) {
+				for (const category of failedCategories) {
+					errors.push({
+						ledger,
+						category,
+						message: `Scanner could not process ${category} entry, hash not verified`,
+						isScannerError: true
+					});
+				}
+				continue;
+			}
+
 			const result = this.verifyLedgerData(
 				ledger,
 				lowestLedger,
@@ -48,7 +75,11 @@ export class CategoryVerificationService {
 				expectedHashes,
 				bucketListHashes,
 				checkPointFrequency,
-				initialPreviousLedgerHeader
+				initialPreviousLedgerHeader,
+				// The header check reads the previous ledger's calculated hash; if
+				// that one was never processed, the mismatch says nothing about the
+				// archive.
+				unprocessed.get(ledger - 1)?.has(Category.ledger) === true
 			);
 			if (result.isErr()) {
 				errors.push(result.error);
@@ -80,7 +111,8 @@ export class CategoryVerificationService {
 		expectedHashes: ExpectedHashes,
 		bucketListHashes: Map<number, string>,
 		checkPointFrequency: CheckPointFrequency,
-		initialPreviousLedgerHeader?: LedgerHeader
+		initialPreviousLedgerHeader?: LedgerHeader,
+		previousLedgerUnprocessed = false
 	) {
 		if (
 			!this.verifyTransactions(ledger, categoryVerificationData, expectedHashes)
@@ -107,6 +139,7 @@ export class CategoryVerificationService {
 		}
 
 		if (
+			!previousLedgerUnprocessed &&
 			!this.verifyLedgerHeaders(
 				ledger,
 				categoryVerificationData,
@@ -139,6 +172,19 @@ export class CategoryVerificationService {
 		}
 
 		return ok(undefined);
+	}
+
+	private static groupProcessingErrorsByLedger(
+		categoryVerificationData: CategoryVerificationData
+	): Map<number, Set<Category>> {
+		const byLedger = new Map<number, Set<Category>>();
+		for (const processingError of categoryVerificationData.processingErrors) {
+			if (processingError.ledger === null) continue;
+			const categories = byLedger.get(processingError.ledger) ?? new Set();
+			categories.add(processingError.category);
+			byLedger.set(processingError.ledger, categories);
+		}
+		return byLedger;
 	}
 
 	private static getLowestLedger(

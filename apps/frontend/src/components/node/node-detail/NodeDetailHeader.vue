@@ -133,13 +133,13 @@
 
       <!-- History archive errors (detailed, with error list) -->
       <div
-        v-if="hasHistoryArchiveError"
+        v-if="hasArchiveDefect"
         class="rounded-lg px-4 py-3 text-sm text-amber-700 bg-amber-50/50 ring-1 ring-amber-200/60"
       >
         <div class="font-semibold mb-1">History archive issue</div>
-        <p v-if="historyArchiveScan && historyArchiveScan.errors.length > 0" class="mb-2">
+        <p v-if="archiveErrors.length > 0" class="mb-2">
           Archive verification errors detected. Start repair at ledger
-          {{ historyArchiveScan.latestVerifiedLedger }} with
+          {{ historyArchiveScan?.latestVerifiedLedger }} with
           <a
             href="https://github.com/stellar/go/tree/master/tools/stellar-archivist"
             target="_blank"
@@ -158,8 +158,24 @@
         </p>
         <history-archive-error-list
           v-if="historyArchiveScan"
-          :errors="historyArchiveScan.errors"
+          :errors="archiveErrors"
         />
+      </div>
+
+      <!-- Scanner-side faults. Radar could not check part of the archive; that
+           is a limitation on our side, not a defect in the operator's archive,
+           so it must never prompt a repair. -->
+      <div
+        v-if="scannerErrors.length > 0"
+        class="rounded-lg px-4 py-3 text-sm text-gray-600 bg-gray-50/70 ring-1 ring-gray-200/60"
+      >
+        <div class="font-semibold mb-1">Archive partially unverified</div>
+        <p class="mb-2">
+          Radar could not process some entries while scanning, so part of this
+          archive has not been verified. This is a limitation of the scanner, not
+          a problem with the archive - no action is needed.
+        </p>
+        <history-archive-error-list :errors="scannerErrors" />
       </div>
 
       <!-- Slow archive info -->
@@ -258,6 +274,23 @@ const nonArchiveWarnings = computed(() =>
 const hasHistoryArchiveError = computed(() =>
   network.historyArchiveHasError(props.node),
 );
+
+// Errors that are genuinely about the archive, versus faults in Radar's own
+// scanner. Only the former should surface a repair prompt - a hasher that lags
+// the network protocol used to make every healthy archive look corrupt.
+const archiveErrors = computed(
+  () => props.historyArchiveScan?.archiveErrors ?? [],
+);
+const scannerErrors = computed(
+  () => props.historyArchiveScan?.scannerErrors ?? [],
+);
+
+// Fall back to the node-level flag when no scan is loaded yet, but once we have
+// one, suppress the archive banner if every error was the scanner's fault.
+const hasArchiveDefect = computed(() => {
+  if (!props.historyArchiveScan) return hasHistoryArchiveError.value;
+  return hasHistoryArchiveError.value && archiveErrors.value.length > 0;
+});
 
 const hasWarnings = computed(() =>
   isFailing.value || warningReasons.value.length > 0 || hasHistoryArchiveError.value,

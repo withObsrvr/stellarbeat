@@ -25,6 +25,12 @@ export class CategoryXDRProcessor extends Writable {
 			callback(new Error('Workerpool terminated'));
 			return;
 		}
+
+		// Every category entry begins with its ledger sequence, so the ledger is
+		// recoverable here even when the worker fails to parse the entry. Without
+		// it a processing failure cannot be tied back to a ledger, and the
+		// verifier would treat the missing hash as a mismatch.
+		const ledger = xdr.length >= 4 ? xdr.readInt32BE(0) : null;
 		switch (this.category) {
 			case Category.results: {
 				this.performInPool<{
@@ -41,7 +47,8 @@ export class CategoryXDRProcessor extends Writable {
 						this.categoryVerificationData.processingErrors.push({
 							url: this.url.value,
 							category: this.category,
-							message: error instanceof Error ? error.message : String(error)
+							message: error instanceof Error ? error.message : String(error),
+							ledger
 						});
 					});
 				break;
@@ -61,7 +68,8 @@ export class CategoryXDRProcessor extends Writable {
 						this.categoryVerificationData.processingErrors.push({
 							url: this.url.value,
 							category: this.category,
-							message: error instanceof Error ? error.message : String(error)
+							message: error instanceof Error ? error.message : String(error),
+							ledger
 						});
 					});
 				break;
@@ -96,7 +104,8 @@ export class CategoryXDRProcessor extends Writable {
 						this.categoryVerificationData.processingErrors.push({
 							url: this.url.value,
 							category: this.category,
-							message: error instanceof Error ? error.message : String(error)
+							message: error instanceof Error ? error.message : String(error),
+							ledger
 						});
 					});
 				break;

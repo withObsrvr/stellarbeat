@@ -336,6 +336,8 @@ export class StellarArchivistVerifier {
 			[ScanErrorCategory.LEDGER_HEADER_HASH]: 'ledger header hash mismatch',
 			[ScanErrorCategory.BUCKET_HASH]: 'bucket hash mismatch',
 			[ScanErrorCategory.MISSING_FILE]: 'missing file',
+			[ScanErrorCategory.SCANNER_ERROR]:
+				'entry the scanner could not process (not an archive defect)',
 			[ScanErrorCategory.CONNECTION]: 'connection error',
 			[ScanErrorCategory.OTHER]: 'verification error'
 		};

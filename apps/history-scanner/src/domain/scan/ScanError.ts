@@ -9,6 +9,9 @@ export enum ScanErrorCategory {
 	LEDGER_HEADER_HASH = 'LEDGER_HEADER_HASH',
 	BUCKET_HASH = 'BUCKET_HASH',
 	MISSING_FILE = 'MISSING_FILE',
+	// A fault in the scanner itself (e.g. the hasher could not parse an entry),
+	// not a defect in the archive. Never ask an operator to repair for this.
+	SCANNER_ERROR = 'SCANNER_ERROR',
 	CONNECTION = 'CONNECTION',
 	OTHER = 'OTHER'
 }
