@@ -133,7 +133,10 @@ describe('Crawler', () => {
 				sequence: BigInt(0),
 				value: ''
 			},
-			peers: new Map()
+			peers: new Map(),
+			// Populated by the connection-attempt diagnostics; empty here because every
+			// collaborator is mocked.
+			connectionAttempts: []
 		});
 		expectCorrectMaxTimer(maxCrawlTimeManager);
 		expectCorrectLogger(crawlLogger);
@@ -184,7 +187,10 @@ describe('Crawler', () => {
 						sequence: BigInt(0),
 						value: ''
 					},
-					peers: new Map()
+					peers: new Map(),
+					// Populated by the connection-attempt diagnostics; empty here because every
+					// collaborator is mocked.
+					connectionAttempts: []
 				});
 				expectCorrectMaxTimer(maxCrawlTimeManager);
 				expectCorrectLogger(crawlLogger);
@@ -236,7 +242,10 @@ describe('Crawler', () => {
 						sequence: BigInt(0),
 						value: ''
 					},
-					peers: new Map()
+					peers: new Map(),
+					// Populated by the connection-attempt diagnostics; empty here because every
+					// collaborator is mocked.
+					connectionAttempts: []
 				});
 				expectCorrectMaxTimer(maxCrawlTimeManager);
 				expectCorrectLogger(crawlLogger);

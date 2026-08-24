@@ -35,7 +35,10 @@ module.exports = {
 			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],
 			preset: 'ts-jest',
 			displayName: 'crawler',
-			rootDir: 'packages/crawler'
+			rootDir: 'packages/crawler',
+			// Crawl results carry bigint ledger sequences; without this a failing
+			// assertion on one crashes the reporter instead of printing the diff.
+			setupFiles: ['<rootDir>/jest.setup.bigint.cjs']
 		},
 		{
 			testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/lib'],
