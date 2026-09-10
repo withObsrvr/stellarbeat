@@ -93,6 +93,7 @@ nodeObject.ledgerVersion = 1;
 nodeObject.overlayMinVersion = 2;
 nodeObject.overlayVersion = 3;
 nodeObject.historyArchiveHasError = true;
+nodeObject.historyArchiveCacheMaxAge = null;
 nodeObject.connectivityError = true;
 nodeObject.stellarCoreVersionBehind = true;
 nodeObject.lag = 30;

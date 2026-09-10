@@ -30,7 +30,7 @@ export class NodeV1DTOMapper {
 						longitude: node.geoData.longitude,
 						countryCode: node.geoData.countryCode,
 						countryName: node.geoData.countryName
-				  }
+					}
 				: null,
 			name: node.details?.name ?? null,
 			host: node.details?.host ?? null,
@@ -48,6 +48,7 @@ export class NodeV1DTOMapper {
 			index: measurement?.index ? measurement.index / 100 : 0,
 			activeInScp: measurement?.isActiveInScp ?? false,
 			historyArchiveHasError: measurement?.historyArchiveHasError ?? false,
+			historyArchiveCacheMaxAge: measurement?.historyArchiveCacheMaxAge ?? null,
 			isValidator: node.isValidator(),
 			statistics: {
 				has24HourStats: !!measurement24HourAverage,
@@ -68,7 +69,8 @@ export class NodeV1DTOMapper {
 			trustCentralityScore: measurement?.trustCentralityScore ?? 0,
 			pageRankScore: measurement?.pageRankScore ?? 0,
 			trustRank: measurement?.trustRank ?? 0,
-			lastTrustCalculation: measurement?.lastTrustCalculation?.toISOString() ?? null
+			lastTrustCalculation:
+				measurement?.lastTrustCalculation?.toISOString() ?? null
 		};
 	}
 

@@ -33,6 +33,12 @@ export default class NodeMeasurement implements Measurement {
 	@Column('bool', { default: false })
 	historyArchiveUnreachable = false;
 
+	//max-age advertised for .well-known/stellar-history.json, null when the
+	//archive sends no cache directive. Above the checkpoint interval the
+	//freshness result may have come from a stale cached copy.
+	@Column('integer', { nullable: true, default: null })
+	historyArchiveCacheMaxAge: number | null = null;
+
 	@Column('bool')
 	isOverLoaded = false;
 

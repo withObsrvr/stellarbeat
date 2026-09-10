@@ -33,6 +33,10 @@ export class Node {
 	public organizationId: string | null = null;
 	public unknown = false; //a node is unknown if it is not crawled or maybe archived
 	public historyArchiveHasError = false;
+	//max-age advertised for .well-known/stellar-history.json, null when the
+	//archive sends no cache directive. A value above the checkpoint interval
+	//means the freshness check can be answered from a stale cached copy.
+	public historyArchiveCacheMaxAge: number | null = null;
 	public connectivityError = false;
 	public stellarCoreVersionBehind = false;
 	public lag: number | null = null;
@@ -100,6 +104,7 @@ export class Node {
 			alias: this.alias,
 			isp: this.isp,
 			historyArchiveHasError: this.historyArchiveHasError,
+			historyArchiveCacheMaxAge: this.historyArchiveCacheMaxAge,
 			connectivityError: this.connectivityError,
 			stellarCoreVersionBehind: this.stellarCoreVersionBehind,
 			lag: this.lag,
@@ -118,8 +123,8 @@ export class Node {
 	 * Helper function to parse numeric fields that may come as strings from the API
 	 */
 	private static parseNumericField(
-		value: number | string, 
-		defaultValue: number, 
+		value: number | string,
+		defaultValue: number,
 		parseFunction: (value: string) => number
 	): number {
 		if (typeof value === 'string') {
@@ -158,12 +163,22 @@ export class Node {
 
 		node.dateDiscovered = new Date(nodeV1DTO.dateDiscovered);
 		node.dateUpdated = new Date(nodeV1DTO.dateUpdated);
-		
+
 		// Convert trust scores from strings to numbers (API returns strings for decimal values)
-		node.trustCentralityScore = Node.parseNumericField(nodeV1DTO.trustCentralityScore, 0, parseFloat);
-		node.pageRankScore = Node.parseNumericField(nodeV1DTO.pageRankScore, 0, parseFloat);
-		node.trustRank = Node.parseNumericField(nodeV1DTO.trustRank, 0, (value) => parseInt(value, 10));
-		
+		node.trustCentralityScore = Node.parseNumericField(
+			nodeV1DTO.trustCentralityScore,
+			0,
+			parseFloat
+		);
+		node.pageRankScore = Node.parseNumericField(
+			nodeV1DTO.pageRankScore,
+			0,
+			parseFloat
+		);
+		node.trustRank = Node.parseNumericField(nodeV1DTO.trustRank, 0, (value) =>
+			parseInt(value, 10)
+		);
+
 		if (nodeV1DTO.lastTrustCalculation) {
 			node.lastTrustCalculation = new Date(nodeV1DTO.lastTrustCalculation);
 		}

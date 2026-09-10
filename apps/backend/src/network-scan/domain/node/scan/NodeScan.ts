@@ -150,7 +150,8 @@ export class NodeScan {
 			const publicKey = node.publicKey.value;
 			const isUpToDate = statuses.upToDate.has(publicKey);
 			const isUnreachable = statuses.unreachable.has(publicKey);
-			if (!isUpToDate && !isUnreachable) return;
+			const isStale = statuses.stale.has(publicKey);
+			if (!isUpToDate && !isUnreachable && !isStale) return;
 
 			const measurement = node.latestMeasurement();
 			if (!measurement) throw new Error('Measurement not found');
@@ -158,6 +159,10 @@ export class NodeScan {
 			//an archive we failed to read is recorded separately, so that a
 			//connectivity problem is not reported as a stale archive
 			measurement.historyArchiveUnreachable = isUnreachable;
+			//a cache TTL longer than the checkpoint interval means the answer above
+			//may have come from a stale copy, so record it alongside the result
+			measurement.historyArchiveCacheMaxAge =
+				statuses.cacheMaxAgeSeconds.get(publicKey) ?? null;
 		});
 	}
 

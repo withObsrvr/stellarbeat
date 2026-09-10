@@ -73,10 +73,12 @@ test('getUpToDateStatus reports an up-to-date archive', async () => {
 	);
 
 	expect(
-		await historyService.getUpToDateStatus(
-			'https://stellar.sui.li/history/',
-			'23586800'
-		)
+		(
+			await historyService.getArchiveCheck(
+				'https://stellar.sui.li/history/',
+				'23586800'
+			)
+		).status
 	).toEqual(HistoryArchiveUpToDateStatus.UpToDate);
 });
 
@@ -100,10 +102,12 @@ test('getUpToDateStatus reports an archive that is behind as stale', async () =>
 	);
 
 	expect(
-		await historyService.getUpToDateStatus(
-			'https://stellar.sui.li/history/',
-			'25586760'
-		)
+		(
+			await historyService.getArchiveCheck(
+				'https://stellar.sui.li/history/',
+				'25586760'
+			)
+		).status
 	).toEqual(HistoryArchiveUpToDateStatus.Stale);
 });
 
@@ -120,10 +124,12 @@ test('getUpToDateStatus reports an archive it cannot read as unreachable, not st
 	);
 
 	expect(
-		await historyService.getUpToDateStatus(
-			'https://stellar.sui.li/history/',
-			'23586800'
-		)
+		(
+			await historyService.getArchiveCheck(
+				'https://stellar.sui.li/history/',
+				'23586800'
+			)
+		).status
 	).toEqual(HistoryArchiveUpToDateStatus.Unreachable);
 });
 
@@ -201,4 +207,55 @@ it('should return urls with historyErrors', async function () {
 
 	expect(result.value.size).toEqual(1);
 	expect(result.value.has(urlWithError)).toBeTruthy();
+});
+
+test('getArchiveCheck reports the max-age advertised for the archive', async () => {
+	const historyService = new HistoryService(
+		httpService,
+		historyArchiveScanService,
+		new LoggerMock()
+	);
+	httpService.get.mockReturnValue(
+		Promise.resolve(
+			ok({
+				data: JSON.parse(stellarHistoryJson),
+				status: 200,
+				statusText: 'ok',
+				headers: { 'Cache-Control': 'public, max-age=3600' }
+			})
+		)
+	);
+
+	const check = await historyService.getArchiveCheck(
+		'https://stellar.sui.li/history/',
+		'23586800'
+	);
+
+	expect(check.status).toEqual(HistoryArchiveUpToDateStatus.UpToDate);
+	expect(check.cacheMaxAgeSeconds).toEqual(3600);
+});
+
+test('getArchiveCheck reports no max-age when the archive sends no cache directive', async () => {
+	const historyService = new HistoryService(
+		httpService,
+		historyArchiveScanService,
+		new LoggerMock()
+	);
+	httpService.get.mockReturnValue(
+		Promise.resolve(
+			ok({
+				data: JSON.parse(stellarHistoryJson),
+				status: 200,
+				statusText: 'ok',
+				headers: { 'content-type': 'application/json' }
+			})
+		)
+	);
+
+	const check = await historyService.getArchiveCheck(
+		'https://stellar.sui.li/history/',
+		'23586800'
+	);
+
+	expect(check.cacheMaxAgeSeconds).toBeNull();
 });

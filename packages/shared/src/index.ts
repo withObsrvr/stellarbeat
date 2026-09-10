@@ -1,5 +1,6 @@
 export { Network, type PublicKey, type OrganizationId } from './network';
 export { Node } from './node';
+export { MAX_SAFE_HISTORY_ARCHIVE_CACHE_TTL_SECONDS } from './history-archive-cache';
 export { default as QuorumService } from './quorum-service-old';
 export { QuorumSlicesGenerator } from './quorum-slices-generator';
 export { QuorumSet, BaseQuorumSet } from './quorum-set';
@@ -12,7 +13,10 @@ export { TrustGraph, Edge, Vertex, isVertex } from './trust-graph/trust-graph';
 export { TrustGraphBuilder } from './trust-graph/trust-graph-builder';
 export { OrganizationSnapShot } from './organization-snap-shot';
 export { NodeSnapShot } from './node-snap-shot';
-export { HistoryArchiveScan, type HistoryArchiveScanError } from './history-archive-scan';
+export {
+	HistoryArchiveScan,
+	type HistoryArchiveScanError
+} from './history-archive-scan';
 export { TransitiveQuorumSetFinder } from './transitive-quorum-set-finder';
 export { containsSlice } from './quorum/containsSlice';
 export * from './quorum/isQuorum';

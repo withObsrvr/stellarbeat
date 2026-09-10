@@ -22,7 +22,8 @@ describe('NodeScannerHistoryArchiveStep', () => {
 		const upToDateStatuses = {
 			upToDate: new Set(['a']),
 			stale: new Set(['b']),
-			unreachable: new Set(['c'])
+			unreachable: new Set(['c']),
+			cacheMaxAgeSeconds: new Map([['b', 3600]])
 		};
 		historyArchiveStatusFinder.getHistoryArchiveUpToDateStatuses.mockResolvedValue(
 			upToDateStatuses

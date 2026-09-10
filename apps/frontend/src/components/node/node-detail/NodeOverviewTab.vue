@@ -17,6 +17,7 @@
         :value="historyArchiveValue"
         :bars="historyArchiveBars"
         color-scheme="emerald"
+        :unreliable-reason="historyArchiveUnreliableReason"
       />
       <BarChart30D
         v-if="node.isValidator"
@@ -384,6 +385,18 @@ const validating30DValue = computed(() => {
 const historyArchiveBars = computed<Bar[]>(() =>
   makeBars("isFullValidatorCount", "bg-emerald-500", "bg-amber-400"),
 );
+
+// A cache TTL longer than the checkpoint interval means the freshness check can
+// be answered from a copy older than the file itself, so neither the percentage
+// nor the bars describe the archive - they describe what the cache served.
+const historyArchiveUnreliableReason = computed(() => {
+  if (!network.historyArchiveCacheMisconfigured(props.node)) return undefined;
+  return (
+    `Archive is served with cache max-age=${props.node.historyArchiveCacheMaxAge}s, ` +
+    "but stellar-history.json changes every ~5 min. Radar may be reading stale " +
+    "cached copies, so this figure understates archive freshness."
+  );
+});
 
 const historyArchiveValue = computed(() => {
   if (dayStats.value.length === 0) return "N/A";

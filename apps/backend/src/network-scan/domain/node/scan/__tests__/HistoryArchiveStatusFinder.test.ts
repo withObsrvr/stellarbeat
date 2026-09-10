@@ -18,12 +18,14 @@ describe('HistoryArchiveStatusFinder', () => {
 			['GAB', 'https://history.stellar.org/prd/core-live/core_live_002']
 		]);
 
-		historyService.getUpToDateStatus.mockResolvedValueOnce(
-			HistoryArchiveUpToDateStatus.UpToDate
-		);
-		historyService.getUpToDateStatus.mockResolvedValueOnce(
-			HistoryArchiveUpToDateStatus.Stale
-		);
+		historyService.getArchiveCheck.mockResolvedValueOnce({
+			status: HistoryArchiveUpToDateStatus.UpToDate,
+			cacheMaxAgeSeconds: null
+		});
+		historyService.getArchiveCheck.mockResolvedValueOnce({
+			status: HistoryArchiveUpToDateStatus.Stale,
+			cacheMaxAgeSeconds: 3600
+		});
 
 		const statuses =
 			await historyArchiveStatusFinder.getHistoryArchiveUpToDateStatuses(
@@ -36,6 +38,8 @@ describe('HistoryArchiveStatusFinder', () => {
 		expect(statuses.stale.size).toEqual(1);
 		expect(statuses.stale.has('GAB')).toBeTruthy();
 		expect(statuses.unreachable.size).toEqual(0);
+		expect(statuses.cacheMaxAgeSeconds.get('GAB')).toEqual(3600);
+		expect(statuses.cacheMaxAgeSeconds.has('GAA')).toBeFalsy();
 	});
 
 	it('should separate archives it could not read from archives that are behind', async function () {
@@ -49,12 +53,14 @@ describe('HistoryArchiveStatusFinder', () => {
 			['GAB', 'https://history.stellar.org/prd/core-live/core_live_002']
 		]);
 
-		historyService.getUpToDateStatus.mockResolvedValueOnce(
-			HistoryArchiveUpToDateStatus.Unreachable
-		);
-		historyService.getUpToDateStatus.mockResolvedValueOnce(
-			HistoryArchiveUpToDateStatus.Stale
-		);
+		historyService.getArchiveCheck.mockResolvedValueOnce({
+			status: HistoryArchiveUpToDateStatus.Unreachable,
+			cacheMaxAgeSeconds: null
+		});
+		historyService.getArchiveCheck.mockResolvedValueOnce({
+			status: HistoryArchiveUpToDateStatus.Stale,
+			cacheMaxAgeSeconds: null
+		});
 
 		const statuses =
 			await historyArchiveStatusFinder.getHistoryArchiveUpToDateStatuses(
