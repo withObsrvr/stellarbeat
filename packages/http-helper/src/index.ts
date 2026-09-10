@@ -12,6 +12,7 @@ export {
 	isHttpError,
 	HttpService,
 	HttpError,
+	HttpOptions,
 	HttpResponse
 } from './HttpService';
 export { AxiosHttpService } from './AxiosHttpService';

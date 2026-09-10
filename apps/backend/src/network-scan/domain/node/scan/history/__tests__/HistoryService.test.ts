@@ -1,8 +1,11 @@
-import { ok } from 'neverthrow';
-import { HistoryService } from '../HistoryService';
+import { err, ok } from 'neverthrow';
+import {
+	HistoryArchiveUpToDateStatus,
+	HistoryService
+} from '../HistoryService';
 import { LoggerMock } from '../../../../../../core/services/__mocks__/LoggerMock';
 import { mock } from 'jest-mock-extended';
-import { HttpService } from 'http-helper';
+import { HttpError, HttpService } from 'http-helper';
 import { HistoryArchiveScanService } from '../HistoryArchiveScanService';
 import { HistoryArchiveScan } from 'shared';
 
@@ -50,7 +53,7 @@ test('fetchStellarHistory', async () => {
 	expect(result.value).toEqual(23586760);
 });
 
-test('stellarHistoryIsUpToDate', async () => {
+test('getUpToDateStatus reports an up-to-date archive', async () => {
 	const historyService = new HistoryService(
 		httpService,
 		historyArchiveScanService,
@@ -70,14 +73,14 @@ test('stellarHistoryIsUpToDate', async () => {
 	);
 
 	expect(
-		await historyService.stellarHistoryIsUpToDate(
+		await historyService.getUpToDateStatus(
 			'https://stellar.sui.li/history/',
 			'23586800'
 		)
-	).toEqual(true);
+	).toEqual(HistoryArchiveUpToDateStatus.UpToDate);
 });
 
-test('stellarHistoryIsNotUpToDate', async () => {
+test('getUpToDateStatus reports an archive that is behind as stale', async () => {
 	const historyService = new HistoryService(
 		httpService,
 		historyArchiveScanService,
@@ -97,11 +100,57 @@ test('stellarHistoryIsNotUpToDate', async () => {
 	);
 
 	expect(
-		await historyService.stellarHistoryIsUpToDate(
+		await historyService.getUpToDateStatus(
 			'https://stellar.sui.li/history/',
 			'25586760'
 		)
-	).toEqual(false);
+	).toEqual(HistoryArchiveUpToDateStatus.Stale);
+});
+
+test('getUpToDateStatus reports an archive it cannot read as unreachable, not stale', async () => {
+	const historyService = new HistoryService(
+		httpService,
+		historyArchiveScanService,
+		new LoggerMock()
+	);
+	httpService.get.mockReturnValue(
+		Promise.resolve(
+			err(new HttpError('SB Connection time-out', 'SB_CONN_TIMEOUT'))
+		)
+	);
+
+	expect(
+		await historyService.getUpToDateStatus(
+			'https://stellar.sui.li/history/',
+			'23586800'
+		)
+	).toEqual(HistoryArchiveUpToDateStatus.Unreachable);
+});
+
+test('fetchStellarHistoryLedger passes an explicit timeout budget', async () => {
+	const historyService = new HistoryService(
+		httpService,
+		historyArchiveScanService,
+		new LoggerMock()
+	);
+	httpService.get.mockReturnValue(
+		Promise.resolve(
+			ok({
+				data: JSON.parse(stellarHistoryJson),
+				status: 200,
+				statusText: 'ok',
+				headers: {}
+			})
+		)
+	);
+
+	await historyService.fetchStellarHistoryLedger(
+		'https://stellar.sui.li/history/'
+	);
+
+	const httpOptions = httpService.get.mock.calls[0][1];
+	expect(httpOptions?.socketTimeoutMs).toBeGreaterThan(2000);
+	expect(httpOptions?.connectionTimeoutMs).toBeGreaterThan(2000);
 });
 
 it('should return urls with historyErrors', async function () {

@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { err, ok, Result } from 'neverthrow';
 import { isNumber, isObject } from '../../../../../core/utilities/TypeGuards';
 import { inject, injectable } from 'inversify';
-import { Url, HttpService } from 'http-helper';
+import { Url, HttpService, HttpOptions, isHttpError } from 'http-helper';
 import { CustomError } from '../../../../../core/errors/CustomError';
 import { Logger } from '../../../../../core/services/Logger';
 import { HistoryArchiveScanService } from './HistoryArchiveScanService';
@@ -13,6 +13,23 @@ export class FetchHistoryError extends CustomError {
 		super('Failed fetching history at ' + url, FetchHistoryError.name, cause);
 	}
 }
+
+export enum HistoryArchiveUpToDateStatus {
+	UpToDate = 'up-to-date',
+	Stale = 'stale',
+	Unreachable = 'unreachable'
+}
+
+//allow for a margin to account for delay in archiving
+const ledgerMargin = 100;
+
+//The .well-known document is small, but archives are commonly served from
+//object storage far away from the scanner. Passing no options at all fell back
+//to a two second budget for the whole request, so a slow archive was recorded
+//as 'not up to date' - indistinguishable from an archive that is genuinely
+//behind. Both timeouts are stated explicitly to keep that budget visible.
+const fetchSocketTimeoutMs = 5000;
+const fetchConnectionTimeoutMs = 10000;
 
 @injectable()
 export class HistoryService {
@@ -33,7 +50,12 @@ export class HistoryService {
 		if (urlResult.isErr())
 			return err(new FetchHistoryError(stellarHistoryUrl, urlResult.error));
 
-		const response = await this.httpService.get(urlResult.value);
+		const httpOptions: HttpOptions = {
+			socketTimeoutMs: fetchSocketTimeoutMs,
+			connectionTimeoutMs: fetchConnectionTimeoutMs
+		};
+
+		const response = await this.httpService.get(urlResult.value, httpOptions);
 		if (response.isErr())
 			return err(new FetchHistoryError(stellarHistoryUrl, response.error));
 
@@ -68,20 +90,37 @@ export class HistoryService {
 		);
 	}
 
-	async stellarHistoryIsUpToDate(
+	async getUpToDateStatus(
 		historyUrl: string,
 		latestLedger: string
-	): Promise<boolean> {
+	): Promise<HistoryArchiveUpToDateStatus> {
 		const stellarHistoryResult =
 			await this.fetchStellarHistoryLedger(historyUrl);
 
 		if (stellarHistoryResult.isErr()) {
-			this.logger.info(stellarHistoryResult.error.message);
-			return false;
+			//An archive we could not read is not the same thing as an archive that
+			//is behind. Collapsing the two hid connectivity problems as staleness.
+			const cause = stellarHistoryResult.error.cause;
+			this.logger.info('Could not read history archive state', {
+				url: historyUrl,
+				message: stellarHistoryResult.error.message,
+				code: isHttpError(cause) ? cause.code : undefined
+			});
+			return HistoryArchiveUpToDateStatus.Unreachable;
 		}
 
 		//todo: latestLedger sequence is bigint, but horizon returns number type for ledger sequence
-		return stellarHistoryResult.value + 100 >= Number(latestLedger); //allow for a margin of 100 ledgers to account for delay in archiving
+		if (stellarHistoryResult.value + ledgerMargin >= Number(latestLedger))
+			return HistoryArchiveUpToDateStatus.UpToDate;
+
+		this.logger.info('History archive is behind', {
+			url: historyUrl,
+			archiveLedger: stellarHistoryResult.value,
+			latestLedger: latestLedger,
+			ledgersBehind: Number(latestLedger) - stellarHistoryResult.value
+		});
+
+		return HistoryArchiveUpToDateStatus.Stale;
 	}
 
 	async getHistoryUrlsWithScanErrors(

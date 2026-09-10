@@ -1,6 +1,15 @@
 import { injectable } from 'inversify';
-import { HistoryService } from './history/HistoryService';
+import {
+	HistoryArchiveUpToDateStatus,
+	HistoryService
+} from './history/HistoryService';
 import { queue } from 'async';
+
+export interface HistoryArchiveUpToDateStatuses {
+	upToDate: Set<string>;
+	stale: Set<string>;
+	unreachable: Set<string>;
+}
 
 @injectable()
 export class HistoryArchiveStatusFinder {
@@ -10,18 +19,27 @@ export class HistoryArchiveStatusFinder {
 		this.historyService = historyService;
 	}
 
-	async getNodesWithUpToDateHistoryArchives(
+	async getHistoryArchiveUpToDateStatuses(
 		publicKeyToHistoryArchiveMap: Map<string, string>,
 		latestLedger: bigint
-	): Promise<Set<string>> {
-		const upToDateNodes = new Set<string>();
+	): Promise<HistoryArchiveUpToDateStatuses> {
+		const statuses: HistoryArchiveUpToDateStatuses = {
+			upToDate: new Set<string>(),
+			stale: new Set<string>(),
+			unreachable: new Set<string>()
+		};
+
 		const q = queue(
 			async (record: { publicKey: string; url: string }, callback) => {
-				const upToDate = await this.historyService.stellarHistoryIsUpToDate(
+				const status = await this.historyService.getUpToDateStatus(
 					record.url,
 					latestLedger.toString()
 				);
-				if (upToDate) upToDateNodes.add(record.publicKey);
+				if (status === HistoryArchiveUpToDateStatus.UpToDate)
+					statuses.upToDate.add(record.publicKey);
+				else if (status === HistoryArchiveUpToDateStatus.Stale)
+					statuses.stale.add(record.publicKey);
+				else statuses.unreachable.add(record.publicKey);
 				callback();
 			},
 			10
@@ -34,11 +52,11 @@ export class HistoryArchiveStatusFinder {
 			})
 		);
 
-		if (q.length() === 0) return upToDateNodes;
+		if (q.length() === 0) return statuses;
 
 		await q.drain();
 
-		return upToDateNodes;
+		return statuses;
 	}
 
 	async getNodesWithHistoryArchiveVerificationErrors(

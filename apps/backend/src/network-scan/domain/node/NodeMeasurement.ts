@@ -28,6 +28,11 @@ export default class NodeMeasurement implements Measurement {
 	@Column('bool', { default: false })
 	historyArchiveHasError = false;
 
+	//the archive could not be read at all. Distinct from isFullValidator being
+	//false, which means the archive was read and found to be behind.
+	@Column('bool', { default: false })
+	historyArchiveUnreachable = false;
+
 	@Column('bool')
 	isOverLoaded = false;
 

@@ -26,7 +26,7 @@ export class QueueError extends CustomError {
 	constructor(
 		public request: Request,
 		cause?: HttpError | Error,
-		message: string = 'Error executing request' + request.url,
+		message: string = 'Error executing request ' + request.url.value,
 		name = QueueError.name
 	) {
 		super(message, name, cause);
@@ -34,13 +34,11 @@ export class QueueError extends CustomError {
 }
 
 export class FileNotFoundError extends QueueError {
-	constructor(public request: Request) {
-		super(
-			request,
-			undefined,
-			'File not found: ' + request.url,
-			FileNotFoundError.name
-		);
+	constructor(
+		public request: Request,
+		message: string = 'File not found: ' + request.url.value
+	) {
+		super(request, undefined, message, FileNotFoundError.name);
 	}
 }
 
@@ -48,7 +46,7 @@ export class RetryableQueueError extends QueueError {
 	constructor(
 		public request: Request,
 		cause?: HttpError | Error | unknown,
-		message: string = 'Error executing request' + request.url
+		message: string = 'Error executing request ' + request.url.value
 	) {
 		super(
 			request,
@@ -286,6 +284,20 @@ export class HttpQueue {
 
 		if (error.response?.status === 404) {
 			return new FileNotFoundError(request);
+		}
+
+		// S3 answers 403 rather than 404 for a missing object when the caller has
+		// no s3:ListBucket permission, so on a public archive the two are
+		// indistinguishable from the outside. Either way the scanner holds no
+		// credentials, so retrying cannot change the outcome. Treating 403 as
+		// retryable made a partial archive - one whose history does not reach
+		// genesis - retry every absent checkpoint six times and then abort the
+		// entire scan as a connection failure.
+		if (error.response?.status === 403) {
+			return new FileNotFoundError(
+				request,
+				'File not found or access denied (403): ' + request.url.value
+			);
 		}
 
 		return new RetryableQueueError(request, error);

@@ -212,12 +212,40 @@ describe('NodeScan', () => {
 		activeNode.addMeasurement(new NodeMeasurement(scanTime, activeNode));
 
 		const nodeScan = new NodeScan(scanTime, [activeNode, missingNode]);
-		const historyArchiveUpToDateStatus = new Map<string, boolean>();
-		historyArchiveUpToDateStatus.set(activeNode.publicKey.value, true);
-		nodeScan.updateHistoryArchiveUpToDateStatus(
-			new Set([activeNode.publicKey.value])
-		);
+		nodeScan.updateHistoryArchiveUpToDateStatus({
+			upToDate: new Set([activeNode.publicKey.value]),
+			stale: new Set<string>(),
+			unreachable: new Set<string>()
+		});
 		expect(activeNode.latestMeasurement()?.isFullValidator).toEqual(true);
+		expect(activeNode.latestMeasurement()?.historyArchiveUnreachable).toEqual(
+			false
+		);
+	});
+
+	test('updateHistoryArchiveUpToDateStatus records an unreachable archive separately from a stale one', () => {
+		const scanTime = new Date('2020-01-03T00:00:00.000Z');
+		activeNode.updateDetails(
+			NodeDetails.create({
+				historyUrl: 'history url',
+				host: 'host',
+				alias: 'alias',
+				name: 'name'
+			}),
+			scanTime
+		);
+		activeNode.addMeasurement(new NodeMeasurement(scanTime, activeNode));
+
+		const nodeScan = new NodeScan(scanTime, [activeNode, missingNode]);
+		nodeScan.updateHistoryArchiveUpToDateStatus({
+			upToDate: new Set<string>(),
+			stale: new Set<string>(),
+			unreachable: new Set([activeNode.publicKey.value])
+		});
+		expect(activeNode.latestMeasurement()?.isFullValidator).toEqual(false);
+		expect(activeNode.latestMeasurement()?.historyArchiveUnreachable).toEqual(
+			true
+		);
 	});
 
 	test('updateHistoryArchiveVerificationStatus', () => {

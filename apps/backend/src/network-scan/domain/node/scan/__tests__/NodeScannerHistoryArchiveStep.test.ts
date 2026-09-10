@@ -19,9 +19,13 @@ describe('NodeScannerHistoryArchiveStep', () => {
 	it('should update full validator status', async () => {
 		const nodeScan = mock<NodeScan>();
 		nodeScan.getHistoryArchiveUrls.mockReturnValue(new Map([['a', 'url']]));
-		const upToDateArchives = new Set(['a']);
-		historyArchiveStatusFinder.getNodesWithUpToDateHistoryArchives.mockResolvedValue(
-			upToDateArchives
+		const upToDateStatuses = {
+			upToDate: new Set(['a']),
+			stale: new Set(['b']),
+			unreachable: new Set(['c'])
+		};
+		historyArchiveStatusFinder.getHistoryArchiveUpToDateStatuses.mockResolvedValue(
+			upToDateStatuses
 		);
 		const verificationErrors = new Set(['b']);
 		historyArchiveStatusFinder.getNodesWithHistoryArchiveVerificationErrors.mockResolvedValue(
@@ -29,13 +33,13 @@ describe('NodeScannerHistoryArchiveStep', () => {
 		);
 		await historyArchiveStep.execute(nodeScan);
 		expect(
-			historyArchiveStatusFinder.getNodesWithUpToDateHistoryArchives
+			historyArchiveStatusFinder.getHistoryArchiveUpToDateStatuses
 		).toBeCalled();
 		expect(
 			historyArchiveStatusFinder.getNodesWithHistoryArchiveVerificationErrors
 		).toBeCalled();
 		expect(nodeScan.updateHistoryArchiveUpToDateStatus).toBeCalledWith(
-			upToDateArchives
+			upToDateStatuses
 		);
 		expect(nodeScan.updateHistoryArchiveVerificationStatus).toBeCalledWith(
 			verificationErrors
