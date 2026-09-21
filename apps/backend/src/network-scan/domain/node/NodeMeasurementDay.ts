@@ -38,6 +38,9 @@ export default class NodeMeasurementDay implements MeasurementAggregation {
 	historyArchiveUnreachableCount = 0;
 
 	@Column('smallint', { default: 0 })
+	historyArchiveCacheMisconfiguredCount = 0;
+
+	@Column('smallint', { default: 0 })
 	crawlCount = 0;
 
 	constructor(node: Node, day: string) {
@@ -59,6 +62,8 @@ export default class NodeMeasurementDay implements MeasurementAggregation {
 			indexSum: this.indexSum,
 			historyArchiveErrorCount: this.historyArchiveErrorCount,
 			historyArchiveUnreachableCount: this.historyArchiveUnreachableCount,
+			historyArchiveCacheMisconfiguredCount:
+				this.historyArchiveCacheMisconfiguredCount,
 			crawlCount: this.crawlCount
 		};
 	}

@@ -10,6 +10,7 @@ import {
 import NetworkStatistics from './network-statistics';
 import { isNumber, isString } from './typeguards';
 import { NodeV1 } from './dto/node-v1';
+import { MAX_SAFE_HISTORY_ARCHIVE_CACHE_TTL_SECONDS } from './history-archive-cache';
 import { NetworkV1 } from './dto/network-v1';
 import { OrganizationV1 } from './dto/organization-v1';
 
@@ -322,6 +323,7 @@ export class Network {
 	nodeHasWarnings(node: Node): boolean {
 		return (
 			this.isFullValidatorWithOutOfDateArchive(node) ||
+			this.historyArchiveCacheMisconfigured(node) ||
 			this.historyArchiveHasError(node)
 		);
 	}
@@ -331,6 +333,9 @@ export class Network {
 			return 'History archive issue detected';
 		}
 
+		if (this.historyArchiveCacheMisconfigured(node))
+			return 'History archive freshness unverifiable (cache TTL too long)';
+
 		if (this.isFullValidatorWithOutOfDateArchive(node))
 			return 'History archive not up-to-date';
 
@@ -338,7 +343,23 @@ export class Network {
 	}
 
 	isFullValidatorWithOutOfDateArchive(node: Node): boolean {
-		return node.historyUrl !== null && !node.isFullValidator;
+		return (
+			node.historyUrl !== null &&
+			!node.isFullValidator &&
+			!this.historyArchiveCacheMisconfigured(node)
+		);
+	}
+
+	//A cache TTL longer than the checkpoint interval lets the freshness check be
+	//answered from a stale copy, so we cannot tell whether the archive itself is
+	//behind. Reporting it as 'behind' would be a claim we cannot support.
+	historyArchiveCacheMisconfigured(node: Node): boolean {
+		return (
+			node.historyUrl !== null &&
+			node.historyArchiveCacheMaxAge !== null &&
+			node.historyArchiveCacheMaxAge >
+				MAX_SAFE_HISTORY_ARCHIVE_CACHE_TTL_SECONDS
+		);
 	}
 
 	historyArchiveHasError(node: Node): boolean {

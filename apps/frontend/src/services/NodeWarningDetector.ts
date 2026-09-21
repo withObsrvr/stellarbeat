@@ -11,6 +11,14 @@ export class NodeWarningDetector {
       reasons.push("History archive issue detected");
     }
 
+    if (network.historyArchiveCacheMisconfigured(node)) {
+      //the freshness check may have been answered from a cached copy older than
+      //the file itself, so we cannot claim the archive is behind
+      reasons.push(
+        `History archive freshness unverifiable (cache max-age=${node.historyArchiveCacheMaxAge}s, changes every ~5 min)`,
+      );
+    }
+
     if (network.isFullValidatorWithOutOfDateArchive(node)) {
       reasons.push("History archive behind");
     }

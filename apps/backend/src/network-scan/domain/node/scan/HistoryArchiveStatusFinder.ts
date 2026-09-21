@@ -9,6 +9,8 @@ export interface HistoryArchiveUpToDateStatuses {
 	upToDate: Set<string>;
 	stale: Set<string>;
 	unreachable: Set<string>;
+	//publicKey -> max-age advertised for the archive, for those that send one
+	cacheMaxAgeSeconds: Map<string, number>;
 }
 
 @injectable()
@@ -26,20 +28,27 @@ export class HistoryArchiveStatusFinder {
 		const statuses: HistoryArchiveUpToDateStatuses = {
 			upToDate: new Set<string>(),
 			stale: new Set<string>(),
-			unreachable: new Set<string>()
+			unreachable: new Set<string>(),
+			cacheMaxAgeSeconds: new Map<string, number>()
 		};
 
 		const q = queue(
 			async (record: { publicKey: string; url: string }, callback) => {
-				const status = await this.historyService.getUpToDateStatus(
+				const check = await this.historyService.getArchiveCheck(
 					record.url,
 					latestLedger.toString()
 				);
-				if (status === HistoryArchiveUpToDateStatus.UpToDate)
+				if (check.status === HistoryArchiveUpToDateStatus.UpToDate)
 					statuses.upToDate.add(record.publicKey);
-				else if (status === HistoryArchiveUpToDateStatus.Stale)
+				else if (check.status === HistoryArchiveUpToDateStatus.Stale)
 					statuses.stale.add(record.publicKey);
 				else statuses.unreachable.add(record.publicKey);
+
+				if (check.cacheMaxAgeSeconds !== null)
+					statuses.cacheMaxAgeSeconds.set(
+						record.publicKey,
+						check.cacheMaxAgeSeconds
+					);
 				callback();
 			},
 			10

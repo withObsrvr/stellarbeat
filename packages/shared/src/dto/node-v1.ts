@@ -48,6 +48,7 @@ export interface NodeV1 {
 	isp: string | null;
 	organizationId: string | null;
 	historyArchiveHasError: boolean;
+	historyArchiveCacheMaxAge?: number | null;
 	isValidator: boolean;
 	connectivityError: boolean;
 	stellarCoreVersionBehind: boolean;
@@ -155,6 +156,12 @@ export const NodeV1Schema: JSONSchemaType<NodeV1> = {
 		historyArchiveHasError: {
 			type: 'boolean'
 		},
+		historyArchiveCacheMaxAge: {
+			type: 'number',
+			nullable: true,
+			description:
+				'max-age in seconds advertised for .well-known/stellar-history.json'
+		},
 		connectivityError: {
 			type: 'boolean'
 		},
@@ -164,7 +171,8 @@ export const NodeV1Schema: JSONSchemaType<NodeV1> = {
 		trustCentralityScore: {
 			type: 'number',
 			default: 0,
-			description: 'Trust centrality score (0-100) based on PageRank with organizational diversity'
+			description:
+				'Trust centrality score (0-100) based on PageRank with organizational diversity'
 		},
 		pageRankScore: {
 			type: 'number',
@@ -174,7 +182,8 @@ export const NodeV1Schema: JSONSchemaType<NodeV1> = {
 		trustRank: {
 			type: 'number',
 			default: 0,
-			description: 'Ranking position based on trust centrality score (1 = highest)'
+			description:
+				'Ranking position based on trust centrality score (1 = highest)'
 		},
 		lastTrustCalculation: nullable({
 			type: 'string',

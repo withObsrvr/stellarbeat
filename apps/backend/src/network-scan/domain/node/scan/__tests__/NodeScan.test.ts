@@ -215,7 +215,8 @@ describe('NodeScan', () => {
 		nodeScan.updateHistoryArchiveUpToDateStatus({
 			upToDate: new Set([activeNode.publicKey.value]),
 			stale: new Set<string>(),
-			unreachable: new Set<string>()
+			unreachable: new Set<string>(),
+			cacheMaxAgeSeconds: new Map<string, number>()
 		});
 		expect(activeNode.latestMeasurement()?.isFullValidator).toEqual(true);
 		expect(activeNode.latestMeasurement()?.historyArchiveUnreachable).toEqual(
@@ -240,11 +241,41 @@ describe('NodeScan', () => {
 		nodeScan.updateHistoryArchiveUpToDateStatus({
 			upToDate: new Set<string>(),
 			stale: new Set<string>(),
-			unreachable: new Set([activeNode.publicKey.value])
+			unreachable: new Set([activeNode.publicKey.value]),
+			cacheMaxAgeSeconds: new Map<string, number>()
 		});
 		expect(activeNode.latestMeasurement()?.isFullValidator).toEqual(false);
 		expect(activeNode.latestMeasurement()?.historyArchiveUnreachable).toEqual(
 			true
+		);
+	});
+
+	test('updateHistoryArchiveUpToDateStatus records the advertised cache ttl for a stale archive', () => {
+		const scanTime = new Date('2020-01-03T00:00:00.000Z');
+		activeNode.updateDetails(
+			NodeDetails.create({
+				historyUrl: 'history url',
+				host: 'host',
+				alias: 'alias',
+				name: 'name'
+			}),
+			scanTime
+		);
+		activeNode.addMeasurement(new NodeMeasurement(scanTime, activeNode));
+
+		const nodeScan = new NodeScan(scanTime, [activeNode, missingNode]);
+		nodeScan.updateHistoryArchiveUpToDateStatus({
+			upToDate: new Set<string>(),
+			stale: new Set([activeNode.publicKey.value]),
+			unreachable: new Set<string>(),
+			cacheMaxAgeSeconds: new Map([[activeNode.publicKey.value, 3600]])
+		});
+		expect(activeNode.latestMeasurement()?.isFullValidator).toEqual(false);
+		expect(activeNode.latestMeasurement()?.historyArchiveUnreachable).toEqual(
+			false
+		);
+		expect(activeNode.latestMeasurement()?.historyArchiveCacheMaxAge).toEqual(
+			3600
 		);
 	});
 

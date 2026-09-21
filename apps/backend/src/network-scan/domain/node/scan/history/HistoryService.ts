@@ -7,11 +7,23 @@ import { CustomError } from '../../../../../core/errors/CustomError';
 import { Logger } from '../../../../../core/services/Logger';
 import { HistoryArchiveScanService } from './HistoryArchiveScanService';
 import { NETWORK_TYPES } from '../../../../infrastructure/di/di-types';
+import { MAX_SAFE_HISTORY_ARCHIVE_CACHE_TTL_SECONDS } from 'shared';
 
 export class FetchHistoryError extends CustomError {
 	constructor(url: string, cause?: Error) {
 		super('Failed fetching history at ' + url, FetchHistoryError.name, cause);
 	}
+}
+
+export interface HistoryArchiveState {
+	currentLedger: number;
+	//null when the archive advertises no max-age directive
+	cacheMaxAgeSeconds: number | null;
+}
+
+export interface HistoryArchiveCheck {
+	status: HistoryArchiveUpToDateStatus;
+	cacheMaxAgeSeconds: number | null;
 }
 
 export enum HistoryArchiveUpToDateStatus {
@@ -43,6 +55,14 @@ export class HistoryService {
 	async fetchStellarHistoryLedger(
 		historyUrl: string
 	): Promise<Result<number, FetchHistoryError>> {
+		return (await this.fetchStellarHistoryState(historyUrl)).map(
+			(state) => state.currentLedger
+		);
+	}
+
+	async fetchStellarHistoryState(
+		historyUrl: string
+	): Promise<Result<HistoryArchiveState, FetchHistoryError>> {
 		historyUrl = historyUrl.replace(/\/$/, ''); //remove trailing slash
 		const stellarHistoryUrl = historyUrl + '/.well-known/stellar-history.json';
 
@@ -75,7 +95,29 @@ export class HistoryService {
 			);
 		}
 
-		return ok(currentLedgerResult.value);
+		return ok({
+			currentLedger: currentLedgerResult.value,
+			cacheMaxAgeSeconds: this.extractCacheMaxAge(response.value.headers)
+		});
+	}
+
+	//Header names are case insensitive and arrive as a plain object, so the
+	//lookup cannot assume a casing.
+	protected extractCacheMaxAge(headers: unknown): number | null {
+		if (!isObject(headers)) return null;
+
+		const key = Object.keys(headers).find(
+			(header) => header.toLowerCase() === 'cache-control'
+		);
+		if (key === undefined) return null;
+
+		const value = headers[key];
+		if (typeof value !== 'string') return null;
+
+		const match = value.match(/max-age\s*=\s*(\d+)/i);
+		if (match === null) return null;
+
+		return Number(match[1]);
 	}
 
 	protected extractLedger(
@@ -90,12 +132,12 @@ export class HistoryService {
 		);
 	}
 
-	async getUpToDateStatus(
+	async getArchiveCheck(
 		historyUrl: string,
 		latestLedger: string
-	): Promise<HistoryArchiveUpToDateStatus> {
+	): Promise<HistoryArchiveCheck> {
 		const stellarHistoryResult =
-			await this.fetchStellarHistoryLedger(historyUrl);
+			await this.fetchStellarHistoryState(historyUrl);
 
 		if (stellarHistoryResult.isErr()) {
 			//An archive we could not read is not the same thing as an archive that
@@ -106,21 +148,48 @@ export class HistoryService {
 				message: stellarHistoryResult.error.message,
 				code: isHttpError(cause) ? cause.code : undefined
 			});
-			return HistoryArchiveUpToDateStatus.Unreachable;
+			return {
+				status: HistoryArchiveUpToDateStatus.Unreachable,
+				cacheMaxAgeSeconds: null
+			};
+		}
+
+		const { currentLedger, cacheMaxAgeSeconds } = stellarHistoryResult.value;
+
+		if (
+			cacheMaxAgeSeconds !== null &&
+			cacheMaxAgeSeconds > MAX_SAFE_HISTORY_ARCHIVE_CACHE_TTL_SECONDS
+		) {
+			//The response may be a cached copy older than the file it describes, so
+			//neither outcome below can be trusted for this archive.
+			this.logger.info(
+				'History archive cache TTL exceeds checkpoint interval',
+				{
+					url: historyUrl,
+					cacheMaxAgeSeconds: cacheMaxAgeSeconds
+				}
+			);
 		}
 
 		//todo: latestLedger sequence is bigint, but horizon returns number type for ledger sequence
-		if (stellarHistoryResult.value + ledgerMargin >= Number(latestLedger))
-			return HistoryArchiveUpToDateStatus.UpToDate;
+		if (currentLedger + ledgerMargin >= Number(latestLedger))
+			return {
+				status: HistoryArchiveUpToDateStatus.UpToDate,
+				cacheMaxAgeSeconds: cacheMaxAgeSeconds
+			};
 
 		this.logger.info('History archive is behind', {
 			url: historyUrl,
-			archiveLedger: stellarHistoryResult.value,
+			archiveLedger: currentLedger,
 			latestLedger: latestLedger,
-			ledgersBehind: Number(latestLedger) - stellarHistoryResult.value
+			ledgersBehind: Number(latestLedger) - currentLedger,
+			cacheMaxAgeSeconds: cacheMaxAgeSeconds
 		});
 
-		return HistoryArchiveUpToDateStatus.Stale;
+		return {
+			status: HistoryArchiveUpToDateStatus.Stale,
+			cacheMaxAgeSeconds: cacheMaxAgeSeconds
+		};
 	}
 
 	async getHistoryUrlsWithScanErrors(
