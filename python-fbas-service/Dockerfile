@@ -13,25 +13,30 @@ RUN apt-get update && apt-get install -y \
 
 # Install Python dependencies
 #
-# pyqbf: the withObsrvr fork of python-fbas declares its qbf extra as a private
-# GitLab URL that requires auth, so we install pyqbf from PyPI first, then
-# python-fbas with --no-deps, then its transitive deps by hand. Upstream has
-# since replaced that URL with `pyqbf==1.1.1.1` from PyPI, so syncing the fork
-# would let this entire workaround collapse back to a plain install.
+# The --no-deps dance below is required for exactly one reason: python-fbas
+# pins python-sat==1.8.dev13, which is not on PyPI (the index goes 1.8.dev12 ->
+# 1.8.dev14). A plain `pip install python-fbas[qbf]` therefore cannot resolve.
+# Once that pin moves upstream, everything here collapses to one line.
+#
+# The private-GitLab pyqbf URL that used to justify this is gone: the fork is
+# now synced with upstream, which declares `pyqbf==1.1.1.1` from PyPI. We still
+# install pyqbf from requirements.txt because --no-deps skips extras.
 #
 # The fork is pinned to a commit rather than @main: an unpinned branch means
 # two builds of the same image tag can contain different analysis code.
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir --no-deps \
-    git+https://github.com/withObsrvr/python-fbas.git@bb26cdbc54e52b1a9000b2b794e6a113241604b3#egg=python-fbas
-# python-sat 1.8.dev13 is pinned by python-fbas itself but is NOT on PyPI --
-# the index goes 1.8.dev12 -> 1.8.dev14. This image builds today only because
-# it was built while that release still existed; any rebuild failed until this
-# pin moved to the next published version.
+    git+https://github.com/withObsrvr/python-fbas.git@c1856af2bae162b4ceb1f9771bf967a29438a047#egg=python-fbas
+# python-sat 1.8.dev13 is pinned by python-fbas itself but has been DELETED
+# from PyPI -- zero files remain, and the index goes 1.8.dev12 -> 1.8.dev14.
+# The running image only builds because it predates that removal. 1.8.dev30 is
+# the latest 1.8.x and ships a manylinux wheel, so it also avoids compiling
+# from sdist; it matches the pin used to build withobsrvr/python-fbas:0.2.0,
+# whose test suite passed green against it. Keep the two in step.
 RUN pip install --no-cache-dir networkx==3.3 platformdirs==4.3.6 \
     py-aiger==6.2.3 py-aiger-cnf==5.0.8 pyapproxmc==4.1.24 \
-    pycryptosat==5.11.21 python-sat==1.8.dev14 requests==2.32.3 \
+    pycryptosat==5.11.21 python-sat==1.8.dev30 requests==2.32.3 \
     z3-solver==4.13.3.0 matplotlib==3.9.2
 
 # Copy application code
