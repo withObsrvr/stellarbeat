@@ -75,9 +75,18 @@ export default class NetworkMeasurement implements Measurement {
 	@Column('smallint', { default: 0 })
 	minSplittingSetSize = 0;
 
+	//smallest splitting set size restricted to the top tier
+	@Column('smallint', { default: 0 })
+	minSplittingSetTopTierSize = 0;
+
 	//smallest splitting set size grouped by organizations
 	@Column('smallint', { default: 0 })
 	minSplittingSetOrgsSize = 0;
+
+	//smallest splitting set size grouped by organizations, restricted to the
+	//top tier
+	@Column('smallint', { default: 0 })
+	minSplittingSetOrgsTopTierSize = 0;
 
 	//smallest splitting set size grouped by organizations
 	@Column('smallint', { default: 0 })

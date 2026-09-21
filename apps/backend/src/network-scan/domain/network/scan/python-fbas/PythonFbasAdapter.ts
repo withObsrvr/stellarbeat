@@ -215,14 +215,22 @@ export class PythonFbasAdapter {
 			return err(blockingFilteredResult.error);
 		if (splittingResult.isErr()) return err(splittingResult.error);
 
+		const topTier = topTierResult.value.top_tier ?? [];
+
+		const splittingSetsTopTierMinSize = await this.analyzeTopTierSplittingSets(
+			allNodesRequest,
+			topTier
+		);
+
 		return ok({
 			merged: {
 				topTierSize: topTierResult.value.top_tier_size,
 				blockingSetsMinSize: blockingAllResult.value.min_size,
 				blockingSetsFilteredMinSize: blockingFilteredResult.value.min_size,
-				splittingSetsMinSize: splittingResult.value.min_size
+				splittingSetsMinSize: splittingResult.value.min_size,
+				splittingSetsTopTierMinSize
 			},
-			topTier: topTierResult.value.top_tier ?? []
+			topTier
 		});
 	}
 
@@ -252,7 +260,8 @@ export class PythonFbasAdapter {
 			topTierSize: 0,
 			blockingSetsMinSize: 0,
 			blockingSetsFilteredMinSize: 0,
-			splittingSetsMinSize: 0
+			splittingSetsMinSize: 0,
+			splittingSetsTopTierMinSize: undefined
 		};
 	}
 
@@ -490,16 +499,79 @@ export class PythonFbasAdapter {
 			return err(blockingFilteredResult.error);
 		if (splittingResult.isErr()) return err(splittingResult.error);
 
+		// The splitting set above is network-wide: it includes separating an
+		// outlying entity from the core, which takes fewer failures than
+		// splitting the core itself. Run it again over just the top tier so the
+		// two questions can be answered separately.
+		const splittingSetsTopTierMinSize = await this.analyzeTopTierSplittingSets(
+			allNodesRequest,
+			topTierResult.value.top_tier ?? []
+		);
+
 		const result = {
 			topTierSize: topTierResult.value.top_tier_size,
 			blockingSetsMinSize: blockingAllResult.value.min_size,
 			blockingSetsFilteredMinSize: blockingFilteredResult.value.min_size,
-			splittingSetsMinSize: splittingResult.value.min_size
+			splittingSetsMinSize: splittingResult.value.min_size,
+			splittingSetsTopTierMinSize
 		};
 
 		console.log('[PythonFbas] Analysis results from Python service:', result);
 
 		return ok(result);
+	}
+
+	/**
+	 * Smallest splitting set within the top tier.
+	 *
+	 * Restricting the FBAS to the top tier is what python-fbas does with
+	 * --reachable-from <top tier validator>; here the same restriction is
+	 * expressed by sending only the top tier members, whose quorum sets by
+	 * definition reference each other.
+	 *
+	 * This is an additive statistic, so it must never be able to take a scan
+	 * down: every failure path returns undefined, meaning "not computed", and
+	 * leaves the network-wide answer alone. Undefined is deliberately not zero,
+	 * which downstream would render as a threshold of zero organizations.
+	 */
+	private async analyzeTopTierSplittingSets(
+		request: PythonFbasAnalysisRequest,
+		topTier: string[]
+	): Promise<number | undefined> {
+		//a top tier of fewer than two entities has nothing to split
+		if (topTier.length < 2) return undefined;
+
+		const topTierMembers = new Set(topTier);
+		const topTierNodes = request.nodes.filter((node) =>
+			topTierMembers.has(node.publicKey)
+		);
+
+		//The service reported a top tier we cannot resolve back to what we sent
+		//it -- most likely the CLI output was parsed into names that no longer
+		//match our public keys. Analysing the subset we happened to match would
+		//produce an authoritative-looking number for a different question.
+		if (topTierNodes.length !== topTier.length) {
+			console.error(
+				`[PythonFbas] Skipping top tier splitting set: ${topTier.length} ` +
+					`members reported, ${topTierNodes.length} resolved in the analysed set`
+			);
+			return undefined;
+		}
+
+		const result = await this.httpClient.analyzeSplittingSets({
+			nodes: topTierNodes,
+			organizations: []
+		});
+
+		if (result.isErr()) {
+			console.error(
+				'[PythonFbas] Top tier splitting set analysis failed:',
+				result.error.message
+			);
+			return undefined;
+		}
+
+		return result.value.min_size;
 	}
 
 	/**

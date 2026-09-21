@@ -22,7 +22,10 @@ export interface NetworkStatisticsV1 {
 	minBlockingSetISPSize: number;
 	minBlockingSetISPFilteredSize: number;
 	minSplittingSetSize: number;
+	//optional: added after the original v1 contract, so older payloads omit them
+	minSplittingSetTopTierSize?: number;
 	minSplittingSetOrgsSize: number;
+	minSplittingSetOrgsTopTierSize?: number;
 	minSplittingSetCountrySize: number;
 	minSplittingSetISPSize: number;
 	topTierSize: number;
@@ -209,6 +212,16 @@ export const NetworkV1Schema: JSONSchemaType<NetworkV1> = {
 					type: 'number',
 					description:
 						'The size of the smallest network splitting set, grouped by organizations'
+				},
+				minSplittingSetTopTierSize: {
+					type: 'number',
+					description:
+						'The size of the smallest splitting set within the top tier. Measures how hard it is to split the core itself, as opposed to separating an outlying node from it.'
+				},
+				minSplittingSetOrgsTopTierSize: {
+					type: 'number',
+					description:
+						'The size of the smallest splitting set within the top tier, grouped by organizations'
 				},
 				minSplittingSetCountrySize: {
 					type: 'number',

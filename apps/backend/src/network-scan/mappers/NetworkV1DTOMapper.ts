@@ -57,6 +57,10 @@ export class NetworkV1DTOMapper {
 					networkMeasurement.minBlockingSetISPFilteredSize,
 				minSplittingSetSize: networkMeasurement.minSplittingSetSize,
 				minSplittingSetOrgsSize: networkMeasurement.minSplittingSetOrgsSize,
+				minSplittingSetTopTierSize:
+					networkMeasurement.minSplittingSetTopTierSize,
+				minSplittingSetOrgsTopTierSize:
+					networkMeasurement.minSplittingSetOrgsTopTierSize,
 				minSplittingSetCountrySize:
 					networkMeasurement.minSplittingSetCountrySize,
 				minSplittingSetISPSize: networkMeasurement.minSplittingSetISPSize,
