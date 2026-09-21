@@ -162,9 +162,11 @@ export class RangeScanner {
 		baseUrl: Url
 	): ScanError[] {
 		return verificationErrors.map((verificationError) => {
-			const category = this.mapCategoryToScanErrorCategory(
-				verificationError.category
-			);
+			// A scanner fault is not an archive defect: report it under its own
+			// category so operators are never told to repair a healthy archive.
+			const category = verificationError.isScannerError
+				? ScanErrorCategory.SCANNER_ERROR
+				: this.mapCategoryToScanErrorCategory(verificationError.category);
 			return new ScanError(
 				ScanErrorType.TYPE_VERIFICATION,
 				baseUrl.value,

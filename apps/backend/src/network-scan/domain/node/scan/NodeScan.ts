@@ -10,6 +10,7 @@ import NodeGeoDataLocation from '../NodeGeoDataLocation';
 import { NodeTomlInfo } from './NodeTomlInfo';
 import { SemanticVersionComparer } from 'shared';
 import { StellarCoreVersion } from '../../network/StellarCoreVersion';
+import { HistoryArchiveUpToDateStatuses } from './HistoryArchiveStatusFinder';
 
 export class NodeScan {
 	public processedLedgers: number[] = [];
@@ -144,20 +145,20 @@ export class NodeScan {
 		);
 	}
 
-	updateHistoryArchiveUpToDateStatus(
-		nodesWithUpToDateHistoryArchives: Set<string>
-	) {
-		this.nodes
-			.filter((node) =>
-				nodesWithUpToDateHistoryArchives.has(node.publicKey.value)
-			)
-			.forEach((node) => {
-				const measurement = node.latestMeasurement();
-				if (!measurement) throw new Error('Measurement not found');
-				measurement.isFullValidator = nodesWithUpToDateHistoryArchives.has(
-					node.publicKey.value
-				);
-			});
+	updateHistoryArchiveUpToDateStatus(statuses: HistoryArchiveUpToDateStatuses) {
+		this.nodes.forEach((node) => {
+			const publicKey = node.publicKey.value;
+			const isUpToDate = statuses.upToDate.has(publicKey);
+			const isUnreachable = statuses.unreachable.has(publicKey);
+			if (!isUpToDate && !isUnreachable) return;
+
+			const measurement = node.latestMeasurement();
+			if (!measurement) throw new Error('Measurement not found');
+			measurement.isFullValidator = isUpToDate;
+			//an archive we failed to read is recorded separately, so that a
+			//connectivity problem is not reported as a stale archive
+			measurement.historyArchiveUnreachable = isUnreachable;
+		});
 	}
 
 	updateHistoryArchiveVerificationStatus(

@@ -8,8 +8,8 @@ const TestingAppDataSource: DataSource = new DataSource({
 	logging: false,
 	url: process.env.DATABASE_TEST_URL,
 	entities: [
-		path.resolve(__dirname, '../../../**/entities/*.ts'),
-		path.resolve(__dirname, '../../../**/domain/**/!(*.test)*.ts')
+		path.resolve(__dirname, '../../../**/entities/*.{js,ts}'),
+		path.resolve(__dirname, '../../../**/domain/**/!(*.test)*.{js,ts}')
 	],
 	migrationsRun: false,
 	ssl: false

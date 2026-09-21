@@ -171,7 +171,8 @@ export class TypeOrmNodeMeasurementDayRepository
 		await this.baseRepository.query(
 			`INSERT INTO node_measurement_day_v2 (time, "nodeId", "isActiveCount", "isValidatingCount",
 												  "isFullValidatorCount", "isOverloadedCount", "indexSum",
-												  "historyArchiveErrorCount", "crawlCount")
+												  "historyArchiveErrorCount", "historyArchiveUnreachableCount",
+												  "crawlCount")
 			 with crawls as (select date_trunc('day', NetworkScan."time") "crawlDay",
 									count(distinct NetworkScan2.id)       "crawlCount"
 							 from network_scan NetworkScan
@@ -189,6 +190,7 @@ export class TypeOrmNodeMeasurementDayRepository
 					sum("isOverLoaded"::int)                  "isOverloadedCount",
 					sum("index"::int)                         "indexSum",
 					sum("historyArchiveHasError"::int)        "historyArchiveErrorCount",
+					sum("historyArchiveUnreachable"::int)     "historyArchiveUnreachableCount",
 					"crawls"."crawlCount"                    as "crawlCount"
 			 FROM "network_scan" NetworkScan
 					  join crawls on crawls."crawlDay" = date_trunc('day', NetworkScan."time")
@@ -207,6 +209,8 @@ export class TypeOrmNodeMeasurementDayRepository
 					 "indexSum"                 = node_measurement_day_v2."indexSum" + EXCLUDED."indexSum",
 					 "historyArchiveErrorCount" = node_measurement_day_v2."historyArchiveErrorCount" +
 												  EXCLUDED."historyArchiveErrorCount",
+					 "historyArchiveUnreachableCount" = node_measurement_day_v2."historyArchiveUnreachableCount" +
+												  EXCLUDED."historyArchiveUnreachableCount",
 					 "crawlCount"               = EXCLUDED."crawlCount"`,
 			[fromCrawlId, toCrawlId]
 		);

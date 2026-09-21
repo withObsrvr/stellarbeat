@@ -1060,6 +1060,13 @@ resource "digitalocean_app" "radar" {
           type  = "GENERAL"
         }
 
+        # Contact Recipient Email if provided
+        env {
+          key   = "CONTACT_RECIPIENT_EMAIL"
+          value = lookup(var.testnet_backend_env, "CONTACT_RECIPIENT_EMAIL", "")
+          type  = "GENERAL"
+        }
+
         http_port = lookup(var.testnet_backend_env, "BACKEND_PORT", 3000)
 
         health_check {

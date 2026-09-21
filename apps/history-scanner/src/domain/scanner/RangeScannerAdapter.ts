@@ -43,7 +43,8 @@ export class RangeScannerAdapter implements IRangeScanner {
 		return result.map((internalResult) => ({
 			latestLedgerHeader: internalResult.latestLedgerHeader,
 			errors: internalResult.errors,
-			exitCode: internalResult.exitCode
+			exitCode: internalResult.exitCode,
+			scannedBucketHashes: internalResult.scannedBucketHashes
 		}));
 	}
 

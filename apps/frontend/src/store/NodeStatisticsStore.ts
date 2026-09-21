@@ -9,6 +9,7 @@ export interface NodeDayStatistics extends StatisticsAggregation {
   isValidatingCount: number;
   isFullValidatorCount: number;
   isOverloadedCount: number;
+  historyArchiveUnreachableCount: number;
   indexSum: number;
   crawlCount: number;
 }
@@ -19,6 +20,7 @@ export interface NodeStatistics extends Statistics {
   isValidating: boolean;
   isFullValidator: boolean;
   isOverloaded: boolean;
+  historyArchiveUnreachable: boolean;
   index: number;
 }
 

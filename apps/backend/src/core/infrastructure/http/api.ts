@@ -36,6 +36,9 @@ import { RegisterScan } from '../../../history-scan-coordinator/use-cases/regist
 import { historyScanRouter } from '../../../history-scan-coordinator/infrastructure/http/HistoryScanRouter';
 import { GetScanJob } from '../../../history-scan-coordinator/use-cases/get-scan-job/GetScanJob';
 import { SendContactSubmission } from '../../../contact/use-cases/send-contact-submission/SendContactSubmission';
+import { endpointCandidateAdminRouter } from '../../../network-scan/infrastructure/http/EndpointCandidateAdminRouter';
+import { EndpointCandidateAdminService } from '../../../network-scan/domain/node/endpoint/EndpointCandidateAdminService';
+import { ScanNetwork } from '../../../network-scan/use-cases/scan-network/ScanNetwork';
 
 let server: Server;
 const api = express();
@@ -52,26 +55,31 @@ api.use(function (
 	res.header('Access-Control-Allow-Origin', '*');
 	res.header(
 		'Access-Control-Allow-Headers',
-		'Origin, X-Requested-With, Content-Type, Accept'
+		'Origin, X-Requested-With, Content-Type, Accept, Authorization'
 	);
 	res.header(
 		'Access-Control-Allow-Methods',
-		'GET, POST, PUT, DELETE, OPTIONS'
+		'GET, POST, PUT, PATCH, DELETE, OPTIONS'
 	);
 	next();
 });
 
 // Add a simple health check endpoint that doesn't require database access
 api.get('/health', (req, res) => {
-  console.log('Health check endpoint called');
-  res.status(200).send('OK');
+	console.log('Health check endpoint called');
+	res.status(200).send('OK');
 });
 
 // Start a minimal server immediately for health checks
 const startMinimalServer = () => {
-  server = api.listen(process.env.BACKEND_PORT || process.env.PORT || 3000, () => {
-    console.log(`Minimal API server started on port ${process.env.BACKEND_PORT || process.env.PORT || 3000} for health checks`);
-  });
+	server = api.listen(
+		process.env.BACKEND_PORT || process.env.PORT || 3000,
+		() => {
+			console.log(
+				`Minimal API server started on port ${process.env.BACKEND_PORT || process.env.PORT || 3000} for health checks`
+			);
+		}
+	);
 };
 
 // Start the minimal server immediately for health checks
@@ -205,12 +213,25 @@ const listen = async () => {
 		})
 	);
 
+	if (config.adminApiUsername && config.adminApiPassword) {
+		api.use(
+			'/v1/admin',
+			endpointCandidateAdminRouter({
+				service: kernel.container.get(EndpointCandidateAdminService),
+				scanNetwork: kernel.container.get(ScanNetwork),
+				networkId: config.networkConfig.networkId,
+				username: config.adminApiUsername,
+				password: config.adminApiPassword
+			})
+		);
+	}
+
 	// If we already have a server running from the minimal setup, close it first
 	if (server) {
 		console.log('Stopping minimal server to start full server');
 		server.close();
 	}
-	
+
 	server = api.listen(config.apiPort, () => {
 		console.log('Full API server now listening on port: ' + config.apiPort);
 	});
@@ -227,17 +248,18 @@ const listen = async () => {
 };
 
 // Try to initialize the full server but keep the minimal one running if it fails
-listen().catch(error => {
-  console.error("Failed to initialize the full API server:", error);
-  console.log("Minimal server will remain running for health checks");
-  
-  // Add a simple /v1 endpoint for the health check to pass
-  api.get('/v1', (req, res) => {
-    res.status(503).json({ 
-      status: "Service Unavailable", 
-      message: "API is in minimal health check mode due to initialization failure" 
-    });
-  });
+listen().catch((error) => {
+	console.error('Failed to initialize the full API server:', error);
+	console.log('Minimal server will remain running for health checks');
+
+	// Add a simple /v1 endpoint for the health check to pass
+	api.get('/v1', (req, res) => {
+		res.status(503).json({
+			status: 'Service Unavailable',
+			message:
+				'API is in minimal health check mode due to initialization failure'
+		});
+	});
 });
 
 async function stop(dataSource: DataSource) {

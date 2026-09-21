@@ -24,15 +24,12 @@
       </ul>
     </UiAlert>
 
-    <UiAlert
-      :show="network.historyArchiveHasError(selectedNode)"
-      variant="warning"
-    >
+    <UiAlert :show="hasArchiveDefect" variant="warning">
       <strong>History archive issue details</strong>
       <br />
-      <p v-if="historyArchiveScan && historyArchiveScan.errors.length > 0">
+      <p v-if="archiveErrors.length > 0">
         Archive verification errors detected. Start repair at ledger
-        {{ historyArchiveScan.latestVerifiedLedger }} with
+        {{ historyArchiveScan?.latestVerifiedLedger }} with
         <a
           href="https://github.com/stellar/go/tree/master/tools/stellar-archivist"
           target="_blank"
@@ -51,8 +48,20 @@
       </p>
       <history-archive-error-list
         v-if="historyArchiveScan"
-        :errors="historyArchiveScan.errors"
+        :errors="archiveErrors"
       />
+    </UiAlert>
+    <!-- Scanner-side faults: Radar could not verify part of the archive. Not a
+         defect in the archive, so no repair is prompted. -->
+    <UiAlert :show="scannerErrors.length > 0" variant="info">
+      <strong>Archive partially unverified</strong>
+      <br />
+      <p>
+        Radar could not process some entries while scanning, so part of this
+        archive has not been verified. This is a limitation of the scanner, not a
+        problem with the archive - no action is needed.
+      </p>
+      <history-archive-error-list :errors="scannerErrors" />
     </UiAlert>
     <UiAlert
       :show="historyArchiveScan ? historyArchiveScan.isSlow : false"
@@ -212,6 +221,21 @@ const selectedNode = computed(() => store.selectedNode);
 
 const fetchingLatestHistoryArchiveScan = ref(false);
 const historyArchiveScan = ref<HistoryArchiveScan | null>(null);
+
+// Errors that are genuinely about the archive, versus faults in Radar's own
+// scanner. Only the former should surface a repair prompt - a hasher that lags
+// the network protocol used to make every healthy archive look corrupt.
+const archiveErrors = computed(() => historyArchiveScan.value?.archiveErrors ?? []);
+const scannerErrors = computed(() => historyArchiveScan.value?.scannerErrors ?? []);
+
+// Fall back to the node-level flag until a scan is loaded, but once we have one,
+// suppress the archive warning if every error was the scanner's fault.
+const hasArchiveDefect = computed(() => {
+  if (!selectedNode.value) return false;
+  const flagged = network.historyArchiveHasError(selectedNode.value);
+  if (!historyArchiveScan.value) return flagged;
+  return flagged && archiveErrors.value.length > 0;
+});
 
 async function fetchHistoryArchiveScan() {
   if (!selectedNode.value) return;

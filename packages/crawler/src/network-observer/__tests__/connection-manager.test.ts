@@ -82,12 +82,62 @@ describe('ConnectionManager', () => {
 	});
 
 	it('disconnects on connection error', () => {
+		const attemptListener = jest.fn();
+		connectionManager.on('connectionAttempt', attemptListener);
 		connectionManager.connectToNode('127.0.0.1', 8001);
-		const error = new Error('Connection error');
+		const error = Object.assign(new Error('Connection refused'), {
+			code: 'ECONNREFUSED'
+		});
 		mockConnection.emit('error', error);
 
 		expect(mockLogger.debug).toHaveBeenCalled();
 		expect(mockConnection.destroy).toHaveBeenCalled();
+		expect(attemptListener).toHaveBeenCalledWith(
+			expect.objectContaining({
+				address: testAddress,
+				outcome: 'tcp_refused',
+				failureStage: 'tcp',
+				errorCode: 'ECONNREFUSED'
+			})
+		);
+	});
+
+	it('emits one authenticated attempt after the Stellar handshake', () => {
+		const attemptListener = jest.fn();
+		connectionManager.on('connectionAttempt', attemptListener);
+		connectionManager.connectToNode(ip, port);
+		mockConnection.emit('socketConnected');
+		mockConnection.emit('connect', testPublicKey, nodeInfo);
+		mockConnection.emit('close');
+
+		expect(attemptListener).toHaveBeenCalledTimes(1);
+		expect(attemptListener).toHaveBeenCalledWith(
+			expect.objectContaining({
+				address: testAddress,
+				outcome: 'authenticated',
+				remotePublicKey: testPublicKey
+			})
+		);
+	});
+
+	it('classifies TLS returned by a proxy', () => {
+		const attemptListener = jest.fn();
+		connectionManager.on('connectionAttempt', attemptListener);
+		connectionManager.connectToNode(ip, port);
+		mockConnection.emit('socketConnected');
+		mockConnection.emit(
+			'error',
+			Object.assign(new Error('TLS traffic detected'), {
+				code: 'OVERLAY_TLS_DETECTED'
+			})
+		);
+
+		expect(attemptListener).toHaveBeenCalledWith(
+			expect.objectContaining({
+				outcome: 'tls_detected',
+				failureStage: 'overlay_hello'
+			})
+		);
 	});
 
 	it('should shutdown and close all active connections', async () => {

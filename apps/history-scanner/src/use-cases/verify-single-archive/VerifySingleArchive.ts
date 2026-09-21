@@ -5,10 +5,14 @@ import { mapUnknownToError } from 'shared';
 import { VerifySingleArchiveDTO } from './VerifySingleArchiveDTO';
 import { ScanJob } from '../../domain/scan/ScanJob';
 import { Url } from 'http-helper';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../../infrastructure/di/di-types';
 
+@injectable()
 export class VerifySingleArchive {
 	constructor(
 		private scanner: Scanner,
+		@inject(TYPES.ExceptionLogger)
 		private exceptionLogger: ExceptionLogger
 	) {}
 

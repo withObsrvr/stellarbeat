@@ -166,6 +166,19 @@ export default class Node extends VersionedEntity<NodeSnapShot> {
 	}
 
 	updateIpPort(ip: string, port: number, time: Date) {
+		this.updateIpPortFromEvidence(ip, port, time, false);
+	}
+
+	updateAuthenticatedIpPort(ip: string, port: number, time: Date) {
+		this.updateIpPortFromEvidence(ip, port, time, true);
+	}
+
+	private updateIpPortFromEvidence(
+		ip: string,
+		port: number,
+		time: Date,
+		authenticated: boolean
+	) {
 		if (
 			this.currentSnapshot().ip === ip &&
 			this.currentSnapshot().port === port
@@ -173,7 +186,7 @@ export default class Node extends VersionedEntity<NodeSnapShot> {
 			return;
 		}
 
-		if (!this.isIpChangeAllowed(time)) {
+		if (!authenticated && !this.isIpChangeAllowed(time)) {
 			return;
 		}
 

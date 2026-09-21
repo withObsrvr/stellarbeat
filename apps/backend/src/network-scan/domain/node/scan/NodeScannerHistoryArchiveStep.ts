@@ -14,7 +14,7 @@ export class NodeScannerHistoryArchiveStep {
 
 	public async execute(nodeScan: NodeScan): Promise<void> {
 		nodeScan.updateHistoryArchiveUpToDateStatus(
-			await this.historyArchiveStatusFinder.getNodesWithUpToDateHistoryArchives(
+			await this.historyArchiveStatusFinder.getHistoryArchiveUpToDateStatuses(
 				nodeScan.getHistoryArchiveUrls(),
 				nodeScan.latestLedger
 			)

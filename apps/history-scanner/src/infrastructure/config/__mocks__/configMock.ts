@@ -16,4 +16,6 @@ export class ConfigMock implements Config {
 	workerId = 'test-worker-1';
 	useStellarArchivist = false;
 	bucketTimeoutMs = 300000;
+	maxConcurrency = 50;
+	uvThreadPoolSize = 4;
 }

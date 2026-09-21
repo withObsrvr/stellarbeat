@@ -263,3 +263,60 @@ function getScanner(rangeScanner: ArchivistRangeScanner) {
 		100
 	);
 }
+
+it('should carry verified bucket hashes into the next range', async () => {
+	// Regression: the bucket hashes returned by a range used to be dropped by
+	// RangeScannerAdapter, so alreadyScannedBucketHashes was always empty and
+	// every range re-downloaded and re-hashed the buckets it shared with
+	// earlier ranges.
+	const rangeScanner = mock<RangeScanner>();
+
+	// The set is passed by reference and mutated between ranges, so snapshot it
+	// at call time instead of inspecting mock.calls afterwards.
+	const alreadyScannedPerCall: Set<string>[] = [];
+	rangeScanner.scan.mockImplementation(
+		async (
+			_baseUrl,
+			_concurrency,
+			toLedger,
+			_fromLedger,
+			_latestScannedLedger,
+			_latestScannedLedgerHeaderHash,
+			alreadyScannedBucketHashes = new Set<string>()
+		) => {
+			alreadyScannedPerCall.push(new Set(alreadyScannedBucketHashes));
+			return ok({
+				latestLedgerHeader: { ledger: toLedger, hash: 'ledger_hash' },
+				scannedBucketHashes: new Set([
+					...alreadyScannedBucketHashes,
+					`bucket_${toLedger}`
+				]),
+				errors: [],
+				exitCode: null
+			});
+		}
+	);
+
+	const scanner = getTypeScriptScanner(rangeScanner);
+	const scanJob = ScanJob.newScanChain(createDummyHistoryBaseUrl(), 0, 200, 1);
+	await scanner.perform(new Date(), scanJob);
+
+	expect(rangeScanner.scan).toHaveBeenCalledTimes(2); //two chunks
+	expect(alreadyScannedPerCall[0]).toEqual(new Set());
+	expect(alreadyScannedPerCall[1]).toEqual(new Set(['bucket_100']));
+});
+
+function getTypeScriptScanner(rangeScanner: RangeScanner) {
+	return new Scanner(
+		mock<ArchivistRangeScanner>(),
+		rangeScanner,
+		new ScanSettingsFactory(
+			mock<CategoryScanner>(),
+			mock<ArchivePerformanceTester>()
+		),
+		mock<Logger>(),
+		mock<ExceptionLogger>(),
+		false, // useStellarArchivist - exercise the RangeScannerAdapter path
+		100
+	);
+}

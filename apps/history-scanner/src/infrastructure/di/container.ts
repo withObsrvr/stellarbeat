@@ -61,7 +61,8 @@ export function load(container: Container, config: Config) {
 				new ArchivePerformanceTester(
 					container.get(CheckPointGenerator),
 					container.get<HttpQueue>(TYPES.HttpQueue),
-					config.historyMaxFileMs
+					config.historyMaxFileMs,
+					config.maxConcurrency
 				)
 		);
 	container

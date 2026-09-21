@@ -1,4 +1,6 @@
 export const NETWORK_TYPES = {
+	EndpointCandidateRepository: Symbol('EndpointCandidateRepository'),
+	EndpointDnsResolver: Symbol('EndpointDnsResolver'),
 	HistoryArchiveScanService: Symbol('HistoryArchiveScanService'),
 	NodeMeasurementRepository: Symbol('NodeMeasurementRepository'),
 	NodeMeasurementDayRepository: Symbol('NodeMeasurementDayRepository'),

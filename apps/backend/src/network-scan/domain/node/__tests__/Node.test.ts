@@ -41,6 +41,21 @@ describe('Node', () => {
 			expect(node.ip).toBe('localhost');
 			expect(node.port).toBe(11625);
 		});
+
+		it('should immediately project an authenticated endpoint change', function () {
+			const node = createDummyNode(
+				'localhost',
+				11625,
+				new Date('2020-01-01T00:00:00.000Z')
+			);
+			node.updateAuthenticatedIpPort(
+				'newHost',
+				11625,
+				new Date('2020-01-01T05:00:00.000Z')
+			);
+			expect(node.ip).toBe('newHost');
+			expect(node.lastIpChange).toEqual(new Date('2020-01-01T05:00:00.000Z'));
+		});
 	});
 
 	describe('isp changed', () => {

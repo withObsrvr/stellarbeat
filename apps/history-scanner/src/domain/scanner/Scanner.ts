@@ -184,6 +184,17 @@ export class Scanner {
 					? rangeResult.value.latestLedgerHeader.ledger
 					: rangeToLedger;
 				latestLedgerHeader.hash = rangeResult.value.latestLedgerHeader?.hash;
+
+				// Carry the verified bucket hashes into the next range. Without
+				// this, alreadyScannedBucketHashes stays empty and every range
+				// re-downloads and re-hashes the buckets it shares with earlier
+				// ranges (the large upper-level snap buckets persist across most
+				// of history, so this dominates bucket traffic on a full scan).
+				if (rangeResult.value.scannedBucketHashes) {
+					for (const hash of rangeResult.value.scannedBucketHashes) {
+						scannedBucketHashes.add(hash);
+					}
+				}
 			}
 
 			rangeFromLedger += this.rangeSize;
@@ -320,6 +331,8 @@ export class Scanner {
 			[ScanErrorCategory.LEDGER_HEADER_HASH]: 'ledger header hash mismatch',
 			[ScanErrorCategory.BUCKET_HASH]: 'bucket hash mismatch',
 			[ScanErrorCategory.MISSING_FILE]: 'missing file',
+			[ScanErrorCategory.SCANNER_ERROR]:
+				'entry the scanner could not process (not an archive defect)',
 			[ScanErrorCategory.CONNECTION]: 'connection error',
 			[ScanErrorCategory.OTHER]: 'verification error'
 		};

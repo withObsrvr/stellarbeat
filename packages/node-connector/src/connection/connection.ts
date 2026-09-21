@@ -18,6 +18,10 @@ import { FlowController } from './flow-controller';
 import StellarMessage = xdr.StellarMessage;
 import MessageType = xdr.MessageType;
 import { mapUnknownToError } from '../map-unknown-to-error';
+import {
+	classifyOverlayFrameHeader,
+	ConnectionProtocolError
+} from './connection-protocol-error';
 
 type PublicKey = string;
 
@@ -170,6 +174,7 @@ export class Connection extends Duplex {
 			'Connected to socket, initiating handshake'
 		);
 		this.handshakeState = HandshakeState.CONNECTED;
+		this.emit('socketConnected');
 		const result = this.sendHello();
 		if (result.isErr()) {
 			this.logger.error(
@@ -215,17 +220,25 @@ export class Connection extends Duplex {
 				return cb(null, this.reading);
 			},
 			(done) => {
-				let processError = null;
+				let processError: Error | null = null;
 
-				if (this.readState === ReadState.ReadyForLength) {
-					if (this.processNextMessageLength()) {
-						this.readState = ReadState.ReadyForMessage;
-					} else {
-						this.reading = false; //we stop processing the buffer
+				try {
+					if (this.readState === ReadState.ReadyForLength) {
+						if (this.processNextMessageLength()) {
+							this.readState = ReadState.ReadyForMessage;
+						} else {
+							this.reading = false; //we stop processing the buffer
+						}
 					}
+				} catch (error) {
+					processError = mapUnknownToError(error);
+					this.reading = false;
 				}
 
-				if (this.readState === ReadState.ReadyForMessage) {
+				if (
+					processError === null &&
+					this.readState === ReadState.ReadyForMessage
+				) {
 					this.processNextMessage()
 						.map((containedAMessage) => {
 							if (containedAMessage) {
@@ -443,6 +456,8 @@ export class Connection extends Duplex {
 		);
 		const data = this.socket.read(4);
 		if (data) {
+			const protocolError = classifyOverlayFrameHeader(data);
+			if (protocolError) throw protocolError;
 			this.lengthNextMessage =
 				xdrBufferConverter.getMessageLengthFromXDRBuffer(data);
 			this.logger.trace(
@@ -698,6 +713,29 @@ export class Connection extends Duplex {
 	}
 
 	protected processHelloMessage(hello: xdr.Hello): Result<void, Error> {
+		if (!hello.networkId().equals(this.connectionAuthentication.networkId)) {
+			return err(
+				new ConnectionProtocolError(
+					'OVERLAY_WRONG_NETWORK',
+					'Remote peer belongs to a different Stellar network'
+				)
+			);
+		}
+
+		const remoteOverlayVersion = hello.overlayVersion();
+		const remoteOverlayMinVersion = hello.overlayMinVersion();
+		if (
+			remoteOverlayVersion < this.localNodeInfo.overlayMinVersion ||
+			this.localNodeInfo.overlayVersion < remoteOverlayMinVersion
+		) {
+			return err(
+				new ConnectionProtocolError(
+					'OVERLAY_PROTOCOL_INCOMPATIBLE',
+					'Remote peer has no compatible Stellar overlay protocol version'
+				)
+			);
+		}
+
 		if (
 			!this.connectionAuthentication.verifyRemoteAuthCert(
 				new Date(),

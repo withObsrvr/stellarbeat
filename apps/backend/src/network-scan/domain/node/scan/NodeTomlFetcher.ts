@@ -71,11 +71,22 @@ export class NodeTomlFetcher {
 				valueValidator.trim(tomlValidator.DISPLAY_NAME)
 			);
 
-		if (
-			isString(tomlValidator.HOST) &&
-			valueValidator.isURL(tomlValidator.HOST)
-		)
-			tomlNodeInfo.host = tomlValidator.HOST;
+		if (isString(tomlValidator.HOST)) {
+			try {
+				const parsedHost = new URL(
+					tomlValidator.HOST.includes('://')
+						? tomlValidator.HOST
+						: `tcp://${tomlValidator.HOST}`
+				);
+				if (
+					valueValidator.isIP(parsedHost.hostname) ||
+					valueValidator.isFQDN(parsedHost.hostname)
+				)
+					tomlNodeInfo.host = tomlValidator.HOST;
+			} catch {
+				// Invalid HOST declarations are ignored as enrichment hints.
+			}
+		}
 
 		return tomlNodeInfo;
 	}

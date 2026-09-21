@@ -12,6 +12,7 @@ import { Observation } from './observation';
 import assert from 'assert';
 import { ObservationState } from './observation-state';
 import { ObservationFactory } from './observation-factory';
+import { ConnectionAttempt } from '../connection-attempt';
 
 export class NetworkObserver extends EventEmitter {
 	private _observation: Observation | null = null;
@@ -63,6 +64,10 @@ export class NetworkObserver extends EventEmitter {
 		this.connectionManager.on('data', (data: DataPayload) => {
 			this.onPeerData(data);
 		});
+		this.connectionManager.on(
+			'connectionAttempt',
+			(attempt: ConnectionAttempt) => this.emit('connectionAttempt', attempt)
+		);
 	}
 
 	private onPeerData(data: DataPayload): void {

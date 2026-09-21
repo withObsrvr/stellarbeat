@@ -58,7 +58,10 @@ import { CrawlerService } from '../../domain/node/scan/node-crawl/CrawlerService
 import { createCrawler, createCrawlFactory } from 'crawler';
 import FbasAnalyzerFacade from '../../domain/network/scan/fbas-analysis/FbasAnalyzerFacade';
 import { PythonFbasAdapter } from '../../domain/network/scan/python-fbas/PythonFbasAdapter';
-import { PythonFbasHttpClient, PythonFbasHttpClientFactory } from '../../domain/network/scan/python-fbas/PythonFbasHttpClient';
+import {
+	PythonFbasHttpClient,
+	PythonFbasHttpClientFactory
+} from '../../domain/network/scan/python-fbas/PythonFbasHttpClient';
 import { FbasAggregator } from '../../domain/network/scan/python-fbas/FbasAggregator';
 import { FbasFilteredAnalyzer } from '../../domain/network/scan/python-fbas/FbasFilteredAnalyzer';
 import { HorizonService } from '../../domain/network/scan/HorizonService';
@@ -111,6 +114,17 @@ import NetworkMeasurementDay from '../../domain/network/NetworkMeasurementDay';
 import { CachedNetworkDTOService } from '../../services/CachedNetworkDTOService';
 import { TrustRankCalculator } from '../../domain/trust/TrustRankCalculator';
 import { NodeOrganizationMappingService } from '../../domain/node/NodeOrganizationMappingService';
+import ValidatorEndpointCandidate from '../../domain/node/endpoint/ValidatorEndpointCandidate';
+import EndpointProbeObservation from '../../domain/node/endpoint/EndpointProbeObservation';
+import { EndpointCandidateRepository } from '../../domain/node/endpoint/EndpointCandidateRepository';
+import { TypeOrmEndpointCandidateRepository } from '../database/repositories/TypeOrmEndpointCandidateRepository';
+import {
+	EndpointDnsResolver,
+	SystemEndpointDnsResolver
+} from '../../domain/node/endpoint/DnsResolver';
+import { EndpointCandidateManager } from '../../domain/node/endpoint/EndpointCandidateManager';
+import { EndpointProbeService } from '../../domain/node/endpoint/EndpointProbeService';
+import { EndpointCandidateAdminService } from '../../domain/node/endpoint/EndpointCandidateAdminService';
 
 export function load(container: Container, config: Config) {
 	container
@@ -225,6 +239,25 @@ function loadDomain(container: Container, config: Config) {
 	loadRollup(container);
 	const dataSource = container.get<DataSource>(DataSource);
 	container
+		.bind<EndpointCandidateRepository>(
+			NETWORK_TYPES.EndpointCandidateRepository
+		)
+		.toDynamicValue(
+			() =>
+				new TypeOrmEndpointCandidateRepository(
+					dataSource.getRepository(ValidatorEndpointCandidate),
+					dataSource.getRepository(EndpointProbeObservation)
+				)
+		)
+		.inRequestScope();
+	container
+		.bind<EndpointDnsResolver>(NETWORK_TYPES.EndpointDnsResolver)
+		.to(SystemEndpointDnsResolver)
+		.inSingletonScope();
+	container.bind(EndpointProbeService).toSelf();
+	container.bind(EndpointCandidateManager).toSelf();
+	container.bind(EndpointCandidateAdminService).toSelf();
+	container
 		.bind<Repository<OrganizationMeasurement>>(
 			'Repository<OrganizationMeasurement>'
 		)
@@ -270,11 +303,13 @@ function loadDomain(container: Container, config: Config) {
 	// Python FBAS scanner dependencies
 	container.bind(FbasAggregator).toSelf();
 	container.bind(FbasFilteredAnalyzer).toSelf();
-	container.bind<PythonFbasHttpClient>(PythonFbasHttpClient).toDynamicValue(() => {
-		return PythonFbasHttpClientFactory.create({
-			baseUrl: config.pythonFbasServiceUrl
+	container
+		.bind<PythonFbasHttpClient>(PythonFbasHttpClient)
+		.toDynamicValue(() => {
+			return PythonFbasHttpClientFactory.create({
+				baseUrl: config.pythonFbasServiceUrl
+			});
 		});
-	});
 	container.bind<PythonFbasAdapter>(PythonFbasAdapter).toDynamicValue(() => {
 		return new PythonFbasAdapter(
 			container.get<PythonFbasHttpClient>(PythonFbasHttpClient),
@@ -352,7 +387,11 @@ function loadDomain(container: Container, config: Config) {
 	container.bind(NodeScanner).toSelf();
 	container.bind(OrganizationScanner).toSelf();
 	container.bind(TrustRankCalculator).toSelf();
-	container.bind<NodeOrganizationMappingService>(NETWORK_TYPES.NodeOrganizationMappingService).to(NodeOrganizationMappingService);
+	container
+		.bind<NodeOrganizationMappingService>(
+			NETWORK_TYPES.NodeOrganizationMappingService
+		)
+		.to(NodeOrganizationMappingService);
 }
 
 function loadUseCases(container: Container) {

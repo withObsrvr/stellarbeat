@@ -69,6 +69,16 @@ export class CrawlLogger {
 		this.logger.info(
 			'Connection attempts: ' + this.crawl.crawledNodeAddresses.size
 		);
+		const failureSummary = this.crawl.connectionAttempts
+			.filter((attempt) => attempt.outcome !== 'authenticated')
+			.reduce<Record<string, number>>((summary, attempt) => {
+				summary[attempt.outcome] = (summary[attempt.outcome] ?? 0) + 1;
+				return summary;
+			}, {});
+		this.logger.info(
+			{ outcomes: failureSummary },
+			'Connection failure summary'
+		);
 		this.logger.info(
 			'Detected public keys: ' + this.crawl.observation.peerNodes.size
 		);

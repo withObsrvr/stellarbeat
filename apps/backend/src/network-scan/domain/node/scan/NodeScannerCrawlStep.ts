@@ -1,5 +1,5 @@
 import { CrawlerService, CrawlResult } from './node-crawl/CrawlerService';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { Logger } from '../../../../core/services/Logger';
 import { err, Ok, ok, Result } from 'neverthrow';
 import { NetworkQuorumSetConfiguration } from '../../network/NetworkQuorumSetConfiguration';
@@ -10,6 +10,7 @@ import { NETWORK_TYPES } from '../../../infrastructure/di/di-types';
 import PublicKey from '../PublicKey';
 import { mapUnknownToError } from '../../../../core/utilities/mapUnknownToError';
 import { NodeAddress } from '../NodeAddress';
+import { EndpointCandidateManager } from '../endpoint/EndpointCandidateManager';
 
 @injectable()
 export class NodeScannerCrawlStep {
@@ -18,7 +19,8 @@ export class NodeScannerCrawlStep {
 		private nodeRepository: NodeRepository,
 		private crawlerService: CrawlerService,
 		@inject('Logger')
-		private logger: Logger
+		private logger: Logger,
+		@optional() private endpointCandidateManager?: EndpointCandidateManager
 	) {}
 
 	public async execute(
@@ -33,15 +35,44 @@ export class NodeScannerCrawlStep {
 			previousLatestLedgerCloseTime:
 				previousLatestLedgerCloseTime?.toISOString()
 		});
+		let scanCandidates = bootstrapNodeAddresses;
+		if (this.endpointCandidateManager) {
+			try {
+				scanCandidates =
+					await this.endpointCandidateManager.prepareScanCandidates(
+						bootstrapNodeAddresses
+					);
+			} catch (error) {
+				this.logger.error(
+					'Failed preparing endpoint candidates; using configured bootstrap peers',
+					{
+						error: mapUnknownToError(error).message
+					}
+				);
+			}
+		}
+
 		const crawlResult = await this.crawlerService.crawl(
 			networkQuorumSetConfiguration,
 			nodeScan.nodes,
-			bootstrapNodeAddresses,
+			scanCandidates,
 			previousLatestLedger,
 			previousLatestLedgerCloseTime
 		);
 		if (crawlResult.isErr()) {
 			return err(crawlResult.error);
+		}
+
+		if (this.endpointCandidateManager) {
+			try {
+				await this.endpointCandidateManager.recordConnectionAttempts(
+					crawlResult.value.connectionAttempts ?? []
+				);
+			} catch (error) {
+				this.logger.error('Failed persisting endpoint connection diagnostics', {
+					error: mapUnknownToError(error).message
+				});
+			}
 		}
 
 		const archivedNodesOrError = await this.fetchRelevantArchivedNodes(
