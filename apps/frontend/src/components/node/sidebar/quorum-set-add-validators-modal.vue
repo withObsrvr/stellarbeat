@@ -1,70 +1,33 @@
 <template>
-  <portal to="quorum-set-modals">
-    <div
-      :id="'add-validator-modal-' + id"
-      :ref="(el) => addModalRef(el)"
-      class="modal fade"
-      tabindex="-1"
-      role="dialog"
-    >
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Select validators to add</h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <AddValidatorsTable
-              v-if="visible"
-              :validators="possibleValidatorsToAdd"
-              @validators-selected="onValidatorsSelected"
-            />
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              data-dismiss="modal"
-              @click="validatorsToAddModalOk"
-            >
-              Add
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </portal>
+  <UiModal
+    v-model="isOpen"
+    title="Select validators to add"
+    size="lg"
+    ok-title="Add"
+    cancel-title="Close"
+    lazy
+    @ok="validatorsToAddModalOk"
+    @cancel="close"
+  >
+    <AddValidatorsTable
+      :validators="possibleValidatorsToAdd"
+      @validators-selected="onValidatorsSelected"
+    />
+  </UiModal>
 </template>
+
 <script setup lang="ts">
-import $ from "jquery";
-import {
-  type ComponentPublicInstance,
-  computed,
-  nextTick,
-  onMounted,
-  type PropType,
-  ref,
-  toRefs,
-} from "vue";
+/**
+ * Converted from a raw Bootstrap `.modal` driven by `$(el).modal("show")`.
+ * Bootstrap's JavaScript is never loaded, so this dialog could not open.
+ *
+ * The old `visible` flag kept the table out of the DOM until the dialog
+ * opened, set from a `show.bs.modal` handler; UiModal's `lazy` does that.
+ */
+import { computed, type PropType, ref, toRefs } from "vue";
 import { Node, QuorumSet } from "shared";
 import useStore from "@/store/useStore";
 import AddValidatorsTable from "@/components/node/tools/simulation/add-validators-table.vue";
-
-const emit = defineEmits(["expand"]);
 
 const props = defineProps({
   id: {
@@ -75,20 +38,30 @@ const props = defineProps({
     type: Object as PropType<QuorumSet>,
     required: true,
   },
+  show: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const { id, quorumSet } = toRefs(props);
+const emit = defineEmits(["expand", "close"]);
+
+const { quorumSet } = toRefs(props);
 const store = useStore();
 const network = store.network;
-const modalRefs = ref(
-  {} as { [key: string]: Element | ComponentPublicInstance | null },
-);
-const addModalRef = (el: Element | ComponentPublicInstance | null) => {
-  if (el === null) return;
-  modalRefs.value[id.value] = el;
-};
-const visible = ref(false);
 const validatorsToAdd = ref<string[]>([]);
+
+const isOpen = computed({
+  get: () => props.show,
+  set: (value: boolean) => {
+    if (!value) emit("close");
+  },
+});
+
+function close() {
+  emit("close");
+}
+
 const possibleValidatorsToAdd = computed(() => {
   return network.nodes.filter(
     (node: Node) =>
@@ -96,32 +69,25 @@ const possibleValidatorsToAdd = computed(() => {
       QuorumSet.getAllValidators(quorumSet.value).indexOf(node.publicKey) < 0,
   );
 });
+
 function onValidatorsSelected(validators: Node[]) {
   validatorsToAdd.value = validators.map(
     (validator: Node) => validator.publicKey,
   );
 }
+
 function validatorsToAddModalOk() {
   if (validatorsToAdd.value.length > 0) {
     addValidatorsToQuorumSet(quorumSet.value, validatorsToAdd.value);
     emit("expand");
   }
+  close();
 }
+
 function addValidatorsToQuorumSet(
   toQuorumSet: QuorumSet,
   validators: string[],
 ) {
   store.addValidators(toQuorumSet, validators);
 }
-
-onMounted(() => {
-  nextTick(() => {
-    const myModalRef = modalRefs.value[id.value];
-    if (myModalRef === null) return;
-
-    $(myModalRef).on("show.bs.modal", () => {
-      visible.value = true;
-    });
-  });
-});
 </script>

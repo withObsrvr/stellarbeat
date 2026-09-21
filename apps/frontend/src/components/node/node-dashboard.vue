@@ -1,7 +1,6 @@
 <template>
   <div v-if="selectedNode">
     <portal-target name="simulate-node-modal"> </portal-target>
-    <portal-target name="quorum-set-modals" multiple></portal-target>
     <UiAlert :show="network.isNodeFailing(selectedNode)" variant="danger">
       {{ network.getNodeFailingReason(selectedNode).description }}
     </UiAlert>

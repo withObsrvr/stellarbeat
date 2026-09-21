@@ -1,7 +1,10 @@
 <template>
   <div class="relative inline-block">
     <button
+      type="button"
       class="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+      aria-label="Quorum set actions"
+      :aria-expanded="open"
       @click.stop="open = !open"
     >
       <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 16 16"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>

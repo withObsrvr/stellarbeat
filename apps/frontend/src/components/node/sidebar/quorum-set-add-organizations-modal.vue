@@ -1,72 +1,34 @@
 <template>
-  <portal to="quorum-set-modals">
-    <div
-      :id="'add-organization-modal-' + id"
-      :ref="(el) => mapModalRef(el)"
-      class="modal fade"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="addOrganizationModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 id="addOrganizationModalLabel" class="modal-title">
-              Select organization to add
-            </h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <AddOrganizationsTable
-              v-if="visible"
-              :organizations="possibleOrganizationsToAdd"
-              @organizations-selected="onOrganizationsSelected"
-            />
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              data-dismiss="modal"
-              @click="organizationsToAddModalOk"
-            >
-              Add
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </portal>
+  <UiModal
+    v-model="isOpen"
+    title="Select organization to add"
+    size="lg"
+    ok-title="Add"
+    cancel-title="Close"
+    lazy
+    @ok="organizationsToAddModalOk"
+    @cancel="close"
+  >
+    <AddOrganizationsTable
+      :organizations="possibleOrganizationsToAdd"
+      @organizations-selected="onOrganizationsSelected"
+    />
+  </UiModal>
 </template>
+
 <script setup lang="ts">
-import {
-  type ComponentPublicInstance,
-  computed,
-  nextTick,
-  onMounted,
-  type PropType,
-  ref,
-  toRefs,
-} from "vue";
+/**
+ * Converted from a raw Bootstrap `.modal` driven by `$(el).modal("show")`.
+ * Bootstrap's JavaScript is never loaded, so this dialog could not open.
+ *
+ * The old `visible` flag existed to keep the table out of the DOM until the
+ * dialog opened, set from a `show.bs.modal` handler. UiModal's `lazy` does
+ * that directly, so the flag is gone.
+ */
+import { computed, type PropType, ref, toRefs } from "vue";
 import useStore from "@/store/useStore";
 import { Organization, QuorumSet } from "shared";
 import AddOrganizationsTable from "@/components/node/tools/simulation/add-organizations-table.vue";
-import $ from "jquery";
 
 const props = defineProps({
   id: {
@@ -77,20 +39,29 @@ const props = defineProps({
     type: Object as PropType<QuorumSet>,
     required: true,
   },
+  show: {
+    type: Boolean,
+    default: false,
+  },
 });
-const modalRefs = ref(
-  {} as { [key: string]: Element | ComponentPublicInstance | null },
-);
-const mapModalRef = (el: Element | ComponentPublicInstance | null) => {
-  if (el === null) return;
-  modalRefs.value[id.value] = el;
-};
-const { id, quorumSet } = toRefs(props);
-const visible = ref(false);
 
+const emit = defineEmits(["close"]);
+
+const { quorumSet } = toRefs(props);
 const organizationsToAdd = ref<Organization[]>([]);
 const store = useStore();
 const network = store.network;
+
+const isOpen = computed({
+  get: () => props.show,
+  set: (value: boolean) => {
+    if (!value) emit("close");
+  },
+});
+
+function close() {
+  emit("close");
+}
 
 const possibleOrganizationsToAdd = computed(() => {
   const trustedOrganizations = network
@@ -106,7 +77,9 @@ function organizationsToAddModalOk() {
   if (organizationsToAdd.value.length > 0) {
     addOrganizationsToQuorumSet(quorumSet.value, organizationsToAdd.value);
   }
+  close();
 }
+
 function onOrganizationsSelected(organizations: Organization[]) {
   organizationsToAdd.value = organizations;
 }
@@ -117,15 +90,4 @@ function addOrganizationsToQuorumSet(
 ) {
   store.addOrganizations(toQuorumSet, organizations);
 }
-
-onMounted(() => {
-  nextTick(() => {
-    const myModalRef = modalRefs.value[id.value];
-    if (myModalRef === null) return;
-
-    $(myModalRef).on("show.bs.modal", () => {
-      visible.value = true;
-    });
-  });
-});
 </script>
