@@ -75,18 +75,21 @@ export default class NetworkMeasurement implements Measurement {
 	@Column('smallint', { default: 0 })
 	minSplittingSetSize = 0;
 
-	//smallest splitting set size restricted to the top tier
-	@Column('smallint', { default: 0 })
-	minSplittingSetTopTierSize = 0;
+	//smallest splitting set size restricted to the top tier.
+	//nullable on purpose: the legacy Rust facade does not compute this, and
+	//storing 0 for "not computed" makes the UI report that no organizations at
+	//all are needed to split the core -- the most alarming reading possible.
+	@Column('smallint', { nullable: true })
+	minSplittingSetTopTierSize: number | null = null;
 
 	//smallest splitting set size grouped by organizations
 	@Column('smallint', { default: 0 })
 	minSplittingSetOrgsSize = 0;
 
 	//smallest splitting set size grouped by organizations, restricted to the
-	//top tier
-	@Column('smallint', { default: 0 })
-	minSplittingSetOrgsTopTierSize = 0;
+	//top tier. Nullable for the same reason as minSplittingSetTopTierSize.
+	@Column('smallint', { nullable: true })
+	minSplittingSetOrgsTopTierSize: number | null = null;
 
 	//smallest splitting set size grouped by organizations
 	@Column('smallint', { default: 0 })

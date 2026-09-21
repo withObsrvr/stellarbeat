@@ -57,10 +57,12 @@ export class NetworkV1DTOMapper {
 					networkMeasurement.minBlockingSetISPFilteredSize,
 				minSplittingSetSize: networkMeasurement.minSplittingSetSize,
 				minSplittingSetOrgsSize: networkMeasurement.minSplittingSetOrgsSize,
+				//null is how "not computed" is stored; the DTO expresses it as an
+				//absent field so consumers never see it as a real threshold
 				minSplittingSetTopTierSize:
-					networkMeasurement.minSplittingSetTopTierSize,
+					networkMeasurement.minSplittingSetTopTierSize ?? undefined,
 				minSplittingSetOrgsTopTierSize:
-					networkMeasurement.minSplittingSetOrgsTopTierSize,
+					networkMeasurement.minSplittingSetOrgsTopTierSize ?? undefined,
 				minSplittingSetCountrySize:
 					networkMeasurement.minSplittingSetCountrySize,
 				minSplittingSetISPSize: networkMeasurement.minSplittingSetISPSize,

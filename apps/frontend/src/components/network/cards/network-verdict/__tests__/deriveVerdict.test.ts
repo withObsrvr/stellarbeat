@@ -199,3 +199,50 @@ describe("deriveVerdict", () => {
     });
   });
 });
+
+describe("deriveVerdict with values absent from the API", () => {
+  /**
+   * The API omits a statistic the scan did not compute, and the database
+   * stores it as null. Both must read as Unknown rather than as a threshold,
+   * which is the bug this whole distinction exists to prevent.
+   */
+  function bare(overrides: Record<string, unknown> = {}) {
+    return Object.assign(new NetworkStatistics(), {
+      hasQuorumIntersection: true,
+      hasSymmetricTopTier: true,
+      minBlockingSetOrgsFilteredSize: 4,
+      minSplittingSetOrgsSize: 4,
+      ...overrides,
+    });
+  }
+
+  it("treats null the same as a missing value", () => {
+    const verdict = deriveVerdict(
+      bare({ minSplittingSetOrgsTopTierSize: null }),
+    );
+
+    expect(
+      verdict.stats.find((s) => s.label === "Core forks if")?.value,
+    ).toBe("Unknown");
+  });
+
+  it("does not claim fragility when the blocking set is unknown", () => {
+    const verdict = deriveVerdict(
+      bare({ minBlockingSetOrgsFilteredSize: null }),
+    );
+
+    expect(verdict.level).toBe("safe");
+    expect(verdict.stats[0].value).toBe("Unknown");
+    expect(verdict.stats[0].tone).toBe("neutral");
+  });
+
+  it("shows an em dash for a null concentration level", () => {
+    const verdict = deriveVerdict(
+      bare({ minBlockingSetCountryFilteredSize: null }),
+    );
+
+    expect(
+      verdict.concentration.find((d) => d.label === "countries")?.value,
+    ).toBe("—");
+  });
+});

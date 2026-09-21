@@ -41,8 +41,8 @@ export interface Verdict {
 const RISK_AT_OR_BELOW = 1;
 const WARN_AT_OR_BELOW = 2;
 
-function toneForSize(size: number | undefined): Tone {
-  if (size === undefined) return "neutral";
+function toneForSize(size: number | null | undefined): Tone {
+  if (size === null || size === undefined) return "neutral";
   if (size <= RISK_AT_OR_BELOW) return "risk";
   if (size <= WARN_AT_OR_BELOW) return "warn";
   return "neutral";
@@ -60,11 +60,11 @@ function pluralize(count: number, singular: string, plural: string): string {
  * finding rather than as missing data.
  */
 function sizeValue(
-  size: number | undefined,
+  size: number | null | undefined,
   singular: string,
   plural: string,
 ): string {
-  if (size === undefined) return "Unknown";
+  if (size === null || size === undefined) return "Unknown";
   return pluralize(size, singular, plural);
 }
 
@@ -77,7 +77,7 @@ export function deriveVerdict(statistics: NetworkStatistics): Verdict {
 
   //A fork is the failure mode being described, so once safety is at risk both
   //splitting-set figures are reported in that register regardless of size.
-  const forkTone = (size: number | undefined): Tone =>
+  const forkTone = (size: number | null | undefined): Tone =>
     level === "at-risk" ? "risk" : toneForSize(size);
 
   return {
@@ -112,7 +112,7 @@ export function deriveVerdict(statistics: NetworkStatistics): Verdict {
 
 function deriveLevel(
   statistics: NetworkStatistics,
-  haltsIf: number | undefined,
+  haltsIf: number | null | undefined,
 ): VerdictLevel {
   //undefined means the scan did not answer, which is not the same as "no"
   if (statistics.hasQuorumIntersection === undefined) return "unknown";
@@ -120,7 +120,8 @@ function deriveLevel(
 
   //Safety holds, but if a single organization going offline can stop the
   //network then saying only "safe" would be misleading.
-  if (haltsIf !== undefined && haltsIf <= RISK_AT_OR_BELOW) return "fragile";
+  if (haltsIf !== null && haltsIf !== undefined && haltsIf <= RISK_AT_OR_BELOW)
+    return "fragile";
 
   return "safe";
 }
@@ -138,7 +139,10 @@ function labelFor(level: VerdictLevel): string {
   }
 }
 
-function summaryFor(level: VerdictLevel, haltsIf: number | undefined): string {
+function summaryFor(
+  level: VerdictLevel,
+  haltsIf: number | null | undefined,
+): string {
   switch (level) {
     case "safe":
       return "Safety is guaranteed and all quorums intersect. The network cannot fork under its current configuration.";
@@ -192,6 +196,6 @@ function concentrationDetail(statistics: NetworkStatistics): VerdictDetail[] {
   ];
 }
 
-function countValue(size: number | undefined): string {
-  return size === undefined ? "—" : String(size);
+function countValue(size: number | null | undefined): string {
+  return size === null || size === undefined ? "—" : String(size);
 }
