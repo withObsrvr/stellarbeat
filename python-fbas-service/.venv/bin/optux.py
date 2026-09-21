@@ -111,6 +111,7 @@ import os
 from pysat.examples.hitman import Atom, Hitman
 from pysat.examples.rc2 import RC2
 from pysat.formula import CNFPlus, WCNFPlus
+from pysat.process import Processor
 from pysat.solvers import Solver, SolverNames
 import re
 import sys
@@ -130,10 +131,12 @@ class OptUx(object):
 
         As a result, OptUx applies exhaustive *disjoint* minimal correction
         subset (MCS) enumeration [1]_, [2]_, [3]_, [4]_ with the incremental
-        use of RC2 [5]_ as an underlying MaxSAT solver. Once disjoint MCSes
-        are enumerated, they are used to bootstrap a hitting set solver. This
-        implementation uses :class:`.Hitman` as a hitting set solver, which is
-        again based on RC2.
+        use of RC2 [5]_ as an underlying MaxSAT solver. Disjoint MCS
+        enumeration is run only if the corresponding input parameter
+        ``nodisj`` is set to ``False``. Once disjoint MCSes are enumerated,
+        they are used to bootstrap a hitting set solver. This implementation
+        uses :class:`.Hitman` as a hitting set solver, which is again based on
+        RC2.
 
         Note that in the main implicit hitting enumeration loop of the
         algorithm, OptUx follows Forqes in that it does not reduce correction
@@ -166,6 +169,21 @@ class OptUx(object):
         support *hard* phase setting, i.e. user preferences will not be
         overwritten by the *phase saving* heuristic [8]_.
 
+        Additionally, the input formula can be preprocessed before running MUS
+        enumeration. This is controlled by the input parameter ``process``
+        whose integer value signifies the number of processing rounds to be
+        applied. The number of rounds is set to 0 by default.
+
+        Since the algorithm builds on implicit hitting set dualization,
+        correction sets computed along the way can be minimized
+        *heuristically*, by limiting the budget on the number of conflicts a
+        SAT solver can collect during the minimization process. Parameter
+        ``reduce`` is responsible for this behaviour. By default, the budget
+        is set to ``0``, meaning that no reduction of correction sets is
+        performed. Setting it to ``-1`` forces the solver to compute an exact
+        MCS. Otherwise, any positive value of this parameter will indicate the
+        upper bound on the number of conflicts.
+
         Finally, one more optional input parameter ``cover`` is to be used
         when exhaustive enumeration of MUSes is not necessary and the tool can
         stop as soon as a given formula is covered by the set of currently
@@ -195,7 +213,10 @@ class OptUx(object):
         :param dcalls: apply clause D oracle calls (for unsorted enumeration only)
         :param exhaust: do core exhaustion
         :param minz: do heuristic core reduction
+        :param nodisj: do not enumerate disjoint MCSes
+        :param process: apply formula preprocessing this many times
         :param puresat: use pure SAT-based hitting set enumeration
+        :param reduce: minimize correction sets using this budget on the number of conflicts
         :param unsorted: apply unsorted MUS enumeration
         :param trim: do core trimming at most this number of times
         :param verbose: verbosity level
@@ -207,15 +228,18 @@ class OptUx(object):
         :type dcalls: bool
         :type exhaust: bool
         :type minz: bool
+        :type nodisj: bool
+        :type process: int
         :type puresat: str
+        :type reduce: int
         :type unsorted: bool
         :type trim: int
         :type verbose: int
     """
 
     def __init__(self, formula, solver='g3', adapt=False, cover=None,
-            dcalls=False, exhaust=False, minz=False, puresat=False,
-                 unsorted=False, trim=False, verbose=0):
+            dcalls=False, exhaust=False, minz=False, nodisj=False, process=0,
+            puresat=False, reduce=0, unsorted=False, trim=False, verbose=0):
         """
             Constructor.
         """
@@ -224,6 +248,9 @@ class OptUx(object):
 
         # verbosity level
         self.verbose = verbose
+
+        # budget on the number of conflicts when reducing corrections sets
+        self.reduce_budget = reduce
 
         # constructing a local copy of the formula
         self.formula = WCNFPlus()
@@ -243,13 +270,25 @@ class OptUx(object):
         self._process_soft(formula)
         self.formula.nv = self.topv
 
+        # applying formula processing (if any)
+        if process:
+            # the processor is immediately destroyed,
+            # as we do not need to restore the models
+            with Processor(bootstrap_with=self.formula.hard) as processor:
+                proc = processor.process(rounds=process, freeze=self.sels)
+                self.formula.hard = proc.clauses
+                self.formula.nv = max(self.formula.nv, proc.nv)
+
         # creating an unweighted copy
         unweighted = self.formula.copy()
         unweighted.wght = [1 for w in unweighted.wght]
 
-        # enumerating disjoint MCSes (including unit-size MCSes)
-        to_hit, self.units = self._disjoint(unweighted, solver, adapt, exhaust,
-                minz, trim)
+        if not nodisj:
+            # enumerating disjoint MCSes (including unit-size MCSes)
+            to_hit, self.units = self._disjoint(unweighted, solver, adapt, exhaust,
+                    minz, trim)
+        else:
+            to_hit, self.units, self.disj_time = [], [], 0.
 
         if self.verbose > 2:
             print('c mcses: {0} unit, {1} disj'.format(len(self.units),
@@ -286,7 +325,7 @@ class OptUx(object):
         # SAT oracle bootstrapped with the hard clauses; note that
         # clauses of the unit-size MCSes are enforced to be enabled
         self.oracle = Solver(name=solver, bootstrap_with=unweighted.hard +
-                [[mcs] for mcs in self.units])
+                [[mcs] for mcs in self.units], use_timer=True)
 
         if unweighted.atms:
             if solver in SolverNames.cadical195:
@@ -438,7 +477,7 @@ class OptUx(object):
                     break
 
                 # extracting the MCS corresponding to the model
-                falsified = list(filter(lambda l: model[abs(l) - 1] == -l, self.sels))
+                falsified = [l for l in self.sels if model[abs(l) - 1] == -l]
 
                 # unit size or not?
                 if len(falsified) > 1:
@@ -473,9 +512,12 @@ class OptUx(object):
         # correctly computed cost of the unit-mcs component
         units_cost = sum(map(lambda l: self.weights[l], self.units))
 
+        it = 0
         while True:
             # computing a new optimal hitting set
             hs = self.hitman.get()
+            if self.verbose > 3:
+                self.cost = sum(map(lambda l: self.weights[l], hs)) + units_cost
 
             if hs is None:
                 # no more hitting sets exist
@@ -504,10 +546,27 @@ class OptUx(object):
                 # the candidate subset is satisfiable,
                 # thus extracting a correction subset
                 model = self.oracle.get_model()
-                cs = list(filter(lambda l: model[abs(l) - 1] == -l, self.sels))
+                cs = [l for l in self.sels if model[abs(l) - 1] == -l]
+
+                # naive MCS extraction with a budget on the conflict count
+                if self.reduce_budget:
+                    ss = [l for l in self.sels if model[abs(l) - 1] == +l]
+                    self.oracle.conf_budget(self.reduce_budget)
+
+                    # probing all the literals of the correction set
+                    for l in cs:
+                        if self.oracle.solve_limited(assumptions=[l] + ss) is True:
+                            ss.append(l)
+
+                    cs = sorted(set(cs) - set(ss))
+                    self.oracle.conf_budget(budget=-1)
 
                 # hitting the new correction subset
                 self.hitman.hit(cs, weights=self.weights)
+
+            it += 1
+            if self.verbose > 3:
+                print(f'c iter: {it}, cost: {self.cost}; cs sz: {len(cs)}')
 
     def enumerate(self):
         """
@@ -547,10 +606,11 @@ def parse_options():
     """
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'ac:de:hmp:s:t:uvx',
-                ['adapt', 'cover=', 'dcalls', 'enum=', 'exhaust', 'help',
-                    'minimize', 'solver=', 'puresat=', 'unsorted', 'trim=',
-                    'verbose'])
+        opts, args = getopt.getopt(sys.argv[1:], 'ac:de:hmnp:P:r:s:t:uvx',
+                                   ['adapt', 'cover=', 'dcalls', 'enum=',
+                                    'exhaust', 'help', 'minimize', 'no-disj',
+                                    'solver=', 'puresat=', 'process=',
+                                    'reduce=', 'unsorted', 'trim=', 'verbose'])
     except getopt.GetoptError as err:
         sys.stderr.write(str(err).capitalize() + '\n')
         usage()
@@ -561,9 +621,12 @@ def parse_options():
     dcalls = False
     exhaust = False
     minz = False
+    no_disj = False
     to_enum = 1
     solver = 'g3'
+    process = 0
     puresat = False
+    reduce = 0
     unsorted = False
     trim = 0
     verbose = 1
@@ -586,8 +649,14 @@ def parse_options():
             sys.exit(0)
         elif opt in ('-m', '--minimize'):
             minz = True
+        elif opt in ('-n', '--no-disj'):
+            no_disj = True
         elif opt in ('-p', '--puresat'):
             puresat = str(arg)
+        elif opt in ('-P', '--process'):
+            process = int(arg)
+        elif opt in ('-r', '--reduce'):
+            reduce = int(arg)
         elif opt in ('-s', '--solver'):
             solver = str(arg)
         elif opt in ('-u', '--unsorted'):
@@ -601,8 +670,8 @@ def parse_options():
         else:
             assert False, 'Unhandled option: {0} {1}'.format(opt, arg)
 
-    return adapt, cover, dcalls, exhaust, minz, trim, to_enum, solver, \
-            puresat, unsorted, verbose, args
+    return adapt, cover, dcalls, exhaust, minz, no_disj, trim, to_enum, \
+            solver, process, puresat, reduce, unsorted, verbose, args
 
 
 #
@@ -622,9 +691,14 @@ def usage():
     print('                                  Available values: [1 .. INT_MAX], all (default: 1)')
     print('        -h, --help                Show this message')
     print('        -m, --minimize            Use a heuristic unsatisfiable core minimizer')
+    print('        -n, --no-disj             Do not enumerate disjoint MCSes')
     print('        -p, --puresat=<string>    Use a pure SAT-based hitting set enumerator')
     print('                                  Available values: cd15, cd19, lgl, mgh (default = mgh)')
     print('                                  Requires: unsorted mode, i.e. \'-u\'')
+    print('        -P, --process=<int>       Number of processing rounds')
+    print('                                  Available values: [0 .. INT_MAX] (default = 0)')
+    print('        -r, --reduce=<int>        Conflict budget when reducing correction sets')
+    print('                                  Available values: [0 .. INT_MAX], -1 (default = 0, meaning no reduction)')
     print('        -s, --solver              SAT solver to use')
     print('                                  Available values: cd15, cd19, g3, g4, lgl, mcb, mcm, mpl, m22, mc, mgh (default = g3)')
     print('        -t, --trim=<int>          How many times to trim unsatisfiable cores')
@@ -637,25 +711,26 @@ def usage():
 #
 #==============================================================================
 if __name__ == '__main__':
-    adapt, cover, dcalls, exhaust, minz, trim, to_enum, solver, puresat, \
-            unsorted, verbose, files = parse_options()
+    adapt, cover, dcalls, exhaust, minz, no_disj, trim, to_enum, solver, \
+            process, puresat, reduce, unsorted, verbose, files = parse_options()
 
     if files:
         # reading standard CNF, WCNF, or (W)CNF+
-        if re.search(r'cnf[p|+]?(\.(gz|bz2|lzma|xz))?$', files[0]):
-            if re.search(r'\.wcnf[p|+]?(\.(gz|bz2|lzma|xz))?$', files[0]):
-                formula = WCNFPlus(from_file=files[0])
-            else:  # expecting '*.cnf[,p,+].*'
-                formula = CNFPlus(from_file=files[0]).weighted()
+        assert re.search(r'cnf[p|+]?(\.(gz|bz2|lzma|xz|zst))?$', files[0]), 'Unknown input file extension'
+        if re.search(r'\.wcnf[p|+]?(\.(gz|bz2|lzma|xz|zst))?$', files[0]):
+            formula = WCNFPlus(from_file=files[0])
+        else:  # expecting '*.cnf[,p,+].*'
+            formula = CNFPlus(from_file=files[0]).weighted()
 
         if cover:  # expecting  '*.cnf[,p,+].*' only!
-            assert re.search(r'cnf[p|+]?(\.(gz|bz2|lzma|xz))?$', cover), 'wrong file for formula to cover'
+            assert re.search(r'cnf[p|+]?(\.(gz|bz2|lzma|xz|zst))?$', cover), 'Wrong file for formula to cover'
             cover = CNFPlus(from_file=cover)
 
         # creating an object of OptUx
         with OptUx(formula, solver=solver, adapt=adapt, cover=cover,
-                dcalls=dcalls, exhaust=exhaust, minz=minz, puresat=puresat,
-                unsorted=unsorted, trim=trim, verbose=verbose) as optux:
+                   dcalls=dcalls, exhaust=exhaust, minz=minz, nodisj=no_disj,
+                   process=process, puresat=puresat, reduce=reduce,
+                   unsorted=unsorted, trim=trim, verbose=verbose) as optux:
 
             # iterating over the necessary number of optimal MUSes
             for i, mus in enumerate(optux.enumerate()):
