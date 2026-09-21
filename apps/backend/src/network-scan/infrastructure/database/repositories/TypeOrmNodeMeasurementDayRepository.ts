@@ -192,8 +192,12 @@ export class TypeOrmNodeMeasurementDayRepository
 					sum("historyArchiveHasError"::int)        "historyArchiveErrorCount",
 					sum("historyArchiveUnreachable"::int)     "historyArchiveUnreachableCount",
 					-- MAX_SAFE_HISTORY_ARCHIVE_CACHE_TTL_SECONDS: a TTL above one
-					-- checkpoint lets the freshness check read a stale cached copy
-					sum(("historyArchiveCacheMaxAge" > 320)::int) "historyArchiveCacheMisconfiguredCount",
+					-- checkpoint lets the freshness check read a stale cached copy.
+					-- historyArchiveCacheMaxAge is nullable and is null for every node
+					-- whose archive sent no cache header, so sum() over a day where no
+					-- node reported one returns null, not 0 -- which the NOT NULL
+					-- column then rejects, failing the whole rollup.
+					coalesce(sum(("historyArchiveCacheMaxAge" > 320)::int), 0) "historyArchiveCacheMisconfiguredCount",
 					"crawls"."crawlCount"                    as "crawlCount"
 			 FROM "network_scan" NetworkScan
 					  join crawls on crawls."crawlDay" = date_trunc('day', NetworkScan."time")

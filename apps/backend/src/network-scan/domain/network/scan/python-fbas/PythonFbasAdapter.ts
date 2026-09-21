@@ -128,16 +128,20 @@ export class PythonFbasAdapter {
 					this.analyzeISPLevel(validNodes)
 				]);
 
-			// Check for errors
+			// The node level is the base of the analysis -- without it there is
+			// nothing to report, so its failure is fatal.
 			if (nodeResult.isErr()) return err(nodeResult.error);
-			if (orgResult.isErr()) return err(orgResult.error);
-			if (countryResult.isErr()) return err(countryResult.error);
-			if (ispResult.isErr()) return err(ispResult.error);
 
+			// The aggregated levels degrade independently. Previously any one of
+			// them failing discarded all four, so a country-level problem threw
+			// away perfectly good node and organization results for the entire
+			// scan. Aggregated levels fail for mundane reasons -- e.g. geo data
+			// lookups timing out leaves every node without a country -- and that
+			// should not cost the scan its other answers.
 			const nodeAnalysis = nodeResult.value.merged;
-			const orgAnalysis = orgResult.value;
-			const countryAnalysis = countryResult.value;
-			const ispAnalysis = ispResult.value;
+			const orgAnalysis = this.levelOrDegraded('organization', orgResult);
+			const countryAnalysis = this.levelOrDegraded('country', countryResult);
+			const ispAnalysis = this.levelOrDegraded('isp', ispResult);
 
 			// Check quorum intersection at node level
 			const quorumIntersectionResult = await this.checkQuorumIntersection(
@@ -220,6 +224,36 @@ export class PythonFbasAdapter {
 			},
 			topTier: topTierResult.value.top_tier ?? []
 		});
+	}
+
+	/**
+	 * Unwrap an aggregated level, or record why it is missing and fall back to
+	 * zeroes.
+	 *
+	 * NOTE: zero is a poor stand-in for "not analyzed" -- downstream this is
+	 * rendered as a threshold, so a degraded country level currently reads as
+	 * "0 countries can break safety" rather than "we could not tell". Carrying
+	 * that distinction needs a nullable representation through NetworkMeasurement
+	 * and the API; until then the log is the only honest signal, so it is an
+	 * error-level one.
+	 */
+	private levelOrDegraded(
+		level: 'organization' | 'country' | 'isp',
+		result: Result<AnalysisMergedResult, Error>
+	): AnalysisMergedResult {
+		if (result.isOk()) return result.value;
+
+		console.error(
+			`[PythonFbas] ${level} level analysis failed, reporting zeroes for it:`,
+			result.error.message
+		);
+
+		return {
+			topTierSize: 0,
+			blockingSetsMinSize: 0,
+			blockingSetsFilteredMinSize: 0,
+			splittingSetsMinSize: 0
+		};
 	}
 
 	/**
@@ -343,27 +377,6 @@ export class PythonFbasAdapter {
 			allNodesRequestCount: allNodesRequest.nodes.length,
 			validatingNodesRequestCount: validatingNodesRequest.nodes.length
 		});
-
-		// Log cleaned quorum sets (first 3)
-		const cleanedSample = allNodesRequest.nodes.slice(0, 3).map((n) => ({
-			publicKey: n.publicKey,
-			name: n.name,
-			threshold: n.quorumSet?.threshold || 0,
-			validators: n.quorumSet?.validators || [],
-			validatorCount: (n.quorumSet?.validators || []).length
-		}));
-		console.log(
-			'[PythonFbas] Cleaned QS (self-refs removed):',
-			JSON.stringify(cleanedSample, null, 2)
-		);
-
-		// DEBUG: Write full request to file for debugging
-		const fs = require('fs');
-		fs.writeFileSync(
-			'/tmp/python-fbas-request.json',
-			JSON.stringify(allNodesRequest, null, 2)
-		);
-		console.log('[PythonFbas] Wrote full request to /tmp/python-fbas-request.json');
 
 		// Run analyses
 		return await this.runAggregatedAnalysis(
