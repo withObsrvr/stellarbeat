@@ -3,31 +3,90 @@
 @tailwind utilities;
 
 /* ──────────────────────────────────────────────
-   Prism Design System — CSS Custom Properties
+   Radar Design Tokens
+
+   Single source of truth for color. Components must
+   read these tokens (directly or through the Tailwind
+   utilities in tailwind.config.js) rather than naming
+   literal palette values such as `gray-200`.
+
+   Three families, deliberately separate:
+     surface / border / text  — the neutral ground
+     accent                   — Radar's brand coral
+     signal                   — severity only, never decoration
    ────────────────────────────────────────────── */
 :root {
-  --color-surface-page: #FAFAFA;
+  /* Surfaces — warm neutrals, biased toward the accent */
+  --color-surface-page: #FBFAF7;
   --color-surface-card: #FFFFFF;
-  --color-surface-subtle: #F3F4F6;
-  --color-border-default: #E5E7EB;
-  --color-border-subtle: #F3F4F6;
-  --color-text-primary: #111111;
-  --color-text-strong: #374151;
-  --color-text-body: #6B7280;
-  --color-text-muted: #9CA3AF;
+  --color-surface-subtle: #F3EFE7;
+
+  /* Borders */
+  --color-border-default: #EDE9E1;
+  --color-border-subtle: #F5F2EC;
+  --color-border-strong: #DFD9CD;
+
+  /* Text */
+  --color-text-primary: #1A1A1A;
+  --color-text-strong: #46413A;
+  --color-text-body: #6B6459;
+  --color-text-muted: #9A9389;
+
+  /* Accent — used sparingly: links, eyebrows, focus rings */
+  --color-accent: #C4512A;
+  --color-accent-hover: #A8441F;
+  --color-accent-subtle: #FBEDE6;
+
+  /* Signal — reserved for network health severity.
+     Never use these to decorate; a reader should be able to
+     trust that green/amber/red always means safe/fragile/at-risk. */
+  --color-signal-safe: #2E7D52;
+  --color-signal-safe-subtle: #EAF3ED;
+  --color-signal-warn: #9A6A14;
+  --color-signal-warn-subtle: #F8F0DE;
+  --color-signal-risk: #B7382A;
+  --color-signal-risk-subtle: #FAEBE8;
+  --color-signal-neutral: #6B6459;
+  --color-signal-neutral-subtle: #F3EFE7;
+
+  /* Focus ring */
+  --color-focus-ring: var(--color-accent);
 }
 
-/* Dark mode infrastructure (no toggle yet) */
+/* Dark palette.
+
+   NOT REACHABLE YET — nothing sets `.dark`, and it must stay
+   that way until the token migration lands. ~900 components still
+   name literal `gray-*` values that cannot respond to these tokens,
+   so enabling dark mode today would render half the app in one
+   theme and half in the other. Wire the toggle only once
+   `grep -r 'gray-[0-9]' src --include=*.vue` comes back clean. */
 .dark {
-  --color-surface-page: #09090B;
-  --color-surface-card: #141414;
-  --color-surface-subtle: #1E1E1E;
-  --color-border-default: #2A2A2A;
-  --color-border-subtle: #1E1E1E;
-  --color-text-primary: #F3F4F6;
-  --color-text-strong: #D1D5DB;
-  --color-text-body: #9CA3AF;
-  --color-text-muted: #6B7280;
+  --color-surface-page: #131211;
+  --color-surface-card: #1B1916;
+  --color-surface-subtle: #232019;
+
+  --color-border-default: #2F2B24;
+  --color-border-subtle: #232019;
+  --color-border-strong: #3C372E;
+
+  --color-text-primary: #F2EEE6;
+  --color-text-strong: #CFC8BC;
+  --color-text-body: #A79F92;
+  --color-text-muted: #756C5F;
+
+  --color-accent: #FF8F62;
+  --color-accent-hover: #FFA983;
+  --color-accent-subtle: #2E2019;
+
+  --color-signal-safe: #6BC094;
+  --color-signal-safe-subtle: #17251D;
+  --color-signal-warn: #DCA945;
+  --color-signal-warn-subtle: #2A2115;
+  --color-signal-risk: #EC8271;
+  --color-signal-risk-subtle: #2B1A17;
+  --color-signal-neutral: #A79F92;
+  --color-signal-neutral-subtle: #232019;
 }
 
 /* ──────────────────────────────────────────────
@@ -53,9 +112,9 @@
   }
 
   @keyframes pulse-ring {
-    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.35); }
-    70%  { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    0%   { box-shadow: 0 0 0 0 var(--pulse-halo); }
+    70%  { box-shadow: 0 0 0 7px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
   }
 
   .anim-fade-up {
@@ -64,6 +123,7 @@
   }
 
   .pulse-dot {
+    --pulse-halo: color-mix(in srgb, var(--color-signal-safe) 35%, transparent);
     animation: pulse-ring 2s infinite;
   }
 
@@ -88,4 +148,16 @@
   .d6 { animation-delay: .48s; }
   .d7 { animation-delay: .56s; }
   .d8 { animation-delay: .64s; }
+}
+
+/* ──────────────────────────────────────────────
+   Motion preferences
+   ────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .anim,
+  .anim-fade-up,
+  .pulse-dot {
+    animation: none;
+    opacity: 1;
+  }
 }
