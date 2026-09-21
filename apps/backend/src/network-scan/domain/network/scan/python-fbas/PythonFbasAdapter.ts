@@ -497,7 +497,25 @@ export class PythonFbasAdapter {
 		if (blockingAllResult.isErr()) return err(blockingAllResult.error);
 		if (blockingFilteredResult.isErr())
 			return err(blockingFilteredResult.error);
-		if (splittingResult.isErr()) return err(splittingResult.error);
+
+		// The splitting set is allowed to fail on its own.
+		//
+		// python-fbas reports "No splitting set found" when safety cannot be
+		// broken at this grouping at all -- the best possible answer, not a
+		// failure. The service refuses to call that zero, so it arrives here as
+		// an error, and treating it as fatal for the level discarded the top
+		// tier and blocking-set figures too. That is how a network whose ISPs
+		// cannot split safety ended up reporting a blocking set of 0 ISPs.
+		let splittingSetsMinSize: number | undefined;
+		if (splittingResult.isOk()) {
+			splittingSetsMinSize = splittingResult.value.min_size;
+		} else {
+			console.error(
+				'[PythonFbas] Splitting set unavailable for this grouping; ' +
+					'reporting the rest of the level:',
+				splittingResult.error.message
+			);
+		}
 
 		// The splitting set above is network-wide: it includes separating an
 		// outlying entity from the core, which takes fewer failures than
@@ -512,7 +530,7 @@ export class PythonFbasAdapter {
 			topTierSize: topTierResult.value.top_tier_size,
 			blockingSetsMinSize: blockingAllResult.value.min_size,
 			blockingSetsFilteredMinSize: blockingFilteredResult.value.min_size,
-			splittingSetsMinSize: splittingResult.value.min_size,
+			splittingSetsMinSize,
 			splittingSetsTopTierMinSize
 		};
 

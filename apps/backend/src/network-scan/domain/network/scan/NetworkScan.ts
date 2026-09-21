@@ -85,17 +85,17 @@ export default class NetworkScan extends CoreEntity {
 		networkMeasurement.minBlockingSetISPFilteredSize =
 			analysisResult.isp.blockingSetsFilteredMinSize;
 		networkMeasurement.minSplittingSetSize =
-			analysisResult.node.splittingSetsMinSize;
+			analysisResult.node.splittingSetsMinSize ?? null;
 		networkMeasurement.minSplittingSetTopTierSize =
 			analysisResult.node.splittingSetsTopTierMinSize ?? null;
 		networkMeasurement.minSplittingSetOrgsSize =
-			analysisResult.organization.splittingSetsMinSize;
+			analysisResult.organization.splittingSetsMinSize ?? null;
 		networkMeasurement.minSplittingSetOrgsTopTierSize =
 			analysisResult.organization.splittingSetsTopTierMinSize ?? null;
 		networkMeasurement.minSplittingSetCountrySize =
-			analysisResult.country.splittingSetsMinSize;
+			analysisResult.country.splittingSetsMinSize ?? null;
 		networkMeasurement.minSplittingSetISPSize =
-			analysisResult.isp.splittingSetsMinSize;
+			analysisResult.isp.splittingSetsMinSize ?? null;
 		networkMeasurement.topTierSize = analysisResult.node.topTierSize;
 		networkMeasurement.topTierOrgsSize =
 			analysisResult.organization.topTierSize;

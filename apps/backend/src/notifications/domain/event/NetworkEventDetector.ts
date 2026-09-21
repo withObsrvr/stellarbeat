@@ -142,14 +142,20 @@ export class NetworkEventDetector {
 	protected detectSafetyEvents(
 		time: Date,
 		id: NetworkId,
-		previousMinSplittingSetSize: number,
-		minSplittingSetSize: number,
-		previousMinSplittingSetOrgSize: number,
-		minSplittingSetOrgSize: number
+		previousMinSplittingSetSize: number | null,
+		minSplittingSetSize: number | null,
+		previousMinSplittingSetOrgSize: number | null,
+		minSplittingSetOrgSize: number | null
 	): Event<EventData, EventSourceId>[] {
+		//null means python-fbas found no splitting set at all -- safety cannot
+		//be broken, the opposite of losing it. It used to be stored as 0, which
+		//this check reads as total loss of safety and notifies subscribers
+		//about. A network that became MORE robust would have sent the alarm.
 		if (
-			(previousMinSplittingSetSize as number) > 0 &&
-			(minSplittingSetSize as number) === 0
+			previousMinSplittingSetSize !== null &&
+			minSplittingSetSize !== null &&
+			previousMinSplittingSetSize > 0 &&
+			minSplittingSetSize === 0
 		)
 			return [
 				new NetworkLossOfSafetyEvent(time, id, {
@@ -159,10 +165,15 @@ export class NetworkEventDetector {
 			];
 
 		const events: Event<EventData, EventSourceId>[] = [];
+
+		//`null <= threshold` is true in JavaScript, because null coerces to 0.
+		//Without the explicit null checks below, a grouping with no splitting
+		//set -- the safest possible outcome -- would raise a safety risk alert.
 		if (
-			(minSplittingSetSize as number) <=
-				NetworkEventDetector.NodeSafetyRiskThreshold &&
-			(previousMinSplittingSetSize as number) >
+			minSplittingSetSize !== null &&
+			previousMinSplittingSetSize !== null &&
+			minSplittingSetSize <= NetworkEventDetector.NodeSafetyRiskThreshold &&
+			previousMinSplittingSetSize >
 				NetworkEventDetector.NodeSafetyRiskThreshold
 		)
 			events.push(
@@ -173,9 +184,11 @@ export class NetworkEventDetector {
 			);
 
 		if (
-			(minSplittingSetOrgSize as number) <=
+			minSplittingSetOrgSize !== null &&
+			previousMinSplittingSetOrgSize !== null &&
+			minSplittingSetOrgSize <=
 				NetworkEventDetector.OrganizationSafetyRiskThreshold &&
-			(previousMinSplittingSetOrgSize as number) >
+			previousMinSplittingSetOrgSize >
 				NetworkEventDetector.OrganizationSafetyRiskThreshold
 		)
 			events.push(

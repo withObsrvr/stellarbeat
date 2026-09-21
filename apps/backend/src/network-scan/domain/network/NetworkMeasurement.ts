@@ -71,9 +71,10 @@ export default class NetworkMeasurement implements Measurement {
 	@Column('smallint', { default: 0 })
 	minBlockingSetISPFilteredSize = 0;
 
-	//smallest splitting set size
-	@Column('smallint', { default: 0 })
-	minSplittingSetSize = 0;
+	//smallest splitting set size. Nullable for the same reason as the grouped
+	//variants: no splitting set at all is not a threshold of zero.
+	@Column('smallint', { nullable: true })
+	minSplittingSetSize: number | null = null;
 
 	//smallest splitting set size restricted to the top tier.
 	//nullable on purpose: the legacy Rust facade does not compute this, and
@@ -83,8 +84,10 @@ export default class NetworkMeasurement implements Measurement {
 	minSplittingSetTopTierSize: number | null = null;
 
 	//smallest splitting set size grouped by organizations
-	@Column('smallint', { default: 0 })
-	minSplittingSetOrgsSize = 0;
+	//nullable: python-fbas reporting no splitting set means safety cannot be
+	//broken at this grouping, which must not be stored as 0
+	@Column('smallint', { nullable: true })
+	minSplittingSetOrgsSize: number | null = null;
 
 	//smallest splitting set size grouped by organizations, restricted to the
 	//top tier. Nullable for the same reason as minSplittingSetTopTierSize.
@@ -92,12 +95,16 @@ export default class NetworkMeasurement implements Measurement {
 	minSplittingSetOrgsTopTierSize: number | null = null;
 
 	//smallest splitting set size grouped by organizations
-	@Column('smallint', { default: 0 })
-	minSplittingSetCountrySize = 0;
+	//nullable: python-fbas reporting no splitting set means safety cannot be
+	//broken at this grouping, which must not be stored as 0
+	@Column('smallint', { nullable: true })
+	minSplittingSetCountrySize: number | null = null;
 
 	//smallest splitting set size grouped by organizations
-	@Column('smallint', { default: 0 })
-	minSplittingSetISPSize = 0;
+	//nullable: python-fbas reporting no splitting set means safety cannot be
+	//broken at this grouping, which must not be stored as 0
+	@Column('smallint', { nullable: true })
+	minSplittingSetISPSize: number | null = null;
 
 	constructor(time: Date) {
 		this.time = time;

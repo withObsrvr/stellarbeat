@@ -21,13 +21,21 @@ export interface NetworkStatisticsV1 {
 	minBlockingSetCountryFilteredSize: number;
 	minBlockingSetISPSize: number;
 	minBlockingSetISPFilteredSize: number;
-	minSplittingSetSize: number;
+	//null when python-fbas reports no splitting set at this grouping,
+	//meaning safety cannot be broken there -- not a threshold of zero
+	minSplittingSetSize: number | null;
 	//optional: added after the original v1 contract, so older payloads omit them
 	minSplittingSetTopTierSize?: number;
-	minSplittingSetOrgsSize: number;
+	//null when python-fbas reports no splitting set at this grouping,
+	//meaning safety cannot be broken there -- not a threshold of zero
+	minSplittingSetOrgsSize: number | null;
 	minSplittingSetOrgsTopTierSize?: number;
-	minSplittingSetCountrySize: number;
-	minSplittingSetISPSize: number;
+	//null when python-fbas reports no splitting set at this grouping,
+	//meaning safety cannot be broken there -- not a threshold of zero
+	minSplittingSetCountrySize: number | null;
+	//null when python-fbas reports no splitting set at this grouping,
+	//meaning safety cannot be broken there -- not a threshold of zero
+	minSplittingSetISPSize: number | null;
 	topTierSize: number;
 	topTierOrgsSize: number;
 	hasSymmetricTopTier: boolean;

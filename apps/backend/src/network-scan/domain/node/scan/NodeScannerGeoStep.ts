@@ -14,9 +14,11 @@ export class NodeScannerGeoStep {
 	) {}
 
 	public async execute(nodeScan: NodeScan): Promise<void> {
-		if (nodeScan.getModifiedIPs().length > 0) {
+		const ipsNeedingGeoData = nodeScan.getIPsNeedingGeoData();
+
+		if (ipsNeedingGeoData.length > 0) {
 			this.logger.info('Updating geoData info for', {
-				nodes: nodeScan.getModifiedIPs()
+				count: ipsNeedingGeoData.length
 			});
 
 			const ipMap = new Map<
@@ -27,7 +29,7 @@ export class NodeScannerGeoStep {
 				}
 			>();
 			await Promise.all(
-				nodeScan.getModifiedIPs().map(async (ip: string) => {
+				ipsNeedingGeoData.map(async (ip: string) => {
 					const result = await this.geoDataService.fetchGeoData(ip);
 					if (result.isErr()) this.logger.info(result.error.message);
 					else {
@@ -43,6 +45,17 @@ export class NodeScannerGeoStep {
 					}
 				})
 			);
+			if (ipMap.size < ipsNeedingGeoData.length) {
+				//Surfaced rather than counted silently: a provider that is down
+				//or a bad key shows up here as every lookup failing, and the
+				//consequence lands two steps later in the country and ISP
+				//analysis rather than anywhere obviously geo-related.
+				this.logger.warn('Geo data lookups failed', {
+					failed: ipsNeedingGeoData.length - ipMap.size,
+					requested: ipsNeedingGeoData.length
+				});
+			}
+
 			if (ipMap.size > 0) nodeScan.updateGeoDataAndISP(ipMap);
 		}
 	}
