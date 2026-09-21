@@ -134,6 +134,11 @@
             </div>
           </div>
         </div>
+        <div v-if="analysisError" class="mb-2">
+          <UiAlert :show="true" variant="danger">
+            Could not start the analysis: {{ analysisError }}
+          </UiAlert>
+        </div>
         <div class="mb-2">
           <UiAlert
             :show="!store.network.networkStatistics.hasSymmetricTopTier"
@@ -270,6 +275,9 @@ const splittingSetsMinSize = ref(0);
 const topTier: Ref<Array<Array<string>>> = ref([]);
 const topTierIsSymmetric = ref(false);
 
+const analysisError = ref("");
+let analysisJobId = 0;
+
 const analyzeTrustCluster = ref(false);
 const analyzeQuorumIntersection = ref(true);
 const quorumIntersectionAnalyzed = ref(false);
@@ -320,20 +328,38 @@ function performAnalysis() {
   );
 
   isLoading.value = true;
-  fbasAnalysisWorker.postMessage({
-    id: 1,
-    nodes: nodesToAnalyze,
-    organizations: store.network.organizations,
-    mergeBy: store.networkAnalysisMergeBy,
-    failingNodePublicKeys: store.network.nodes
-      .filter((node) => store.network.isNodeFailing(node))
-      .map((node) => node.publicKey),
-    analyzeQuorumIntersection: analyzeQuorumIntersection,
-    analyzeSafety: analyzeSafety,
-    analyzeLiveness: analyzeLiveness,
-    analyzeTopTier: analyzeTopTier,
-    analyzeSymmetricTopTier: true,
-  });
+  analysisError.value = "";
+
+  try {
+    fbasAnalysisWorker.postMessage({
+      // The worker reads `jobId`; `id` left it undefined, so results could not
+      // be matched to the run that asked for them.
+      jobId: ++analysisJobId,
+      nodes: nodesToAnalyze,
+      organizations: store.network.organizations,
+      mergeBy: store.networkAnalysisMergeBy,
+      failingNodePublicKeys: store.network.nodes
+        .filter((node) => store.network.isNodeFailing(node))
+        .map((node) => node.publicKey),
+      // .value matters: postMessage structured-clones its argument, and a Vue
+      // ref carries a dependency graph of effect functions, which are not
+      // cloneable. Passing the refs themselves threw DataCloneError before the
+      // worker ever started, so this tool never ran.
+      analyzeQuorumIntersection: analyzeQuorumIntersection.value,
+      analyzeSafety: analyzeSafety.value,
+      analyzeLiveness: analyzeLiveness.value,
+      analyzeTopTier: analyzeTopTier.value,
+      analyzeSymmetricTopTier: true,
+    });
+  } catch (error) {
+    // Without this the thrown clone error escaped as an unhandled event handler
+    // error and left the dimmer spinning forever, with the reason visible only
+    // in the console.
+    isLoading.value = false;
+    analysisError.value =
+      error instanceof Error ? error.message : String(error);
+    console.error("Could not start the network analysis", error);
+  }
 }
 
 function getNodesToQuorumSetMap(nodes: Node[]): Map<PublicKey, BaseQuorumSet> {
@@ -408,6 +434,8 @@ onMounted(() => {
       case "end":
         {
           if (event.data.result) {
+            //a run that has been superseded must not overwrite newer results
+            if (event.data.result.jobId !== analysisJobId) return;
             hasResult.value = true;
             resultMergedBy.value = event.data.result.mergeBy;
             updatePartitions();
