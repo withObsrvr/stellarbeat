@@ -233,12 +233,19 @@
               fi
             done
 
-            # Load environment variables
-            set -a
-            source apps/backend/.env 2>/dev/null || true
-            source apps/frontend/.env 2>/dev/null || true
-            source apps/users/.env 2>/dev/null || true
-            set +a
+            # Deliberately NOT sourcing the .env files here.
+            #
+            # `source` applies shell quote removal, so a value like
+            #   NETWORK_QUORUM_SET=[["GABC","GDEF"],["GHIJ"]]
+            # becomes [[GABC,GDEF],[GHIJ]] once exported -- no longer JSON.
+            # dotenv does not overwrite variables already present in the
+            # environment, so the mangled shell value wins over the correct
+            # file value and the scanner dies with:
+            #   SyntaxError: Unexpected token 'G', "[[GCVJ4Z6TI6"... is not valid JSON
+            #
+            # Every app loads its own .env through dotenv (see Config.ts and
+            # AppDataSource.ts), so exporting them here was redundant as well
+            # as destructive.
 
             # Build shared packages first
             if [ -d "packages/shared" ]; then

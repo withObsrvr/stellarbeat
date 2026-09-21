@@ -97,3 +97,32 @@ psql -h localhost -p 25433 -d stellarbeat_test  -c 'GRANT ALL ON SCHEMA public T
 
 **A crawl that logs `activeTopTiers: 0` and never syncs** — `NETWORK_KNOWN_PEERS`
 is stale. The crawl bootstraps from that list.
+
+**`SyntaxError: Unexpected token 'G', "[[GCVJ4Z6TI6"... is not valid JSON`** —
+something exported `NETWORK_QUORUM_SET` into the shell before the app read it.
+`source`-ing a `.env` applies shell quote removal, so
+
+```
+NETWORK_QUORUM_SET=[["GABC","GDEF"]]     in the file
+NETWORK_QUORUM_SET=[[GABC,GDEF]]         after export
+```
+
+and dotenv will not overwrite a variable that is already in the environment, so
+the mangled value wins. The devShell used to do this; it no longer does. If you
+hit it in a shell of your own, `unset NETWORK_QUORUM_SET` and let dotenv read
+the file. Never `source` these files — every app loads its own.
+
+**`Python FBAS analysis failed, falling back to Rust scanner` with
+`error: "fetch failed"`** — the service is probably reachable; Node 18+ resolves
+`localhost` to `::1` first, and a published container port (or a uvicorn bound
+to `127.0.0.1`) listens on IPv4 only. Use `127.0.0.1` in
+`PYTHON_FBAS_SERVICE_URL`.
+
+**`Core forks if` shows Unknown** — the top-tier splitting set needs
+python-fbas's `top-tier` command, which requires QBF. A local pip install of
+`pyqbf` needs a C++ toolchain and does not build cleanly under nix. Run the
+published service image instead, which has it:
+
+```bash
+docker run --rm -p 8001:8080 withobsrvr/python-fbas:0.2.0
+```
