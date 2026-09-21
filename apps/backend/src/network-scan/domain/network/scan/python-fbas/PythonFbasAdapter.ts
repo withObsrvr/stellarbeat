@@ -81,6 +81,16 @@ export interface IPythonFbasHttpClient {
 	healthCheck(): Promise<Result<{ status: string }, Error>>;
 }
 
+/**
+ * Node-level analysis carries the top tier membership alongside the merged
+ * sizes, because the symmetric top tier check needs to know *which* nodes are
+ * in the top tier — not just how many.
+ */
+interface NodeLevelAnalysis {
+	merged: AnalysisMergedResult;
+	topTier: string[];
+}
+
 export class PythonFbasAdapter {
 	constructor(
 		private readonly httpClient: IPythonFbasHttpClient,
@@ -124,7 +134,7 @@ export class PythonFbasAdapter {
 			if (countryResult.isErr()) return err(countryResult.error);
 			if (ispResult.isErr()) return err(ispResult.error);
 
-			const nodeAnalysis = nodeResult.value;
+			const nodeAnalysis = nodeResult.value.merged;
 			const orgAnalysis = orgResult.value;
 			const countryAnalysis = countryResult.value;
 			const ispAnalysis = ispResult.value;
@@ -138,8 +148,10 @@ export class PythonFbasAdapter {
 
 			const analysisResult: AnalysisResult = {
 				hasQuorumIntersection: quorumIntersectionResult.value,
-				// TODO: Implement symmetric top tier check
-				hasSymmetricTopTier: false,
+				hasSymmetricTopTier: this.isTopTierSymmetric(
+					validNodes,
+					nodeResult.value.topTier
+				),
 				node: nodeAnalysis,
 				organization: orgAnalysis,
 				country: countryAnalysis,
@@ -161,7 +173,7 @@ export class PythonFbasAdapter {
 	 */
 	private async analyzeNodeLevel(
 		nodes: Node[]
-	): Promise<Result<AnalysisMergedResult, Error>> {
+	): Promise<Result<NodeLevelAnalysis, Error>> {
 		// Split into all vs validating
 		const filtered = this.filteredAnalyzer.prepareFilteredAnalysis({ nodes });
 
@@ -200,11 +212,68 @@ export class PythonFbasAdapter {
 		if (splittingResult.isErr()) return err(splittingResult.error);
 
 		return ok({
-			topTierSize: topTierResult.value.top_tier_size,
-			blockingSetsMinSize: blockingAllResult.value.min_size,
-			blockingSetsFilteredMinSize: blockingFilteredResult.value.min_size,
-			splittingSetsMinSize: splittingResult.value.min_size
+			merged: {
+				topTierSize: topTierResult.value.top_tier_size,
+				blockingSetsMinSize: blockingAllResult.value.min_size,
+				blockingSetsFilteredMinSize: blockingFilteredResult.value.min_size,
+				splittingSetsMinSize: splittingResult.value.min_size
+			},
+			topTier: topTierResult.value.top_tier ?? []
 		});
+	}
+
+	/**
+	 * A top tier is symmetric when every node in it declares the same quorum
+	 * set. Radar uses this to decide whether the browser-side analysis is cheap
+	 * enough to run automatically, so returning a wrong `false` permanently
+	 * shows the "analysis could be slow" warning and drops the UI into manual
+	 * mode.
+	 *
+	 * python-fbas has no equivalent command, so the comparison is done here
+	 * against the quorum sets Radar already holds.
+	 */
+	private isTopTierSymmetric(nodes: Node[], topTier: string[]): boolean {
+		// An empty top tier is not a symmetric one — it means the analysis
+		// found nothing, which is a different thing entirely.
+		if (topTier.length === 0) return false;
+
+		const quorumSetsByPublicKey = new Map<string, QuorumSet>();
+		nodes.forEach((node) => {
+			const quorumSet = node.quorumSet?.quorumSet;
+			if (quorumSet) {
+				quorumSetsByPublicKey.set(node.publicKey.value, quorumSet);
+			}
+		});
+
+		let reference: string | null = null;
+		for (const publicKey of topTier) {
+			const quorumSet = quorumSetsByPublicKey.get(publicKey);
+			// A top tier member we cannot inspect makes the answer unknowable,
+			// and unknowable is not symmetric.
+			if (!quorumSet) return false;
+
+			const fingerprint = this.fingerprintQuorumSet(quorumSet);
+			if (reference === null) {
+				reference = fingerprint;
+			} else if (fingerprint !== reference) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Order-independent structural fingerprint of a quorum set, so two nodes
+	 * that declare the same trust in a different order compare as equal.
+	 */
+	private fingerprintQuorumSet(quorumSet: QuorumSet): string {
+		const validators = [...quorumSet.validators].sort();
+		const innerQuorumSets = quorumSet.innerQuorumSets
+			.map((innerQuorumSet) => this.fingerprintQuorumSet(innerQuorumSet))
+			.sort();
+
+		return JSON.stringify([quorumSet.threshold, validators, innerQuorumSets]);
 	}
 
 	/**
@@ -234,9 +303,11 @@ export class PythonFbasAdapter {
 		console.log('[PythonFbas] Organization aggregation summary:', {
 			totalNodes: nodes.length,
 			totalOrganizations: organizations.length,
-			aggregatedCount: aggregatedNodes.length
+			aggregatedCount: aggregatedNodes.length,
+			orgsWithInvalidThreshold: detailedOrgs.filter(
+				(org) => org.hasInvalidThreshold
+			).length
 		});
-		console.log('[PythonFbas] ALL Detailed orgs:', JSON.stringify(detailedOrgs, null, 2));
 
 		// Validate aggregation
 		const validation =

@@ -8,6 +8,7 @@ import {
 	createNodeWithISP
 } from '../__fixtures__/test-helpers';
 import { ok } from 'neverthrow';
+import Node from '../../../../node/Node';
 
 describe('PythonFbasAdapter', () => {
 	let adapter: PythonFbasAdapter;
@@ -416,5 +417,149 @@ describe('PythonFbasAdapter', () => {
 			);
 			expect(ispLevelCall).toBeDefined();
 		});
+	});
+});
+
+describe('PythonFbasAdapter symmetric top tier', () => {
+	let adapter: PythonFbasAdapter;
+	let mockHttpClient: jest.Mocked<IPythonFbasHttpClient>;
+	const time = new Date();
+
+	/**
+	 * Wires the mock so every analysis call succeeds, with the node-level top
+	 * tier reported as `topTier`. Only the symmetric flag is under test here.
+	 */
+	function stubHttpClient(topTier: string[]) {
+		mockHttpClient.analyzeTopTier.mockResolvedValue(
+			ok({ top_tier: topTier, top_tier_size: topTier.length })
+		);
+		mockHttpClient.analyzeBlockingSets.mockResolvedValue(ok({ min_size: 2 }));
+		mockHttpClient.analyzeSplittingSets.mockResolvedValue(ok({ min_size: 3 }));
+		mockHttpClient.analyzeQuorums.mockResolvedValue(
+			ok({ quorum_intersection: true })
+		);
+	}
+
+	function nodeWith(
+		publicKey: string,
+		quorumSetData: {
+			threshold: number;
+			validators: string[];
+			innerQuorumSets: any[];
+		}
+	): Node {
+		const node = createNodeWithQuorumSet(quorumSetData, true, time);
+		// createDummyNode generates a random key; pin it so the top tier
+		// returned by the stub actually resolves to this node.
+		Object.defineProperty(node, 'publicKey', {
+			value: { value: publicKey },
+			configurable: true
+		});
+		return node;
+	}
+
+	beforeEach(() => {
+		mockHttpClient = {
+			analyzeTopTier: jest.fn(),
+			analyzeBlockingSets: jest.fn(),
+			analyzeSplittingSets: jest.fn(),
+			analyzeQuorums: jest.fn(),
+			healthCheck: jest.fn()
+		};
+		adapter = new PythonFbasAdapter(
+			mockHttpClient,
+			new FbasAggregator(),
+			new FbasFilteredAnalyzer()
+		);
+	});
+
+	it('reports a symmetric top tier when every member declares the same quorum set', async () => {
+		const quorumSet = {
+			threshold: 2,
+			validators: ['A', 'B', 'C'],
+			innerQuorumSets: []
+		};
+		const nodes = [
+			nodeWith('A', quorumSet),
+			nodeWith('B', quorumSet),
+			nodeWith('C', quorumSet)
+		];
+		stubHttpClient(['A', 'B', 'C']);
+
+		const result = await adapter.analyze(nodes, []);
+
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) expect(result.value.hasSymmetricTopTier).toBe(true);
+	});
+
+	it('ignores validator ordering when comparing quorum sets', async () => {
+		const nodes = [
+			nodeWith('A', {
+				threshold: 2,
+				validators: ['A', 'B', 'C'],
+				innerQuorumSets: []
+			}),
+			nodeWith('B', {
+				threshold: 2,
+				validators: ['C', 'A', 'B'],
+				innerQuorumSets: []
+			})
+		];
+		stubHttpClient(['A', 'B']);
+
+		const result = await adapter.analyze(nodes, []);
+
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) expect(result.value.hasSymmetricTopTier).toBe(true);
+	});
+
+	it('reports an asymmetric top tier when a member declares a different threshold', async () => {
+		const nodes = [
+			nodeWith('A', {
+				threshold: 2,
+				validators: ['A', 'B', 'C'],
+				innerQuorumSets: []
+			}),
+			nodeWith('B', {
+				threshold: 3,
+				validators: ['A', 'B', 'C'],
+				innerQuorumSets: []
+			})
+		];
+		stubHttpClient(['A', 'B']);
+
+		const result = await adapter.analyze(nodes, []);
+
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) expect(result.value.hasSymmetricTopTier).toBe(false);
+	});
+
+	it('does not call an empty top tier symmetric', async () => {
+		const nodes = [
+			nodeWith('A', { threshold: 1, validators: ['A'], innerQuorumSets: [] })
+		];
+		stubHttpClient([]);
+
+		const result = await adapter.analyze(nodes, []);
+
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) expect(result.value.hasSymmetricTopTier).toBe(false);
+	});
+
+	it('does not call a top tier symmetric when a member cannot be inspected', async () => {
+		const nodes = [
+			nodeWith('A', {
+				threshold: 2,
+				validators: ['A', 'B'],
+				innerQuorumSets: []
+			})
+		];
+		// The service reports a member Radar holds no quorum set for.
+		stubHttpClient(['A', 'UNKNOWN']);
+
+		const result = await adapter.analyze(nodes, []);
+
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) expect(result.value.hasSymmetricTopTier).toBe(false);
 	});
 });
