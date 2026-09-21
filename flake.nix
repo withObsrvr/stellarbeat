@@ -100,6 +100,12 @@
             ${pkgs.postgresql_15}/bin/psql -h localhost -p 25432 -d postgres -c "CREATE USER \"user\" WITH PASSWORD 'password';" 2>/dev/null || true
             ${pkgs.postgresql_15}/bin/psql -h localhost -p 25432 -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE stellarbeat TO \"user\";" 2>/dev/null || true
             ${pkgs.postgresql_15}/bin/psql -h localhost -p 25432 -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE stellarbeat_users TO \"user\";" 2>/dev/null || true
+            # Postgres 15 revoked CREATE on schema public from PUBLIC, so the
+            # database-level grants above are not enough for migrations to
+            # create tables. Without these, TypeORM fails with
+            # "permission denied for schema public".
+            ${pkgs.postgresql_15}/bin/psql -h localhost -p 25432 -d stellarbeat -c "GRANT ALL ON SCHEMA public TO \"user\";" 2>/dev/null || true
+            ${pkgs.postgresql_15}/bin/psql -h localhost -p 25432 -d stellarbeat_users -c "GRANT ALL ON SCHEMA public TO \"user\";" 2>/dev/null || true
           fi
           
           # Start test PostgreSQL (port 25433)
@@ -112,6 +118,7 @@
             ${pkgs.postgresql_15}/bin/createdb -h localhost -p 25433 stellarbeat_test 2>/dev/null || true
             ${pkgs.postgresql_15}/bin/psql -h localhost -p 25433 -d postgres -c "CREATE USER \"user\" WITH PASSWORD 'password';" 2>/dev/null || true
             ${pkgs.postgresql_15}/bin/psql -h localhost -p 25433 -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE stellarbeat_test TO \"user\";" 2>/dev/null || true
+            ${pkgs.postgresql_15}/bin/psql -h localhost -p 25433 -d stellarbeat_test -c "GRANT ALL ON SCHEMA public TO \"user\";" 2>/dev/null || true
           fi
           
           echo "✅ PostgreSQL databases are ready!"
@@ -216,16 +223,15 @@
               echo ".nix-postgres/" >> .gitignore
             fi
             
-            # Set up environment files
-            if [ ! -f "apps/backend/.env" ]; then
-              cp apps/backend/.env apps/backend/.env
-            fi
-            if [ ! -f "apps/frontend/.env" ]; then
-              cp apps/frontend/.env apps/frontend/.env
-            fi
-            if [ ! -f "apps/users/.env" ]; then
-              cp apps/users/.env apps/users/.env
-            fi
+            # Set up environment files. Seed a missing .env from the checked-in
+            # .env.dist template; each cp used to name .env as both source and
+            # destination, so it could only ever fail.
+            for app in backend frontend users; do
+              if [ ! -f "apps/$app/.env" ] && [ -f "apps/$app/.env.dist" ]; then
+                cp "apps/$app/.env.dist" "apps/$app/.env"
+                echo "Seeded apps/$app/.env from .env.dist - review it before running."
+              fi
+            done
 
             # Load environment variables
             set -a
