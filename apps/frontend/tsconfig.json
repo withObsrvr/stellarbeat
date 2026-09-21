@@ -25,7 +25,7 @@
     "forceConsistentCasingInFileNames": true,
     // See <https://github.com/vuejs/vue-cli/pull/5688>
     "skipLibCheck": true,
-    "types": ["jest", "jquery", "bootstrap"],
+    "types": ["jest"],
     "paths": {
       "@/*": ["src/*"]
     },

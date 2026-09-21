@@ -313,9 +313,6 @@ importers:
       express:
         specifier: ^4.21.2
         version: 4.21.2
-      jquery:
-        specifier: ^3.7.1
-        version: 3.7.1
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
@@ -328,9 +325,6 @@ importers:
       leaflet.markercluster:
         specifier: ^1.5.3
         version: 1.5.3(leaflet@1.9.4)
-      popper.js:
-        specifier: 1.16.1
-        version: 1.16.1
       scp-simulation:
         specifier: workspace:*
         version: link:../../packages/scp-simulation
@@ -350,9 +344,6 @@ importers:
       '@playwright/test':
         specifier: ^1.56.1
         version: 1.56.1
-      '@types/bootstrap':
-        specifier: ^5.2.10
-        version: 5.2.10
       '@types/d3-drag':
         specifier: ^3.0.7
         version: 3.0.7
@@ -371,9 +362,6 @@ importers:
       '@types/d3-zoom':
         specifier: ^3.0.8
         version: 3.0.8
-      '@types/jquery':
-        specifier: ^3.5.30
-        version: 3.5.31
       '@types/leaflet':
         specifier: ^1.9.12
         version: 1.9.12
@@ -1440,9 +1428,6 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@popperjs/core@2.11.8':
-    resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
-
   '@rollup/plugin-virtual@3.0.2':
     resolution: {integrity: sha512-10monEYsBp3scM4/ND4LNH5Rxvh3e/cVeL3jWTgZ2SrQ+BmUoQcopVQvnaMcOnykb1VkxUFuDAN+0FnpTFRy2A==}
     engines: {node: '>=14.0.0'}
@@ -1967,9 +1952,6 @@ packages:
   '@types/body-parser@1.19.5':
     resolution: {integrity: sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==}
 
-  '@types/bootstrap@5.2.10':
-    resolution: {integrity: sha512-F2X+cd6551tep0MvVZ6nM8v7XgGN/twpdNDjqS1TUM7YFNEtQYWk+dKAnH+T1gr6QgCoGMPl487xw/9hXooa2g==}
-
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
 
@@ -2042,9 +2024,6 @@ packages:
   '@types/jest@29.5.6':
     resolution: {integrity: sha512-/t9NnzkOpXb4Nfvg17ieHE6EeSjDS2SGSpNYfoLbUAeL/EOueU/RSdOWFpfQTXBEM7BguYW1XQ0EbM+6RlIh6w==}
 
-  '@types/jquery@3.5.31':
-    resolution: {integrity: sha512-rf/iB+cPJ/YZfMwr+FVuQbm7IaWC4y3FVYfVDxRGqmUCFjjPII0HWaP0vTPJGp6m4o13AXySCcMbWfrWtBFAKw==}
-
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
@@ -2089,9 +2068,6 @@ packages:
 
   '@types/serve-static@1.15.7':
     resolution: {integrity: sha512-W8Ym+h8nhuRwaKPaDw34QUkwsGi6Rc4yYqvKFo5rm2FUEhCFbzVWrxXUxuKK8TASjWsysJY0nsmNCGhCOIsrOw==}
-
-  '@types/sizzle@2.3.8':
-    resolution: {integrity: sha512-0vWLNK2D5MT9dg0iOo8GlKguPAU02QjmZitPEsXRuJXU/OGIOt9vT9Fc26wtYuavLxtO45v9PGleoL9Z0k1LHg==}
 
   '@types/sodium-native@2.3.9':
     resolution: {integrity: sha512-jZIg5ltGH1okmnH3FrLQsgwjcjOVozMSHwSiEm1/LpMekhOMHbQqp21P4H24mizh1BjwI6Q8qmphmD/HJuAqWg==}
@@ -6463,8 +6439,6 @@ snapshots:
     dependencies:
       playwright: 1.56.1
 
-  '@popperjs/core@2.11.8': {}
-
   '@rollup/plugin-virtual@3.0.2(rollup@4.34.6)':
     optionalDependencies:
       rollup: 4.34.6
@@ -7068,10 +7042,6 @@ snapshots:
       '@types/connect': 3.4.38
       '@types/node': 22.13.10
 
-  '@types/bootstrap@5.2.10':
-    dependencies:
-      '@popperjs/core': 2.11.8
-
   '@types/connect@3.4.38':
     dependencies:
       '@types/node': 22.13.10
@@ -7153,10 +7123,6 @@ snapshots:
       expect: 29.7.0
       pretty-format: 29.7.0
 
-  '@types/jquery@3.5.31':
-    dependencies:
-      '@types/sizzle': 2.3.8
-
   '@types/json-schema@7.0.15': {}
 
   '@types/json5@0.0.29': {}
@@ -7201,8 +7167,6 @@ snapshots:
       '@types/http-errors': 2.0.4
       '@types/node': 22.13.10
       '@types/send': 0.17.4
-
-  '@types/sizzle@2.3.8': {}
 
   '@types/sodium-native@2.3.9':
     dependencies:
