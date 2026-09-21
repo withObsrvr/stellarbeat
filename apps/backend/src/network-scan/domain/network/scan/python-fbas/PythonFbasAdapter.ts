@@ -103,14 +103,26 @@ export class PythonFbasAdapter {
 	 *
 	 * This replaces the Rust scanner's analyze() method
 	 */
+	/**
+	 * @param nodes the transitive network quorum set -- effectively the top
+	 *   tier. Everything except the network-wide splitting set is computed over
+	 *   this, because most of the analysis is exponential in its size.
+	 * @param networkWideNodes every validating node, used only for the
+	 *   network-wide organization splitting set. Omit it and that figure falls
+	 *   back to the restricted set, which is what Radar did historically -- and
+	 *   why it reported the top tier's answer as if it were network-wide.
+	 */
 	async analyze(
 		nodes: Node[],
-		organizations: Organization[]
+		organizations: Organization[],
+		networkWideNodes?: Node[]
 	): Promise<Result<AnalysisResult, Error>> {
+		const hasUsableQuorumSet = (node: Node) =>
+			Boolean(node.quorumSet && node.quorumSet.quorumSet.threshold > 0);
+
 		// Filter nodes with valid quorum sets
-		const validNodes = nodes.filter(
-			(node) => node.quorumSet && node.quorumSet.quorumSet.threshold > 0
-		);
+		const validNodes = nodes.filter(hasUsableQuorumSet);
+		const validNetworkWideNodes = networkWideNodes?.filter(hasUsableQuorumSet);
 
 		if (validNodes.length === 0) {
 			return err(
@@ -123,7 +135,11 @@ export class PythonFbasAdapter {
 			const [nodeResult, orgResult, countryResult, ispResult] =
 				await Promise.all([
 					this.analyzeNodeLevel(validNodes),
-					this.analyzeOrganizationLevel(validNodes, organizations),
+					this.analyzeOrganizationLevel(
+						validNodes,
+						organizations,
+						validNetworkWideNodes
+					),
 					this.analyzeCountryLevel(validNodes),
 					this.analyzeISPLevel(validNodes)
 				]);
@@ -324,7 +340,8 @@ export class PythonFbasAdapter {
 	 */
 	private async analyzeOrganizationLevel(
 		nodes: Node[],
-		organizations: Organization[]
+		organizations: Organization[],
+		networkWideNodes?: Node[]
 	): Promise<Result<AnalysisMergedResult, Error>> {
 		// Aggregate by organization
 		const aggregatedNodes = this.aggregator.aggregateByOrganization(
@@ -387,11 +404,82 @@ export class PythonFbasAdapter {
 			validatingNodesRequestCount: validatingNodesRequest.nodes.length
 		});
 
-		// Run analyses
-		return await this.runAggregatedAnalysis(
+		const result = await this.runAggregatedAnalysis(
 			allNodesRequest,
 			validatingNodesRequest
 		);
+		if (result.isErr()) return result;
+
+		// Recompute the splitting set over every organization, not just the ones
+		// in the transitive network quorum set.
+		//
+		// This is the whole point of separating the two safety figures. Radar
+		// restricts its analysis to the top tier because most of it is
+		// exponential in top tier size, but a splitting set over ten
+		// organizations answers a narrower question than the one the label
+		// implies: it cannot see an outlying validator being severed from the
+		// core, which takes fewer organizations than splitting the core itself.
+		// python-fbas reports the wider number by default, which is why it said
+		// 2 where Radar said 4.
+		const networkWide = await this.analyzeNetworkWideOrgSplittingSet(
+			networkWideNodes,
+			organizations
+		);
+
+		return ok({
+			...result.value,
+			//keep the restricted answer only when the wider one is unavailable
+			splittingSetsMinSize:
+				networkWide !== undefined ? networkWide : result.value.splittingSetsMinSize
+		});
+	}
+
+	/**
+	 * Smallest set of organizations that can break safety anywhere in the
+	 * network, including by severing a node from the core.
+	 *
+	 * Returns undefined rather than an error: this widens an existing figure,
+	 * so failing to compute it must leave the rest of the scan intact.
+	 */
+	private async analyzeNetworkWideOrgSplittingSet(
+		networkWideNodes: Node[] | undefined,
+		organizations: Organization[]
+	): Promise<number | undefined> {
+		if (!networkWideNodes || networkWideNodes.length === 0) return undefined;
+
+		const aggregated = this.aggregator.aggregateByOrganization(
+			networkWideNodes,
+			organizations
+		);
+
+		const validation = this.aggregator.validateAggregatedNodes(aggregated);
+		if (!validation.valid) {
+			console.error(
+				'[PythonFbas] Network-wide organization aggregation invalid, ' +
+					'keeping the top-tier splitting set:',
+				validation.errors.join(', ')
+			);
+			return undefined;
+		}
+
+		//Nothing gained if the wider set collapses to the same organizations.
+		const request = this.aggregatedNodesToPythonRequest(aggregated);
+		const result = await this.httpClient.analyzeSplittingSets(request);
+
+		if (result.isErr()) {
+			console.error(
+				'[PythonFbas] Network-wide organization splitting set unavailable:',
+				result.error.message
+			);
+			return undefined;
+		}
+
+		console.log('[PythonFbas] Network-wide org splitting set:', {
+			organizations: aggregated.length,
+			minSize: result.value.min_size
+		});
+
+		return result.value.min_size;
 	}
 
 	/**

@@ -7,7 +7,7 @@ import {
 	createNodeWithGeoData,
 	createNodeWithISP
 } from '../__fixtures__/test-helpers';
-import { ok } from 'neverthrow';
+import { ok, err } from 'neverthrow';
 import Node from '../../../../node/Node';
 
 describe('PythonFbasAdapter', () => {
@@ -561,5 +561,91 @@ describe('PythonFbasAdapter symmetric top tier', () => {
 
 		expect(result.isOk()).toBe(true);
 		if (result.isOk()) expect(result.value.hasSymmetricTopTier).toBe(false);
+	});
+});
+
+describe('PythonFbasAdapter network-wide organization splitting set', () => {
+	let mockHttpClient: jest.Mocked<IPythonFbasHttpClient>;
+	let adapter: PythonFbasAdapter;
+	const time = new Date();
+
+	function stub(topTier: string[], splittingMinSizes: number[]) {
+		mockHttpClient.analyzeTopTier.mockResolvedValue(
+			ok({ top_tier: topTier, top_tier_size: topTier.length })
+		);
+		mockHttpClient.analyzeBlockingSets.mockResolvedValue(ok({ min_size: 3 }));
+		mockHttpClient.analyzeQuorums.mockResolvedValue(
+			ok({ quorum_intersection: true })
+		);
+		//each call in order: the levels, then the network-wide recomputation
+		let call = 0;
+		mockHttpClient.analyzeSplittingSets.mockImplementation(async () => {
+			const size = splittingMinSizes[Math.min(call, splittingMinSizes.length - 1)];
+			call++;
+			return ok({ min_size: size });
+		});
+	}
+
+	beforeEach(() => {
+		mockHttpClient = {
+			analyzeTopTier: jest.fn(),
+			analyzeBlockingSets: jest.fn(),
+			analyzeSplittingSets: jest.fn(),
+			analyzeQuorums: jest.fn(),
+			healthCheck: jest.fn()
+		};
+		adapter = new PythonFbasAdapter(
+			mockHttpClient,
+			new FbasAggregator(),
+			new FbasFilteredAnalyzer()
+		);
+	});
+
+	/**
+	 * Radar restricts its analysis to the transitive network quorum set, so its
+	 * organization splitting set answered a narrower question than its label
+	 * implied. Passing the wider validating set lets that figure see a validator
+	 * being severed from the core, which is the discrepancy python-fbas reported.
+	 */
+	it('does not widen the figure when no wider node set is given', async () => {
+		const nodes = [
+			createNodeWithQuorumSet(
+				{ threshold: 1, validators: ['A'], innerQuorumSets: [] },
+				true,
+				time
+			)
+		];
+		stub([], [7]);
+
+		const result = await adapter.analyze(nodes, []);
+
+		expect(result.isOk()).toBe(true);
+		if (result.isOk())
+			expect(result.value.organization.splittingSetsMinSize).toBe(7);
+	});
+
+	it('leaves the rest of the scan intact when the wider analysis fails', async () => {
+		const nodes = [
+			createNodeWithQuorumSet(
+				{ threshold: 1, validators: ['A'], innerQuorumSets: [] },
+				true,
+				time
+			)
+		];
+		stub([], [7]);
+		//the wider recomputation is the last splitting-set call
+		mockHttpClient.analyzeSplittingSets
+			.mockResolvedValueOnce(ok({ min_size: 7 }))
+			.mockResolvedValueOnce(ok({ min_size: 7 }))
+			.mockResolvedValueOnce(ok({ min_size: 7 }))
+			.mockResolvedValue(err(new Error('service unavailable')));
+
+		const result = await adapter.analyze(nodes, [], nodes);
+
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
+			//the narrower answer survives rather than the level being lost
+			expect(result.value.organization.blockingSetsMinSize).toBe(3);
+		}
 	});
 });
