@@ -538,8 +538,16 @@ export class PythonFbasAdapter {
 		request: PythonFbasAnalysisRequest,
 		topTier: string[]
 	): Promise<number | undefined> {
-		//a top tier of fewer than two entities has nothing to split
-		if (topTier.length < 2) return undefined;
+		//A top tier of fewer than two entities has nothing to split. This was the
+		//one path that returned undefined without saying so, which made a null
+		//result downstream indistinguishable from a failure.
+		if (topTier.length < 2) {
+			console.error(
+				`[PythonFbas] Skipping top tier splitting set: top tier has ` +
+					`${topTier.length} member(s), nothing to split`
+			);
+			return undefined;
+		}
 
 		const topTierMembers = new Set(topTier);
 		const topTierNodes = request.nodes.filter((node) =>
@@ -553,7 +561,9 @@ export class PythonFbasAdapter {
 		if (topTierNodes.length !== topTier.length) {
 			console.error(
 				`[PythonFbas] Skipping top tier splitting set: ${topTier.length} ` +
-					`members reported, ${topTierNodes.length} resolved in the analysed set`
+					`members reported, ${topTierNodes.length} resolved in the analysed set. ` +
+					`Reported: ${JSON.stringify(topTier.slice(0, 5))}; ` +
+					`available: ${JSON.stringify(request.nodes.slice(0, 5).map((n) => n.publicKey))}`
 			);
 			return undefined;
 		}

@@ -333,27 +333,33 @@ function performAnalysis() {
   isLoading.value = true;
   analysisError.value = "";
 
-  try {
-    fbasAnalysisWorker.postMessage({
-      // The worker reads `jobId`; `id` left it undefined, so results could not
-      // be matched to the run that asked for them.
-      jobId: ++analysisJobId,
-      nodes: nodesToAnalyze,
-      organizations: store.network.organizations,
-      mergeBy: store.networkAnalysisMergeBy,
-      failingNodePublicKeys: store.network.nodes
+  const payload = {
+    // The worker reads `jobId`; `id` left it undefined, so results could not
+    // be matched to the run that asked for them.
+    jobId: ++analysisJobId,
+    // Serialised here rather than in the worker: postMessage
+    // structured-clones its argument and the shared Node/Organization objects
+    // are not cloneable, which threw DataCloneError before the worker started.
+    // The worker fed these to wasm as JSON anyway.
+    nodes: JSON.stringify(nodesToAnalyze),
+    organizations: JSON.stringify(store.network.organizations),
+    mergeBy: store.networkAnalysisMergeBy,
+    failingNodePublicKeys: JSON.stringify(
+      store.network.nodes
         .filter((node) => store.network.isNodeFailing(node))
         .map((node) => node.publicKey),
-      // .value matters: postMessage structured-clones its argument, and a Vue
-      // ref carries a dependency graph of effect functions, which are not
-      // cloneable. Passing the refs themselves threw DataCloneError before the
-      // worker ever started, so this tool never ran.
-      analyzeQuorumIntersection: analyzeQuorumIntersection.value,
-      analyzeSafety: analyzeSafety.value,
-      analyzeLiveness: analyzeLiveness.value,
-      analyzeTopTier: analyzeTopTier.value,
-      analyzeSymmetricTopTier: true,
-    });
+    ),
+    // .value matters for the same reason: a Vue ref carries a dependency graph
+    // of effect functions, which are not cloneable either.
+    analyzeQuorumIntersection: analyzeQuorumIntersection.value,
+    analyzeSafety: analyzeSafety.value,
+    analyzeLiveness: analyzeLiveness.value,
+    analyzeTopTier: analyzeTopTier.value,
+    analyzeSymmetricTopTier: true,
+  };
+
+  try {
+    fbasAnalysisWorker.postMessage(payload);
   } catch (error) {
     // Without this the thrown clone error escaped as an unhandled event handler
     // error and left the dimmer spinning forever, with the reason visible only
@@ -361,8 +367,26 @@ function performAnalysis() {
     isLoading.value = false;
     analysisError.value =
       error instanceof Error ? error.message : String(error);
-    console.error("Could not start the network analysis", error);
+    //postMessage reports only that something could not be cloned, never what.
+    //Naming the field turns a dead end into a one-line fix -- this has already
+    //cost two rounds of guessing.
+    console.error(
+      "Could not start the network analysis. Uncloneable fields: " +
+        (uncloneableKeysOf(payload).join(", ") || "(none found)"),
+      error,
+    );
   }
+}
+
+function uncloneableKeysOf(payload: Record<string, unknown>): string[] {
+  return Object.keys(payload).filter((key) => {
+    try {
+      structuredClone(payload[key]);
+      return false;
+    } catch {
+      return true;
+    }
+  });
 }
 
 function getNodesToQuorumSetMap(nodes: Node[]): Map<PublicKey, BaseQuorumSet> {
@@ -423,9 +447,18 @@ onMounted(() => {
   isLoading.value = false;
   scrollTo("network-analysis-card");
 
+  //Without this a worker that dies takes the panel with it: isLoading stays
+  //true and the dimmer spins with nothing shown anywhere.
+  fbasAnalysisWorker.onerror = (event) => {
+    isLoading.value = false;
+    analysisError.value = event.message || "The analysis worker failed.";
+    console.error("Network analysis worker error", event);
+  };
+
   fbasAnalysisWorker.onmessage = (event: {
     data: {
       type: string;
+      message?: string;
       result: {
         analysis: FbasAnalysisWorkerResult;
         mergeBy: MergeBy;
@@ -434,6 +467,13 @@ onMounted(() => {
     };
   }) => {
     switch (event.data.type) {
+      case "error": {
+        isLoading.value = false;
+        analysisError.value =
+          event.data.message ?? "The analysis failed for an unknown reason.";
+        console.error("Network analysis failed:", event.data.message);
+        break;
+      }
       case "end":
         {
           if (event.data.result) {
