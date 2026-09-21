@@ -1,7 +1,10 @@
 <template>
   <div>
     <!-- 30D Bar Charts -->
-    <div v-if="!store.isSimulation" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div
+      v-if="!store.isSimulation"
+      class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+    >
       <BarChart30D
         title="Validating"
         :value="validating30DValue"
@@ -28,16 +31,26 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       <!-- Node Details -->
       <div>
-        <h3 class="text-2xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Node Details</h3>
-        <div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden text-sm">
+        <h3
+          class="text-2xs font-semibold uppercase tracking-wider text-gray-400 mb-2"
+        >
+          Node Details
+        </h3>
+        <div
+          class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden text-sm"
+        >
           <UiDetailRow label="Host">
-            <span class="font-mono text-xs text-gray-700">{{ node.host || 'N/A' }}</span>
+            <span class="font-mono text-xs text-gray-700">{{
+              node.host || "N/A"
+            }}</span>
           </UiDetailRow>
           <UiDetailRow label="IP">
-            <span class="font-mono text-xs text-gray-700">{{ node.key || 'N/A' }}</span>
+            <span class="font-mono text-xs text-gray-700">{{
+              node.key || "N/A"
+            }}</span>
           </UiDetailRow>
           <UiDetailRow label="Version">
-            <span class="text-gray-900">{{ node.versionStr || 'N/A' }}</span>
+            <span class="text-gray-900">{{ node.versionStr || "N/A" }}</span>
           </UiDetailRow>
           <UiDetailRow label="Organization">
             <router-link
@@ -48,45 +61,77 @@
                 query: routeQuery,
               }"
               class="font-medium text-gray-900"
-            >{{ organization.name }}</router-link>
+              >{{ organization.name }}</router-link
+            >
             <span v-else class="text-gray-900">N/A</span>
           </UiDetailRow>
           <UiDetailRow label="Domain">
-            <span class="text-gray-900">{{ node.homeDomain || 'N/A' }}</span>
+            <span class="text-gray-900">{{ node.homeDomain || "N/A" }}</span>
           </UiDetailRow>
           <UiDetailRow label="Country">
-            <span class="text-gray-900">{{ node.geoData.countryName || 'N/A' }}</span>
+            <span class="text-gray-900">{{
+              node.geoData.countryName || "N/A"
+            }}</span>
           </UiDetailRow>
           <UiDetailRow label="ISP">
-            <span class="text-gray-700">{{ node.isp || 'N/A' }}</span>
+            <span class="text-gray-700">{{ node.isp || "N/A" }}</span>
           </UiDetailRow>
           <UiDetailRow label="Discovered">
-            <span class="text-gray-700">{{ node.dateDiscovered.toDateString() }}</span>
+            <span class="text-gray-700">{{
+              node.dateDiscovered.toDateString()
+            }}</span>
           </UiDetailRow>
-          <UiDetailRow label="History URL" :last="lastDetailRow === 'historyUrl'">
-            <span class="font-mono text-xs text-gray-700 break-all">{{ node.historyUrl || 'N/A' }}</span>
+          <UiDetailRow
+            label="History URL"
+            :last="lastDetailRow === 'historyUrl'"
+          >
+            <span class="font-mono text-xs text-gray-700 break-all">{{
+              node.historyUrl || "N/A"
+            }}</span>
           </UiDetailRow>
-          <UiDetailRow v-if="node.overlayVersion" label="Overlay Version" :last="lastDetailRow === 'overlayVersion'">
+          <UiDetailRow
+            v-if="node.overlayVersion"
+            label="Overlay Version"
+            :last="lastDetailRow === 'overlayVersion'"
+          >
             <span class="text-gray-900">{{ node.overlayVersion }}</span>
           </UiDetailRow>
-          <UiDetailRow v-if="node.overlayMinVersion" label="Overlay Min Version" :last="lastDetailRow === 'overlayMinVersion'">
+          <UiDetailRow
+            v-if="node.overlayMinVersion"
+            label="Overlay Min Version"
+            :last="lastDetailRow === 'overlayMinVersion'"
+          >
             <span class="text-gray-900">{{ node.overlayMinVersion }}</span>
           </UiDetailRow>
-          <UiDetailRow v-if="node.ledgerVersion" label="Ledger Version" :last="lastDetailRow === 'ledgerVersion'">
+          <UiDetailRow
+            v-if="node.ledgerVersion"
+            label="Ledger Version"
+            :last="lastDetailRow === 'ledgerVersion'"
+          >
             <span class="text-gray-900">{{ node.ledgerVersion }}</span>
           </UiDetailRow>
-          <UiDetailRow v-if="node.isValidator" label="Externalize Lag" :last="lastDetailRow === 'lag'">
-            <span class="text-gray-900">{{ node.lag !== null ? node.lag + ' ms' : 'Not detected' }}</span>
+          <UiDetailRow
+            v-if="node.isValidator"
+            label="Externalize Lag"
+            :last="lastDetailRow === 'lag'"
+          >
+            <span class="text-gray-900">{{
+              node.lag !== null ? node.lag + " ms" : "Not detected"
+            }}</span>
           </UiDetailRow>
         </div>
       </div>
 
       <!-- Organization -->
       <div v-if="organization">
-        <h3 class="text-2xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+        <h3
+          class="text-2xs font-semibold uppercase tracking-wider text-gray-400 mb-2"
+        >
           Organization: {{ organization.name }}
         </h3>
-        <div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden text-sm">
+        <div
+          class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden text-sm"
+        >
           <div
             v-for="orgNode in orgNodes"
             :key="orgNode.publicKey"
@@ -104,16 +149,26 @@
                   query: routeQuery,
                 }"
                 class="font-medium text-gray-900 hover:text-emerald-700 transition-colors"
-              >{{ orgNode.displayName }}</router-link>
-              <UiBadge v-if="orgNode.publicKey === node.publicKey" variant="emerald">
+                >{{ orgNode.displayName }}</router-link
+              >
+              <UiBadge
+                v-if="orgNode.publicKey === node.publicKey"
+                variant="emerald"
+              >
                 Viewing
               </UiBadge>
             </div>
             <span class="text-emerald-600 tabular text-sm">
-              {{ orgNode.statistics.has30DayStats ? orgNode.statistics.validating30DaysPercentage + '%' : 'N/A' }}
+              {{
+                orgNode.statistics.has30DayStats
+                  ? orgNode.statistics.validating30DaysPercentage + "%"
+                  : "N/A"
+              }}
             </span>
           </div>
-          <div class="flex items-center justify-between px-5 py-2.5 bg-gray-50/80">
+          <div
+            class="flex items-center justify-between px-5 py-2.5 bg-gray-50/80"
+          >
             <span class="text-gray-400">Org Uptime</span>
             <span class="font-semibold text-emerald-600">
               {{ orgUptime }}
@@ -136,29 +191,54 @@
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          />
         </svg>
         Trust Graph
       </button>
-      <div v-show="graphExpanded" class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden" style="height: 400px">
-        <network-visual-navigator :view="route.query.view as string || 'graph'" />
+      <div
+        v-show="graphExpanded"
+        class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+        style="height: 400px"
+      >
+        <network-visual-navigator
+          :view="(route.query.view as string) || 'graph'"
+        />
       </div>
     </div>
 
     <!-- Trusts preview -->
     <div v-if="node.isValidator" class="mb-8">
-      <h3 class="text-2xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+      <h3
+        class="text-2xs font-semibold uppercase tracking-wider text-gray-400 mb-2"
+      >
         Trusts ({{ trustsCount }})
       </h3>
-      <div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div
+        class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+      >
         <table class="w-full text-left">
           <thead>
-            <tr class="text-2xs font-mono text-gray-400 uppercase tracking-widest bg-gray-50/80">
+            <tr
+              class="text-2xs font-mono text-gray-400 uppercase tracking-widest bg-gray-50/80"
+            >
               <th class="px-5 py-3 font-medium">Validator</th>
-              <th class="px-4 py-3 font-medium text-right hidden md:table-cell">24H</th>
-              <th class="px-4 py-3 font-medium text-right hidden md:table-cell">30D</th>
-              <th class="px-4 py-3 font-medium text-right hidden lg:table-cell">Version</th>
-              <th class="px-4 py-3 font-medium text-right hidden lg:table-cell">Country</th>
+              <th class="px-4 py-3 font-medium text-right hidden md:table-cell">
+                24H
+              </th>
+              <th class="px-4 py-3 font-medium text-right hidden md:table-cell">
+                30D
+              </th>
+              <th class="px-4 py-3 font-medium text-right hidden lg:table-cell">
+                Version
+              </th>
+              <th class="px-4 py-3 font-medium text-right hidden lg:table-cell">
+                Country
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -171,23 +251,41 @@
               <td class="px-5 py-3">
                 <div class="flex items-center gap-2">
                   <UiStatusDot :color="v.isValidating ? 'emerald' : 'red'" />
-                  <span class="font-medium text-gray-900">{{ v.displayName }}</span>
-                  <UiBadge v-if="v.isFullValidator" variant="gray" tier="meta">Full</UiBadge>
+                  <span class="font-medium text-gray-900">{{
+                    v.displayName
+                  }}</span>
+                  <UiBadge v-if="v.isFullValidator" variant="gray" tier="meta"
+                    >Full</UiBadge
+                  >
                 </div>
               </td>
-              <td class="px-4 py-3 text-right hidden md:table-cell text-sm tabular">
-                {{ v.statistics.has24HourStats ? v.statistics.validating24HoursPercentage + '%' : 'N/A' }}
+              <td
+                class="px-4 py-3 text-right hidden md:table-cell text-sm tabular"
+              >
+                {{
+                  v.statistics.has24HourStats
+                    ? v.statistics.validating24HoursPercentage + "%"
+                    : "N/A"
+                }}
               </td>
               <td class="px-4 py-3 text-right hidden md:table-cell">
                 <span :class="get30DColor(v)" class="text-sm tabular">
-                  {{ v.statistics.has30DayStats ? v.statistics.validating30DaysPercentage + '%' : 'N/A' }}
+                  {{
+                    v.statistics.has30DayStats
+                      ? v.statistics.validating30DaysPercentage + "%"
+                      : "N/A"
+                  }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-right hidden lg:table-cell font-mono text-xs text-gray-500">
-                {{ v.versionStr || 'N/A' }}
+              <td
+                class="px-4 py-3 text-right hidden lg:table-cell font-mono text-xs text-gray-500"
+              >
+                {{ v.versionStr || "N/A" }}
               </td>
-              <td class="px-4 py-3 text-right hidden lg:table-cell text-xs text-gray-700">
-                {{ v.geoData.countryName || 'N/A' }}
+              <td
+                class="px-4 py-3 text-right hidden lg:table-cell text-xs text-gray-700"
+              >
+                {{ v.geoData.countryName || "N/A" }}
               </td>
             </tr>
           </tbody>
@@ -198,14 +296,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
-import { Node, QuorumSet } from 'shared';
-import useStore from '@/store/useStore';
-import useNodeMeasurementsStore from '@/store/useNodeMeasurementsStore';
-import type { NodeDayStatistics } from '@/store/NodeStatisticsStore';
-import BarChart30D, { type Bar } from './BarChart30D.vue';
-import NetworkVisualNavigator from '@/components/visual-navigator/network-visual-navigator.vue';
-import { useRoute, useRouter } from 'vue-router';
+import { computed, onMounted, ref, watch } from "vue";
+import { Node, QuorumSet } from "shared";
+import useStore from "@/store/useStore";
+import useNodeMeasurementsStore from "@/store/useNodeMeasurementsStore";
+import type { NodeDayStatistics } from "@/store/NodeStatisticsStore";
+import BarChart30D, { type Bar } from "./BarChart30D.vue";
+import NetworkVisualNavigator from "@/components/visual-navigator/network-visual-navigator.vue";
+import { useRoute, useRouter } from "vue-router";
 
 const props = defineProps<{
   node: Node;
@@ -251,7 +349,7 @@ function makeBars(
   inverted = false,
 ): Bar[] {
   if (dayStats.value.length === 0) {
-    return Array(30).fill({ height: '4px', color: 'bg-gray-200' });
+    return Array(30).fill({ height: "4px", color: "bg-gray-200" });
   }
   return dayStats.value.map((stat) => {
     let ratio = (stat[property] as number) / stat.crawlCount;
@@ -259,7 +357,7 @@ function makeBars(
     const pct = Math.max(4, Math.round(ratio * 100));
     const isGood = inverted ? ratio < 0.01 : ratio > 0.99;
     return {
-      height: pct + '%',
+      height: pct + "%",
       color: isGood ? goodColor : badColor,
     };
   });
@@ -267,32 +365,32 @@ function makeBars(
 
 const validatingBars = computed<Bar[]>(() => {
   if (props.node.isValidator) {
-    return makeBars('isValidatingCount', 'bg-emerald-500', 'bg-amber-400');
+    return makeBars("isValidatingCount", "bg-emerald-500", "bg-amber-400");
   }
-  return makeBars('isActiveCount', 'bg-emerald-500', 'bg-amber-400');
+  return makeBars("isActiveCount", "bg-emerald-500", "bg-amber-400");
 });
 
 const validating30DValue = computed(() => {
   if (props.node.isValidator) {
     return props.node.statistics.has30DayStats
-      ? props.node.statistics.validating30DaysPercentage + '%'
-      : 'N/A';
+      ? props.node.statistics.validating30DaysPercentage + "%"
+      : "N/A";
   }
   return props.node.statistics.has30DayStats
-    ? props.node.statistics.active30DaysPercentage + '%'
-    : 'N/A';
+    ? props.node.statistics.active30DaysPercentage + "%"
+    : "N/A";
 });
 
 const historyArchiveBars = computed<Bar[]>(() =>
-  makeBars('isFullValidatorCount', 'bg-emerald-500', 'bg-amber-400'),
+  makeBars("isFullValidatorCount", "bg-emerald-500", "bg-amber-400"),
 );
 
 const historyArchiveValue = computed(() => {
-  if (dayStats.value.length === 0) return 'N/A';
+  if (dayStats.value.length === 0) return "N/A";
   const total = dayStats.value.reduce((s, d) => s + d.crawlCount, 0);
   const count = dayStats.value.reduce((s, d) => s + d.isFullValidatorCount, 0);
-  if (total === 0) return 'N/A';
-  return ((count / total) * 100).toFixed(1) + '%';
+  if (total === 0) return "N/A";
+  return ((count / total) * 100).toFixed(1) + "%";
 });
 
 const crawlerRejectedTotals = computed(() => {
@@ -303,37 +401,36 @@ const crawlerRejectedTotals = computed(() => {
 
 const crawlerRejectedBars = computed<Bar[]>(() => {
   if (dayStats.value.length === 0) {
-    return Array(30).fill({ height: '4px', color: 'bg-gray-200' });
+    return Array(30).fill({ height: "4px", color: "bg-gray-200" });
   }
   return dayStats.value.map((stat) => {
-    const ratio = stat.crawlCount === 0
-      ? 0
-      : stat.isOverloadedCount / stat.crawlCount;
+    const ratio =
+      stat.crawlCount === 0 ? 0 : stat.isOverloadedCount / stat.crawlCount;
     return {
-      height: Math.max(4, Math.round(ratio * 100)) + '%',
-      color: ratio > 0 ? 'bg-red-400' : 'bg-gray-200',
+      height: Math.max(4, Math.round(ratio * 100)) + "%",
+      color: ratio > 0 ? "bg-red-400" : "bg-gray-200",
     };
   });
 });
 
 const crawlerRejectedValue = computed(() => {
-  if (dayStats.value.length === 0) return 'N/A';
+  if (dayStats.value.length === 0) return "N/A";
   const { total, count } = crawlerRejectedTotals.value;
-  if (total === 0) return 'N/A';
-  return ((count / total) * 100).toFixed(1) + '%';
+  if (total === 0) return "N/A";
+  return ((count / total) * 100).toFixed(1) + "%";
 });
 
-const crawlerRejectedColorScheme = computed<'emerald' | 'red'>(() =>
-  crawlerRejectedTotals.value.count === 0 ? 'emerald' : 'red',
+const crawlerRejectedColorScheme = computed<"emerald" | "red">(() =>
+  crawlerRejectedTotals.value.count === 0 ? "emerald" : "red",
 );
 
 // Determine which detail row is last (for removing bottom border)
 const lastDetailRow = computed(() => {
-  if (props.node.isValidator) return 'lag';
-  if (props.node.ledgerVersion) return 'ledgerVersion';
-  if (props.node.overlayMinVersion) return 'overlayMinVersion';
-  if (props.node.overlayVersion) return 'overlayVersion';
-  return 'historyUrl';
+  if (props.node.isValidator) return "lag";
+  if (props.node.ledgerVersion) return "ledgerVersion";
+  if (props.node.overlayMinVersion) return "overlayMinVersion";
+  if (props.node.overlayVersion) return "overlayVersion";
+  return "historyUrl";
 });
 
 // Organization
@@ -352,14 +449,14 @@ const orgNodes = computed(() => {
 
 const orgUptime = computed(() => {
   const org = organization.value;
-  if (!org) return 'N/A';
-  if (org.has30DayStats) return org.subQuorum30DaysAvailability + '%';
-  return 'N/A';
+  if (!org) return "N/A";
+  if (org.has30DayStats) return org.subQuorum30DaysAvailability + "%";
+  return "N/A";
 });
 
 // Trusts preview
-const trustsCount = computed(() =>
-  QuorumSet.getAllValidators(props.node.quorumSet).length,
+const trustsCount = computed(
+  () => QuorumSet.getAllValidators(props.node.quorumSet).length,
 );
 
 const trustsPreview = computed(() => {
@@ -370,15 +467,15 @@ const trustsPreview = computed(() => {
 });
 
 function get30DColor(v: Node) {
-  if (!v.statistics.has30DayStats) return 'text-gray-400';
+  if (!v.statistics.has30DayStats) return "text-gray-400";
   return v.statistics.validating30DaysPercentage >= 99
-    ? 'text-emerald-600'
-    : 'text-amber-600';
+    ? "text-emerald-600"
+    : "text-amber-600";
 }
 
 function navigateToNode(publicKey: string) {
   router.push({
-    name: 'node-dashboard',
+    name: "node-dashboard",
     params: { publicKey },
     query: routeQuery.value,
   });
