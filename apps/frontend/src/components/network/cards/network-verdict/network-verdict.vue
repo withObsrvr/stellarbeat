@@ -19,6 +19,14 @@
         >
           {{ verdict.label }}
         </h2>
+        <button
+          type="button"
+          class="rounded-full p-0.5 text-ink-muted hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+          :aria-label="`How ${verdict.label.toLowerCase()} is determined`"
+          @click="explain(verdict.infoTopic)"
+        >
+          <InfoIcon />
+        </button>
       </div>
       <span v-if="updatedAt" class="font-mono text-xs text-ink-muted">
         as of {{ updatedAt }}
@@ -35,9 +43,17 @@
     <dl class="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
       <div v-for="stat in verdict.stats" :key="stat.label" class="flex flex-col gap-2">
         <dt
-          class="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted"
+          class="flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-ink-muted"
         >
           {{ stat.label }}
+          <button
+            type="button"
+            class="rounded-full text-ink-muted hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+            :aria-label="`What ${stat.label.toLowerCase()} means`"
+            @click="explain(stat.infoTopic)"
+          >
+            <InfoIcon />
+          </button>
         </dt>
         <dd class="flex flex-col gap-1.5">
           <span
@@ -57,6 +73,14 @@
     <div class="flex flex-col gap-2.5 text-[13.5px] text-ink-body">
       <div class="flex flex-wrap items-center gap-2">
         <span>Top tier:</span>
+        <button
+          type="button"
+          class="rounded-full text-ink-muted hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+          aria-label="What the top tier means"
+          @click="explain('top-tier')"
+        >
+          <InfoIcon />
+        </button>
         <span
           v-for="(detail, index) in verdict.topTier"
           :key="detail.label"
@@ -88,6 +112,14 @@
       </div>
     </div>
 
+    <!-- The plain-language wording above is a summary. These are the existing
+         FBAS explainers, reused rather than restated, so a reader can always
+         reach the real definition. -->
+    <QuorumIntersectionInfo ref="quorumIntersectionInfo" />
+    <LivenessInfo ref="livenessInfo" />
+    <SafetyInfo ref="safetyInfo" />
+    <TopTierInfo ref="topTierInfo" />
+
     <!-- The detailed engine output is demoted, not removed -->
     <template v-if="$slots.details">
       <div class="mb-5 mt-6 h-px bg-line"></div>
@@ -97,9 +129,36 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { type NetworkStatistics } from "shared";
-import { deriveVerdict, type Tone } from "./deriveVerdict";
+import {
+  deriveVerdict,
+  type InfoTopic,
+  type Tone,
+} from "./deriveVerdict";
+import InfoIcon from "./InfoIcon.vue";
+import QuorumIntersectionInfo from "@/components/network/tools/network-analysis/info/quorum-intersection-info.vue";
+import LivenessInfo from "@/components/network/tools/network-analysis/info/liveness-info.vue";
+import SafetyInfo from "@/components/network/tools/network-analysis/info/safety-info.vue";
+import TopTierInfo from "@/components/network/tools/network-analysis/info/top-tier-info.vue";
+
+type Explainer = { show: () => void } | null;
+
+const quorumIntersectionInfo = ref<Explainer>(null);
+const livenessInfo = ref<Explainer>(null);
+const safetyInfo = ref<Explainer>(null);
+const topTierInfo = ref<Explainer>(null);
+
+function explain(topic: InfoTopic) {
+  const explainer: Record<InfoTopic, Explainer> = {
+    "quorum-intersection": quorumIntersectionInfo.value,
+    liveness: livenessInfo.value,
+    safety: safetyInfo.value,
+    "top-tier": topTierInfo.value,
+  };
+
+  explainer[topic]?.show();
+}
 
 const props = defineProps<{
   statistics: NetworkStatistics;

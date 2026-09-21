@@ -12,17 +12,29 @@ export type VerdictLevel = "safe" | "fragile" | "at-risk" | "unknown";
 
 export type Tone = "neutral" | "safe" | "warn" | "risk";
 
+/**
+ * Which existing FBAS explainer backs a given line.
+ *
+ * The plain-language wording is a summary, not a replacement: a reader who
+ * wants the real definition must be able to reach it. Keeping the mapping here
+ * rather than in the template means it is data, and testable, rather than
+ * markup that can drift away from the copy it explains.
+ */
+export type InfoTopic = "quorum-intersection" | "liveness" | "safety" | "top-tier";
+
 export interface VerdictStat {
   label: string;
   value: string;
   caption: string;
   tone: Tone;
+  infoTopic: InfoTopic;
 }
 
 export interface VerdictDetail {
   label: string;
   value: string;
   tone: Tone;
+  infoTopic?: InfoTopic;
 }
 
 export interface Verdict {
@@ -31,6 +43,8 @@ export interface Verdict {
   label: string;
   //one or two sentences answering "should I be worried?"
   summary: string;
+  //the explainer behind the headline verdict itself
+  infoTopic: InfoTopic;
   stats: VerdictStat[];
   topTier: VerdictDetail[];
   concentration: VerdictDetail[];
@@ -84,18 +98,23 @@ export function deriveVerdict(statistics: NetworkStatistics): Verdict {
     level,
     label: labelFor(level),
     summary: summaryFor(level, haltsIf),
+    infoTopic: "quorum-intersection",
     stats: [
       {
         label: "Halts if",
         value: sizeValue(haltsIf, "org fails", "orgs fail"),
         caption: "smallest set of organizations whose failure stops new ledgers",
         tone: toneForSize(haltsIf),
+        //blocking sets
+        infoTopic: "liveness",
       },
       {
         label: "Core forks if",
         value: sizeValue(coreForksIf, "org colludes", "orgs collude"),
         caption: "smallest set that could split the top tier itself",
         tone: forkTone(coreForksIf),
+        //splitting sets
+        infoTopic: "safety",
       },
       {
         label: "Nodes cut off by",
@@ -103,6 +122,8 @@ export function deriveVerdict(statistics: NetworkStatistics): Verdict {
         caption:
           "smallest set that could separate a node from the rest of the network",
         tone: forkTone(cutOffBy),
+        //the same splitting-set analysis, unrestricted
+        infoTopic: "safety",
       },
     ],
     topTier: topTierDetail(statistics),
@@ -165,6 +186,7 @@ function topTierDetail(statistics: NetworkStatistics): VerdictDetail[] {
       label: "Top tier",
       value: sizeValue(size, "org", "orgs"),
       tone: "neutral",
+      infoTopic: "top-tier",
     },
     {
       label: "Structure",
@@ -172,6 +194,7 @@ function topTierDetail(statistics: NetworkStatistics): VerdictDetail[] {
       //Asymmetry is not a fault, only a reason analysis is slower and trust is
       //unevenly expressed, so it is a note rather than a warning.
       tone: statistics.hasSymmetricTopTier ? "safe" : "neutral",
+      infoTopic: "top-tier",
     },
   ];
 }

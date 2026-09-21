@@ -73,4 +73,13 @@ const safetyInfoModal = ref(null);
 function hideModal() {
   if (safetyInfoModal.value) (safetyInfoModal.value as any).hide();
 }
+
+// Exposed so callers can open the explainer. Without this the component can
+// only be opened by the global show-modal-global event, which is part of the
+// Bootstrap compatibility layer that is on its way out.
+function showModal() {
+  if (safetyInfoModal.value) (safetyInfoModal.value as any).show();
+}
+
+defineExpose({ show: showModal, hide: hideModal });
 </script>

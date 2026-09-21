@@ -246,3 +246,48 @@ describe("deriveVerdict with values absent from the API", () => {
     ).toBe("—");
   });
 });
+
+describe("deriveVerdict explainer mapping", () => {
+  /**
+   * Each line of plain language has to be traceable to the FBAS analysis it
+   * summarises, or the summary is all a reader ever gets.
+   */
+  const verdict = deriveVerdict(
+    Object.assign(new NetworkStatistics(), {
+      hasQuorumIntersection: true,
+      minBlockingSetOrgsFilteredSize: 4,
+      minSplittingSetOrgsSize: 4,
+      minSplittingSetOrgsTopTierSize: 5,
+      topTierOrgsSize: 7,
+    }),
+  );
+
+  it("points the headline at the quorum intersection explainer", () => {
+    expect(verdict.infoTopic).toBe("quorum-intersection");
+  });
+
+  it("points 'halts if' at the blocking-set explainer", () => {
+    expect(
+      verdict.stats.find((s) => s.label === "Halts if")?.infoTopic,
+    ).toBe("liveness");
+  });
+
+  it("points both fork figures at the splitting-set explainer", () => {
+    expect(
+      verdict.stats.find((s) => s.label === "Core forks if")?.infoTopic,
+    ).toBe("safety");
+    expect(
+      verdict.stats.find((s) => s.label === "Nodes cut off by")?.infoTopic,
+    ).toBe("safety");
+  });
+
+  it("gives every stat an explainer", () => {
+    expect(verdict.stats.every((s) => Boolean(s.infoTopic))).toBe(true);
+  });
+
+  it("points the top tier detail at the top-tier explainer", () => {
+    expect(
+      verdict.topTier.every((d) => d.infoTopic === "top-tier"),
+    ).toBe(true);
+  });
+});

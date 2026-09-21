@@ -37,10 +37,10 @@
                           {{ hasQuorumIntersection ? "All quorums intersect" : "No quorum intersection" }}
                         </UiBadge>
                       </h3>
-                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showQiInfo = true">
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="quorumIntersectionInfo?.show()">
                         <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </button>
-                      <quorum-intersection-info />
+                      <quorum-intersection-info ref="quorumIntersectionInfo" />
                     </div>
                   </template>
                 </analysis>
@@ -65,11 +65,11 @@
                     <div class="flex justify-between items-baseline">
                       <h3 v-if="blockingSetsMinSize <= 0">Network halted.</h3>
                       <h3 v-else>Found set(s) of size {{ blockingSetsMinSize }} that could impact liveness.</h3>
-                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showLivenessInfo = true">
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="livenessInfo?.show()">
                         <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </button>
                     </div>
-                    <liveness-info />
+                    <liveness-info ref="livenessInfo" />
                   </template>
                 </analysis>
               </div>
@@ -93,11 +93,11 @@
                     <div class="flex justify-between items-baseline">
                       <h3 v-if="splittingSetsMinSize <= 0">No intersection between quorums found.</h3>
                       <h3 v-else>Found set(s) of size {{ splittingSetsMinSize }} that could impact safety.</h3>
-                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showSafetyInfo = true">
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="safetyInfo?.show()">
                         <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </button>
                     </div>
-                    <safety-info />
+                    <safety-info ref="safetyInfo" />
                   </template>
                 </analysis>
               </div>
@@ -120,10 +120,10 @@
                   <template #title>
                     <div class="flex justify-between items-baseline">
                       <h3 class="mb-0">Top tier has size {{ topTier.length }}</h3>
-                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showTopTierInfo = true">
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="topTierInfo?.show()">
                         <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </button>
-                      <top-tier-info />
+                      <top-tier-info ref="topTierInfo" />
                     </div>
                     <UiBadge variant="info">
                       {{ topTierIsSymmetric ? "Symmetric" : "Not symmetric" }}
@@ -243,10 +243,13 @@ const { isLoading, dimmerClass } = useIsLoading();
 const store = useStore();
 
 const showModal = ref(false);
-const showQiInfo = ref(false);
-const showLivenessInfo = ref(false);
-const showSafetyInfo = ref(false);
-const showTopTierInfo = ref(false);
+// The info buttons used to set these as plain booleans that nothing read --
+// the explainer components take no props and were never bound to them, so all
+// four buttons did nothing. Template refs call the components directly now.
+const quorumIntersectionInfo = ref<{ show: () => void } | null>(null);
+const livenessInfo = ref<{ show: () => void } | null>(null);
+const safetyInfo = ref<{ show: () => void } | null>(null);
+const topTierInfo = ref<{ show: () => void } | null>(null);
 const activeSection = ref('quorum');
 
 const MyMergeBy: {
