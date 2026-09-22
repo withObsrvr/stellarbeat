@@ -15,7 +15,6 @@
     "@stellarbeat/stellar-halting-analysis": "1.2.0",
     "@stellarbeat/stellar_analysis_web": "^0.7.0",
     "@vueform/multiselect": "^2.6.11",
-    "bootstrap": "4.6.1",
     "chart.js": "^4.4.4",
     "chartjs-adapter-date-fns": "^3.0.0",
     "connect-history-api-fallback": "^2.0.0",

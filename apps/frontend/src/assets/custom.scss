@@ -1,7 +1,11 @@
+// Bootstrap and the vendored Tabler dashboard theme are gone. The ~60 class
+// names the app still used are reimplemented on Radar tokens in
+// assets/tailwind.css under @layer components; everything else in those two
+// stylesheets was dead weight.
+//
+// tabler-ui/variables stays for now: it defines $blue, which graph.vue reaches
+// through assets/variables.scss for its SVG strokes. That is the last thread.
 @import "./tabler-ui/variables";
-@import "bootstrap/scss/bootstrap.scss";
-@import "./tabler-ui/dashboard/dashboard";
-// Bootstrap-Vue removed - using compatibility layer instead
 @import "federated-voting";
 
 .dropdown-item.active,

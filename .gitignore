@@ -44,3 +44,8 @@ docs/OBSRVR_Radar_Quarterly_Report_Q1_2026.pdf
 terraform/environments/staging/terraform.auto_copy.tfvars_old
 apps/backend/src/network-scan/VALIDATOR_DISCOVERY_TESTING.md
 apps/backend/src/network-scan/CREIT_CONNECTIVITY_DIAGNOSTIC_2026-07-29.md
+
+# Playwright screenshot output from the visual smoke spec
+apps/frontend/e2e-screens/
+apps/frontend/test-results/
+apps/frontend/playwright-report/
