@@ -21,10 +21,21 @@ export interface NetworkStatisticsV1 {
 	minBlockingSetCountryFilteredSize: number;
 	minBlockingSetISPSize: number;
 	minBlockingSetISPFilteredSize: number;
-	minSplittingSetSize: number;
-	minSplittingSetOrgsSize: number;
-	minSplittingSetCountrySize: number;
-	minSplittingSetISPSize: number;
+	//null when python-fbas reports no splitting set at this grouping,
+	//meaning safety cannot be broken there -- not a threshold of zero
+	minSplittingSetSize: number | null;
+	//optional: added after the original v1 contract, so older payloads omit them
+	minSplittingSetTopTierSize?: number;
+	//null when python-fbas reports no splitting set at this grouping,
+	//meaning safety cannot be broken there -- not a threshold of zero
+	minSplittingSetOrgsSize: number | null;
+	minSplittingSetOrgsTopTierSize?: number;
+	//null when python-fbas reports no splitting set at this grouping,
+	//meaning safety cannot be broken there -- not a threshold of zero
+	minSplittingSetCountrySize: number | null;
+	//null when python-fbas reports no splitting set at this grouping,
+	//meaning safety cannot be broken there -- not a threshold of zero
+	minSplittingSetISPSize: number | null;
 	topTierSize: number;
 	topTierOrgsSize: number;
 	hasSymmetricTopTier: boolean;
@@ -209,6 +220,16 @@ export const NetworkV1Schema: JSONSchemaType<NetworkV1> = {
 					type: 'number',
 					description:
 						'The size of the smallest network splitting set, grouped by organizations'
+				},
+				minSplittingSetTopTierSize: {
+					type: 'number',
+					description:
+						'The size of the smallest splitting set within the top tier. Measures how hard it is to split the core itself, as opposed to separating an outlying node from it.'
+				},
+				minSplittingSetOrgsTopTierSize: {
+					type: 'number',
+					description:
+						'The size of the smallest splitting set within the top tier, grouped by organizations'
 				},
 				minSplittingSetCountrySize: {
 					type: 'number',

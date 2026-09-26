@@ -250,9 +250,20 @@ export class FbasAggregator {
 		// Calculate threshold: average of individual validator thresholds
 		// This better preserves the original trust requirements
 		const avgThreshold = quorumSets.reduce((sum, qs) => sum + qs.threshold, 0) / quorumSets.length;
-		const threshold = Math.max(1, Math.ceil(avgThreshold));
 
-		console.log(`[FbasAggregator] Merged QS for ${currentGroupId}: threshold=${threshold}, validators=${validators.length}, originalThresholds=${quorumSets.map(qs => qs.threshold).join(',')}`);
+		// Clamp to the number of entities that actually survived aggregation.
+		// Aggregation collapses many validators into few groups, so an averaged
+		// threshold routinely exceeds the group count -- e.g. when geo data is
+		// missing for every node, country aggregation yields a single "Unknown"
+		// group whose averaged threshold is 7 against 1 validator. Such a quorum
+		// set can never be satisfied, so no quorum exists, so python-fbas finds
+		// no splitting set, and the result surfaces in Radar as a safety
+		// threshold of 0. Requiring more entities than exist is never what the
+		// original operators expressed.
+		const threshold = Math.min(
+			Math.max(1, Math.ceil(avgThreshold)),
+			validators.length
+		);
 
 		return new QuorumSet(threshold, validators, []);
 	}
@@ -310,9 +321,20 @@ export class FbasAggregator {
 		// Calculate threshold: average of individual validator thresholds
 		// This better preserves the original trust requirements
 		const avgThreshold = quorumSets.reduce((sum, qs) => sum + qs.threshold, 0) / quorumSets.length;
-		const threshold = Math.max(1, Math.ceil(avgThreshold));
 
-		console.log(`[FbasAggregator] Merged QS for ${currentGroupId}: threshold=${threshold}, validators=${validators.length}, originalThresholds=${quorumSets.map(qs => qs.threshold).join(',')}`);
+		// Clamp to the number of entities that actually survived aggregation.
+		// Aggregation collapses many validators into few groups, so an averaged
+		// threshold routinely exceeds the group count -- e.g. when geo data is
+		// missing for every node, country aggregation yields a single "Unknown"
+		// group whose averaged threshold is 7 against 1 validator. Such a quorum
+		// set can never be satisfied, so no quorum exists, so python-fbas finds
+		// no splitting set, and the result surfaces in Radar as a safety
+		// threshold of 0. Requiring more entities than exist is never what the
+		// original operators expressed.
+		const threshold = Math.min(
+			Math.max(1, Math.ceil(avgThreshold)),
+			validators.length
+		);
 
 		return new QuorumSet(threshold, validators, []);
 	}

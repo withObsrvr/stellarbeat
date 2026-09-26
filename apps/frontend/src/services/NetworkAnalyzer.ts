@@ -119,12 +119,14 @@ export default class NetworkAnalyzer {
     this.automaticState = AutomaticNetworkAnalysis.AnalyzingTopTierSymmetric;
     this.fbasAnalysisWorker.postMessage({
       jobId: this.networkAnalysisId,
-      nodes: this.nodesToAnalyze,
-      organizations: this.network.organizations,
+      nodes: JSON.stringify(this.nodesToAnalyze),
+      organizations: JSON.stringify(this.network.organizations),
       mergeBy: MergeBy.DoNotMerge,
-      failingNodePublicKeys: this.network.nodes
-        .filter((node) => this.network.isNodeFailing(node))
-        .map((node) => node.publicKey),
+      failingNodePublicKeys: JSON.stringify(
+        this.network.nodes
+          .filter((node) => this.network.isNodeFailing(node))
+          .map((node) => node.publicKey),
+      ),
       analyzeTopTier: false,
       analyzeSymmetricTopTier: true,
       analyzeQuorumIntersection: false,
@@ -139,12 +141,14 @@ export default class NetworkAnalyzer {
     this.automaticState = AutomaticNetworkAnalysis.AnalyzingNodes;
     this.fbasAnalysisWorker.postMessage({
       jobId: this.networkAnalysisId,
-      nodes: this.nodesToAnalyze,
-      organizations: this.network.organizations,
+      nodes: JSON.stringify(this.nodesToAnalyze),
+      organizations: JSON.stringify(this.network.organizations),
       mergeBy: MergeBy.DoNotMerge,
-      failingNodePublicKeys: this.network.nodes
-        .filter((node) => this.network.isNodeFailing(node))
-        .map((node) => node.publicKey),
+      failingNodePublicKeys: JSON.stringify(
+        this.network.nodes
+          .filter((node) => this.network.isNodeFailing(node))
+          .map((node) => node.publicKey),
+      ),
       analyzeTopTier: true,
       analyzeSymmetricTopTier: false,
       analyzeQuorumIntersection: true,
@@ -158,12 +162,14 @@ export default class NetworkAnalyzer {
     this.automaticState = AutomaticNetworkAnalysis.AnalyzingOrganizations;
     this.fbasAnalysisWorker.postMessage({
       jobId: this.networkAnalysisId,
-      nodes: this.nodesToAnalyze,
-      organizations: this.network.organizations,
+      nodes: JSON.stringify(this.nodesToAnalyze),
+      organizations: JSON.stringify(this.network.organizations),
       mergeBy: MergeBy.Orgs,
-      failingNodePublicKeys: this.network.nodes
-        .filter((node) => this.network.isNodeFailing(node))
-        .map((node) => node.publicKey),
+      failingNodePublicKeys: JSON.stringify(
+        this.network.nodes
+          .filter((node) => this.network.isNodeFailing(node))
+          .map((node) => node.publicKey),
+      ),
       analyzeTopTier: true,
       analyzeSymmetricTopTier: false,
       analyzeQuorumIntersection: false,
@@ -177,12 +183,14 @@ export default class NetworkAnalyzer {
     this.automaticState = AutomaticNetworkAnalysis.AnalyzingCountries;
     this.fbasAnalysisWorker.postMessage({
       jobId: this.networkAnalysisId,
-      nodes: this.nodesToAnalyze,
-      organizations: this.network.organizations,
+      nodes: JSON.stringify(this.nodesToAnalyze),
+      organizations: JSON.stringify(this.network.organizations),
       mergeBy: MergeBy.Countries,
-      failingNodePublicKeys: this.network.nodes
-        .filter((node) => this.network.isNodeFailing(node))
-        .map((node) => node.publicKey),
+      failingNodePublicKeys: JSON.stringify(
+        this.network.nodes
+          .filter((node) => this.network.isNodeFailing(node))
+          .map((node) => node.publicKey),
+      ),
       analyzeTopTier: false,
       analyzeSymmetricTopTier: false,
       analyzeQuorumIntersection: false,
@@ -196,12 +204,14 @@ export default class NetworkAnalyzer {
     this.automaticState = AutomaticNetworkAnalysis.AnalyzingISPs;
     this.fbasAnalysisWorker.postMessage({
       jobId: this.networkAnalysisId,
-      nodes: this.nodesToAnalyze,
-      organizations: this.network.organizations,
+      nodes: JSON.stringify(this.nodesToAnalyze),
+      organizations: JSON.stringify(this.network.organizations),
       mergeBy: MergeBy.ISPs,
-      failingNodePublicKeys: this.network.nodes
-        .filter((node) => this.network.isNodeFailing(node))
-        .map((node) => node.publicKey),
+      failingNodePublicKeys: JSON.stringify(
+        this.network.nodes
+          .filter((node) => this.network.isNodeFailing(node))
+          .map((node) => node.publicKey),
+      ),
       analyzeTopTier: false,
       analyzeSymmetricTopTier: false,
       analyzeQuorumIntersection: false,

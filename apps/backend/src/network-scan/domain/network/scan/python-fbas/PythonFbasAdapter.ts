@@ -81,6 +81,16 @@ export interface IPythonFbasHttpClient {
 	healthCheck(): Promise<Result<{ status: string }, Error>>;
 }
 
+/**
+ * Node-level analysis carries the top tier membership alongside the merged
+ * sizes, because the symmetric top tier check needs to know *which* nodes are
+ * in the top tier — not just how many.
+ */
+interface NodeLevelAnalysis {
+	merged: AnalysisMergedResult;
+	topTier: string[];
+}
+
 export class PythonFbasAdapter {
 	constructor(
 		private readonly httpClient: IPythonFbasHttpClient,
@@ -93,14 +103,26 @@ export class PythonFbasAdapter {
 	 *
 	 * This replaces the Rust scanner's analyze() method
 	 */
+	/**
+	 * @param nodes the transitive network quorum set -- effectively the top
+	 *   tier. Everything except the network-wide splitting set is computed over
+	 *   this, because most of the analysis is exponential in its size.
+	 * @param networkWideNodes every validating node, used only for the
+	 *   network-wide organization splitting set. Omit it and that figure falls
+	 *   back to the restricted set, which is what Radar did historically -- and
+	 *   why it reported the top tier's answer as if it were network-wide.
+	 */
 	async analyze(
 		nodes: Node[],
-		organizations: Organization[]
+		organizations: Organization[],
+		networkWideNodes?: Node[]
 	): Promise<Result<AnalysisResult, Error>> {
+		const hasUsableQuorumSet = (node: Node) =>
+			Boolean(node.quorumSet && node.quorumSet.quorumSet.threshold > 0);
+
 		// Filter nodes with valid quorum sets
-		const validNodes = nodes.filter(
-			(node) => node.quorumSet && node.quorumSet.quorumSet.threshold > 0
-		);
+		const validNodes = nodes.filter(hasUsableQuorumSet);
+		const validNetworkWideNodes = networkWideNodes?.filter(hasUsableQuorumSet);
 
 		if (validNodes.length === 0) {
 			return err(
@@ -113,21 +135,29 @@ export class PythonFbasAdapter {
 			const [nodeResult, orgResult, countryResult, ispResult] =
 				await Promise.all([
 					this.analyzeNodeLevel(validNodes),
-					this.analyzeOrganizationLevel(validNodes, organizations),
+					this.analyzeOrganizationLevel(
+						validNodes,
+						organizations,
+						validNetworkWideNodes
+					),
 					this.analyzeCountryLevel(validNodes),
 					this.analyzeISPLevel(validNodes)
 				]);
 
-			// Check for errors
+			// The node level is the base of the analysis -- without it there is
+			// nothing to report, so its failure is fatal.
 			if (nodeResult.isErr()) return err(nodeResult.error);
-			if (orgResult.isErr()) return err(orgResult.error);
-			if (countryResult.isErr()) return err(countryResult.error);
-			if (ispResult.isErr()) return err(ispResult.error);
 
-			const nodeAnalysis = nodeResult.value;
-			const orgAnalysis = orgResult.value;
-			const countryAnalysis = countryResult.value;
-			const ispAnalysis = ispResult.value;
+			// The aggregated levels degrade independently. Previously any one of
+			// them failing discarded all four, so a country-level problem threw
+			// away perfectly good node and organization results for the entire
+			// scan. Aggregated levels fail for mundane reasons -- e.g. geo data
+			// lookups timing out leaves every node without a country -- and that
+			// should not cost the scan its other answers.
+			const nodeAnalysis = nodeResult.value.merged;
+			const orgAnalysis = this.levelOrDegraded('organization', orgResult);
+			const countryAnalysis = this.levelOrDegraded('country', countryResult);
+			const ispAnalysis = this.levelOrDegraded('isp', ispResult);
 
 			// Check quorum intersection at node level
 			const quorumIntersectionResult = await this.checkQuorumIntersection(
@@ -138,8 +168,10 @@ export class PythonFbasAdapter {
 
 			const analysisResult: AnalysisResult = {
 				hasQuorumIntersection: quorumIntersectionResult.value,
-				// TODO: Implement symmetric top tier check
-				hasSymmetricTopTier: false,
+				hasSymmetricTopTier: this.isTopTierSymmetric(
+					validNodes,
+					nodeResult.value.topTier
+				),
 				node: nodeAnalysis,
 				organization: orgAnalysis,
 				country: countryAnalysis,
@@ -161,7 +193,7 @@ export class PythonFbasAdapter {
 	 */
 	private async analyzeNodeLevel(
 		nodes: Node[]
-	): Promise<Result<AnalysisMergedResult, Error>> {
+	): Promise<Result<NodeLevelAnalysis, Error>> {
 		// Split into all vs validating
 		const filtered = this.filteredAnalyzer.prepareFilteredAnalysis({ nodes });
 
@@ -199,12 +231,108 @@ export class PythonFbasAdapter {
 			return err(blockingFilteredResult.error);
 		if (splittingResult.isErr()) return err(splittingResult.error);
 
+		const topTier = topTierResult.value.top_tier ?? [];
+
+		const splittingSetsTopTierMinSize = await this.analyzeTopTierSplittingSets(
+			allNodesRequest,
+			topTier
+		);
+
 		return ok({
-			topTierSize: topTierResult.value.top_tier_size,
-			blockingSetsMinSize: blockingAllResult.value.min_size,
-			blockingSetsFilteredMinSize: blockingFilteredResult.value.min_size,
-			splittingSetsMinSize: splittingResult.value.min_size
+			merged: {
+				topTierSize: topTierResult.value.top_tier_size,
+				blockingSetsMinSize: blockingAllResult.value.min_size,
+				blockingSetsFilteredMinSize: blockingFilteredResult.value.min_size,
+				splittingSetsMinSize: splittingResult.value.min_size,
+				splittingSetsTopTierMinSize
+			},
+			topTier
 		});
+	}
+
+	/**
+	 * Unwrap an aggregated level, or record why it is missing and fall back to
+	 * zeroes.
+	 *
+	 * NOTE: zero is a poor stand-in for "not analyzed" -- downstream this is
+	 * rendered as a threshold, so a degraded country level currently reads as
+	 * "0 countries can break safety" rather than "we could not tell". Carrying
+	 * that distinction needs a nullable representation through NetworkMeasurement
+	 * and the API; until then the log is the only honest signal, so it is an
+	 * error-level one.
+	 */
+	private levelOrDegraded(
+		level: 'organization' | 'country' | 'isp',
+		result: Result<AnalysisMergedResult, Error>
+	): AnalysisMergedResult {
+		if (result.isOk()) return result.value;
+
+		console.error(
+			`[PythonFbas] ${level} level analysis failed, reporting zeroes for it:`,
+			result.error.message
+		);
+
+		return {
+			topTierSize: 0,
+			blockingSetsMinSize: 0,
+			blockingSetsFilteredMinSize: 0,
+			splittingSetsMinSize: 0,
+			splittingSetsTopTierMinSize: undefined
+		};
+	}
+
+	/**
+	 * A top tier is symmetric when every node in it declares the same quorum
+	 * set. Radar uses this to decide whether the browser-side analysis is cheap
+	 * enough to run automatically, so returning a wrong `false` permanently
+	 * shows the "analysis could be slow" warning and drops the UI into manual
+	 * mode.
+	 *
+	 * python-fbas has no equivalent command, so the comparison is done here
+	 * against the quorum sets Radar already holds.
+	 */
+	private isTopTierSymmetric(nodes: Node[], topTier: string[]): boolean {
+		// An empty top tier is not a symmetric one — it means the analysis
+		// found nothing, which is a different thing entirely.
+		if (topTier.length === 0) return false;
+
+		const quorumSetsByPublicKey = new Map<string, QuorumSet>();
+		nodes.forEach((node) => {
+			const quorumSet = node.quorumSet?.quorumSet;
+			if (quorumSet) {
+				quorumSetsByPublicKey.set(node.publicKey.value, quorumSet);
+			}
+		});
+
+		let reference: string | null = null;
+		for (const publicKey of topTier) {
+			const quorumSet = quorumSetsByPublicKey.get(publicKey);
+			// A top tier member we cannot inspect makes the answer unknowable,
+			// and unknowable is not symmetric.
+			if (!quorumSet) return false;
+
+			const fingerprint = this.fingerprintQuorumSet(quorumSet);
+			if (reference === null) {
+				reference = fingerprint;
+			} else if (fingerprint !== reference) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Order-independent structural fingerprint of a quorum set, so two nodes
+	 * that declare the same trust in a different order compare as equal.
+	 */
+	private fingerprintQuorumSet(quorumSet: QuorumSet): string {
+		const validators = [...quorumSet.validators].sort();
+		const innerQuorumSets = quorumSet.innerQuorumSets
+			.map((innerQuorumSet) => this.fingerprintQuorumSet(innerQuorumSet))
+			.sort();
+
+		return JSON.stringify([quorumSet.threshold, validators, innerQuorumSets]);
 	}
 
 	/**
@@ -212,7 +340,8 @@ export class PythonFbasAdapter {
 	 */
 	private async analyzeOrganizationLevel(
 		nodes: Node[],
-		organizations: Organization[]
+		organizations: Organization[],
+		networkWideNodes?: Node[]
 	): Promise<Result<AnalysisMergedResult, Error>> {
 		// Aggregate by organization
 		const aggregatedNodes = this.aggregator.aggregateByOrganization(
@@ -234,9 +363,11 @@ export class PythonFbasAdapter {
 		console.log('[PythonFbas] Organization aggregation summary:', {
 			totalNodes: nodes.length,
 			totalOrganizations: organizations.length,
-			aggregatedCount: aggregatedNodes.length
+			aggregatedCount: aggregatedNodes.length,
+			orgsWithInvalidThreshold: detailedOrgs.filter(
+				(org) => org.hasInvalidThreshold
+			).length
 		});
-		console.log('[PythonFbas] ALL Detailed orgs:', JSON.stringify(detailedOrgs, null, 2));
 
 		// Validate aggregation
 		const validation =
@@ -273,32 +404,82 @@ export class PythonFbasAdapter {
 			validatingNodesRequestCount: validatingNodesRequest.nodes.length
 		});
 
-		// Log cleaned quorum sets (first 3)
-		const cleanedSample = allNodesRequest.nodes.slice(0, 3).map((n) => ({
-			publicKey: n.publicKey,
-			name: n.name,
-			threshold: n.quorumSet?.threshold || 0,
-			validators: n.quorumSet?.validators || [],
-			validatorCount: (n.quorumSet?.validators || []).length
-		}));
-		console.log(
-			'[PythonFbas] Cleaned QS (self-refs removed):',
-			JSON.stringify(cleanedSample, null, 2)
-		);
-
-		// DEBUG: Write full request to file for debugging
-		const fs = require('fs');
-		fs.writeFileSync(
-			'/tmp/python-fbas-request.json',
-			JSON.stringify(allNodesRequest, null, 2)
-		);
-		console.log('[PythonFbas] Wrote full request to /tmp/python-fbas-request.json');
-
-		// Run analyses
-		return await this.runAggregatedAnalysis(
+		const result = await this.runAggregatedAnalysis(
 			allNodesRequest,
 			validatingNodesRequest
 		);
+		if (result.isErr()) return result;
+
+		// Recompute the splitting set over every organization, not just the ones
+		// in the transitive network quorum set.
+		//
+		// This is the whole point of separating the two safety figures. Radar
+		// restricts its analysis to the top tier because most of it is
+		// exponential in top tier size, but a splitting set over ten
+		// organizations answers a narrower question than the one the label
+		// implies: it cannot see an outlying validator being severed from the
+		// core, which takes fewer organizations than splitting the core itself.
+		// python-fbas reports the wider number by default, which is why it said
+		// 2 where Radar said 4.
+		const networkWide = await this.analyzeNetworkWideOrgSplittingSet(
+			networkWideNodes,
+			organizations
+		);
+
+		return ok({
+			...result.value,
+			//keep the restricted answer only when the wider one is unavailable
+			splittingSetsMinSize:
+				networkWide !== undefined ? networkWide : result.value.splittingSetsMinSize
+		});
+	}
+
+	/**
+	 * Smallest set of organizations that can break safety anywhere in the
+	 * network, including by severing a node from the core.
+	 *
+	 * Returns undefined rather than an error: this widens an existing figure,
+	 * so failing to compute it must leave the rest of the scan intact.
+	 */
+	private async analyzeNetworkWideOrgSplittingSet(
+		networkWideNodes: Node[] | undefined,
+		organizations: Organization[]
+	): Promise<number | undefined> {
+		if (!networkWideNodes || networkWideNodes.length === 0) return undefined;
+
+		const aggregated = this.aggregator.aggregateByOrganization(
+			networkWideNodes,
+			organizations
+		);
+
+		const validation = this.aggregator.validateAggregatedNodes(aggregated);
+		if (!validation.valid) {
+			console.error(
+				'[PythonFbas] Network-wide organization aggregation invalid, ' +
+					'keeping the top-tier splitting set:',
+				validation.errors.join(', ')
+			);
+			return undefined;
+		}
+
+		//Nothing gained if the wider set collapses to the same organizations.
+		const request = this.aggregatedNodesToPythonRequest(aggregated);
+		const result = await this.httpClient.analyzeSplittingSets(request);
+
+		if (result.isErr()) {
+			console.error(
+				'[PythonFbas] Network-wide organization splitting set unavailable:',
+				result.error.message
+			);
+			return undefined;
+		}
+
+		console.log('[PythonFbas] Network-wide org splitting set:', {
+			organizations: aggregated.length,
+			minSize: result.value.min_size
+		});
+
+		return result.value.min_size;
 	}
 
 	/**
@@ -404,18 +585,109 @@ export class PythonFbasAdapter {
 		if (blockingAllResult.isErr()) return err(blockingAllResult.error);
 		if (blockingFilteredResult.isErr())
 			return err(blockingFilteredResult.error);
-		if (splittingResult.isErr()) return err(splittingResult.error);
+
+		// The splitting set is allowed to fail on its own.
+		//
+		// python-fbas reports "No splitting set found" when safety cannot be
+		// broken at this grouping at all -- the best possible answer, not a
+		// failure. The service refuses to call that zero, so it arrives here as
+		// an error, and treating it as fatal for the level discarded the top
+		// tier and blocking-set figures too. That is how a network whose ISPs
+		// cannot split safety ended up reporting a blocking set of 0 ISPs.
+		let splittingSetsMinSize: number | undefined;
+		if (splittingResult.isOk()) {
+			splittingSetsMinSize = splittingResult.value.min_size;
+		} else {
+			console.error(
+				'[PythonFbas] Splitting set unavailable for this grouping; ' +
+					'reporting the rest of the level:',
+				splittingResult.error.message
+			);
+		}
+
+		// The splitting set above is network-wide: it includes separating an
+		// outlying entity from the core, which takes fewer failures than
+		// splitting the core itself. Run it again over just the top tier so the
+		// two questions can be answered separately.
+		const splittingSetsTopTierMinSize = await this.analyzeTopTierSplittingSets(
+			allNodesRequest,
+			topTierResult.value.top_tier ?? []
+		);
 
 		const result = {
 			topTierSize: topTierResult.value.top_tier_size,
 			blockingSetsMinSize: blockingAllResult.value.min_size,
 			blockingSetsFilteredMinSize: blockingFilteredResult.value.min_size,
-			splittingSetsMinSize: splittingResult.value.min_size
+			splittingSetsMinSize,
+			splittingSetsTopTierMinSize
 		};
 
 		console.log('[PythonFbas] Analysis results from Python service:', result);
 
 		return ok(result);
+	}
+
+	/**
+	 * Smallest splitting set within the top tier.
+	 *
+	 * Restricting the FBAS to the top tier is what python-fbas does with
+	 * --reachable-from <top tier validator>; here the same restriction is
+	 * expressed by sending only the top tier members, whose quorum sets by
+	 * definition reference each other.
+	 *
+	 * This is an additive statistic, so it must never be able to take a scan
+	 * down: every failure path returns undefined, meaning "not computed", and
+	 * leaves the network-wide answer alone. Undefined is deliberately not zero,
+	 * which downstream would render as a threshold of zero organizations.
+	 */
+	private async analyzeTopTierSplittingSets(
+		request: PythonFbasAnalysisRequest,
+		topTier: string[]
+	): Promise<number | undefined> {
+		//A top tier of fewer than two entities has nothing to split. This was the
+		//one path that returned undefined without saying so, which made a null
+		//result downstream indistinguishable from a failure.
+		if (topTier.length < 2) {
+			console.error(
+				`[PythonFbas] Skipping top tier splitting set: top tier has ` +
+					`${topTier.length} member(s), nothing to split`
+			);
+			return undefined;
+		}
+
+		const topTierMembers = new Set(topTier);
+		const topTierNodes = request.nodes.filter((node) =>
+			topTierMembers.has(node.publicKey)
+		);
+
+		//The service reported a top tier we cannot resolve back to what we sent
+		//it -- most likely the CLI output was parsed into names that no longer
+		//match our public keys. Analysing the subset we happened to match would
+		//produce an authoritative-looking number for a different question.
+		if (topTierNodes.length !== topTier.length) {
+			console.error(
+				`[PythonFbas] Skipping top tier splitting set: ${topTier.length} ` +
+					`members reported, ${topTierNodes.length} resolved in the analysed set. ` +
+					`Reported: ${JSON.stringify(topTier.slice(0, 5))}; ` +
+					`available: ${JSON.stringify(request.nodes.slice(0, 5).map((n) => n.publicKey))}`
+			);
+			return undefined;
+		}
+
+		const result = await this.httpClient.analyzeSplittingSets({
+			nodes: topTierNodes,
+			organizations: []
+		});
+
+		if (result.isErr()) {
+			console.error(
+				'[PythonFbas] Top tier splitting set analysis failed:',
+				result.error.message
+			);
+			return undefined;
+		}
+
+		return result.value.min_size;
 	}
 
 	/**

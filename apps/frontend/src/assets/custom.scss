@@ -1,7 +1,8 @@
-@import "./tabler-ui/variables";
-@import "bootstrap/scss/bootstrap.scss";
-@import "./tabler-ui/dashboard/dashboard";
-// Bootstrap-Vue removed - using compatibility layer instead
+// Bootstrap and the vendored Tabler theme are both gone. The ~60 class names
+// the app actually used are reimplemented on Radar tokens in
+// assets/tailwind.css under @layer components; everything else in those
+// stylesheets was dead weight.
+@import "./variables";
 @import "federated-voting";
 
 .dropdown-item.active,
@@ -19,9 +20,8 @@
   color: #000 !important;
 }
 a {
-  color: $blue;
+  color: $graph-primary;
 }
-$graph-primary: $blue;
 
 /* poppins-regular - latin */
 @font-face {

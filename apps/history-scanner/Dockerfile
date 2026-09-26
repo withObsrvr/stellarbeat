@@ -1,7 +1,12 @@
-# Install stellar-archivist (requires Go 1.25+)
-FROM golang:1.25-alpine AS archivist-builder
+# Build stellar-archivist, SDF's Rust implementation. The version is pinned: the
+# scanner drives this binary as a subprocess, so an unpinned @main lets an
+# upstream CLI change silently break verification with no build failure.
+# Alpine builds against musl so the binary runs in the node:20-alpine runtime.
+FROM rust:1.91-alpine AS archivist-builder
 
-RUN go install github.com/stellar/go-stellar-sdk/tools/stellar-archivist@main
+RUN apk add --no-cache musl-dev
+
+RUN cargo install stellar-archivist --version 28.0.0 --locked --root /usr/local
 
 # Build the Node.js application
 FROM node:20-alpine AS app-builder
@@ -52,7 +57,7 @@ WORKDIR /app
 COPY --from=app-builder /prod/history-scanner ./
 
 # Copy stellar-archivist binary
-COPY --from=archivist-builder /go/bin/stellar-archivist /usr/local/bin/stellar-archivist
+COPY --from=archivist-builder /usr/local/bin/stellar-archivist /usr/local/bin/stellar-archivist
 RUN chmod +x /usr/local/bin/stellar-archivist
 
 # Set environment variable for binary path

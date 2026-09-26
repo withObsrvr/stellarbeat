@@ -97,7 +97,13 @@ export class NetworkScanner {
 
 			const pythonResult = await this.pythonFbasAdapter.analyze(
 				nodesToAnalyze,
-				organizationsToAnalyze
+				organizationsToAnalyze,
+				//Every validating node, not just the transitive network quorum
+				//set, so the network-wide organization splitting set can see
+				//validators outside the core being severed from it. The rest of
+				//the analysis stays restricted because it is exponential in top
+				//tier size.
+				nodeScan.nodes.filter((node) => node.isValidating())
 			);
 
 			if (pythonResult.isOk()) {

@@ -1,7 +1,6 @@
 <template>
   <div v-if="selectedNode">
     <portal-target name="simulate-node-modal"></portal-target>
-    <portal-target name="quorum-set-modals" multiple></portal-target>
 
     <!-- Header (includes inline warning indicators) -->
     <NodeDetailHeader

@@ -37,10 +37,10 @@
                           {{ hasQuorumIntersection ? "All quorums intersect" : "No quorum intersection" }}
                         </UiBadge>
                       </h3>
-                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showQiInfo = true">
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="quorumIntersectionInfo?.show()">
                         <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </button>
-                      <quorum-intersection-info />
+                      <quorum-intersection-info ref="quorumIntersectionInfo" />
                     </div>
                   </template>
                 </analysis>
@@ -65,11 +65,11 @@
                     <div class="flex justify-between items-baseline">
                       <h3 v-if="blockingSetsMinSize <= 0">Network halted.</h3>
                       <h3 v-else>Found set(s) of size {{ blockingSetsMinSize }} that could impact liveness.</h3>
-                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showLivenessInfo = true">
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="livenessInfo?.show()">
                         <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </button>
                     </div>
-                    <liveness-info />
+                    <liveness-info ref="livenessInfo" />
                   </template>
                 </analysis>
               </div>
@@ -93,11 +93,11 @@
                     <div class="flex justify-between items-baseline">
                       <h3 v-if="splittingSetsMinSize <= 0">No intersection between quorums found.</h3>
                       <h3 v-else>Found set(s) of size {{ splittingSetsMinSize }} that could impact safety.</h3>
-                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showSafetyInfo = true">
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="safetyInfo?.show()">
                         <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </button>
                     </div>
-                    <safety-info />
+                    <safety-info ref="safetyInfo" />
                   </template>
                 </analysis>
               </div>
@@ -120,10 +120,10 @@
                   <template #title>
                     <div class="flex justify-between items-baseline">
                       <h3 class="mb-0">Top tier has size {{ topTier.length }}</h3>
-                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="showTopTierInfo = true">
+                      <button class="p-1 text-gray-400 hover:text-gray-600 transition-colors" @click="topTierInfo?.show()">
                         <svg v-tooltip:top="'Info'" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </button>
-                      <top-tier-info />
+                      <top-tier-info ref="topTierInfo" />
                     </div>
                     <UiBadge variant="info">
                       {{ topTierIsSymmetric ? "Symmetric" : "Not symmetric" }}
@@ -133,6 +133,11 @@
               </div>
             </div>
           </div>
+        </div>
+        <div v-if="analysisError" class="mb-2">
+          <UiAlert :show="true" variant="danger">
+            Could not start the analysis: {{ analysisError }}
+          </UiAlert>
         </div>
         <div class="mb-2">
           <UiAlert
@@ -238,10 +243,13 @@ const { isLoading, dimmerClass } = useIsLoading();
 const store = useStore();
 
 const showModal = ref(false);
-const showQiInfo = ref(false);
-const showLivenessInfo = ref(false);
-const showSafetyInfo = ref(false);
-const showTopTierInfo = ref(false);
+// The info buttons used to set these as plain booleans that nothing read --
+// the explainer components take no props and were never bound to them, so all
+// four buttons did nothing. Template refs call the components directly now.
+const quorumIntersectionInfo = ref<{ show: () => void } | null>(null);
+const livenessInfo = ref<{ show: () => void } | null>(null);
+const safetyInfo = ref<{ show: () => void } | null>(null);
+const topTierInfo = ref<{ show: () => void } | null>(null);
 const activeSection = ref('quorum');
 
 const MyMergeBy: {
@@ -269,6 +277,9 @@ const splittingSets: Ref<Array<Array<string>>> = ref([]);
 const splittingSetsMinSize = ref(0);
 const topTier: Ref<Array<Array<string>>> = ref([]);
 const topTierIsSymmetric = ref(false);
+
+const analysisError = ref("");
+let analysisJobId = 0;
 
 const analyzeTrustCluster = ref(false);
 const analyzeQuorumIntersection = ref(true);
@@ -320,19 +331,61 @@ function performAnalysis() {
   );
 
   isLoading.value = true;
-  fbasAnalysisWorker.postMessage({
-    id: 1,
-    nodes: nodesToAnalyze,
-    organizations: store.network.organizations,
+  analysisError.value = "";
+
+  const payload = {
+    // The worker reads `jobId`; `id` left it undefined, so results could not
+    // be matched to the run that asked for them.
+    jobId: ++analysisJobId,
+    // Serialised here rather than in the worker: postMessage
+    // structured-clones its argument and the shared Node/Organization objects
+    // are not cloneable, which threw DataCloneError before the worker started.
+    // The worker fed these to wasm as JSON anyway.
+    nodes: JSON.stringify(nodesToAnalyze),
+    organizations: JSON.stringify(store.network.organizations),
     mergeBy: store.networkAnalysisMergeBy,
-    failingNodePublicKeys: store.network.nodes
-      .filter((node) => store.network.isNodeFailing(node))
-      .map((node) => node.publicKey),
-    analyzeQuorumIntersection: analyzeQuorumIntersection,
-    analyzeSafety: analyzeSafety,
-    analyzeLiveness: analyzeLiveness,
-    analyzeTopTier: analyzeTopTier,
+    failingNodePublicKeys: JSON.stringify(
+      store.network.nodes
+        .filter((node) => store.network.isNodeFailing(node))
+        .map((node) => node.publicKey),
+    ),
+    // .value matters for the same reason: a Vue ref carries a dependency graph
+    // of effect functions, which are not cloneable either.
+    analyzeQuorumIntersection: analyzeQuorumIntersection.value,
+    analyzeSafety: analyzeSafety.value,
+    analyzeLiveness: analyzeLiveness.value,
+    analyzeTopTier: analyzeTopTier.value,
     analyzeSymmetricTopTier: true,
+  };
+
+  try {
+    fbasAnalysisWorker.postMessage(payload);
+  } catch (error) {
+    // Without this the thrown clone error escaped as an unhandled event handler
+    // error and left the dimmer spinning forever, with the reason visible only
+    // in the console.
+    isLoading.value = false;
+    analysisError.value =
+      error instanceof Error ? error.message : String(error);
+    //postMessage reports only that something could not be cloned, never what.
+    //Naming the field turns a dead end into a one-line fix -- this has already
+    //cost two rounds of guessing.
+    console.error(
+      "Could not start the network analysis. Uncloneable fields: " +
+        (uncloneableKeysOf(payload).join(", ") || "(none found)"),
+      error,
+    );
+  }
+}
+
+function uncloneableKeysOf(payload: Record<string, unknown>): string[] {
+  return Object.keys(payload).filter((key) => {
+    try {
+      structuredClone(payload[key]);
+      return false;
+    } catch {
+      return true;
+    }
   });
 }
 
@@ -394,9 +447,18 @@ onMounted(() => {
   isLoading.value = false;
   scrollTo("network-analysis-card");
 
+  //Without this a worker that dies takes the panel with it: isLoading stays
+  //true and the dimmer spins with nothing shown anywhere.
+  fbasAnalysisWorker.onerror = (event) => {
+    isLoading.value = false;
+    analysisError.value = event.message || "The analysis worker failed.";
+    console.error("Network analysis worker error", event);
+  };
+
   fbasAnalysisWorker.onmessage = (event: {
     data: {
       type: string;
+      message?: string;
       result: {
         analysis: FbasAnalysisWorkerResult;
         mergeBy: MergeBy;
@@ -405,9 +467,18 @@ onMounted(() => {
     };
   }) => {
     switch (event.data.type) {
+      case "error": {
+        isLoading.value = false;
+        analysisError.value =
+          event.data.message ?? "The analysis failed for an unknown reason.";
+        console.error("Network analysis failed:", event.data.message);
+        break;
+      }
       case "end":
         {
           if (event.data.result) {
+            //a run that has been superseded must not overwrite newer results
+            if (event.data.result.jobId !== analysisJobId) return;
             hasResult.value = true;
             resultMergedBy.value = event.data.result.mergeBy;
             updatePartitions();
