@@ -9,6 +9,11 @@ import { Logger } from 'logger';
 import { ok, err } from 'neverthrow';
 import { ScanJobDTO } from 'history-scanner-dto';
 import { Scan } from '../../../domain/scan/Scan';
+import {
+	ScanError,
+	ScanErrorCategory,
+	ScanErrorType
+} from '../../../domain/scan/ScanError';
 import { Url } from 'http-helper';
 
 // Mock the asyncSleep utility to speed up tests
@@ -70,6 +75,80 @@ describe('VerifyArchives', () => {
 		expect(jobMonitorMock.checkIn).toHaveBeenCalled();
 		expect(exceptionLoggerMock.captureException).not.toHaveBeenCalled();
 		expect(scannerMock.perform).toHaveBeenCalled();
+	});
+
+	it('should check in ok when the scan reports archive defects', async () => {
+		//a scan that ran and found problems did its job
+		scanCoordinatorMock.getScanJob.mockResolvedValue(ok(mockScanJobDTO));
+		scannerMock.perform.mockResolvedValue(
+			new Scan(
+				new Date(),
+				new Date(),
+				new Date(),
+				Url.create('https://example.com')._unsafeUnwrap(),
+				0,
+				100,
+				0,
+				null,
+				0,
+				null,
+				[
+					new ScanError(
+						ScanErrorType.TYPE_VERIFICATION,
+						'https://example.com',
+						'1 bucket hash mismatch',
+						1,
+						ScanErrorCategory.BUCKET_HASH
+					)
+				]
+			)
+		);
+		jobMonitorMock.checkIn.mockResolvedValue(ok(undefined));
+
+		await verifyArchives.execute({ persist: false, loop: false });
+
+		const statuses = jobMonitorMock.checkIn.mock.calls.map(
+			(call) => call[0].status
+		);
+		expect(statuses).toEqual(['in_progress', 'ok']);
+	});
+
+	it('should check in error when the scan was aborted before reaching the archive', async () => {
+		//regression: an aborted scan checked in 'ok', so an archive that was never
+		//verified was indistinguishable from a healthy one
+		scanCoordinatorMock.getScanJob.mockResolvedValue(ok(mockScanJobDTO));
+		scannerMock.perform.mockResolvedValue(
+			new Scan(
+				new Date(),
+				new Date(),
+				new Date(),
+				Url.create('https://example.com')._unsafeUnwrap(),
+				0,
+				100,
+				0,
+				null,
+				0,
+				null,
+				[
+					new ScanError(
+						ScanErrorType.TYPE_CONNECTION,
+						'https://example.com',
+						'Scan aborted: connection failed at ledger range 0-1000000',
+						1,
+						ScanErrorCategory.CONNECTION
+					)
+				]
+			)
+		);
+		jobMonitorMock.checkIn.mockResolvedValue(ok(undefined));
+
+		await verifyArchives.execute({ persist: false, loop: false });
+
+		const statuses = jobMonitorMock.checkIn.mock.calls.map(
+			(call) => call[0].status
+		);
+		expect(statuses).toEqual(['in_progress', 'error']);
+		expect(statuses).not.toContain('ok');
 	});
 
 	it('should handle coordinator error and sleep', async () => {

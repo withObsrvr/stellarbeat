@@ -3,6 +3,7 @@ import { ScanCoordinatorService } from '../../domain/scan/ScanCoordinatorService
 import { ExceptionLogger } from 'exception-logger';
 import { mapUnknownToError } from 'shared';
 import { Scan } from '../../domain/scan/Scan';
+import { ScanErrorCategory } from '../../domain/scan/ScanError';
 import { asyncSleep } from 'shared';
 import { VerifyArchivesDTO } from './VerifyArchivesDTO';
 import { ScanJob } from '../../domain/scan/ScanJob';
@@ -69,18 +70,28 @@ export class VerifyArchives {
 		});
 
 		await this.checkIn('in_progress');
-		await this.perform(scanJobResult.value, persist);
-		await this.checkIn('ok');
+		const scan = await this.perform(scanJobResult.value, persist);
+		//A scan that ran and found archive defects did its job. A scan that could
+		//not reach the archive did not, and used to check in 'ok' regardless, so
+		//an archive that never got verified looked like a healthy one.
+		await this.checkIn(VerifyArchives.scanWasAborted(scan) ? 'error' : 'ok');
 	}
 
-	private async perform(scanJob: ScanJob, persist = false) {
+	private static scanWasAborted(scan: Scan): boolean {
+		return scan.errors.some(
+			(error) => error.category === ScanErrorCategory.CONNECTION
+		);
+	}
+
+	private async perform(scanJob: ScanJob, persist = false): Promise<Scan> {
 		const scan = await this.scanner.perform(new Date(), scanJob);
 		this.logger.info('Scan completed', {
 			workerId: this.workerId,
 			url: scanJob.url.value,
-			hasError: scan.hasError
+			hasError: scan.hasError()
 		});
 		if (persist) await this.persist(scan);
+		return scan;
 	}
 
 	private async persist(scan: Scan) {
