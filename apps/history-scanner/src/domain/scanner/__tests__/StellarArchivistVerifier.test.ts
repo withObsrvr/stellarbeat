@@ -1,5 +1,8 @@
 import 'reflect-metadata';
-import { StellarArchivistVerifier } from '../StellarArchivistVerifier';
+import {
+	parseArchivistProgress,
+	StellarArchivistVerifier
+} from '../StellarArchivistVerifier';
 import { ScanErrorCategory, ScanErrorType } from '../../scan/ScanError';
 import { mock } from 'jest-mock-extended';
 import { Logger } from 'logger';
@@ -218,5 +221,48 @@ describe('StellarArchivistVerifier', () => {
 		if (result.isOk()) return;
 		expect(result.error.type).toEqual(ScanErrorType.TYPE_CONNECTION);
 		expect(result.error.message).toContain('Failed to spawn');
+	});
+});
+
+describe('parseArchivistProgress', () => {
+	it('reads the checkpoint count from a progress line', () => {
+		const progress = parseArchivistProgress(
+			'2026-09-29T14:36:17Z  INFO Progress: 100/15627 checkpoints processed\n',
+			null
+		);
+
+		expect(progress).toEqual({ processed: 100, total: 15627 });
+	});
+
+	it('takes the latest line when a chunk carries several', () => {
+		const progress = parseArchivistProgress(
+			'INFO Progress: 100/15627 checkpoints processed\n' +
+				'INFO Progress: 200/15627 checkpoints processed\n',
+			null
+		);
+
+		expect(progress?.processed).toEqual(200);
+	});
+
+	it('learns the total before any progress is reported', () => {
+		//a scan that stalls early still reports how much work it was given
+		const progress = parseArchivistProgress(
+			'INFO Processing 15627 checkpoints from 999999 (0x000f423f) to 2000063\n',
+			null
+		);
+
+		expect(progress).toEqual({ processed: 0, total: 15627 });
+	});
+
+	it('keeps the previous value for a chunk with no progress', () => {
+		const previous = { processed: 200, total: 15627 };
+
+		expect(
+			parseArchivistProgress('INFO Starting scan of https://x\n', previous)
+		).toEqual(previous);
+	});
+
+	it('returns null when nothing has been reported yet', () => {
+		expect(parseArchivistProgress('INFO Starting scan\n', null)).toBeNull();
 	});
 });

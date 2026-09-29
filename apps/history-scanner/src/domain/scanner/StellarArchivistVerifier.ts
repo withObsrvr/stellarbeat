@@ -13,6 +13,44 @@ import {
 	supportedReportVersion
 } from './StellarArchivistReport';
 
+export interface ArchivistProgress {
+	processed: number;
+	total: number;
+}
+
+/**
+ * stellar-archivist reports liveness on stdout via tracing:
+ *
+ *   Processing 15627 checkpoints from 999999 (0x000f423f) to 2000063 (0x001e84bf)
+ *   Progress: 100/15627 checkpoints processed
+ *
+ * Returns the latest progress found in a chunk, or null when it carries none.
+ */
+export function parseArchivistProgress(
+	chunk: string,
+	previous: ArchivistProgress | null
+): ArchivistProgress | null {
+	let latest = previous;
+
+	for (const line of chunk.split('\n')) {
+		const progress = line.match(
+			/Progress:\s*(\d+)\s*\/\s*(\d+)\s+checkpoints processed/
+		);
+		if (progress) {
+			latest = { processed: Number(progress[1]), total: Number(progress[2]) };
+			continue;
+		}
+
+		//The total is announced before the first Progress line, so a scan that
+		//stalls early still reports how much work it was given.
+		const total = line.match(/Processing\s+(\d+)\s+checkpoints from/);
+		if (total)
+			latest = { processed: latest?.processed ?? 0, total: Number(total[1]) };
+	}
+
+	return latest;
+}
+
 export interface VerificationResult {
 	latestVerifiedLedger: number;
 	errors: ScanError[];
@@ -130,19 +168,45 @@ export class StellarArchivistVerifier {
 			const child = spawn(this.binaryPath, args);
 			const startTime = Date.now();
 			let stderrTail = '';
+			let progress: ArchivistProgress | null = null;
+			let progressAtLastHeartbeat: number | null = null;
+			let heartbeats = 0;
 
 			const heartbeatInterval = setInterval(
 				() => {
+					//Without the checkpoint count a wedged scan and a slow one produce
+					//the same reassuring line every five minutes. A scan that has not
+					//advanced between heartbeats is stuck, and says so.
+					const processed = progress?.processed ?? null;
+					const stalled =
+						heartbeats > 0 && processed === progressAtLastHeartbeat;
+
 					this.logger.info('stellar-archivist still running', {
 						url: archiveUrl.value,
 						elapsedMinutes: Math.floor((Date.now() - startTime) / 60000),
 						fromLedger,
 						toLedger,
-						ledgerRange: toLedger - fromLedger
+						ledgerRange: toLedger - fromLedger,
+						checkpointsProcessed: processed,
+						checkpointsTotal: progress?.total ?? null,
+						checkpointsSinceLastHeartbeat:
+							processed !== null && progressAtLastHeartbeat !== null
+								? processed - progressAtLastHeartbeat
+								: null,
+						stalled
 					});
+
+					progressAtLastHeartbeat = processed;
+					heartbeats += 1;
 				},
 				5 * 60 * 1000
 			);
+
+			//stellar-archivist writes its tracing output to stdout, including the
+			//progress lines; only clap argument errors go to stderr.
+			child.stdout.on('data', (data: Buffer) => {
+				progress = parseArchivistProgress(data.toString(), progress);
+			});
 
 			//The report carries the verification outcome; logs are kept only to
 			//explain a failed invocation.
@@ -162,7 +226,9 @@ export class StellarArchivistVerifier {
 					exitCode: code,
 					elapsedMinutes: Math.floor((Date.now() - startTime) / 60000),
 					fromLedger,
-					toLedger
+					toLedger,
+					checkpointsProcessed: progress?.processed ?? null,
+					checkpointsTotal: progress?.total ?? null
 				});
 				if (code !== 0 && stderrTail.trim().length > 0)
 					this.logger.info('stellar-archivist output', {
