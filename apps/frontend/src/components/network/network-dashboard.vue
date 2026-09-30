@@ -27,7 +27,9 @@
       >
       for details.
     </UiAlert>
-    <div class="grid grid-cols-12 gap-4">
+    <!-- The verdict is a companion to the network analysis, not a headline: it
+         appears with that section and leaves with it. -->
+    <div v-if="store.isNetworkAnalysisVisible" class="grid grid-cols-12 gap-4">
       <div class="col-span-12">
         <NetworkVerdict
           :statistics="network.networkStatistics"
