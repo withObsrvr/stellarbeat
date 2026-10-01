@@ -20,7 +20,9 @@ export default class NetworkStatistics {
 	minBlockingSetISPSize?: number;
 	minBlockingSetISPFilteredSize?: number;
 	minSplittingSetSize?: number;
+	minSplittingSetTopTierSize?: number;
 	minSplittingSetOrgsSize?: number;
+	minSplittingSetOrgsTopTierSize?: number;
 	minSplittingSetCountrySize?: number;
 	minSplittingSetISPSize?: number;
 	topTierSize?: number;

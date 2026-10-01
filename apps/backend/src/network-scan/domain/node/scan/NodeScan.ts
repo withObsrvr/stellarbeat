@@ -191,6 +191,31 @@ export class NodeScan {
 			.map((node) => node.ip);
 	}
 
+	/**
+	 * IPs that need a geo lookup: ones that changed, plus any node still
+	 * carrying no geo data at all.
+	 *
+	 * Asking only for changed IPs means a failed lookup is never retried. A
+	 * node is geo-located once, when its IP is first seen, and if the provider
+	 * was down, the key was wrong, or the network was unreachable at that
+	 * moment, the node stays without a country or ISP until its IP happens to
+	 * change -- which for a stable validator is never.
+	 *
+	 * That is not a cosmetic gap. Country and ISP FBAS analysis groups nodes by
+	 * those fields, so nodes missing them collapse into one synthetic "Unknown"
+	 * group, and a single group cannot be split or blocked. The result is the
+	 * safety threshold of 0 countries reported against staging.
+	 */
+	public getIPsNeedingGeoData(): string[] {
+		const modified = new Set(this.getModifiedIPs());
+
+		this.nodes.forEach((node) => {
+			if (node.geoData === null) modified.add(node.ip);
+		});
+
+		return Array.from(modified);
+	}
+
 	public updateIndexes(indexes: Map<string, number>) {
 		this.nodes.forEach((node) => {
 			const measurement = node.latestMeasurement();

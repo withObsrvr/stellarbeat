@@ -1,2 +1,19 @@
-@import "tabler-ui/variables";
-$graph-primary: $blue;
+// SCSS variables for the graph, which draws SVG strokes and fills that cannot
+// use the CSS custom properties in tailwind.css.
+//
+// These two values are all that survived the vendored Tabler theme: graph.vue
+// reached into tabler-ui/_variables.scss for them, which kept a 50-file
+// stylesheet directory alive to supply two colours. They are inlined here at
+// their original values so the graph renders exactly as before.
+//
+// Candidates for tokenisation: $graph-primary is Tabler's blue and is not part
+// of the Radar palette, so the graph is currently the one place in the app
+// still using the old brand colour.
+$graph-primary: #1687b2;
+$white: #fff;
+
+// Used by the two graph components and trust.scss for SVG strokes and fills,
+// at the values the Tabler theme defined.
+$gray-100: #f8f9fa;
+$red: #cd201f;
+$yellow: #f1c40f;

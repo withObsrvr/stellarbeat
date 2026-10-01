@@ -125,6 +125,9 @@ export abstract class NetworkMeasurementAggregation
 	@Column('int', { default: 0 })
 	minBlockingSetISPFilteredSum = 0;
 
+	//The grouped splitting-set aggregates below are nullable: null means no such
+	//set exists at that grouping, which is the best possible answer, not zero.
+	//minSplittingSetMin/Max/Sum stay non-null - minSplittingSetSize itself is.
 	@Column('smallint', { default: 0 })
 	minSplittingSetMin = 0;
 
@@ -134,32 +137,32 @@ export abstract class NetworkMeasurementAggregation
 	@Column('int', { default: 0 })
 	minSplittingSetSum = 0;
 
-	@Column('smallint', { default: 0 })
-	minSplittingSetOrgsMin = 0;
+	@Column('smallint', { nullable: true })
+	minSplittingSetOrgsMin: number | null = null;
 
-	@Column('smallint', { default: 0 })
-	minSplittingSetOrgsMax = 0;
+	@Column('smallint', { nullable: true })
+	minSplittingSetOrgsMax: number | null = null;
 
-	@Column('int', { default: 0 })
-	minSplittingSetOrgsSum = 0;
+	@Column('int', { nullable: true })
+	minSplittingSetOrgsSum: number | null = null;
 
-	@Column('smallint', { default: 0 })
-	minSplittingSetCountryMin = 0;
+	@Column('smallint', { nullable: true })
+	minSplittingSetCountryMin: number | null = null;
 
-	@Column('smallint', { default: 0 })
-	minSplittingSetCountryMax = 0;
+	@Column('smallint', { nullable: true })
+	minSplittingSetCountryMax: number | null = null;
 
-	@Column('int', { default: 0 })
-	minSplittingSetCountrySum = 0;
+	@Column('int', { nullable: true })
+	minSplittingSetCountrySum: number | null = null;
 
-	@Column('smallint', { default: 0 })
-	minSplittingSetISPMin = 0;
+	@Column('smallint', { nullable: true })
+	minSplittingSetISPMin: number | null = null;
 
-	@Column('smallint', { default: 0 })
-	minSplittingSetISPMax = 0;
+	@Column('smallint', { nullable: true })
+	minSplittingSetISPMax: number | null = null;
 
-	@Column('int', { default: 0 })
-	minSplittingSetISPSum = 0;
+	@Column('int', { nullable: true })
+	minSplittingSetISPSum: number | null = null;
 
 	@Column('smallint', { default: 0 })
 	crawlCount = 0;

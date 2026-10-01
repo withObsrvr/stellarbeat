@@ -5,7 +5,11 @@ import { createDummyHistoryBaseUrl } from '../../history-archive/__fixtures__/Hi
 import { err, ok } from 'neverthrow';
 import { ArchivistRangeScanner } from '../ArchivistRangeScanner';
 import { RangeScanner } from '../RangeScanner';
-import { ScanError, ScanErrorCategory, ScanErrorType } from '../../scan/ScanError';
+import {
+	ScanError,
+	ScanErrorCategory,
+	ScanErrorType
+} from '../../scan/ScanError';
 import { ScanJob } from '../../scan/ScanJob';
 import { ScanSettingsFactory } from '../../scan/ScanSettingsFactory';
 import { CategoryScanner } from '../CategoryScanner';
@@ -99,18 +103,22 @@ describe('connection error handling', () => {
 		jest.useRealTimers();
 	});
 
-	it('should retry on exit code 2 and succeed after recovery', async () => {
+	it('should retry when the scan could not run, then succeed', async () => {
 		const rangeScanner = mock<ArchivistRangeScanner>();
 
 		// First call fails with exit code 2 (connection error)
 		// Second call (after retry) succeeds
 		rangeScanner.scan
+			//The range scanner returns err() when stellar-archivist could not run
+			//at all; a non-zero exit with a result means the scan completed.
 			.mockResolvedValueOnce(
-				ok({
-					latestLedgerHeader: { ledger: 100 },
-					errors: [],
-					exitCode: 2
-				})
+				err(
+					new ScanError(
+						ScanErrorType.TYPE_CONNECTION,
+						'https://example.com',
+						'stellar-archivist wrote no report (exit code 2); the scan did not run'
+					)
+				)
 			)
 			.mockResolvedValueOnce(
 				ok({
@@ -128,7 +136,12 @@ describe('connection error handling', () => {
 			);
 
 		const scanner = getScanner(rangeScanner);
-		const scanJob = ScanJob.newScanChain(createDummyHistoryBaseUrl(), 0, 200, 1);
+		const scanJob = ScanJob.newScanChain(
+			createDummyHistoryBaseUrl(),
+			0,
+			200,
+			1
+		);
 
 		const scanPromise = scanner.perform(new Date(), scanJob);
 
@@ -146,17 +159,24 @@ describe('connection error handling', () => {
 	it('should abort scan after max retries on persistent connection error', async () => {
 		const rangeScanner = mock<ArchivistRangeScanner>();
 
-		// Always return exit code 2 (connection error)
+		//The tool never manages to run
 		rangeScanner.scan.mockResolvedValue(
-			ok({
-				latestLedgerHeader: { ledger: 100 },
-				errors: [],
-				exitCode: 2
-			})
+			err(
+				new ScanError(
+					ScanErrorType.TYPE_CONNECTION,
+					'https://example.com',
+					'stellar-archivist wrote no report (exit code 2); the scan did not run'
+				)
+			)
 		);
 
 		const scanner = getScanner(rangeScanner);
-		const scanJob = ScanJob.newScanChain(createDummyHistoryBaseUrl(), 0, 200, 1);
+		const scanJob = ScanJob.newScanChain(
+			createDummyHistoryBaseUrl(),
+			0,
+			200,
+			1
+		);
 
 		const scanPromise = scanner.perform(new Date(), scanJob);
 
@@ -194,7 +214,12 @@ describe('connection error handling', () => {
 		);
 
 		const scanner = getScanner(rangeScanner);
-		const scanJob = ScanJob.newScanChain(createDummyHistoryBaseUrl(), 0, 200, 1);
+		const scanJob = ScanJob.newScanChain(
+			createDummyHistoryBaseUrl(),
+			0,
+			200,
+			1
+		);
 
 		const scan = await scanner.perform(new Date(), scanJob);
 
@@ -208,26 +233,27 @@ describe('connection error handling', () => {
 	it('should not produce false missing file errors when connection fails', async () => {
 		const rangeScanner = mock<ArchivistRangeScanner>();
 
-		// Simulate what happens when archive goes offline:
-		// stellar-archivist reports "missing files" but with exit code 2
-		const missingFileError = new ScanError(
-			ScanErrorType.TYPE_VERIFICATION,
-			'https://example.com/ledger',
-			'15627 missing files',
-			15627,
-			ScanErrorCategory.MISSING_FILE
-		);
-
+		//When the archive is unavailable stellar-archivist writes no report, and
+		//when it is largely unreadable the verifier refuses to call it corrupt.
+		//Either way the range scanner reports a connection problem rather than a
+		//pile of missing-file errors the operator would be asked to repair.
 		rangeScanner.scan.mockResolvedValue(
-			ok({
-				latestLedgerHeader: { ledger: 100 },
-				errors: [missingFileError],
-				exitCode: 2 // Connection error, not verification error
-			})
+			err(
+				new ScanError(
+					ScanErrorType.TYPE_CONNECTION,
+					'https://example.com/ledger',
+					'stellar-archivist could not read 15627 of 15700 files; treating as a connection problem rather than archive corruption'
+				)
+			)
 		);
 
 		const scanner = getScanner(rangeScanner);
-		const scanJob = ScanJob.newScanChain(createDummyHistoryBaseUrl(), 0, 200, 1);
+		const scanJob = ScanJob.newScanChain(
+			createDummyHistoryBaseUrl(),
+			0,
+			200,
+			1
+		);
 
 		const scanPromise = scanner.perform(new Date(), scanJob);
 

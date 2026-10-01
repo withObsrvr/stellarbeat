@@ -473,3 +473,48 @@ describe('NodeScan', () => {
 		);
 	});
 });
+
+describe('NodeScan.getIPsNeedingGeoData', () => {
+	/**
+	 * A failed geo lookup used to be permanent: only changed IPs were ever
+	 * asked for, so a node located once -- badly -- stayed that way. That is
+	 * what leaves country and ISP analysis with a single "Unknown" group.
+	 */
+	it('includes nodes that have no geo data even when their IP is unchanged', () => {
+		//created earlier than the scan, so neither counts as a changed IP
+		const earlier = new Date('2026-09-01T00:00:00Z');
+		const time = new Date('2026-09-21T00:00:00Z');
+		const located = createNode('1.1.1.1', earlier);
+		located.updateGeoData(
+			NodeGeoDataLocation.create({
+				latitude: 1,
+				longitude: 1,
+				countryName: 'Germany',
+				countryCode: 'DE'
+			}),
+			time
+		);
+		const missing = createNode('2.2.2.2', earlier);
+
+		const scan = new NodeScan(time, [located, missing]);
+
+		expect(scan.getModifiedIPs()).not.toContain('2.2.2.2');
+		expect(scan.getIPsNeedingGeoData()).toContain('2.2.2.2');
+		expect(scan.getIPsNeedingGeoData()).not.toContain('1.1.1.1');
+	});
+
+	it('does not ask for the same IP twice', () => {
+		const time = new Date();
+		//a changed IP AND no geo data -- must not appear twice
+		const node = createNode('3.3.3.3', time);
+		const scan = new NodeScan(time, [node]);
+
+		const ips = scan.getIPsNeedingGeoData();
+
+		expect(ips.filter((ip) => ip === '3.3.3.3')).toHaveLength(1);
+	});
+});
+
+function createNode(ip: string, time: Date) {
+	return createDummyNode(ip, 11625, time);
+}

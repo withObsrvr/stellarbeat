@@ -165,6 +165,34 @@ describe('ScanNetwork', () => {
 		);
 	});
 
+	it('should not check in ok after a failed scan', async function () {
+		//regression: the error branch fell through to checkIn('ok'), so the last
+		//status a monitor saw was success and a broken scan looked healthy
+		const SUT = setupSUT();
+		SUT.scanRepository.saveAndRollupMeasurements.mockResolvedValue(
+			err(new Error('save failed'))
+		);
+
+		await SUT.scanNetwork.execute({ updateNetwork: true, dryRun: false });
+
+		const statuses = SUT.jobMonitor.checkIn.mock.calls.map(
+			(call) => call[0].status
+		);
+		expect(statuses).toEqual(['in_progress', 'error']);
+		expect(statuses).not.toContain('ok');
+	});
+
+	it('should check in ok after a successful scan', async function () {
+		const SUT = setupSUT();
+
+		await SUT.scanNetwork.execute({ updateNetwork: true, dryRun: false });
+
+		const statuses = SUT.jobMonitor.checkIn.mock.calls.map(
+			(call) => call[0].status
+		);
+		expect(statuses).toEqual(['in_progress', 'ok']);
+	});
+
 	it('should capture error if notify fails', async function () {
 		const SUT = setupSUT();
 		SUT.notify.execute.mockResolvedValue(err(mock<NotifyError>()));
@@ -313,7 +341,8 @@ describe('ScanNetwork', () => {
 			heartBeater,
 			notify,
 			exceptionLogger,
-			logger
+			logger,
+			jobMonitor
 		};
 	}
 	function createNetwork(): Network {

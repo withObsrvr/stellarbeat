@@ -3,31 +3,90 @@
 @tailwind utilities;
 
 /* ──────────────────────────────────────────────
-   Prism Design System — CSS Custom Properties
+   Radar Design Tokens
+
+   Single source of truth for color. Components must
+   read these tokens (directly or through the Tailwind
+   utilities in tailwind.config.js) rather than naming
+   literal palette values such as `gray-200`.
+
+   Three families, deliberately separate:
+     surface / border / text  — the neutral ground
+     accent                   — Radar's brand coral
+     signal                   — severity only, never decoration
    ────────────────────────────────────────────── */
 :root {
-  --color-surface-page: #FAFAFA;
+  /* Surfaces — warm neutrals, biased toward the accent */
+  --color-surface-page: #FBFAF7;
   --color-surface-card: #FFFFFF;
-  --color-surface-subtle: #F3F4F6;
-  --color-border-default: #E5E7EB;
-  --color-border-subtle: #F3F4F6;
-  --color-text-primary: #111111;
-  --color-text-strong: #374151;
-  --color-text-body: #6B7280;
-  --color-text-muted: #9CA3AF;
+  --color-surface-subtle: #F3EFE7;
+
+  /* Borders */
+  --color-border-default: #EDE9E1;
+  --color-border-subtle: #F5F2EC;
+  --color-border-strong: #DFD9CD;
+
+  /* Text */
+  --color-text-primary: #1A1A1A;
+  --color-text-strong: #46413A;
+  --color-text-body: #6B6459;
+  --color-text-muted: #9A9389;
+
+  /* Accent — used sparingly: links, eyebrows, focus rings */
+  --color-accent: #C4512A;
+  --color-accent-hover: #A8441F;
+  --color-accent-subtle: #FBEDE6;
+
+  /* Signal — reserved for network health severity.
+     Never use these to decorate; a reader should be able to
+     trust that green/amber/red always means safe/fragile/at-risk. */
+  --color-signal-safe: #2E7D52;
+  --color-signal-safe-subtle: #EAF3ED;
+  --color-signal-warn: #9A6A14;
+  --color-signal-warn-subtle: #F8F0DE;
+  --color-signal-risk: #B7382A;
+  --color-signal-risk-subtle: #FAEBE8;
+  --color-signal-neutral: #6B6459;
+  --color-signal-neutral-subtle: #F3EFE7;
+
+  /* Focus ring */
+  --color-focus-ring: var(--color-accent);
 }
 
-/* Dark mode infrastructure (no toggle yet) */
+/* Dark palette.
+
+   NOT REACHABLE YET — nothing sets `.dark`, and it must stay
+   that way until the token migration lands. ~900 components still
+   name literal `gray-*` values that cannot respond to these tokens,
+   so enabling dark mode today would render half the app in one
+   theme and half in the other. Wire the toggle only once
+   `grep -r 'gray-[0-9]' src --include=*.vue` comes back clean. */
 .dark {
-  --color-surface-page: #09090B;
-  --color-surface-card: #141414;
-  --color-surface-subtle: #1E1E1E;
-  --color-border-default: #2A2A2A;
-  --color-border-subtle: #1E1E1E;
-  --color-text-primary: #F3F4F6;
-  --color-text-strong: #D1D5DB;
-  --color-text-body: #9CA3AF;
-  --color-text-muted: #6B7280;
+  --color-surface-page: #131211;
+  --color-surface-card: #1B1916;
+  --color-surface-subtle: #232019;
+
+  --color-border-default: #2F2B24;
+  --color-border-subtle: #232019;
+  --color-border-strong: #3C372E;
+
+  --color-text-primary: #F2EEE6;
+  --color-text-strong: #CFC8BC;
+  --color-text-body: #A79F92;
+  --color-text-muted: #756C5F;
+
+  --color-accent: #FF8F62;
+  --color-accent-hover: #FFA983;
+  --color-accent-subtle: #2E2019;
+
+  --color-signal-safe: #6BC094;
+  --color-signal-safe-subtle: #17251D;
+  --color-signal-warn: #DCA945;
+  --color-signal-warn-subtle: #2A2115;
+  --color-signal-risk: #EC8271;
+  --color-signal-risk-subtle: #2B1A17;
+  --color-signal-neutral: #A79F92;
+  --color-signal-neutral-subtle: #232019;
 }
 
 /* ──────────────────────────────────────────────
@@ -53,9 +112,9 @@
   }
 
   @keyframes pulse-ring {
-    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.35); }
-    70%  { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    0%   { box-shadow: 0 0 0 0 var(--pulse-halo); }
+    70%  { box-shadow: 0 0 0 7px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
   }
 
   .anim-fade-up {
@@ -64,6 +123,7 @@
   }
 
   .pulse-dot {
+    --pulse-halo: color-mix(in srgb, var(--color-signal-safe) 35%, transparent);
     animation: pulse-ring 2s infinite;
   }
 
@@ -88,4 +148,441 @@
   .d6 { animation-delay: .48s; }
   .d7 { animation-delay: .56s; }
   .d8 { animation-delay: .64s; }
+}
+
+/* ──────────────────────────────────────────────
+   Motion preferences
+   ────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .anim,
+  .anim-fade-up,
+  .pulse-dot {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ──────────────────────────────────────────────
+   Legacy component classes
+
+   These are the Bootstrap and Tabler class names still used across the app,
+   reimplemented on Radar's tokens so the vendor stylesheets can be dropped.
+   Around 60 names, against Bootstrap's ~1500 -- the rest was never used.
+
+   This is a bridge, not a destination: every class here is one a component
+   should eventually stop using in favour of the UI primitives in
+   src/components/ui. It lives in @layer components so Tailwind utilities
+   still win when a template overrides something.
+
+   Deliberately NOT reimplemented, because they never worked in the first
+   place: ms-*, me-*, lh-* are Bootstrap 5 names and this project was on
+   Bootstrap 4.6.1, so they have always been inert. Templates using them get
+   no spacing today and will get none tomorrow.
+   ────────────────────────────────────────────── */
+@layer components {
+  /* ── Buttons ─────────────────────────────────────────────────────── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent
+           px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+    color: var(--color-text-primary);
+  }
+  .btn:disabled,
+  .btn.disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+  .btn-sm {
+    @apply px-2.5 py-1 text-xs;
+  }
+  .btn-primary {
+    background: var(--color-text-primary);
+    color: var(--color-surface-card);
+  }
+  .btn-primary:hover {
+    background: var(--color-text-strong);
+  }
+  .btn-secondary,
+  .btn-outline-default,
+  .btn-outline-secondary {
+    background: var(--color-surface-card);
+    border-color: var(--color-border-default);
+    color: var(--color-text-strong);
+  }
+  .btn-secondary:hover,
+  .btn-outline-default:hover,
+  .btn-outline-secondary:hover {
+    background: var(--color-surface-subtle);
+  }
+  .btn-outline-primary {
+    background: transparent;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+  .btn-outline-primary:hover {
+    background: var(--color-accent-subtle);
+  }
+  .btn-danger {
+    background: var(--color-signal-risk);
+    color: #fff;
+  }
+  .btn-success {
+    background: var(--color-signal-safe);
+    color: #fff;
+  }
+  .btn-warning {
+    background: var(--color-signal-warn);
+    color: #fff;
+  }
+  .btn-group {
+    @apply inline-flex;
+  }
+  .btn-group > .btn:not(:first-child) {
+    @apply -ml-px rounded-l-none;
+  }
+  .btn-group > .btn:not(:last-child) {
+    @apply rounded-r-none;
+  }
+  .btn-close {
+    @apply cursor-pointer border-none bg-transparent p-1 text-lg leading-none;
+    color: var(--color-text-muted);
+  }
+
+  /* ── Badges ──────────────────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    background: var(--color-surface-subtle);
+    color: var(--color-text-strong);
+  }
+  .badge-secondary {
+    background: var(--color-surface-subtle);
+    color: var(--color-text-body);
+  }
+  .badge-info {
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+  }
+  .badge-success {
+    background: var(--color-signal-safe-subtle);
+    color: var(--color-signal-safe);
+  }
+  .badge-warning {
+    background: var(--color-signal-warn-subtle);
+    color: var(--color-signal-warn);
+  }
+  .badge-danger {
+    background: var(--color-signal-risk-subtle);
+    color: var(--color-signal-risk);
+  }
+
+  /* ── Cards ───────────────────────────────────────────────────────── */
+  .card {
+    @apply rounded-xl border;
+    background: var(--color-surface-card);
+    border-color: var(--color-border-default);
+  }
+  .card-header {
+    @apply flex items-center justify-between gap-3 border-b px-4 py-3;
+    border-color: var(--color-border-subtle);
+  }
+  .card-title {
+    @apply text-sm font-semibold;
+    color: var(--color-text-primary);
+  }
+  .card-body {
+    @apply px-4 py-4;
+  }
+  .card-footer {
+    @apply border-t px-4 py-3;
+    border-color: var(--color-border-subtle);
+  }
+
+  /* ── Alerts ──────────────────────────────────────────────────────── */
+  .alert {
+    @apply rounded-lg border px-4 py-3 text-sm;
+    background: var(--color-surface-subtle);
+    border-color: var(--color-border-default);
+    color: var(--color-text-strong);
+  }
+  .alert-info {
+    background: var(--color-accent-subtle);
+    border-color: var(--color-accent);
+    color: var(--color-text-strong);
+  }
+  .alert-warning {
+    background: var(--color-signal-warn-subtle);
+    border-color: var(--color-signal-warn);
+    color: var(--color-text-strong);
+  }
+  .alert-danger {
+    background: var(--color-signal-risk-subtle);
+    border-color: var(--color-signal-risk);
+    color: var(--color-text-strong);
+  }
+
+  /* ── Forms ───────────────────────────────────────────────────────── */
+  .form-control,
+  .form-select {
+    @apply block w-full rounded-lg border px-3 py-1.5 text-sm;
+    background: var(--color-surface-card);
+    border-color: var(--color-border-default);
+    color: var(--color-text-primary);
+  }
+  .form-control:focus,
+  .form-select:focus {
+    @apply outline-none ring-2;
+    border-color: var(--color-accent);
+    --tw-ring-color: var(--color-accent-subtle);
+  }
+  .form-control-sm,
+  .form-select-sm {
+    @apply px-2 py-1 text-xs;
+  }
+  .form-group {
+    @apply mb-3;
+  }
+  .form-label {
+    @apply mb-1 block text-sm font-medium;
+    color: var(--color-text-strong);
+  }
+  .form-check {
+    @apply relative flex items-center gap-2;
+  }
+  .form-check-inline {
+    @apply mr-4 inline-flex;
+  }
+  .form-check-input {
+    @apply h-4 w-4 flex-none rounded border;
+    border-color: var(--color-border-default);
+    accent-color: var(--color-accent);
+  }
+  .form-check-label {
+    @apply cursor-pointer text-sm;
+    color: var(--color-text-strong);
+  }
+  .form-switch .form-check-input {
+    @apply h-4 w-7 rounded-full;
+  }
+  .form-range {
+    @apply w-full;
+    accent-color: var(--color-accent);
+  }
+
+  /* ── Navs and tabs ───────────────────────────────────────────────── */
+  .nav-tabs {
+    @apply flex gap-1 border-b;
+    border-color: var(--color-border-default);
+  }
+  .nav-item {
+    @apply list-none;
+  }
+  .nav-link {
+    @apply inline-block cursor-pointer rounded-t-lg px-3 py-2 text-sm font-medium;
+    color: var(--color-text-body);
+  }
+  .nav-link:hover {
+    color: var(--color-text-primary);
+  }
+  .nav-link.active {
+    color: var(--color-text-primary);
+    border-bottom: 2px solid var(--color-accent);
+  }
+  .tab-content > .tab-pane {
+    @apply hidden;
+  }
+  .tab-content > .tab-pane.active {
+    @apply block;
+  }
+
+  /* ── Lists ───────────────────────────────────────────────────────── */
+  .list-group {
+    @apply flex flex-col;
+  }
+  .list-group-item {
+    @apply border-b px-3 py-2 text-sm;
+    border-color: var(--color-border-subtle);
+    color: var(--color-text-strong);
+  }
+  .list-group-item:last-child {
+    @apply border-b-0;
+  }
+  .list-group-item-action {
+    @apply cursor-pointer;
+  }
+  .list-group-item-action:hover {
+    background: var(--color-surface-subtle);
+  }
+  .list-group-transparent .list-group-item {
+    @apply border-0 bg-transparent;
+  }
+
+  /* ── Pagination ──────────────────────────────────────────────────── */
+  .pagination {
+    @apply flex list-none items-center gap-1;
+  }
+  .page-item .page-link {
+    @apply cursor-pointer rounded px-2 py-1 text-sm;
+    color: var(--color-text-body);
+  }
+  .page-item.active .page-link {
+    background: var(--color-surface-subtle);
+    color: var(--color-text-primary);
+  }
+
+  /* ── Dropdowns ───────────────────────────────────────────────────── */
+  /* display:none is load-bearing, not decoration. Components toggle `.show`
+     to open these (search.vue does), so a dropdown without the hidden default
+     is permanently open. Same for .modal below. */
+  .dropdown-menu {
+    @apply absolute z-50 hidden min-w-[10rem] rounded-lg border py-1 shadow-lg;
+    background: var(--color-surface-card);
+    border-color: var(--color-border-default);
+  }
+  .dropdown-menu.show {
+    @apply block;
+  }
+  .dropdown-item {
+    @apply block cursor-pointer px-3 py-2 text-sm;
+    color: var(--color-text-strong);
+  }
+  .dropdown-item:hover {
+    background: var(--color-surface-subtle);
+  }
+
+  /* ── Grid ────────────────────────────────────────────────────────── */
+  .row {
+    @apply -mx-2 flex flex-wrap;
+  }
+  .row > [class*="col-"] {
+    @apply px-2;
+  }
+  .col-12,
+  .col-sm-12,
+  .col-lg-12 {
+    @apply w-full;
+  }
+  .col-md-3 { @apply w-full md:w-1/4; }
+  .col-md-6 { @apply w-full md:w-1/2; }
+  .col-md-9 { @apply w-full md:w-3/4; }
+  .col-lg-2 { @apply w-full lg:w-1/6; }
+  .col-lg-3 { @apply w-full lg:w-1/4; }
+  .col-lg-9 { @apply w-full lg:w-3/4; }
+  .col-lg-10 { @apply w-full lg:w-5/6; }
+
+  /* ── Assorted layout ─────────────────────────────────────────────── */
+  .d-flex { @apply flex; }
+  .d-block { @apply block; }
+  .text-muted { color: var(--color-text-muted); }
+  .page-header { @apply mb-4 flex items-center justify-between gap-3; }
+  .page-title {
+    @apply text-lg font-semibold;
+    color: var(--color-text-primary);
+  }
+  .progress-bar {
+    @apply h-full rounded;
+    background: var(--color-accent);
+  }
+
+  /* Raw .modal markup that predates UiModal. These are hidden by default and
+     shown by adding .show, which is what Bootstrap's JavaScript used to do --
+     and never does now, because that JavaScript is not loaded. So they stay
+     hidden, exactly as they did before Bootstrap's CSS was removed.
+     simulate-new-node.vue is the last one; without this rule its dialog
+     renders inline at the bottom of every page that mounts it. */
+  .modal {
+    @apply fixed inset-0 z-[1050] hidden overflow-y-auto;
+  }
+  .modal.show {
+    @apply block;
+  }
+  .modal-dialog {
+    @apply mx-auto my-8 w-full max-w-lg;
+  }
+  .modal-lg {
+    @apply max-w-3xl;
+  }
+  .modal-content {
+    @apply rounded-xl border shadow-xl;
+    background: var(--color-surface-card);
+    border-color: var(--color-border-default);
+  }
+  .modal-header {
+    @apply flex items-center justify-between gap-3 border-b px-4 py-3;
+    border-color: var(--color-border-subtle);
+  }
+  .modal-title {
+    @apply text-base font-semibold;
+    color: var(--color-text-primary);
+  }
+  .modal-body { @apply px-4 py-4; }
+  .modal-footer {
+    @apply flex items-center justify-end gap-2 border-t px-4 py-3;
+    border-color: var(--color-border-subtle);
+  }
+
+  .fade { @apply transition-opacity; }
+
+  /* ── Layout utilities ────────────────────────────────────────────────
+     These are Bootstrap 4 and Tabler utility classes. They are easy to miss
+     when auditing, because they look like Tailwind: `h-100` sits right next
+     to Tailwind's `h-10`, and `align-items-center` next to `items-center`.
+     Dropping them silently collapsed the network graph, whose wrapper is
+     sized entirely by `h-100`.
+     ──────────────────────────────────────────────────────────────────── */
+  .h-100 { height: 100%; }
+  .w-100 { width: 100%; }
+  .position-relative { position: relative; }
+  .flex-column { flex-direction: column; }
+  .flex-fill { flex: 1 1 auto; }
+  .align-items-start { align-items: flex-start; }
+  .align-items-center { align-items: center; }
+  .align-items-baseline { align-items: baseline; }
+  .justify-content-start { justify-content: flex-start; }
+  .justify-content-center { justify-content: center; }
+  .justify-content-between { justify-content: space-between; }
+  .justify-content-around { justify-content: space-around; }
+  .font-weight-bold { font-weight: 700; }
+  .list-unstyled { @apply list-none pl-0; }
+  .small { font-size: 0.875em; }
+  .mt-md-2 { @apply md:mt-2; }
+  .p-lg-6 { @apply lg:p-8; }
+  .order-lg-1 { @apply lg:order-1; }
+
+  /* Tabler structural classes still referenced by live components. */
+  .page { @apply flex min-h-screen flex-col; }
+  .nav { @apply flex list-none flex-wrap pl-0; }
+  .dropdown { @apply relative; }
+  .icon { @apply inline-block align-middle; }
+  .tag {
+    @apply inline-flex items-center rounded px-1.5 py-0.5 text-xs;
+    background: var(--color-surface-subtle);
+    color: var(--color-text-strong);
+  }
+  .input-icon { @apply relative; }
+  .input-icon-addon {
+    @apply pointer-events-none absolute inset-y-0 left-0 flex w-10 items-center justify-center;
+    color: var(--color-text-muted);
+  }
+
+  /* ── Tabler loader and dimmer ────────────────────────────────────── */
+  .dimmer {
+    @apply relative;
+  }
+  .dimmer.active .dimmer-content {
+    @apply pointer-events-none opacity-40;
+  }
+  .dimmer .loader {
+    @apply hidden;
+  }
+  .dimmer.active .loader {
+    @apply absolute left-1/2 top-4 z-10 block h-8 w-8 -translate-x-1/2 rounded-full border-2;
+    border-color: var(--color-border-default);
+    border-top-color: var(--color-accent);
+    animation: legacy-spin 0.6s linear infinite;
+  }
+}
+
+@keyframes legacy-spin {
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
 }

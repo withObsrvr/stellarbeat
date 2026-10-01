@@ -80,7 +80,16 @@
           "
         >
           <div>
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <svg
+              class="mr-2 inline h-4 w-4 align-text-bottom"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 2.5 1.5 21h21L12 2.5Zm0 5.25a1 1 0 0 1 1 1v5a1 1 0 1 1-2 0v-5a1 1 0 0 1 1-1Zm0 9.25a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3Z"
+              />
+            </svg>
             <span>You have unsaved trust configuration changes</span>
           </div>
           <div>

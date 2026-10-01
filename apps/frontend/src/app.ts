@@ -8,7 +8,7 @@ import Multiselect from "vue-multiselect";
 import * as Sentry from "@sentry/vue";
 import ToolTipDirective from "./directives/tooltip";
 import {
-  Badge, Alert, Card, Button, Icon,
+  Badge, Alert, Card, Button,
   FormInput, FormTextarea, FormSelect, FormCheckbox, FormGroup,
   FormRadio, FormRadioGroup,
   ListGroup, ListGroupItem, Collapse, Pagination,
@@ -40,7 +40,6 @@ app.component("UiBadge", Badge);
 app.component("UiAlert", Alert);
 app.component("UiCard", Card);
 app.component("UiButton", Button);
-app.component("UiIcon", Icon);
 app.component("UiFormInput", FormInput);
 app.component("UiFormTextarea", FormTextarea);
 app.component("UiFormSelect", FormSelect);

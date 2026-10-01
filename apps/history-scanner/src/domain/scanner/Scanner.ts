@@ -113,7 +113,10 @@ export class Scanner {
 			console.time('range_scan');
 
 			// Update settings for TypeScript scanner if needed
-			if (!this.useStellarArchivist && rangeScanner instanceof RangeScannerAdapter) {
+			if (
+				!this.useStellarArchivist &&
+				rangeScanner instanceof RangeScannerAdapter
+			) {
 				rangeScanner.updateSettings({
 					latestScannedLedger: latestLedgerHeader.ledger,
 					latestScannedLedgerHeaderHash: latestLedgerHeader.hash ?? null,
@@ -128,10 +131,13 @@ export class Scanner {
 			);
 			console.timeEnd('range_scan');
 
-			// Check for connection error (exit code 2)
-			const isConnectionError =
-				rangeResult.isErr() ||
-				(rangeResult.isOk() && rangeResult.value.exitCode === 2);
+			// A failed range is the only thing worth retrying. stellar-archivist
+			// exits 2 both when it cannot run and when it completed and found
+			// archive issues, so the exit code cannot classify the outcome on its
+			// own - the range scanner already returns err() for the former.
+			// Retrying on exit code 2 made a corrupt archive scan forever: every
+			// attempt found the same defects, and every attempt discarded them.
+			const isConnectionError = rangeResult.isErr();
 
 			if (isConnectionError) {
 				this.logger.warn('Connection error detected, attempting retries', {
@@ -147,16 +153,17 @@ export class Scanner {
 					rangeToLedger
 				);
 
-				// Check if retries failed
-				if (
-					rangeResult.isErr() ||
-					(rangeResult.isOk() && rangeResult.value.exitCode === 2)
-				) {
+				// Same here: a completed scan that reported archive issues is a
+				// result, not a failed attempt.
+				if (rangeResult.isErr()) {
 					// Retries failed - abort scan
-					this.logger.error('Aborting scan due to persistent connection error', {
-						url: url.value,
-						fromLedger: rangeFromLedger
-					});
+					this.logger.error(
+						'Aborting scan due to persistent connection error',
+						{
+							url: url.value,
+							fromLedger: rangeFromLedger
+						}
+					);
 
 					return {
 						latestLedgerHeader,
@@ -219,8 +226,7 @@ export class Scanner {
 		const adapterSettings: RangeScannerSettings = {
 			concurrency: scanSettings.concurrency,
 			latestScannedLedger: scanSettings.latestScannedLedger,
-			latestScannedLedgerHeaderHash:
-				scanSettings.latestScannedLedgerHeaderHash,
+			latestScannedLedgerHeaderHash: scanSettings.latestScannedLedgerHeaderHash,
 			alreadyScannedBucketHashes: new Set<string>()
 		};
 
@@ -365,12 +371,11 @@ export class Scanner {
 			await this.sleep(delay);
 			const result = await rangeScanner.scan(url, fromLedger, toLedger);
 
-			// Check if this attempt succeeded (not a connection error)
-			if (result.isOk() && result.value.exitCode !== 2) {
+			// Any completed scan is an answer, whatever it found.
+			if (result.isOk()) {
 				return result;
 			}
 
-			// If result is an error (not just exit code 2), log it
 			if (result.isErr()) {
 				this.logger.warn('Retry attempt failed with error', {
 					url: url.value,

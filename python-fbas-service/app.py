@@ -155,6 +155,84 @@ def run_python_fbas(args: List[str], timeout: int = 60) -> subprocess.CompletedP
         )
 
 
+class UnrecognizedOutput(HTTPException):
+    """python-fbas produced output this service cannot interpret.
+
+    This exists because the alternative -- returning a default -- is worse than
+    failing. Every parser below used to fall back to 0 or [] when the expected
+    line was missing, so a changed CLI format, a crash, or a "no result" branch
+    all arrived downstream as a real-looking answer of zero. Radar renders those
+    numbers as safety thresholds, and "0 organizations" is the most alarming
+    statement it can make.
+
+    This is not hypothetical: syncing python-fbas changed `min-quorum` to print
+    "Example min-cardinality quorum:" instead of "Example min quorum:", which the
+    old parser swallowed as an empty quorum of size 0.
+    """
+
+    def __init__(self, command: str, expected: str, output: str):
+        super().__init__(
+            status_code=502,
+            detail=(
+                f"Could not parse `python-fbas {command}` output. "
+                f"Expected {expected}. This usually means the CLI output format "
+                f"changed and this service needs updating.\n"
+                f"--- output ---\n{output[:2000]}"
+            )
+        )
+
+
+def require_success(command: str, result: subprocess.CompletedProcess) -> None:
+    """Fail loudly on a non-zero exit rather than parsing whatever came out."""
+    if result.returncode != 0:
+        logger.error("python-fbas %s exited %s: %s",
+                     command, result.returncode, result.stderr)
+        raise HTTPException(
+            status_code=502,
+            detail=f"python-fbas {command} failed: {result.stderr[:2000]}"
+        )
+
+
+def parse_cardinality(command: str, output: str, label: str) -> int:
+    """Read `<label>: <int>` from the output, or raise."""
+    for line in output.splitlines():
+        if label in line:
+            try:
+                return int(line.split(':')[-1].strip())
+            except ValueError:
+                raise UnrecognizedOutput(
+                    command, f"an integer after '{label}'", output)
+    raise UnrecognizedOutput(command, f"a line containing '{label}'", output)
+
+
+def parse_validator_list(command: str, output: str, *prefixes: str) -> List[str]:
+    """Read the bracketed validator list that follows any of `prefixes`.
+
+    The list may sit on the same line as the prefix or on the next one, and
+    python-fbas renders group names unquoted when --group-by is in use, so the
+    parse is tolerant about quoting but not about the list being absent.
+    """
+    lines = output.splitlines()
+    for index, line in enumerate(lines):
+        if not any(line.strip().startswith(prefix) for prefix in prefixes):
+            continue
+        for candidate in lines[index:index + 3]:
+            if '[' in candidate and ']' in candidate:
+                inner = candidate[candidate.index(
+                    '[') + 1:candidate.rindex(']')].strip()
+                if not inner:
+                    return []
+                return [
+                    item.split('(')[0].strip().strip("'\"")
+                    for item in inner.split(',')
+                    if item.strip()
+                ]
+        raise UnrecognizedOutput(
+            command, f"a bracketed list after '{prefixes[0]}'", output)
+    raise UnrecognizedOutput(
+        command, f"a line starting with '{prefixes[0]}'", output)
+
+
 def prepare_fbas_data(request: AnalysisRequest) -> List[Dict]:
     """Convert request nodes to python-fbas format"""
     nodes_data = []
@@ -226,10 +304,12 @@ async def analyze_top_tier(request: AnalysisRequest):
         ])
 
         if result.returncode != 0:
-            # Check if this is the known AssertionError with disjoint quorums
+            # A network with disjoint quorums genuinely has no top tier, and
+            # python-fbas surfaces that as an assertion rather than a result.
+            # This is the one empty answer that is a finding rather than a gap.
             if 'AssertionError' in result.stderr and 'find_min_quorum' in result.stderr:
-                logger.warning(f"Top tier analysis failed due to disjoint quorums (network with splitting sets min_size=0)")
-                # Return empty top tier for networks with disjoint quorums
+                logger.warning(
+                    "Top tier analysis found disjoint quorums; reporting an empty top tier")
                 execution_time = int((time.time() - start_time) * 1000)
                 return TopTierResponse(
                     top_tier=[],
@@ -237,21 +317,9 @@ async def analyze_top_tier(request: AnalysisRequest):
                     execution_time_ms=execution_time,
                     cache_hit=False
                 )
-            logger.error(f"Top tier analysis failed: {result.stderr}")
-            raise HTTPException(status_code=500, detail=result.stderr)
+            require_success('top-tier', result)
 
-        # Parse output
-        lines = result.stdout.strip().split('\n')
-        top_tier = []
-
-        for line in lines:
-            if line.startswith('Top tier:'):
-                # Extract validators from output
-                tier_str = line.split(':', 1)[1].strip()
-                # Parse list format
-                tier_str = tier_str.strip('[]')
-                if tier_str:
-                    top_tier = [v.split('(')[0].strip().strip("'") for v in tier_str.split(',')]
+        top_tier = parse_validator_list('top-tier', result.stdout, 'Top tier:')
 
         execution_time = int((time.time() - start_time) * 1000)
 
@@ -281,25 +349,20 @@ async def analyze_blocking_sets(request: AnalysisRequest):
             'min-blocking-set'
         ])
 
-        if result.returncode != 0:
-            logger.error(f"Blocking sets analysis failed: {result.stderr}")
-            raise HTTPException(status_code=500, detail=result.stderr)
+        require_success('min-blocking-set', result)
 
-        # Parse output
-        lines = result.stdout.strip().split('\n')
-        min_size = 0
-        example_set = []
+        if 'No blocking set found' in result.stdout:
+            raise UnrecognizedOutput(
+                'min-blocking-set',
+                'a blocking set; python-fbas reported none, which this service '
+                'cannot express as a size',
+                result.stdout)
 
-        for line in lines:
-            if 'Minimal blocking-set cardinality is:' in line:
-                min_size = int(line.split(':')[-1].strip())
-            elif line.startswith('Example:'):
-                # Next line contains the set
-                idx = lines.index(line)
-                if idx + 1 < len(lines):
-                    set_str = lines[idx + 1].strip('[]')
-                    if set_str:
-                        example_set = [v.split('(')[0].strip().strip("'") for v in set_str.split(',')]
+        min_size = parse_cardinality(
+            'min-blocking-set', result.stdout,
+            'Minimal blocking-set cardinality is:')
+        example_set = parse_validator_list(
+            'min-blocking-set', result.stdout, 'Example:')
 
         execution_time = int((time.time() - start_time) * 1000)
 
@@ -329,30 +392,27 @@ async def analyze_splitting_sets(request: AnalysisRequest):
             'min-splitting-set'
         ])
 
-        # Note: python-fbas may return non-zero if split detected
-
-        # Parse output
+        # python-fbas may exit non-zero when a split is detected, so the exit
+        # code is not checked here; the output is authoritative.
         output = result.stdout + result.stderr
-        lines = output.strip().split('\n')
 
-        min_size = 0
-        example_set = []
-        has_split = False
+        # "No splitting set found" is a real answer, and it is NOT zero -- zero
+        # would mean no organizations at all are needed to break safety. The
+        # previous parser could not tell the two apart, which is how Radar came
+        # to display a safety threshold of 0 countries.
+        if 'No splitting set found' in output:
+            raise UnrecognizedOutput(
+                'min-splitting-set',
+                'a splitting set; python-fbas found none, which is not the same '
+                'as a threshold of zero',
+                output)
 
-        for line in lines:
-            if 'Minimal splitting-set cardinality is:' in line:
-                min_size = int(line.split(':')[-1].strip())
-            elif 'splits quorums' in line:
-                has_split = True
-            elif line.startswith('Example:') or line.startswith('['):
-                # Try to extract set
-                try:
-                    if '[' in line:
-                        set_str = line[line.index('['):line.index(']')+1]
-                        example_set = json.loads(set_str.replace("'", '"'))
-                except Exception:
-                    # Ignore malformed splitting set output - not critical for the analysis
-                    pass
+        min_size = parse_cardinality(
+            'min-splitting-set', output,
+            'Minimal splitting-set cardinality is:')
+        example_set = parse_validator_list(
+            'min-splitting-set', output, 'Example:')
+        has_split = 'splits quorums' in output
 
         execution_time = int((time.time() - start_time) * 1000)
 
@@ -384,7 +444,20 @@ async def analyze_quorums(request: AnalysisRequest):
             'check-intersection'
         ])
 
-        has_intersection = 'No disjoint quorums found' in check_result.stdout
+        require_success('check-intersection', check_result)
+
+        # This decides whether Radar reports the network as safe or as able to
+        # fork, so it must never be inferred from a missing substring. Both
+        # outcomes are matched explicitly and anything else is an error.
+        if 'No disjoint quorums found' in check_result.stdout:
+            has_intersection = True
+        elif 'Disjoint quorums:' in check_result.stdout:
+            has_intersection = False
+        else:
+            raise UnrecognizedOutput(
+                'check-intersection',
+                "either 'No disjoint quorums found' or 'Disjoint quorums:'",
+                check_result.stdout)
 
         # Then find minimal quorum
         quorum_result = run_python_fbas([
@@ -392,24 +465,14 @@ async def analyze_quorums(request: AnalysisRequest):
             'min-quorum'
         ])
 
-        if quorum_result.returncode != 0:
-            logger.error(f"Quorum analysis failed: {quorum_result.stderr}")
-            raise HTTPException(status_code=500, detail=quorum_result.stderr)
+        require_success('min-quorum', quorum_result)
 
-        # Parse output
-        lines = quorum_result.stdout.strip().split('\n')
-        example_quorum = []
-
-        for line in lines:
-            if line.startswith('Example min quorum:'):
-                # Extract from next lines or same line
-                idx = lines.index(line)
-                for i in range(idx, min(idx + 15, len(lines))):
-                    if lines[i].strip().startswith('['):
-                        qstr = lines[i].strip().strip('[]')
-                        if qstr:
-                            example_quorum = [v.split('(')[0].strip().strip("'") for v in qstr.split(',')]
-                        break
+        # Both labels are accepted because the default mode changed: min-quorum
+        # used to always print "Example min quorum:", and now prints
+        # "Example min-cardinality quorum:" unless --mode minimal is passed.
+        example_quorum = parse_validator_list(
+            'min-quorum', quorum_result.stdout,
+            'Example min-cardinality quorum:', 'Example min quorum:')
 
         execution_time = int((time.time() - start_time) * 1000)
 

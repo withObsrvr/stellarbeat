@@ -55,6 +55,10 @@ describe('NetworkV1DTOMapper', () => {
 		networkMeasurement.minBlockingSetISPFilteredSize = 13;
 		networkMeasurement.minSplittingSetSize = 14;
 		networkMeasurement.minSplittingSetOrgsSize = 15;
+		//distinct from the network-wide figures so the mapping is verified
+		//rather than passing on a shared default
+		networkMeasurement.minSplittingSetTopTierSize = 21;
+		networkMeasurement.minSplittingSetOrgsTopTierSize = 22;
 		networkMeasurement.minSplittingSetCountrySize = 16;
 		networkMeasurement.minSplittingSetISPSize = 17;
 		networkMeasurement.topTierSize = 18;
@@ -119,6 +123,10 @@ describe('NetworkV1DTOMapper', () => {
 					networkMeasurement.minBlockingSetISPFilteredSize,
 				minSplittingSetSize: networkMeasurement.minSplittingSetSize,
 				minSplittingSetOrgsSize: networkMeasurement.minSplittingSetOrgsSize,
+				minSplittingSetTopTierSize:
+					networkMeasurement.minSplittingSetTopTierSize,
+				minSplittingSetOrgsTopTierSize:
+					networkMeasurement.minSplittingSetOrgsTopTierSize,
 				minSplittingSetCountrySize:
 					networkMeasurement.minSplittingSetCountrySize,
 				minSplittingSetISPSize: networkMeasurement.minSplittingSetISPSize,

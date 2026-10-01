@@ -56,7 +56,6 @@ export default defineConfig({
             "d3-polygon",
             "d3-drag",
           ],
-          jquery: ["jquery"],
           vue: ["vue", "vue-router", "vue-multiselect"],
           sentry: ["@sentry/vue"],
           shared: ["shared"],

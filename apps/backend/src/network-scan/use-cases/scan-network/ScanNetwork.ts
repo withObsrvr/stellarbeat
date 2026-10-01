@@ -70,12 +70,17 @@ export class ScanNetwork {
 				this.networkConfig.knownPeers,
 				dto.dryRun
 			);
+			//A failed scan used to check in 'error' and then fall through to
+			//'ok', so the last status a monitor saw was success. The scan is
+			//still not treated as fatal - partial results are persisted and the
+			//process exits cleanly - but the status it reports is now the one
+			//that actually happened.
+			//todo: the caller should determine what the 'fatal' errors are
 			if (result.isErr()) {
 				this.exceptionLogger.captureException(result.error);
-				await this.checkIn('error');
-			} //todo: the caller should determine what the 'fatal' errors are
+			}
 
-			await this.checkIn('ok');
+			await this.checkIn(result.isErr() ? 'error' : 'ok');
 			return ok(undefined);
 		} catch (error) {
 			this.exceptionLogger.captureException(mapUnknownToError(error));

@@ -17,6 +17,16 @@ export enum ScanErrorCategory {
 	OTHER = 'OTHER'
 }
 
+//node-postgres returns bigint columns as strings so that values beyond
+//Number.MAX_SAFE_INTEGER survive the round trip. Ledger sequences are far below
+//that, and callers compare them numerically, so convert on read. Without this
+//the API returns firstLedger as "57434879" while count comes back as a number.
+export const bigIntToNumber = {
+	to: (value: number | null): number | null => value,
+	from: (value: string | null): number | null =>
+		value === null ? null : Number(value)
+};
+
 @Entity({ name: 'history_archive_scan_error' })
 export class ScanError extends IdentifiedValueObject implements Error {
 	public readonly name = 'ScanError';
@@ -32,10 +42,10 @@ export class ScanError extends IdentifiedValueObject implements Error {
 	@Column('enum', { enum: ScanErrorCategory, nullable: false, default: ScanErrorCategory.OTHER })
 	public readonly category: ScanErrorCategory;
 
-	@Column('bigint', { nullable: true })
+	@Column('bigint', { nullable: true, transformer: bigIntToNumber })
 	public readonly firstLedger: number | null;
 
-	@Column('bigint', { nullable: true })
+	@Column('bigint', { nullable: true, transformer: bigIntToNumber })
 	public readonly lastLedger: number | null;
 
 	@ManyToOne('Scan', 'errors')

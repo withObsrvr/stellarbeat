@@ -7,11 +7,15 @@ import init, {
   init_panic_hook,
   MergeBy,
 } from "@stellarbeat/stellar_analysis_web";
-import {
-  Node,
-  Organization,
-  type PublicKey,
-} from "shared";
+/**
+ * The caller sends JSON, not class instances.
+ *
+ * postMessage structured-clones its argument, and the shared Node and
+ * Organization objects are not cloneable, so passing them threw DataCloneError
+ * before the worker ever started. Everything here was fed to wasm as JSON
+ * anyway, so the caller serialises once and this side passes the string
+ * straight through -- one less encode, and the failure mode disappears.
+ */
 //@ts-ignore
 import wasmUrl from "@stellarbeat/stellar_analysis_web/stellar_analysis_bg.wasm?url";
 //@ts-ignore
@@ -52,7 +56,7 @@ ctx.addEventListener("message", (event) => {
       .then(() => {
         init_panic_hook();
         initialized = true;
-        performAnalysis(
+        runAnalysis(
           nodes,
           failingNodePublicKeys,
           organizations,
@@ -66,10 +70,16 @@ ctx.addEventListener("message", (event) => {
         );
       })
       .catch((e) => {
-        console.log("Failed to initialize wasm module", e);
+        ctx.postMessage({
+          type: "error",
+          jobId,
+          message:
+            "Failed to initialize the analysis module: " +
+            (e instanceof Error ? e.message : String(e)),
+        });
       });
   } else {
-    performAnalysis(
+    runAnalysis(
       nodes,
       failingNodePublicKeys,
       organizations,
@@ -84,10 +94,51 @@ ctx.addEventListener("message", (event) => {
   }
 });
 
+/**
+ * Wraps the analysis so a failure is reported rather than swallowed.
+ *
+ * The wasm calls are synchronous, so anything they throw escapes the message
+ * handler and the worker simply never replies. The caller waits on a response
+ * that is not coming, and the UI spins forever with nothing in the console.
+ */
+function runAnalysis(
+  nodes: string,
+  failingNodePublicKeys: string,
+  organizations: string,
+  mergeBy: MergeBy,
+  analyzeQuorumIntersection: boolean,
+  analyzeLiveness: boolean,
+  analyzeSafety: boolean,
+  analyzeTopTier: boolean,
+  analyzeSymmetricTopTier: boolean,
+  jobId: number,
+) {
+  try {
+    performAnalysis(
+      nodes,
+      failingNodePublicKeys,
+      organizations,
+      mergeBy,
+      analyzeQuorumIntersection,
+      analyzeLiveness,
+      analyzeSafety,
+      analyzeTopTier,
+      analyzeSymmetricTopTier,
+      jobId,
+    );
+  } catch (error) {
+    ctx.postMessage({
+      type: "error",
+      jobId,
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
 function performAnalysis(
-  nodes: Node[],
-  failingNodePublicKeys: PublicKey[],
-  organizations: Organization[],
+  nodes: string,
+  failingNodePublicKeys: string,
+  organizations: string,
   mergeBy: MergeBy,
   analyzeQuorumIntersection: boolean,
   analyzeLiveness: boolean,
@@ -115,8 +166,8 @@ function performAnalysis(
 
   if (analyzeSymmetricTopTier) {
     const symmetricTopTierAnalysis = analyze_symmetric_top_tier(
-      JSON.stringify(nodes),
-      JSON.stringify(organizations),
+      nodes,
+      organizations,
       mergeBy,
     ) as {
       symmetric_top_tier: string[] | null;
@@ -127,8 +178,8 @@ function performAnalysis(
   } else analysis.hasSymmetricTopTierAnalyzed = false;
   if (analyzeQuorumIntersection) {
     const minimalQuorumsAnalysis = analyze_minimal_quorums(
-      JSON.stringify(nodes),
-      JSON.stringify(organizations),
+      nodes,
+      organizations,
       mergeBy,
     ) as {
       quorum_intersection: boolean;
@@ -141,8 +192,8 @@ function performAnalysis(
 
   if (analyzeTopTier) {
     const topTierAnalysis = analyze_top_tier(
-      JSON.stringify(nodes),
-      JSON.stringify(organizations),
+      nodes,
+      organizations,
       mergeBy,
     ) as {
       top_tier: string[];
@@ -155,9 +206,9 @@ function performAnalysis(
 
   if (analyzeLiveness) {
     const minimalBlockingSetsAnalysis = analyze_minimal_blocking_sets(
-      JSON.stringify(nodes),
-      JSON.stringify(organizations),
-      JSON.stringify(failingNodePublicKeys),
+      nodes,
+      organizations,
+      failingNodePublicKeys,
       mergeBy,
     ) as {
       result: string[][];
@@ -170,8 +221,8 @@ function performAnalysis(
 
   if (analyzeSafety) {
     const minimalSplittingSetsAnalysis = analyze_minimal_splitting_sets(
-      JSON.stringify(nodes),
-      JSON.stringify(organizations),
+      nodes,
+      organizations,
       mergeBy,
     ) as {
       result: string[][];

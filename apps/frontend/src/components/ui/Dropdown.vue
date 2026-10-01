@@ -3,8 +3,9 @@
     <button
       type="button"
       :class="toggleClasses"
-      @click.stop="toggle"
       :aria-expanded="isOpen"
+      :aria-label="ariaLabel"
+      @click.stop="toggle"
     >
       <slot name="button-content">
         {{ text }}
@@ -39,6 +40,9 @@
 import { ref, computed, onMounted, onBeforeUnmount, provide } from 'vue';
 
 const props = defineProps<{
+  //An icon-only toggle has no accessible name without this; screen readers
+  //and tests both need one.
+  ariaLabel?: string;
   text?: string;
   variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'outline';
   size?: 'sm' | 'md' | 'lg';

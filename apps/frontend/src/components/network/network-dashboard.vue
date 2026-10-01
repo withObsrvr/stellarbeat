@@ -27,7 +27,17 @@
       >
       for details.
     </UiAlert>
-    <div class="grid grid-cols-12 gap-4">
+    <!-- The verdict is a companion to the network analysis, not a headline: it
+         appears with that section and leaves with it. -->
+    <div v-if="store.isNetworkAnalysisVisible" class="grid grid-cols-12 gap-4">
+      <div class="col-span-12">
+        <NetworkVerdict
+          :statistics="network.networkStatistics"
+          :updated-at="verdictUpdatedAt"
+        />
+      </div>
+    </div>
+    <div class="grid grid-cols-12 gap-4 mt-4">
       <div class="col-span-12">
         <network-statistics :network="network" />
       </div>
@@ -123,7 +133,24 @@ import NetworkRiskRadarChart from "@/components/network/cards/network-risk-analy
 import useStore from "@/store/useStore";
 import ValidatorLoad from "@/components/network/cards/validator-load.vue";
 import NetworkIsps from "@/components/network/cards/network-isps.vue";
+import NetworkVerdict from "@/components/network/cards/network-verdict/network-verdict.vue";
+import { computed } from "vue";
 
 const store = useStore();
 const network = store.network;
+
+//The verdict describes a moment, so it has to say which one. Falls back to an
+//empty string rather than "now" when the scan time is missing, so the block
+//never implies data is fresher than it is.
+const verdictUpdatedAt = computed(() => {
+  const time = network.networkStatistics.time ?? network.time;
+  if (!time) return "";
+
+  return new Date(time).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+});
 </script>

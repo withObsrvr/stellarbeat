@@ -363,3 +363,56 @@ describe('FbasAggregator', () => {
 		});
 	});
 });
+
+describe('FbasAggregator threshold clamping', () => {
+	const aggregator = new FbasAggregator();
+	const time = new Date();
+
+	/**
+	 * Reproduces the staging failure behind the "safety threshold of 0
+	 * countries" report: geo data lookups timed out for every node, so country
+	 * aggregation collapsed all of them into a single "Unknown" group. The
+	 * merged quorum set averaged the source thresholds (7) against a single
+	 * remaining validator, which can never be satisfied -- so no quorum exists,
+	 * python-fbas finds no splitting set, and Radar renders the missing answer
+	 * as a threshold of 0.
+	 */
+	it('never requires more validators than the aggregation produced', () => {
+		const nodes = Array(29)
+			.fill(null)
+			.map(() =>
+				createNodeWithQuorumSet(
+					{ threshold: 7, validators: [], innerQuorumSets: [] },
+					true,
+					time
+				)
+			);
+
+		const aggregated = aggregator.aggregateByCountry(nodes);
+
+		expect(aggregated).toHaveLength(1);
+		expect(aggregated[0].publicKey).toBe('Unknown');
+
+		const quorumSet = aggregated[0].quorumSet;
+		expect(quorumSet).not.toBeNull();
+		expect(quorumSet!.threshold).toBeLessThanOrEqual(
+			quorumSet!.validators.length
+		);
+		expect(quorumSet!.threshold).toBeGreaterThanOrEqual(1);
+	});
+
+	it('leaves a satisfiable threshold untouched', () => {
+		const us1 = createNodeWithGeoData('United States', true, time);
+		const us2 = createNodeWithGeoData('United States', true, time);
+		const de = createNodeWithGeoData('Germany', true, time);
+
+		const aggregated = aggregator.aggregateByCountry([us1, us2, de]);
+
+		aggregated.forEach((node) => {
+			expect(node.quorumSet).not.toBeNull();
+			expect(node.quorumSet!.threshold).toBeLessThanOrEqual(
+				node.quorumSet!.validators.length
+			);
+		});
+	});
+});
