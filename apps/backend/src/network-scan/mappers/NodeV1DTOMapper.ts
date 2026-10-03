@@ -49,6 +49,8 @@ export class NodeV1DTOMapper {
 			activeInScp: measurement?.isActiveInScp ?? false,
 			historyArchiveHasError: measurement?.historyArchiveHasError ?? false,
 			historyArchiveCacheMaxAge: measurement?.historyArchiveCacheMaxAge ?? null,
+			historyArchiveUnreachable:
+				measurement?.historyArchiveUnreachable ?? false,
 			isValidator: node.isValidator(),
 			statistics: {
 				has24HourStats: !!measurement24HourAverage,

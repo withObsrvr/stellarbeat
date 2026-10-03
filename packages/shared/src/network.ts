@@ -323,6 +323,7 @@ export class Network {
 	nodeHasWarnings(node: Node): boolean {
 		return (
 			this.isFullValidatorWithOutOfDateArchive(node) ||
+			this.historyArchiveUnreachable(node) ||
 			this.historyArchiveCacheMisconfigured(node) ||
 			this.historyArchiveHasError(node)
 		);
@@ -332,6 +333,9 @@ export class Network {
 		if (this.historyArchiveHasError(node)) {
 			return 'History archive issue detected';
 		}
+
+		if (this.historyArchiveUnreachable(node))
+			return 'History archive could not be reached';
 
 		if (this.historyArchiveCacheMisconfigured(node))
 			return 'History archive freshness unverifiable (cache TTL too long)';
@@ -346,8 +350,17 @@ export class Network {
 		return (
 			node.historyUrl !== null &&
 			!node.isFullValidator &&
+			!this.historyArchiveUnreachable(node) &&
 			!this.historyArchiveCacheMisconfigured(node)
 		);
+	}
+
+	//An archive we could not read is not an archive that is behind. A 403, a
+	//refused connection or a DNS failure says nothing about how current the
+	//archive is, and telling an operator their history is stale because of one
+	//sends them looking in the wrong place.
+	historyArchiveUnreachable(node: Node): boolean {
+		return node.historyUrl !== null && node.historyArchiveUnreachable;
 	}
 
 	//A cache TTL longer than the checkpoint interval lets the freshness check be

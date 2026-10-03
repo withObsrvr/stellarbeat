@@ -49,6 +49,7 @@ export interface NodeV1 {
 	organizationId: string | null;
 	historyArchiveHasError: boolean;
 	historyArchiveCacheMaxAge?: number | null;
+	historyArchiveUnreachable?: boolean;
 	isValidator: boolean;
 	connectivityError: boolean;
 	stellarCoreVersionBehind: boolean;
@@ -161,6 +162,12 @@ export const NodeV1Schema: JSONSchemaType<NodeV1> = {
 			nullable: true,
 			description:
 				'max-age in seconds advertised for .well-known/stellar-history.json'
+		},
+		historyArchiveUnreachable: {
+			type: 'boolean',
+			nullable: true,
+			description:
+				'the archive could not be read at all, as distinct from being behind'
 		},
 		connectivityError: {
 			type: 'boolean'

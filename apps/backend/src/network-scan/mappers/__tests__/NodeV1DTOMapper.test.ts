@@ -60,6 +60,7 @@ describe('NodeV1DTOMapper', () => {
 			isValidator: true,
 			historyArchiveHasError: true,
 			historyArchiveCacheMaxAge: null,
+			historyArchiveUnreachable: false,
 			historyUrl: 'myUrl',
 			activeInScp: true,
 			connectivityError: true,
