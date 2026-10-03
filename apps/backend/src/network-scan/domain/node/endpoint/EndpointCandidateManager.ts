@@ -213,6 +213,16 @@ export class EndpointCandidateManager {
 		return candidates;
 	}
 
+	/**
+	 * Fold a crawl's connection attempts into the candidate set.
+	 *
+	 * A pubnet crawl reports ~1400 attempts. Writing each one as it was
+	 * processed meant two separately-transacted statements per attempt, and the
+	 * resulting ~2900 serial round trips took roughly fifteen minutes -- longer
+	 * than the rest of the scan put together, and long enough that the scanner
+	 * never got an idle gap between runs. So the loop below only reads and
+	 * mutates in memory; every write happens afterwards, in bulk.
+	 */
 	async recordConnectionAttempts(
 		attempts: ConnectionAttempt[],
 		scanId: string | null = null
@@ -228,19 +238,27 @@ export class EndpointCandidateManager {
 			addressCandidates.push(candidate);
 			candidatesByAddress.set(address, addressCandidates);
 		}
+
+		const discovered: ValidatorEndpointCandidate[] = [];
+		const touched = new Set<ValidatorEndpointCandidate>();
+		//Observations reference candidate.id, which the database assigns, so the
+		//pairs are held until the newly discovered candidates have been inserted.
+		const recorded: {
+			candidate: ValidatorEndpointCandidate;
+			attempt: ConnectionAttempt;
+			outcome: ConnectionAttemptOutcome;
+		}[] = [];
+
 		for (const attempt of attempts) {
 			const address = `${attempt.ip}:${attempt.port}`;
 			let matches = candidatesByAddress.get(address) ?? [];
 			if (matches.length === 0) {
-				const discovered = await this.upsert({
-					networkId: this.config.networkConfig.networkId,
-					expectedPublicKey: attempt.remotePublicKey,
-					ip: attempt.ip,
-					port: attempt.port,
-					source: 'peer_gossip'
-				});
-				candidates.push(discovered);
-				matches = [discovered];
+				const candidate = this.createDiscoveredCandidate(attempt);
+				//A gossiped address can be unroutable or otherwise invalid. That is
+				//one peer's problem, not the batch's, so skip it and keep going.
+				if (candidate === null) continue;
+				discovered.push(candidate);
+				matches = [candidate];
 				candidatesByAddress.set(address, matches);
 			}
 
@@ -252,24 +270,52 @@ export class EndpointCandidateManager {
 				const outcome: ConnectionAttemptOutcome = wrongKey
 					? 'unexpected_public_key'
 					: attempt.outcome;
-				await this.repository.saveObservation(
-					EndpointProbeObservation.fromConnectionAttempt(
-						candidate.id,
-						attempt,
-						{
-							scanId,
-							outcome
-						}
-					)
-				);
 
 				if (wrongKey) candidate.quarantine(attempt.completedAt);
 				else if (attempt.outcome === 'authenticated' && attempt.remotePublicKey)
 					candidate.authenticated(attempt.remotePublicKey, attempt.completedAt);
 				else candidate.failed(attempt.completedAt);
-				await this.repository.saveCandidate(candidate);
+
+				touched.add(candidate);
+				recorded.push({ candidate, attempt, outcome });
 			}
 		}
+
+		//Insert first: the observations below need the generated ids.
+		if (discovered.length > 0) {
+			await this.repository.saveCandidates(discovered);
+			candidates.push(...discovered);
+			discovered.forEach((candidate) => touched.delete(candidate));
+		}
+		await this.repository.saveCandidates(Array.from(touched));
+		await this.repository.saveObservations(
+			recorded.map(({ candidate, attempt, outcome }) =>
+				EndpointProbeObservation.fromConnectionAttempt(candidate.id, attempt, {
+					scanId,
+					outcome
+				})
+			)
+		);
+	}
+
+	//The in-memory half of upsert() for a gossiped address: no dedupe lookup,
+	//because the caller already holds every candidate on the network.
+	private createDiscoveredCandidate(
+		attempt: ConnectionAttempt
+	): ValidatorEndpointCandidate | null {
+		const props: ValidatorEndpointCandidateProps = {
+			networkId: this.config.networkConfig.networkId,
+			expectedPublicKey: attempt.remotePublicKey,
+			ip: attempt.ip,
+			port: attempt.port,
+			source: 'peer_gossip'
+		};
+		try {
+			this.validateCandidate(props);
+		} catch {
+			return null;
+		}
+		return ValidatorEndpointCandidate.create(props);
 	}
 
 	async probeCandidate(id: string): Promise<ConnectionAttempt[]> {

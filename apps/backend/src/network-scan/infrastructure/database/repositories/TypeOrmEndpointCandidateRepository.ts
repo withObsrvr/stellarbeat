@@ -54,4 +54,34 @@ export class TypeOrmEndpointCandidateRepository
 	): Promise<EndpointProbeObservation> {
 		return await this.observationRepository.save(observation);
 	}
+
+	/**
+	 * One save() for the whole set, so TypeORM loads the existing rows in a
+	 * single SELECT and runs the writes inside one transaction, instead of a
+	 * BEGIN/SELECT/UPDATE/COMMIT round trip per candidate. reload: false drops
+	 * the post-write SELECT; nothing here reads the entity back.
+	 */
+	async saveCandidates(
+		candidates: ValidatorEndpointCandidate[]
+	): Promise<ValidatorEndpointCandidate[]> {
+		if (candidates.length === 0) return [];
+		return await this.candidateRepository.save(candidates, {
+			chunk: 500,
+			reload: false
+		});
+	}
+
+	//Observations are append-only, so this is a plain multi-row INSERT rather
+	//than save(), which would first SELECT to decide insert-vs-update.
+	async saveObservations(
+		observations: EndpointProbeObservation[]
+	): Promise<void> {
+		if (observations.length === 0) return;
+		const chunkSize = 500;
+		for (let index = 0; index < observations.length; index += chunkSize) {
+			await this.observationRepository.insert(
+				observations.slice(index, index + chunkSize)
+			);
+		}
+	}
 }

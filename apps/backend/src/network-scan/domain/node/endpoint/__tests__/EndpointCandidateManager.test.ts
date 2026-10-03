@@ -24,6 +24,7 @@ class InMemoryEndpointCandidateRepository
 {
 	candidates: ValidatorEndpointCandidate[] = [];
 	observations: EndpointProbeObservation[] = [];
+	writeCalls = 0;
 	private nextId = 1;
 
 	async findById(id: string): Promise<ValidatorEndpointCandidate | null> {
@@ -72,6 +73,22 @@ class InMemoryEndpointCandidateRepository
 		observation.id = `observation-${this.observations.length + 1}`;
 		this.observations.push(observation);
 		return observation;
+	}
+
+	async saveCandidates(
+		candidates: ValidatorEndpointCandidate[]
+	): Promise<ValidatorEndpointCandidate[]> {
+		this.writeCalls++;
+		for (const candidate of candidates) await this.saveCandidate(candidate);
+		return candidates;
+	}
+
+	async saveObservations(
+		observations: EndpointProbeObservation[]
+	): Promise<void> {
+		this.writeCalls++;
+		for (const observation of observations)
+			await this.saveObservation(observation);
 	}
 }
 
@@ -247,6 +264,33 @@ describe('EndpointCandidateManager', () => {
 			'1.1.1.1'
 		]);
 		expect(addresses.map((address) => address.ip)).not.toContain('8.8.8.8');
+	});
+
+	it('writes a whole crawl in a fixed number of round trips', async () => {
+		const attempts = Array.from({ length: 400 }, (_, index) =>
+			failedAttempt(`203.0.113.${index % 256}`)
+		);
+
+		await manager.recordConnectionAttempts(attempts);
+
+		//Two candidate writes (discovered, then touched) and one observation
+		//write, regardless of how many attempts the crawl reported. Per-attempt
+		//persistence is what made a scan take twenty minutes.
+		expect(repository.writeCalls).toBe(3);
+		expect(repository.observations.length).toBe(attempts.length);
+	});
+
+	it('keeps the batch when one gossiped address is unusable', async () => {
+		await manager.recordConnectionAttempts([
+			failedAttempt('203.0.113.7'),
+			failedAttempt('not-an-ip'),
+			authenticatedAttempt('203.0.113.8', MARKETNODE_KEYS[0])
+		]);
+
+		expect(
+			(await manager.list()).map((candidate) => candidate.ip).sort()
+		).toEqual(['203.0.113.7', '203.0.113.8']);
+		expect(repository.observations).toHaveLength(2);
 	});
 
 	it('parses TOML hosts with or without an explicit scheme', () => {
