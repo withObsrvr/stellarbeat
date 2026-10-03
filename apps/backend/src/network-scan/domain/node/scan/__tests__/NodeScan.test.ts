@@ -180,15 +180,20 @@ describe('NodeScan', () => {
 
 	test('getHistoryArchiveUrls', () => {
 		const scanTime = new Date('2020-01-03T00:00:00.000Z');
-		activeNode.updateDetails(
-			NodeDetails.create({
-				historyUrl: 'history url',
-				host: 'host',
-				alias: 'alias',
-				name: 'name'
-			}),
-			scanTime
-		);
+		const details = NodeDetails.create({
+			historyUrl: 'history url',
+			host: 'host',
+			alias: 'alias',
+			name: 'name'
+		});
+		activeNode.updateDetails(details, scanTime);
+		activeNode.addMeasurement(activeMeasurement(activeNode, scanTime));
+
+		//An archive URL left behind by a node that stopped validating months ago
+		//still resolves to a dead hostname every scan, and the failure then reads
+		//as an archive defect rather than a departed operator.
+		missingNode.updateDetails(details, scanTime);
+		missingNode.addMeasurement(inactiveMeasurement(missingNode, scanTime));
 
 		const nodeScan = new NodeScan(scanTime, [activeNode, missingNode]);
 		const historyArchiveUrls = nodeScan.getHistoryArchiveUrls();
@@ -196,6 +201,7 @@ describe('NodeScan', () => {
 		expect(historyArchiveUrls.get(activeNode.publicKey.value)).toEqual(
 			'history url'
 		);
+		expect(historyArchiveUrls.has(missingNode.publicKey.value)).toBe(false);
 	});
 
 	test('updateHistoryArchiveUpToDateStatus', () => {
@@ -517,4 +523,16 @@ describe('NodeScan.getIPsNeedingGeoData', () => {
 
 function createNode(ip: string, time: Date) {
 	return createDummyNode(ip, 11625, time);
+}
+
+function activeMeasurement(node: Node, time: Date): NodeMeasurement {
+	const measurement = new NodeMeasurement(time, node);
+	measurement.isActive = true;
+	return measurement;
+}
+
+function inactiveMeasurement(node: Node, time: Date): NodeMeasurement {
+	const measurement = new NodeMeasurement(time, node);
+	measurement.isActive = false;
+	return measurement;
 }

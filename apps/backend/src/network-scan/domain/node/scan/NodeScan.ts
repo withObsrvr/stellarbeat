@@ -134,10 +134,19 @@ export class NodeScan {
 			.map((node) => node.homeDomain as string);
 	}
 
+	/**
+	 * Only archives of nodes the crawl actually reached.
+	 *
+	 * A node that has not been seen for months still carries its historyUrl, and
+	 * polling it produced a reachability error every scan - SatoshiPay's archives
+	 * resolved to ENOTFOUND for three months after the operator left. There is
+	 * nothing to report about the archive of a node that is gone: an error there
+	 * says the operator left, not that their history is stale or broken.
+	 */
 	getHistoryArchiveUrls(): Map<string, string> {
 		return new Map(
 			this.nodes
-				.filter((node) => node.details?.historyUrl)
+				.filter((node) => node.details?.historyUrl && node.isActive())
 				.map((node) => [
 					node.publicKey.value,
 					node.details?.historyUrl as string
