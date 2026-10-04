@@ -179,7 +179,8 @@ describe('ScanNetwork.integration', () => {
 				//any object
 				expect.any(Object), //todo: improve this in crawler (CrawlStateFactory)
 				expect.any(Object),
-				expect.any(Object)
+				expect.any(Object),
+				expect.any(Set)
 			);
 
 			await TestUtils.resetDB(kernel.container.get(DataSource));
