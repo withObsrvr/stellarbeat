@@ -18,7 +18,8 @@ export class CrawlFactory {
 		topTierAddresses: NodeAddress[],
 		topTierQuorumSet: QuorumSet,
 		latestConfirmedClosedLedger: Ledger,
-		quorumSets: Map<string, QuorumSet>
+		quorumSets: Map<string, QuorumSet>,
+		suppressedNodeAddresses: Set<string> = new Set()
 	): Crawl {
 		const observation = this.observationFactory.createObservation(
 			this.network,
@@ -28,6 +29,6 @@ export class CrawlFactory {
 			latestConfirmedClosedLedger,
 			quorumSets
 		);
-		return new Crawl(nodesToCrawl, observation);
+		return new Crawl(nodesToCrawl, observation, suppressedNodeAddresses);
 	}
 }

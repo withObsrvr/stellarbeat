@@ -270,7 +270,7 @@ def prepare_fbas_data(request: AnalysisRequest) -> List[Dict]:
 # API Endpoints
 
 @app.get("/health", response_model=HealthResponse)
-async def health_check():
+def health_check():
     """Health check endpoint"""
     try:
         # Test python-fbas is available
@@ -287,7 +287,7 @@ async def health_check():
 
 
 @app.post("/analyze/top-tier", response_model=TopTierResponse)
-async def analyze_top_tier(request: AnalysisRequest):
+def analyze_top_tier(request: AnalysisRequest):
     """Analyze network top tier"""
     logger.info(f"Top tier analysis requested for {len(request.nodes)} nodes")
     start_time = time.time()
@@ -335,7 +335,7 @@ async def analyze_top_tier(request: AnalysisRequest):
 
 
 @app.post("/analyze/blocking-sets", response_model=BlockingSetsResponse)
-async def analyze_blocking_sets(request: AnalysisRequest):
+def analyze_blocking_sets(request: AnalysisRequest):
     """Analyze minimal blocking sets"""
     logger.info(f"Blocking sets analysis requested for {len(request.nodes)} nodes")
     start_time = time.time()
@@ -378,7 +378,7 @@ async def analyze_blocking_sets(request: AnalysisRequest):
 
 
 @app.post("/analyze/splitting-sets", response_model=SplittingSetsResponse)
-async def analyze_splitting_sets(request: AnalysisRequest):
+def analyze_splitting_sets(request: AnalysisRequest):
     """Analyze minimal splitting sets"""
     logger.info(f"Splitting sets analysis requested for {len(request.nodes)} nodes")
     start_time = time.time()
@@ -429,7 +429,7 @@ async def analyze_splitting_sets(request: AnalysisRequest):
 
 
 @app.post("/analyze/quorums", response_model=QuorumsResponse)
-async def analyze_quorums(request: AnalysisRequest):
+def analyze_quorums(request: AnalysisRequest):
     """Analyze minimal quorums and check intersection"""
     logger.info(f"Quorum analysis requested for {len(request.nodes)} nodes")
     start_time = time.time()
@@ -489,7 +489,7 @@ async def analyze_quorums(request: AnalysisRequest):
 
 
 @app.post("/analyze/history-critical", response_model=HistoryCriticalResponse)
-async def analyze_history_critical(request: AnalysisRequest):
+def analyze_history_critical(request: AnalysisRequest):
     """Analyze history-critical sets (validators whose failure causes history loss)"""
     logger.info(f"History-critical analysis requested for {len(request.nodes)} nodes")
     start_time = time.time()
@@ -525,16 +525,16 @@ async def analyze_history_critical(request: AnalysisRequest):
 
 
 @app.post("/analyze/full", response_model=FullAnalysisResponse)
-async def analyze_full(request: AnalysisRequest):
+def analyze_full(request: AnalysisRequest):
     """Run all analyses in one request (more efficient)"""
     logger.info(f"Full analysis requested for {len(request.nodes)} nodes")
     start_time = time.time()
 
     # Run all analyses
-    top_tier = await analyze_top_tier(request)
-    blocking_sets = await analyze_blocking_sets(request)
-    splitting_sets = await analyze_splitting_sets(request)
-    quorums = await analyze_quorums(request)
+    top_tier = analyze_top_tier(request)
+    blocking_sets = analyze_blocking_sets(request)
+    splitting_sets = analyze_splitting_sets(request)
+    quorums = analyze_quorums(request)
 
     total_time = int((time.time() - start_time) * 1000)
 

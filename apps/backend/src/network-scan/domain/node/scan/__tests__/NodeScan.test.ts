@@ -128,6 +128,30 @@ describe('NodeScan', () => {
 		expect(missingNode.latestMeasurement()?.time).toEqual(scanTime);
 	});
 
+	it('preserves SCP evidence when an endpoint probe confirms an existing node', () => {
+		const scanTime = new Date('2020-01-03T00:00:00.000Z');
+		const nodeScan = new NodeScan(scanTime, [activeNode]);
+		const crawledPeer = new PeerNode(activeNode.publicKey.value);
+		crawledPeer.ip = 'crawl-address';
+		crawledPeer.port = 11625;
+		crawledPeer.successfullyConnected = true;
+		crawledPeer.isValidating = true;
+		crawledPeer.participatingInSCP = true;
+		nodeScan.processCrawl([crawledPeer]);
+		const crawlMeasurement = activeNode.latestMeasurement();
+
+		const probePeer = new PeerNode(activeNode.publicKey.value);
+		probePeer.ip = 'toml-address';
+		probePeer.port = 11625;
+		probePeer.successfullyConnected = true;
+		nodeScan.processEndpointProbes([probePeer]);
+
+		expect(activeNode.latestMeasurement()).toBe(crawlMeasurement);
+		expect(activeNode.latestMeasurement()?.isValidating).toBe(true);
+		expect(activeNode.latestMeasurement()?.isActiveInScp).toBe(true);
+		expect(activeNode.ip).toBe('toml-address');
+	});
+
 	test('getPublicKeys', () => {
 		const scanTime = new Date('2020-01-03T00:00:00.000Z');
 		const nodeScan = new NodeScan(scanTime, [activeNode, missingNode]);

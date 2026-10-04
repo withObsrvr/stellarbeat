@@ -59,7 +59,8 @@ export class TypeOrmEndpointCandidateRepository
 	 * One save() for the whole set, so TypeORM loads the existing rows in a
 	 * single SELECT and runs the writes inside one transaction, instead of a
 	 * BEGIN/SELECT/UPDATE/COMMIT round trip per candidate. reload: false drops
-	 * the post-write SELECT; nothing here reads the entity back.
+	 * the post-write SELECT; candidate UUIDs are assigned before persistence so
+	 * same-batch observations can reference newly inserted rows.
 	 */
 	async saveCandidates(
 		candidates: ValidatorEndpointCandidate[]

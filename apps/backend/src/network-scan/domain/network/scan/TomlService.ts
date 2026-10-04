@@ -30,6 +30,15 @@ export class TomlFetchError {
 
 @injectable()
 export class TomlService {
+	private static readonly SCAN_CACHE_TTL_MS = 2 * 60 * 1000;
+	private readonly cache = new Map<
+		string,
+		{
+			createdAt: number;
+			result: Promise<Result<Record<string, unknown>, TomlFetchError>>;
+		}
+	>();
+
 	constructor(
 		@inject('HttpService') protected httpService: HttpService,
 		@inject('Logger') protected logger: Logger
@@ -66,6 +75,22 @@ export class TomlService {
 	}
 
 	async fetchToml(
+		homeDomain: string
+	): Promise<Result<Record<string, unknown>, TomlFetchError>> {
+		const normalizedDomain = homeDomain.toLowerCase();
+		const cached = this.cache.get(normalizedDomain);
+		if (
+			cached &&
+			Date.now() - cached.createdAt < TomlService.SCAN_CACHE_TTL_MS
+		)
+			return await cached.result;
+
+		const result = this.fetchTomlUncached(normalizedDomain);
+		this.cache.set(normalizedDomain, { createdAt: Date.now(), result });
+		return await result;
+	}
+
+	private async fetchTomlUncached(
 		homeDomain: string
 	): Promise<Result<Record<string, unknown>, TomlFetchError>> {
 		const urlResult = Url.create(

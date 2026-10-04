@@ -13,6 +13,29 @@ export class InvalidPeerNode {
 
 export class PeerNodeToNodeMapper {
 	static updateNodeFromPeerNode(node: Node, peerNode: PeerNode, time: Date) {
+		PeerNodeToNodeMapper.updateNodeIdentityFromPeerNode(node, peerNode, time);
+
+		const measurement = PeerNodeToNodeMapper.mapPeerNodeToNodeMeasurement(
+			peerNode,
+			node,
+			time
+		);
+
+		node.addMeasurement(measurement);
+	}
+
+	/**
+	 * Apply facts established by an authenticated overlay connection without
+	 * inventing SCP evidence. Endpoint probes complete after the main crawl and
+	 * do not listen for externalize statements, so using the full mapper for
+	 * them used to replace a validator's real measurement with
+	 * `isValidating=false` at the same scan timestamp.
+	 */
+	static updateNodeIdentityFromPeerNode(
+		node: Node,
+		peerNode: PeerNode,
+		time: Date
+	) {
 		if (peerNode.ip && peerNode.port) {
 			if (peerNode.successfullyConnected)
 				node.updateAuthenticatedIpPort(peerNode.ip, peerNode.port, time);
@@ -39,13 +62,6 @@ export class PeerNodeToNodeMapper {
 			node.updateVersionStr(peerNode.nodeInfo?.versionString, time);
 		}
 
-		const measurement = PeerNodeToNodeMapper.mapPeerNodeToNodeMeasurement(
-			peerNode,
-			node,
-			time
-		);
-
-		node.addMeasurement(measurement);
 	}
 
 	static createNodeFromPeerNode(

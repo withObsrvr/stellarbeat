@@ -256,4 +256,29 @@ describe('Crawler', () => {
 				throw e;
 			});
 	});
+
+	it('does not crawl a suppressed address received through peer gossip', (resolve) => {
+		const {
+			crawler,
+			crawl,
+			networkObserver,
+			networkObserverEventEmitter
+		} = setupSUT();
+		crawl.suppressedNodeAddresses.add('suppressed:11625');
+		networkObserver.startObservation.mockResolvedValue(1);
+		networkObserver.stop.mockResolvedValue(mock<Observation>());
+		networkObserver.connectToNode.mockImplementation((address, port) => {
+			networkObserverEventEmitter.emit('peers', [['suppressed', 11625]]);
+			networkObserverEventEmitter.emit('disconnect', {
+				address: `${address}:${port}`,
+				publicKey: 'A'
+			});
+			return Promise.resolve();
+		});
+
+		crawler.startCrawl(crawl).then(() => {
+			expect(networkObserver.connectToNode).toHaveBeenCalledTimes(1);
+			resolve();
+		});
+	});
 });

@@ -83,6 +83,58 @@ export class NodeScan {
 		return invalidPeerNodes;
 	}
 
+	/**
+	 * Merge authenticated endpoint probes without replacing measurements made
+	 * by the SCP-aware crawl. A probe proves identity, address and liveness; it
+	 * does not prove that a node is or is not validating.
+	 */
+	public processEndpointProbes(
+		peerNodes: PeerNode[],
+		archivedNodes: Node[] = []
+	): InvalidPeerNode[] {
+		const invalidPeerNodes: InvalidPeerNode[] = [];
+
+		peerNodes.forEach((peerNode) => {
+			const existing = this.getNodeByPublicKeyString(peerNode.publicKey);
+			if (existing) {
+				PeerNodeToNodeMapper.updateNodeIdentityFromPeerNode(
+					existing,
+					peerNode,
+					this.time
+				);
+				const measurement = existing.latestMeasurement();
+				if (measurement?.time.getTime() === this.time.getTime()) {
+					measurement.isActive = true;
+					measurement.connectivityError = false;
+				}
+				return;
+			}
+
+			const archived = archivedNodes.find(
+				(node) => node.publicKey.value === peerNode.publicKey
+			);
+			if (archived) {
+				archived.unArchive(this.time);
+				PeerNodeToNodeMapper.updateNodeFromPeerNode(
+					archived,
+					peerNode,
+					this.time
+				);
+				this.nodes.push(archived);
+				return;
+			}
+
+			const created = PeerNodeToNodeMapper.createNodeFromPeerNode(
+				peerNode,
+				this.time
+			);
+			if (created.isErr()) invalidPeerNodes.push(created.error);
+			else this.nodes.push(created.value);
+		});
+
+		return invalidPeerNodes;
+	}
+
 	getPublicKeys(): string[] {
 		return this.nodes.map((node) => node.publicKey.value);
 	}

@@ -60,8 +60,8 @@ class InMemoryEndpointCandidateRepository
 	async saveCandidate(
 		candidate: ValidatorEndpointCandidate
 	): Promise<ValidatorEndpointCandidate> {
-		if (!candidate.id) {
-			candidate.id = `candidate-${this.nextId++}`;
+		if (!this.candidates.some((stored) => stored.id === candidate.id)) {
+			candidate.id ||= `candidate-${this.nextId++}`;
 			this.candidates.push(candidate);
 		}
 		return candidate;
@@ -217,6 +217,35 @@ describe('EndpointCandidateManager', () => {
 		expect(repository.observations[0].outcome).toBe('unexpected_public_key');
 	});
 
+	it('temporarily suppresses only recently failed gossip-only addresses', async () => {
+		const now = new Date('2026-10-04T21:10:00Z');
+		const failed = await manager.upsert({
+			networkId: 'test',
+			ip: '203.0.113.10',
+			port: 11625,
+			source: 'peer_gossip'
+		});
+		failed.failed(new Date(now.getTime() - 60_000));
+
+		const trusted = await manager.upsert({
+			networkId: 'test',
+			expectedPublicKey: MARKETNODE_KEYS[0],
+			ip: '203.0.113.11',
+			port: 11625,
+			source: 'peer_gossip'
+		});
+		trusted.failed(new Date(now.getTime() - 60_000));
+		await manager.upsert({
+			networkId: 'test',
+			ip: '203.0.113.11',
+			port: 11625,
+			source: 'configured_seed'
+		});
+
+		const suppressed = await manager.getRecentlyFailedGossipAddresses(now);
+		expect(suppressed).toEqual(new Set(['203.0.113.10:11625']));
+	});
+
 	it('stores a Creit-style TLS response as an overlay hello failure', async () => {
 		const candidate = await manager.upsert({
 			networkId: 'test',
@@ -278,6 +307,9 @@ describe('EndpointCandidateManager', () => {
 		//persistence is what made a scan take twenty minutes.
 		expect(repository.writeCalls).toBe(3);
 		expect(repository.observations.length).toBe(attempts.length);
+		expect(
+			repository.observations.every((observation) => observation.candidateId)
+		).toBe(true);
 	});
 
 	it('keeps the batch when one gossiped address is unusable', async () => {

@@ -30,6 +30,9 @@ export class EndpointCandidateManager {
 	private static readonly MAX_DNS_ANSWERS_PER_HOST = 8;
 	private static readonly MAX_CANDIDATES_TO_RESOLVE = 256;
 	private static readonly MAX_ADDITIONAL_SCAN_ADDRESSES = 64;
+	private static readonly GOSSIP_FAILURE_COOLDOWN_MS = 15 * 60 * 1000;
+	private static readonly DNS_FALLBACK_TTL_SECONDS = 300;
+	private static readonly NETWORK_CONCURRENCY = 8;
 
 	constructor(
 		@inject(NETWORK_TYPES.EndpointCandidateRepository)
@@ -124,13 +127,26 @@ export class EndpointCandidateManager {
 				candidate.state !== 'quarantined' &&
 				candidate.state !== 'disabled'
 		);
-		const resolved: ValidatorEndpointCandidate[] = [];
-		for (const candidate of eligible.slice(
-			0,
-			EndpointCandidateManager.MAX_CANDIDATES_TO_RESOLVE
-		)) {
-			resolved.push(...(await this.resolveCandidate(candidate)));
-		}
+		const now = new Date();
+		const hostCandidates = eligible
+			.filter(
+				(candidate) =>
+					candidate.hostname !== null && this.dnsResolutionExpired(candidate, now)
+			)
+			.slice(
+				0,
+				Math.min(
+					EndpointCandidateManager.MAX_CANDIDATES_TO_RESOLVE,
+					EndpointCandidateManager.MAX_ADDITIONAL_SCAN_ADDRESSES
+				)
+			);
+		const resolved = (
+			await this.mapWithConcurrency(
+				hostCandidates,
+				EndpointCandidateManager.NETWORK_CONCURRENCY,
+				(candidate) => this.resolveCandidate(candidate)
+			)
+		).flat();
 
 		const maximumAddressCount =
 			unique.size + EndpointCandidateManager.MAX_ADDITIONAL_SCAN_ADDRESSES;
@@ -142,6 +158,54 @@ export class EndpointCandidateManager {
 				unique.set(`${candidate.ip}:${candidate.port}`, address.value);
 		}
 		return Array.from(unique.values());
+	}
+
+	async getRecentlyFailedGossipAddresses(at = new Date()): Promise<Set<string>> {
+		const candidates = await this.repository.findForNetwork(
+			this.config.networkConfig.networkId
+		);
+		const byAddress = new Map<string, ValidatorEndpointCandidate[]>();
+		for (const candidate of candidates) {
+			if (!candidate.ip) continue;
+			const address = `${candidate.ip}:${candidate.port}`;
+			const matches = byAddress.get(address) ?? [];
+			matches.push(candidate);
+			byAddress.set(address, matches);
+		}
+
+		const cutoff =
+			at.getTime() - EndpointCandidateManager.GOSSIP_FAILURE_COOLDOWN_MS;
+		const suppressed = new Set<string>();
+		for (const [address, matches] of byAddress) {
+			const hasTrustedEvidence = matches.some(
+				(candidate) =>
+					candidate.state === 'authenticated' ||
+					candidate.source !== 'peer_gossip'
+			);
+			if (hasTrustedEvidence) continue;
+			if (
+				matches.some(
+					(candidate) =>
+						candidate.state === 'failed' &&
+						candidate.lastAttemptedAt !== null &&
+						candidate.lastAttemptedAt.getTime() >= cutoff
+				)
+			)
+				suppressed.add(address);
+		}
+		return suppressed;
+	}
+
+	private dnsResolutionExpired(
+		candidate: ValidatorEndpointCandidate,
+		at: Date
+	): boolean {
+		if (candidate.lastResolvedAt === null) return true;
+		const ttlSeconds =
+			candidate.dnsTtl ?? EndpointCandidateManager.DNS_FALLBACK_TTL_SECONDS;
+		return (
+			candidate.lastResolvedAt.getTime() + ttlSeconds * 1000 <= at.getTime()
+		);
 	}
 
 	async resolveCandidate(
@@ -357,15 +421,22 @@ export class EndpointCandidateManager {
 
 		const acceptedAttempts: ConnectionAttempt[] = [];
 		const allAttempts: ConnectionAttempt[] = [];
-		for (const candidate of Array.from(targets.values()).slice(0, budget)) {
-			const attempt = await this.endpointProbeService.probe(
-				candidate.ip as string,
-				candidate.port
-			);
+		const attempts = await this.mapWithConcurrency(
+			Array.from(targets.values()).slice(0, budget),
+			EndpointCandidateManager.NETWORK_CONCURRENCY,
+			(candidate) =>
+				this.endpointProbeService.probe(
+					candidate.ip as string,
+					candidate.port
+				)
+		);
+		for (const attempt of attempts) {
 			allAttempts.push(attempt);
+			const candidate = targets.get(`${attempt.ip}:${attempt.port}`);
 			if (
 				attempt.outcome === 'authenticated' &&
 				attempt.remotePublicKey &&
+				candidate &&
 				(candidate.expectedPublicKey === null ||
 					candidate.expectedPublicKey === attempt.remotePublicKey)
 			)
@@ -373,6 +444,22 @@ export class EndpointCandidateManager {
 		}
 		await this.recordConnectionAttempts(allAttempts);
 		return acceptedAttempts;
+	}
+
+	private async mapWithConcurrency<T, R>(
+		values: T[],
+		concurrency: number,
+		mapper: (value: T) => Promise<R>
+	): Promise<R[]> {
+		const results: R[] = [];
+		for (let index = 0; index < values.length; index += concurrency) {
+			results.push(
+				...(await Promise.all(
+					values.slice(index, index + concurrency).map(mapper)
+				))
+			);
+		}
+		return results;
 	}
 
 	private validateCandidate(props: ValidatorEndpointCandidateProps): void {
