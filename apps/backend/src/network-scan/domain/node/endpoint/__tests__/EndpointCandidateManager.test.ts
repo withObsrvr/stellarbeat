@@ -162,6 +162,30 @@ describe('EndpointCandidateManager', () => {
 		).toBe('unverified');
 	});
 
+	it('refreshes a declaration and its DNS child only once per hostname', async () => {
+		const declaration = await manager.upsert({
+			networkId: 'test',
+			expectedPublicKey: MARKETNODE_KEYS[0],
+			hostname: 'validator.stellar.marketnode.com',
+			port: 11625,
+			source: 'toml_declaration'
+		});
+		resolver.resolve.mockResolvedValue([{ ip: '20.187.166.130', ttl: 1 }]);
+		const [child] = await manager.resolveCandidate(declaration);
+		const expired = new Date(Date.now() - 2_000);
+		declaration.lastResolvedAt = expired;
+		child.lastResolvedAt = expired;
+		resolver.resolve.mockClear();
+		resolver.resolve.mockResolvedValue([{ ip: '20.198.213.76', ttl: 60 }]);
+
+		await manager.prepareScanCandidates([]);
+
+		expect(resolver.resolve).toHaveBeenCalledTimes(1);
+		expect(resolver.resolve).toHaveBeenCalledWith(
+			'validator.stellar.marketnode.com'
+		);
+	});
+
 	it('discovers all Marketnode validators from TOML declarations', async () => {
 		const declarations = new Set(
 			MARKETNODE_KEYS.map(

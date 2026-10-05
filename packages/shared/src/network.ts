@@ -349,6 +349,7 @@ export class Network {
 	isFullValidatorWithOutOfDateArchive(node: Node): boolean {
 		return (
 			node.historyUrl !== null &&
+			(node.active || node.isValidating) &&
 			!node.isFullValidator &&
 			!this.historyArchiveUnreachable(node) &&
 			!this.historyArchiveCacheMisconfigured(node)

@@ -187,7 +187,7 @@ export class NodeScan {
 	}
 
 	/**
-	 * Only archives of nodes the crawl actually reached.
+	 * Only archives of nodes for which this scan has current liveness evidence.
 	 *
 	 * A node that has not been seen for months still carries its historyUrl, and
 	 * polling it produced a reachability error every scan - SatoshiPay's archives
@@ -198,7 +198,10 @@ export class NodeScan {
 	getHistoryArchiveUrls(): Map<string, string> {
 		return new Map(
 			this.nodes
-				.filter((node) => node.details?.historyUrl && node.isActive())
+				.filter(
+					(node) =>
+						node.details?.historyUrl && (node.isActive() || node.isValidating())
+				)
 				.map((node) => [
 					node.publicKey.value,
 					node.details?.historyUrl as string

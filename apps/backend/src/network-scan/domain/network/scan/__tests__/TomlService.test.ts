@@ -166,6 +166,26 @@ describe('tomlService', () => {
 			expect(httpService.get).toHaveBeenCalledTimes(1);
 		});
 
+		it('evicts expired responses when the cache is used again', async () => {
+			const now = jest.spyOn(Date, 'now').mockReturnValue(1_000);
+			httpService.get.mockResolvedValue(
+				ok({ data: tomlV2String, status: 200, statusText: 'ok', headers: {} })
+			);
+
+			await tomlService.fetchToml('old-domain.com');
+			now.mockReturnValue(1_000 + 2 * 60 * 1000 + 1);
+			await tomlService.fetchToml('new-domain.com');
+
+			expect(
+				Array.from(
+					(
+						tomlService as unknown as { cache: Map<string, unknown> }
+					).cache.keys()
+				)
+			).toEqual(['new-domain.com']);
+			now.mockRestore();
+		});
+
 		it('should return err when toml file cannot be parsed', async function () {
 			const httpServiceMock = {
 				get: jest

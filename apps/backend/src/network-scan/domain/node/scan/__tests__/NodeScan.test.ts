@@ -228,6 +228,30 @@ describe('NodeScan', () => {
 		expect(historyArchiveUrls.has(missingNode.publicKey.value)).toBe(false);
 	});
 
+	test('checks an archive when validation is observed through relayed SCP evidence', () => {
+		const scanTime = new Date('2020-01-03T00:00:00.000Z');
+		activeNode.updateDetails(
+			NodeDetails.create({
+				historyUrl: 'history url',
+				host: 'host',
+				alias: 'alias',
+				name: 'name'
+			}),
+			scanTime
+		);
+		const measurement = new NodeMeasurement(scanTime, activeNode);
+		measurement.isActive = false;
+		measurement.isValidating = true;
+		activeNode.addMeasurement(measurement);
+
+		const historyArchiveUrls = new NodeScan(scanTime, [
+			activeNode
+		]).getHistoryArchiveUrls();
+		expect(historyArchiveUrls.get(activeNode.publicKey.value)).toBe(
+			'history url'
+		);
+	});
+
 	test('updateHistoryArchiveUpToDateStatus', () => {
 		const scanTime = new Date('2020-01-03T00:00:00.000Z');
 		activeNode.updateDetails(

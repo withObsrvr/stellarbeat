@@ -14,6 +14,7 @@ describe("NodeWarningDetector", () => {
       const node = new Node("a");
       node.historyUrl = "http://localhost:11626";
       node.isFullValidator = false;
+      node.active = true;
       const network = new Network([node]);
       expect(NodeWarningDetector.nodeHasWarning(node, network)).toBe(true);
     });
@@ -50,6 +51,7 @@ describe("NodeWarningDetector", () => {
       const node = new Node("a");
       node.historyUrl = "http://localhost:11626";
       node.isFullValidator = false;
+      node.active = true;
       const network = new Network([node]);
       expect(NodeWarningDetector.getNodeWarningReasons(node, network)).toEqual([
         "History archive behind",
@@ -64,6 +66,17 @@ describe("NodeWarningDetector", () => {
       expect(NodeWarningDetector.getNodeWarningReasons(node, network)).toEqual([
         "History archive issue detected",
       ]);
+    });
+    it("does not flag an unchecked archive on an inactive non-validating node", () => {
+      const node = new Node("a");
+      node.historyUrl = "http://localhost:11626";
+      node.isFullValidator = false;
+      node.active = false;
+      node.isValidating = false;
+      const network = new Network([node]);
+      expect(NodeWarningDetector.getNodeWarningReasons(node, network)).toEqual(
+        [],
+      );
     });
     it("returns empty array if node has no warnings", () => {
       const node = new Node("a");
@@ -119,6 +132,7 @@ describe("NodeWarningDetector", () => {
       const node = new Node("a");
       node.historyUrl = "http://localhost:11626";
       node.isFullValidator = false;
+      node.active = true;
       node.historyArchiveHasError = true;
       node.stellarCoreVersionBehind = true;
       const network = new Network([node]);

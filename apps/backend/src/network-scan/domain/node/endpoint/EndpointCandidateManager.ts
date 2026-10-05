@@ -128,18 +128,32 @@ export class EndpointCandidateManager {
 				candidate.state !== 'disabled'
 		);
 		const now = new Date();
-		const hostCandidates = eligible
-			.filter(
-				(candidate) =>
-					candidate.hostname !== null && this.dnsResolutionExpired(candidate, now)
+		const expiredHostCandidates = eligible.filter(
+			(candidate) =>
+				candidate.hostname !== null && this.dnsResolutionExpired(candidate, now)
+		);
+		//A declaration and each of its DNS-derived children share a hostname.
+		//Refresh that hostname once; resolving every child concurrently races the
+		//unique candidate key when DNS publishes a new address.
+		const candidatesByHostname = new Map<string, ValidatorEndpointCandidate>();
+		for (const candidate of expiredHostCandidates) {
+			const key = [
+				candidate.networkId,
+				candidate.expectedPublicKey ?? '',
+				candidate.hostname,
+				candidate.port
+			].join('|');
+			const current = candidatesByHostname.get(key);
+			if (!current || (current.ip !== null && candidate.ip === null))
+				candidatesByHostname.set(key, candidate);
+		}
+		const hostCandidates = Array.from(candidatesByHostname.values()).slice(
+			0,
+			Math.min(
+				EndpointCandidateManager.MAX_CANDIDATES_TO_RESOLVE,
+				EndpointCandidateManager.MAX_ADDITIONAL_SCAN_ADDRESSES
 			)
-			.slice(
-				0,
-				Math.min(
-					EndpointCandidateManager.MAX_CANDIDATES_TO_RESOLVE,
-					EndpointCandidateManager.MAX_ADDITIONAL_SCAN_ADDRESSES
-				)
-			);
+		);
 		const resolved = (
 			await this.mapWithConcurrency(
 				hostCandidates,
@@ -160,7 +174,9 @@ export class EndpointCandidateManager {
 		return Array.from(unique.values());
 	}
 
-	async getRecentlyFailedGossipAddresses(at = new Date()): Promise<Set<string>> {
+	async getRecentlyFailedGossipAddresses(
+		at = new Date()
+	): Promise<Set<string>> {
 		const candidates = await this.repository.findForNetwork(
 			this.config.networkConfig.networkId
 		);
@@ -425,10 +441,7 @@ export class EndpointCandidateManager {
 			Array.from(targets.values()).slice(0, budget),
 			EndpointCandidateManager.NETWORK_CONCURRENCY,
 			(candidate) =>
-				this.endpointProbeService.probe(
-					candidate.ip as string,
-					candidate.port
-				)
+				this.endpointProbeService.probe(candidate.ip as string, candidate.port)
 		);
 		for (const attempt of attempts) {
 			allAttempts.push(attempt);
