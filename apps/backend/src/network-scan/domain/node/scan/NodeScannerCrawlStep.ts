@@ -36,12 +36,22 @@ export class NodeScannerCrawlStep {
 				previousLatestLedgerCloseTime?.toISOString()
 		});
 		let scanCandidates = bootstrapNodeAddresses;
+		let suppressedNodeAddresses = new Set<string>();
+		const candidatePreparationStartedAt = Date.now();
 		if (this.endpointCandidateManager) {
 			try {
-				scanCandidates =
-					await this.endpointCandidateManager.prepareScanCandidates(
+				[scanCandidates, suppressedNodeAddresses] = await Promise.all([
+					this.endpointCandidateManager.prepareScanCandidates(
 						bootstrapNodeAddresses
-					);
+					),
+					this.endpointCandidateManager.getRecentlyFailedGossipAddresses()
+				]);
+				//Known nodes and explicit scan candidates remain eligible. The cooldown
+				//only prevents rediscovery of dead, gossip-only addresses.
+				for (const node of nodeScan.nodes)
+					suppressedNodeAddresses.delete(`${node.ip}:${node.port}`);
+				for (const candidate of scanCandidates)
+					suppressedNodeAddresses.delete(`${candidate.ip}:${candidate.port}`);
 			} catch (error) {
 				this.logger.error(
 					'Failed preparing endpoint candidates; using configured bootstrap peers',
@@ -51,19 +61,32 @@ export class NodeScannerCrawlStep {
 				);
 			}
 		}
+		this.logger.info('Prepared endpoint candidates', {
+			durationMs: Date.now() - candidatePreparationStartedAt,
+			candidateCount: scanCandidates.length,
+			suppressedGossipAddressCount: suppressedNodeAddresses.size
+		});
 
+		const crawlStartedAt = Date.now();
 		const crawlResult = await this.crawlerService.crawl(
 			networkQuorumSetConfiguration,
 			nodeScan.nodes,
 			scanCandidates,
 			previousLatestLedger,
-			previousLatestLedgerCloseTime
+			previousLatestLedgerCloseTime,
+			suppressedNodeAddresses
 		);
 		if (crawlResult.isErr()) {
 			return err(crawlResult.error);
 		}
+		this.logger.info('Overlay crawl returned', {
+			durationMs: Date.now() - crawlStartedAt,
+			connectionAttemptCount:
+				crawlResult.value.connectionAttempts?.length ?? 0
+		});
 
 		if (this.endpointCandidateManager) {
+			const diagnosticsStartedAt = Date.now();
 			try {
 				await this.endpointCandidateManager.recordConnectionAttempts(
 					crawlResult.value.connectionAttempts ?? []
@@ -73,6 +96,9 @@ export class NodeScannerCrawlStep {
 					error: mapUnknownToError(error).message
 				});
 			}
+			this.logger.info('Persisted endpoint connection diagnostics', {
+				durationMs: Date.now() - diagnosticsStartedAt
+			});
 		}
 
 		const archivedNodesOrError = await this.fetchRelevantArchivedNodes(

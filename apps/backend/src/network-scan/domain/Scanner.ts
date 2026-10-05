@@ -63,6 +63,7 @@ export class Scanner {
 			time,
 			previousScanResult?.organizationScan.organizations ?? []
 		);
+		const organizationStartedAt = Date.now();
 		const organizationScanResult = await this.organizationScanner.execute(
 			organizationScan,
 			nodeScan
@@ -70,8 +71,12 @@ export class Scanner {
 		if (organizationScanResult.isErr()) {
 			return err(organizationScanResult.error);
 		}
+		this.logger.info('Organization scan complete', {
+			durationMs: Date.now() - organizationStartedAt
+		});
 
 		const networkScan = new NetworkScan(time);
+		const networkStartedAt = Date.now();
 		const networkScanResult = await this.networkScanner.execute(
 			networkScan,
 			nodeScan,
@@ -81,6 +86,9 @@ export class Scanner {
 		if (networkScanResult.isErr()) {
 			return err(networkScanResult.error);
 		}
+		this.logger.info('Network analysis complete', {
+			durationMs: Date.now() - networkStartedAt
+		});
 
 		return ok({
 			networkScan,

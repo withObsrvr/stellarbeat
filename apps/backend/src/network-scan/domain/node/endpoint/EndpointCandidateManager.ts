@@ -30,6 +30,9 @@ export class EndpointCandidateManager {
 	private static readonly MAX_DNS_ANSWERS_PER_HOST = 8;
 	private static readonly MAX_CANDIDATES_TO_RESOLVE = 256;
 	private static readonly MAX_ADDITIONAL_SCAN_ADDRESSES = 64;
+	private static readonly GOSSIP_FAILURE_COOLDOWN_MS = 15 * 60 * 1000;
+	private static readonly DNS_FALLBACK_TTL_SECONDS = 300;
+	private static readonly NETWORK_CONCURRENCY = 8;
 
 	constructor(
 		@inject(NETWORK_TYPES.EndpointCandidateRepository)
@@ -124,13 +127,40 @@ export class EndpointCandidateManager {
 				candidate.state !== 'quarantined' &&
 				candidate.state !== 'disabled'
 		);
-		const resolved: ValidatorEndpointCandidate[] = [];
-		for (const candidate of eligible.slice(
-			0,
-			EndpointCandidateManager.MAX_CANDIDATES_TO_RESOLVE
-		)) {
-			resolved.push(...(await this.resolveCandidate(candidate)));
+		const now = new Date();
+		const expiredHostCandidates = eligible.filter(
+			(candidate) =>
+				candidate.hostname !== null && this.dnsResolutionExpired(candidate, now)
+		);
+		//A declaration and each of its DNS-derived children share a hostname.
+		//Refresh that hostname once; resolving every child concurrently races the
+		//unique candidate key when DNS publishes a new address.
+		const candidatesByHostname = new Map<string, ValidatorEndpointCandidate>();
+		for (const candidate of expiredHostCandidates) {
+			const key = [
+				candidate.networkId,
+				candidate.expectedPublicKey ?? '',
+				candidate.hostname,
+				candidate.port
+			].join('|');
+			const current = candidatesByHostname.get(key);
+			if (!current || (current.ip !== null && candidate.ip === null))
+				candidatesByHostname.set(key, candidate);
 		}
+		const hostCandidates = Array.from(candidatesByHostname.values()).slice(
+			0,
+			Math.min(
+				EndpointCandidateManager.MAX_CANDIDATES_TO_RESOLVE,
+				EndpointCandidateManager.MAX_ADDITIONAL_SCAN_ADDRESSES
+			)
+		);
+		const resolved = (
+			await this.mapWithConcurrency(
+				hostCandidates,
+				EndpointCandidateManager.NETWORK_CONCURRENCY,
+				(candidate) => this.resolveCandidate(candidate)
+			)
+		).flat();
 
 		const maximumAddressCount =
 			unique.size + EndpointCandidateManager.MAX_ADDITIONAL_SCAN_ADDRESSES;
@@ -142,6 +172,56 @@ export class EndpointCandidateManager {
 				unique.set(`${candidate.ip}:${candidate.port}`, address.value);
 		}
 		return Array.from(unique.values());
+	}
+
+	async getRecentlyFailedGossipAddresses(
+		at = new Date()
+	): Promise<Set<string>> {
+		const candidates = await this.repository.findForNetwork(
+			this.config.networkConfig.networkId
+		);
+		const byAddress = new Map<string, ValidatorEndpointCandidate[]>();
+		for (const candidate of candidates) {
+			if (!candidate.ip) continue;
+			const address = `${candidate.ip}:${candidate.port}`;
+			const matches = byAddress.get(address) ?? [];
+			matches.push(candidate);
+			byAddress.set(address, matches);
+		}
+
+		const cutoff =
+			at.getTime() - EndpointCandidateManager.GOSSIP_FAILURE_COOLDOWN_MS;
+		const suppressed = new Set<string>();
+		for (const [address, matches] of byAddress) {
+			const hasTrustedEvidence = matches.some(
+				(candidate) =>
+					candidate.state === 'authenticated' ||
+					candidate.source !== 'peer_gossip'
+			);
+			if (hasTrustedEvidence) continue;
+			if (
+				matches.some(
+					(candidate) =>
+						candidate.state === 'failed' &&
+						candidate.lastAttemptedAt !== null &&
+						candidate.lastAttemptedAt.getTime() >= cutoff
+				)
+			)
+				suppressed.add(address);
+		}
+		return suppressed;
+	}
+
+	private dnsResolutionExpired(
+		candidate: ValidatorEndpointCandidate,
+		at: Date
+	): boolean {
+		if (candidate.lastResolvedAt === null) return true;
+		const ttlSeconds =
+			candidate.dnsTtl ?? EndpointCandidateManager.DNS_FALLBACK_TTL_SECONDS;
+		return (
+			candidate.lastResolvedAt.getTime() + ttlSeconds * 1000 <= at.getTime()
+		);
 	}
 
 	async resolveCandidate(
@@ -213,6 +293,16 @@ export class EndpointCandidateManager {
 		return candidates;
 	}
 
+	/**
+	 * Fold a crawl's connection attempts into the candidate set.
+	 *
+	 * A pubnet crawl reports ~1400 attempts. Writing each one as it was
+	 * processed meant two separately-transacted statements per attempt, and the
+	 * resulting ~2900 serial round trips took roughly fifteen minutes -- longer
+	 * than the rest of the scan put together, and long enough that the scanner
+	 * never got an idle gap between runs. So the loop below only reads and
+	 * mutates in memory; every write happens afterwards, in bulk.
+	 */
 	async recordConnectionAttempts(
 		attempts: ConnectionAttempt[],
 		scanId: string | null = null
@@ -228,19 +318,27 @@ export class EndpointCandidateManager {
 			addressCandidates.push(candidate);
 			candidatesByAddress.set(address, addressCandidates);
 		}
+
+		const discovered: ValidatorEndpointCandidate[] = [];
+		const touched = new Set<ValidatorEndpointCandidate>();
+		//Observations reference candidate.id, which the database assigns, so the
+		//pairs are held until the newly discovered candidates have been inserted.
+		const recorded: {
+			candidate: ValidatorEndpointCandidate;
+			attempt: ConnectionAttempt;
+			outcome: ConnectionAttemptOutcome;
+		}[] = [];
+
 		for (const attempt of attempts) {
 			const address = `${attempt.ip}:${attempt.port}`;
 			let matches = candidatesByAddress.get(address) ?? [];
 			if (matches.length === 0) {
-				const discovered = await this.upsert({
-					networkId: this.config.networkConfig.networkId,
-					expectedPublicKey: attempt.remotePublicKey,
-					ip: attempt.ip,
-					port: attempt.port,
-					source: 'peer_gossip'
-				});
-				candidates.push(discovered);
-				matches = [discovered];
+				const candidate = this.createDiscoveredCandidate(attempt);
+				//A gossiped address can be unroutable or otherwise invalid. That is
+				//one peer's problem, not the batch's, so skip it and keep going.
+				if (candidate === null) continue;
+				discovered.push(candidate);
+				matches = [candidate];
 				candidatesByAddress.set(address, matches);
 			}
 
@@ -252,24 +350,52 @@ export class EndpointCandidateManager {
 				const outcome: ConnectionAttemptOutcome = wrongKey
 					? 'unexpected_public_key'
 					: attempt.outcome;
-				await this.repository.saveObservation(
-					EndpointProbeObservation.fromConnectionAttempt(
-						candidate.id,
-						attempt,
-						{
-							scanId,
-							outcome
-						}
-					)
-				);
 
 				if (wrongKey) candidate.quarantine(attempt.completedAt);
 				else if (attempt.outcome === 'authenticated' && attempt.remotePublicKey)
 					candidate.authenticated(attempt.remotePublicKey, attempt.completedAt);
 				else candidate.failed(attempt.completedAt);
-				await this.repository.saveCandidate(candidate);
+
+				touched.add(candidate);
+				recorded.push({ candidate, attempt, outcome });
 			}
 		}
+
+		//Insert first: the observations below need the generated ids.
+		if (discovered.length > 0) {
+			await this.repository.saveCandidates(discovered);
+			candidates.push(...discovered);
+			discovered.forEach((candidate) => touched.delete(candidate));
+		}
+		await this.repository.saveCandidates(Array.from(touched));
+		await this.repository.saveObservations(
+			recorded.map(({ candidate, attempt, outcome }) =>
+				EndpointProbeObservation.fromConnectionAttempt(candidate.id, attempt, {
+					scanId,
+					outcome
+				})
+			)
+		);
+	}
+
+	//The in-memory half of upsert() for a gossiped address: no dedupe lookup,
+	//because the caller already holds every candidate on the network.
+	private createDiscoveredCandidate(
+		attempt: ConnectionAttempt
+	): ValidatorEndpointCandidate | null {
+		const props: ValidatorEndpointCandidateProps = {
+			networkId: this.config.networkConfig.networkId,
+			expectedPublicKey: attempt.remotePublicKey,
+			ip: attempt.ip,
+			port: attempt.port,
+			source: 'peer_gossip'
+		};
+		try {
+			this.validateCandidate(props);
+		} catch {
+			return null;
+		}
+		return ValidatorEndpointCandidate.create(props);
 	}
 
 	async probeCandidate(id: string): Promise<ConnectionAttempt[]> {
@@ -311,15 +437,19 @@ export class EndpointCandidateManager {
 
 		const acceptedAttempts: ConnectionAttempt[] = [];
 		const allAttempts: ConnectionAttempt[] = [];
-		for (const candidate of Array.from(targets.values()).slice(0, budget)) {
-			const attempt = await this.endpointProbeService.probe(
-				candidate.ip as string,
-				candidate.port
-			);
+		const attempts = await this.mapWithConcurrency(
+			Array.from(targets.values()).slice(0, budget),
+			EndpointCandidateManager.NETWORK_CONCURRENCY,
+			(candidate) =>
+				this.endpointProbeService.probe(candidate.ip as string, candidate.port)
+		);
+		for (const attempt of attempts) {
 			allAttempts.push(attempt);
+			const candidate = targets.get(`${attempt.ip}:${attempt.port}`);
 			if (
 				attempt.outcome === 'authenticated' &&
 				attempt.remotePublicKey &&
+				candidate &&
 				(candidate.expectedPublicKey === null ||
 					candidate.expectedPublicKey === attempt.remotePublicKey)
 			)
@@ -327,6 +457,22 @@ export class EndpointCandidateManager {
 		}
 		await this.recordConnectionAttempts(allAttempts);
 		return acceptedAttempts;
+	}
+
+	private async mapWithConcurrency<T, R>(
+		values: T[],
+		concurrency: number,
+		mapper: (value: T) => Promise<R>
+	): Promise<R[]> {
+		const results: R[] = [];
+		for (let index = 0; index < values.length; index += concurrency) {
+			results.push(
+				...(await Promise.all(
+					values.slice(index, index + concurrency).map(mapper)
+				))
+			);
+		}
+		return results;
 	}
 
 	private validateCandidate(props: ValidatorEndpointCandidateProps): void {

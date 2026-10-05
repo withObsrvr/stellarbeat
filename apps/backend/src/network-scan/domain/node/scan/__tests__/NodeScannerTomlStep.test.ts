@@ -68,17 +68,14 @@ describe('NodeScannerTomlStep', () => {
 			candidate
 		]);
 		expect(nodeRepository.findByPublicKey).toHaveBeenCalledTimes(1);
-		expect(nodeScan.processCrawl).toHaveBeenCalledWith(
+		expect(nodeScan.processEndpointProbes).toHaveBeenCalledWith(
 			[
 				expect.objectContaining({
 					ip: '20.187.166.130',
 					successfullyConnected: true
 				})
 			],
-			[],
-			nodeScan.processedLedgers,
-			nodeScan.latestLedger,
-			nodeScan.latestLedgerCloseTime
+			[]
 		);
 	});
 });

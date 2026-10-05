@@ -22,6 +22,7 @@ describe('NodeScannerHistoryArchiveStep', () => {
 		const upToDateStatuses = {
 			upToDate: new Set(['a']),
 			stale: new Set(['b']),
+			accessRestricted: new Set(['d']),
 			unreachable: new Set(['c']),
 			cacheMaxAgeSeconds: new Map([['b', 3600]])
 		};

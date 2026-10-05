@@ -11,6 +11,15 @@ export class NodeWarningDetector {
       reasons.push("History archive issue detected");
     }
 
+    if (network.historyArchiveUnreachable(node)) {
+      //a refused connection or DNS failure says nothing about staleness
+      reasons.push("History archive could not be reached");
+    }
+
+    if (network.historyArchiveAccessRestricted(node)) {
+      reasons.push("History archive access restricted for Radar scanner");
+    }
+
     if (network.historyArchiveCacheMisconfigured(node)) {
       //the freshness check may have been answered from a cached copy older than
       //the file itself, so we cannot claim the archive is behind

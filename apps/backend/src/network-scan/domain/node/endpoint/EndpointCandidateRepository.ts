@@ -15,4 +15,11 @@ export interface EndpointCandidateRepository {
 	saveObservation(
 		observation: EndpointProbeObservation
 	): Promise<EndpointProbeObservation>;
+	//Bulk variants. A crawl produces one observation per connection attempt --
+	//well over a thousand per scan -- and saving those one at a time dominated
+	//the scan's runtime, so the write path for a whole crawl goes through these.
+	saveCandidates(
+		candidates: ValidatorEndpointCandidate[]
+	): Promise<ValidatorEndpointCandidate[]>;
+	saveObservations(observations: EndpointProbeObservation[]): Promise<void>;
 }

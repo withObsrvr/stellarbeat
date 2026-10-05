@@ -147,17 +147,17 @@ export class PythonFbasAdapter {
 			// The node level is the base of the analysis -- without it there is
 			// nothing to report, so its failure is fatal.
 			if (nodeResult.isErr()) return err(nodeResult.error);
+			if (orgResult.isErr()) return err(orgResult.error);
+			if (countryResult.isErr()) return err(countryResult.error);
+			if (ispResult.isErr()) return err(ispResult.error);
 
-			// The aggregated levels degrade independently. Previously any one of
-			// them failing discarded all four, so a country-level problem threw
-			// away perfectly good node and organization results for the entire
-			// scan. Aggregated levels fail for mundane reasons -- e.g. geo data
-			// lookups timing out leaves every node without a country -- and that
-			// should not cost the scan its other answers.
+			// Never turn an unavailable level into a real-looking threshold of zero.
+			// Until blocking/top-tier fields are nullable end-to-end, failing the
+			// Python result lets NetworkScanner use the complete Rust fallback.
 			const nodeAnalysis = nodeResult.value.merged;
-			const orgAnalysis = this.levelOrDegraded('organization', orgResult);
-			const countryAnalysis = this.levelOrDegraded('country', countryResult);
-			const ispAnalysis = this.levelOrDegraded('isp', ispResult);
+			const orgAnalysis = orgResult.value;
+			const countryAnalysis = countryResult.value;
+			const ispAnalysis = ispResult.value;
 
 			// Check quorum intersection at node level
 			const quorumIntersectionResult = await this.checkQuorumIntersection(
@@ -261,26 +261,6 @@ export class PythonFbasAdapter {
 	 * and the API; until then the log is the only honest signal, so it is an
 	 * error-level one.
 	 */
-	private levelOrDegraded(
-		level: 'organization' | 'country' | 'isp',
-		result: Result<AnalysisMergedResult, Error>
-	): AnalysisMergedResult {
-		if (result.isOk()) return result.value;
-
-		console.error(
-			`[PythonFbas] ${level} level analysis failed, reporting zeroes for it:`,
-			result.error.message
-		);
-
-		return {
-			topTierSize: 0,
-			blockingSetsMinSize: 0,
-			blockingSetsFilteredMinSize: 0,
-			splittingSetsMinSize: 0,
-			splittingSetsTopTierMinSize: undefined
-		};
-	}
-
 	/**
 	 * A top tier is symmetric when every node in it declares the same quorum
 	 * set. Radar uses this to decide whether the browser-side analysis is cheap

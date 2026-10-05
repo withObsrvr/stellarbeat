@@ -133,6 +133,36 @@ test('getUpToDateStatus reports an archive it cannot read as unreachable, not st
 	).toEqual(HistoryArchiveUpToDateStatus.Unreachable);
 });
 
+test.each([401, 403])(
+	'getUpToDateStatus reports HTTP %i as access restricted',
+	async (status) => {
+		const historyService = new HistoryService(
+			httpService,
+			historyArchiveScanService,
+			new LoggerMock()
+		);
+		httpService.get.mockResolvedValue(
+			err(
+				new HttpError('Request denied', 'ERR_BAD_REQUEST', {
+					data: {},
+					status,
+					statusText: 'Forbidden',
+					headers: {}
+				})
+		)
+		);
+
+		const check = await historyService.getArchiveCheck(
+			'https://stellar-history.moneygram.com/v1',
+			'64783487'
+		);
+
+		expect(check.status).toEqual(
+			HistoryArchiveUpToDateStatus.AccessRestricted
+		);
+	}
+);
+
 test('fetchStellarHistoryLedger passes an explicit timeout budget', async () => {
 	const historyService = new HistoryService(
 		httpService,

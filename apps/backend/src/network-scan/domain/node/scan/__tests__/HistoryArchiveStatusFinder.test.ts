@@ -38,8 +38,39 @@ describe('HistoryArchiveStatusFinder', () => {
 		expect(statuses.stale.size).toEqual(1);
 		expect(statuses.stale.has('GAB')).toBeTruthy();
 		expect(statuses.unreachable.size).toEqual(0);
+		expect(statuses.accessRestricted.size).toEqual(0);
 		expect(statuses.cacheMaxAgeSeconds.get('GAB')).toEqual(3600);
 		expect(statuses.cacheMaxAgeSeconds.has('GAA')).toBeFalsy();
+	});
+
+	it('should separate access-restricted archives from unreachable archives', async function () {
+		const historyService = mock<HistoryService>();
+		const historyArchiveStatusFinder = new HistoryArchiveStatusFinder(
+			historyService
+		);
+		const map = new Map([
+			['GAA', 'https://stellar-history.moneygram.com/v1'],
+			['GAB', 'https://unreachable.example']
+		]);
+
+		historyService.getArchiveCheck.mockResolvedValueOnce({
+			status: HistoryArchiveUpToDateStatus.AccessRestricted,
+			cacheMaxAgeSeconds: null
+		});
+		historyService.getArchiveCheck.mockResolvedValueOnce({
+			status: HistoryArchiveUpToDateStatus.Unreachable,
+			cacheMaxAgeSeconds: null
+		});
+
+		const statuses =
+			await historyArchiveStatusFinder.getHistoryArchiveUpToDateStatuses(
+				map,
+				BigInt(1)
+			);
+
+		expect(statuses.accessRestricted.has('GAA')).toBeTruthy();
+		expect(statuses.unreachable.has('GAB')).toBeTruthy();
+		expect(statuses.stale.size).toEqual(0);
 	});
 
 	it('should separate archives it could not read from archives that are behind', async function () {
