@@ -51,6 +51,8 @@ export class NodeV1DTOMapper {
 			historyArchiveCacheMaxAge: measurement?.historyArchiveCacheMaxAge ?? null,
 			historyArchiveUnreachable:
 				measurement?.historyArchiveUnreachable ?? false,
+			historyArchiveAccessRestricted:
+				measurement?.historyArchiveAccessRestricted ?? false,
 			isValidator: node.isValidator(),
 			statistics: {
 				has24HourStats: !!measurement24HourAverage,

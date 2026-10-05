@@ -12,8 +12,12 @@ export class NodeWarningDetector {
     }
 
     if (network.historyArchiveUnreachable(node)) {
-      //a 403, refused connection or DNS failure says nothing about staleness
+      //a refused connection or DNS failure says nothing about staleness
       reasons.push("History archive could not be reached");
+    }
+
+    if (network.historyArchiveAccessRestricted(node)) {
+      reasons.push("History archive access restricted for Radar scanner");
     }
 
     if (network.historyArchiveCacheMisconfigured(node)) {

@@ -40,6 +40,9 @@ export class Node {
 	//the archive could not be read at all. Distinct from isFullValidator being
 	//false, which means it was read and found to be behind.
 	public historyArchiveUnreachable = false;
+	//the scanner received HTTP 401/403. The archive may still be available from
+	//other networks, so this is distinct from unreachable and stale.
+	public historyArchiveAccessRestricted = false;
 	public connectivityError = false;
 	public stellarCoreVersionBehind = false;
 	public lag: number | null = null;
@@ -109,6 +112,7 @@ export class Node {
 			historyArchiveHasError: this.historyArchiveHasError,
 			historyArchiveCacheMaxAge: this.historyArchiveCacheMaxAge,
 			historyArchiveUnreachable: this.historyArchiveUnreachable,
+			historyArchiveAccessRestricted: this.historyArchiveAccessRestricted,
 			connectivityError: this.connectivityError,
 			stellarCoreVersionBehind: this.stellarCoreVersionBehind,
 			lag: this.lag,

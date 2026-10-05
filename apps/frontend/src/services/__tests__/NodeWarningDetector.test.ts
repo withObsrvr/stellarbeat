@@ -67,6 +67,18 @@ describe("NodeWarningDetector", () => {
         "History archive issue detected",
       ]);
     });
+    it("reports scanner access restriction without reporting the archive behind", () => {
+      const node = new Node("a");
+      node.historyUrl = "https://stellar-history.moneygram.com/v1";
+      node.active = true;
+      node.isFullValidator = false;
+      node.historyArchiveAccessRestricted = true;
+      const network = new Network([node]);
+
+      expect(NodeWarningDetector.getNodeWarningReasons(node, network)).toEqual([
+        "History archive access restricted for Radar scanner",
+      ]);
+    });
     it("does not flag an unchecked archive on an inactive non-validating node", () => {
       const node = new Node("a");
       node.historyUrl = "http://localhost:11626";

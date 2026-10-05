@@ -324,6 +324,7 @@ export class Network {
 		return (
 			this.isFullValidatorWithOutOfDateArchive(node) ||
 			this.historyArchiveUnreachable(node) ||
+			this.historyArchiveAccessRestricted(node) ||
 			this.historyArchiveCacheMisconfigured(node) ||
 			this.historyArchiveHasError(node)
 		);
@@ -336,6 +337,9 @@ export class Network {
 
 		if (this.historyArchiveUnreachable(node))
 			return 'History archive could not be reached';
+
+		if (this.historyArchiveAccessRestricted(node))
+			return 'History archive access restricted for Radar scanner';
 
 		if (this.historyArchiveCacheMisconfigured(node))
 			return 'History archive freshness unverifiable (cache TTL too long)';
@@ -352,16 +356,19 @@ export class Network {
 			(node.active || node.isValidating) &&
 			!node.isFullValidator &&
 			!this.historyArchiveUnreachable(node) &&
+			!this.historyArchiveAccessRestricted(node) &&
 			!this.historyArchiveCacheMisconfigured(node)
 		);
 	}
 
-	//An archive we could not read is not an archive that is behind. A 403, a
-	//refused connection or a DNS failure says nothing about how current the
-	//archive is, and telling an operator their history is stale because of one
-	//sends them looking in the wrong place.
+	//An archive we could not reach is not an archive that is behind. A refused
+	//connection or DNS failure says nothing about how current the archive is.
 	historyArchiveUnreachable(node: Node): boolean {
 		return node.historyUrl !== null && node.historyArchiveUnreachable;
+	}
+
+	historyArchiveAccessRestricted(node: Node): boolean {
+		return node.historyUrl !== null && node.historyArchiveAccessRestricted;
 	}
 
 	//A cache TTL longer than the checkpoint interval lets the freshness check be

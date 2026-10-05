@@ -29,6 +29,7 @@ export interface HistoryArchiveCheck {
 export enum HistoryArchiveUpToDateStatus {
 	UpToDate = 'up-to-date',
 	Stale = 'stale',
+	AccessRestricted = 'access-restricted',
 	Unreachable = 'unreachable'
 }
 
@@ -143,13 +144,18 @@ export class HistoryService {
 			//An archive we could not read is not the same thing as an archive that
 			//is behind. Collapsing the two hid connectivity problems as staleness.
 			const cause = stellarHistoryResult.error.cause;
+			const status = isHttpError(cause) ? cause.response?.status : undefined;
 			this.logger.info('Could not read history archive state', {
 				url: historyUrl,
 				message: stellarHistoryResult.error.message,
-				code: isHttpError(cause) ? cause.code : undefined
+				code: isHttpError(cause) ? cause.code : undefined,
+				status
 			});
 			return {
-				status: HistoryArchiveUpToDateStatus.Unreachable,
+				status:
+					status === 401 || status === 403
+						? HistoryArchiveUpToDateStatus.AccessRestricted
+						: HistoryArchiveUpToDateStatus.Unreachable,
 				cacheMaxAgeSeconds: null
 			};
 		}

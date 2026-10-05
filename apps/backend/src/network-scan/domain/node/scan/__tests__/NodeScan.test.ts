@@ -269,6 +269,7 @@ describe('NodeScan', () => {
 		nodeScan.updateHistoryArchiveUpToDateStatus({
 			upToDate: new Set([activeNode.publicKey.value]),
 			stale: new Set<string>(),
+			accessRestricted: new Set<string>(),
 			unreachable: new Set<string>(),
 			cacheMaxAgeSeconds: new Map<string, number>()
 		});
@@ -295,6 +296,7 @@ describe('NodeScan', () => {
 		nodeScan.updateHistoryArchiveUpToDateStatus({
 			upToDate: new Set<string>(),
 			stale: new Set<string>(),
+			accessRestricted: new Set<string>(),
 			unreachable: new Set([activeNode.publicKey.value]),
 			cacheMaxAgeSeconds: new Map<string, number>()
 		});
@@ -302,6 +304,36 @@ describe('NodeScan', () => {
 		expect(activeNode.latestMeasurement()?.historyArchiveUnreachable).toEqual(
 			true
 		);
+	});
+
+	test('updateHistoryArchiveUpToDateStatus records access restriction separately', () => {
+		const scanTime = new Date('2020-01-03T00:00:00.000Z');
+		activeNode.updateDetails(
+			NodeDetails.create({
+				historyUrl: 'history url',
+				host: 'host',
+				alias: 'alias',
+				name: 'name'
+			}),
+			scanTime
+		);
+		activeNode.addMeasurement(new NodeMeasurement(scanTime, activeNode));
+
+		new NodeScan(scanTime, [activeNode]).updateHistoryArchiveUpToDateStatus({
+			upToDate: new Set<string>(),
+			stale: new Set<string>(),
+			accessRestricted: new Set([activeNode.publicKey.value]),
+			unreachable: new Set<string>(),
+			cacheMaxAgeSeconds: new Map<string, number>()
+		});
+
+		expect(
+			activeNode.latestMeasurement()?.historyArchiveAccessRestricted
+		).toEqual(true);
+		expect(activeNode.latestMeasurement()?.historyArchiveUnreachable).toEqual(
+			false
+		);
+		expect(activeNode.latestMeasurement()?.isFullValidator).toEqual(false);
 	});
 
 	test('updateHistoryArchiveUpToDateStatus records the advertised cache ttl for a stale archive', () => {
@@ -321,6 +353,7 @@ describe('NodeScan', () => {
 		nodeScan.updateHistoryArchiveUpToDateStatus({
 			upToDate: new Set<string>(),
 			stale: new Set([activeNode.publicKey.value]),
+			accessRestricted: new Set<string>(),
 			unreachable: new Set<string>(),
 			cacheMaxAgeSeconds: new Map([[activeNode.publicKey.value, 3600]])
 		});

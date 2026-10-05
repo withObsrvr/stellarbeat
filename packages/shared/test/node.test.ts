@@ -95,6 +95,7 @@ nodeObject.overlayVersion = 3;
 nodeObject.historyArchiveHasError = true;
 nodeObject.historyArchiveCacheMaxAge = null;
 nodeObject.historyArchiveUnreachable = false;
+nodeObject.historyArchiveAccessRestricted = false;
 nodeObject.connectivityError = true;
 nodeObject.stellarCoreVersionBehind = true;
 nodeObject.lag = 30;

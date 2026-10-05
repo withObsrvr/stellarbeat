@@ -172,6 +172,7 @@ export class TypeOrmNodeMeasurementDayRepository
 			`INSERT INTO node_measurement_day_v2 (time, "nodeId", "isActiveCount", "isValidatingCount",
 												  "isFullValidatorCount", "isOverloadedCount", "indexSum",
 												  "historyArchiveErrorCount", "historyArchiveUnreachableCount",
+												  "historyArchiveAccessRestrictedCount",
 												  "historyArchiveCacheMisconfiguredCount", "crawlCount")
 			 with crawls as (select date_trunc('day', NetworkScan."time") "crawlDay",
 									count(distinct NetworkScan2.id)       "crawlCount"
@@ -191,6 +192,7 @@ export class TypeOrmNodeMeasurementDayRepository
 					sum("index"::int)                         "indexSum",
 					sum("historyArchiveHasError"::int)        "historyArchiveErrorCount",
 					sum("historyArchiveUnreachable"::int)     "historyArchiveUnreachableCount",
+					sum("historyArchiveAccessRestricted"::int) "historyArchiveAccessRestrictedCount",
 					-- MAX_SAFE_HISTORY_ARCHIVE_CACHE_TTL_SECONDS: a TTL above one
 					-- checkpoint lets the freshness check read a stale cached copy.
 					-- historyArchiveCacheMaxAge is nullable and is null for every node
@@ -218,6 +220,8 @@ export class TypeOrmNodeMeasurementDayRepository
 												  EXCLUDED."historyArchiveErrorCount",
 					 "historyArchiveUnreachableCount" = node_measurement_day_v2."historyArchiveUnreachableCount" +
 												  EXCLUDED."historyArchiveUnreachableCount",
+					 "historyArchiveAccessRestrictedCount" = node_measurement_day_v2."historyArchiveAccessRestrictedCount" +
+												  EXCLUDED."historyArchiveAccessRestrictedCount",
 					 "historyArchiveCacheMisconfiguredCount" = node_measurement_day_v2."historyArchiveCacheMisconfiguredCount" +
 												  EXCLUDED."historyArchiveCacheMisconfiguredCount",
 					 "crawlCount"               = EXCLUDED."crawlCount"`,

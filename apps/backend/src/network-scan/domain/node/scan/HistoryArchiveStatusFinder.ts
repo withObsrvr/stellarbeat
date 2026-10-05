@@ -8,6 +8,7 @@ import { queue } from 'async';
 export interface HistoryArchiveUpToDateStatuses {
 	upToDate: Set<string>;
 	stale: Set<string>;
+	accessRestricted: Set<string>;
 	unreachable: Set<string>;
 	//publicKey -> max-age advertised for the archive, for those that send one
 	cacheMaxAgeSeconds: Map<string, number>;
@@ -28,6 +29,7 @@ export class HistoryArchiveStatusFinder {
 		const statuses: HistoryArchiveUpToDateStatuses = {
 			upToDate: new Set<string>(),
 			stale: new Set<string>(),
+			accessRestricted: new Set<string>(),
 			unreachable: new Set<string>(),
 			cacheMaxAgeSeconds: new Map<string, number>()
 		};
@@ -42,6 +44,8 @@ export class HistoryArchiveStatusFinder {
 					statuses.upToDate.add(record.publicKey);
 				else if (check.status === HistoryArchiveUpToDateStatus.Stale)
 					statuses.stale.add(record.publicKey);
+				else if (check.status === HistoryArchiveUpToDateStatus.AccessRestricted)
+					statuses.accessRestricted.add(record.publicKey);
 				else statuses.unreachable.add(record.publicKey);
 
 				if (check.cacheMaxAgeSeconds !== null)

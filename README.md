@@ -11,7 +11,9 @@ integration, implements email notifications, scans validator history archives
 for errors and provides educational tools to aid in understanding the Stellar
 Consensus Protocol.
 
-> **Note:** Formerly known as StellarBeat, the project is now in the care of OBSRVR, which continues to build on its solid foundation with updated branding and ongoing improvements.
+> **Note:** Formerly known as StellarBeat, the project is now in the care of
+> OBSRVR, which continues to build on its solid foundation with updated branding
+> and ongoing improvements.
 
 ## Architecture
 
@@ -67,6 +69,11 @@ The project uses:
 - Docker/Devcontainer support for development environments
 - OpenAPI documentation
 
+Developer references:
+
+- [Local development](docs/local-development.md)
+- [External history archive probe](docs/history-archive-probe.md)
+
 ### Database
 
 - PostgreSQL for data persistence
@@ -86,31 +93,34 @@ choosing a provider.
 
 ### CI/CD Pipeline
 
-The project uses GitHub Actions for continuous integration and deployment. The workflow is defined in `.github/workflows/ci-cd.yml`. 
+The project uses GitHub Actions for continuous integration and deployment. The
+workflow is defined in `.github/workflows/ci-cd.yml`.
 
 #### GitHub Environments
 
 The CI/CD pipeline uses GitHub Environments to manage deployment environments:
-- `obsrvr-radar-staging` - For staging deployments 
+
+- `obsrvr-radar-staging` - For staging deployments
 - `obsrvr-radar-integration` - For integration deployments
 - `obsrvr-radar-production` - For production deployments
 
-Each environment can have its own secrets, environment variables, and deployment protection rules.
+Each environment can have its own secrets, environment variables, and deployment
+protection rules.
 
 #### Required Secrets
 
-To ensure the CI/CD pipeline works correctly, the following secrets need to be added to your GitHub repository:
+To ensure the CI/CD pipeline works correctly, the following secrets need to be
+added to your GitHub repository:
 
 1. Repository Secrets (used by all environments):
+
    - **AWS Credentials:**
      - `AWS_ACCESS_KEY_ID` - AWS access key with S3 permissions
      - `AWS_SECRET_ACCESS_KEY` - Corresponding AWS secret key
      - `AWS_REGION` - Region where your S3 bucket is located (e.g., "us-east-2")
      - `AWS_BUCKET_NAME` - S3 bucket name for backups
-   
    - **DigitalOcean Credentials:**
      - `DIGITALOCEAN_ACCESS_TOKEN` - Your DigitalOcean API token
-   
    - **Shared Service Credentials:**
      - `IPSTACK_ACCESS_KEY` - API key for IP geolocation service
      - `NETWORK_KNOWN_PEERS` - Comma-separated list of known network peers
@@ -127,23 +137,27 @@ To ensure the CI/CD pipeline works correctly, the following secrets need to be a
 2. Environment-specific Secrets (in GitHub Environments):
 
    **Staging Environment:**
+
    - `STAGING_DOMAIN` - Domain for staging environment
    - `STAGING_API_KEY` - API key for staging environment
    - `STAGING_JWT_SECRET` - JWT secret for staging environment
-   
+
    **Integration Environment:**
+
    - `INTEGRATION_DOMAIN` - Domain for integration environment
    - `INTEGRATION_API_KEY` - API key for integration environment
    - `INTEGRATION_JWT_SECRET` - JWT secret for integration environment
    - `INTEGRATION_DATABASE_URL` - Database connection URL
-   
+
    **Production Environment:**
+
    - `PRODUCTION_DOMAIN` - Domain for production environment
    - `PRODUCTION_API_KEY` - API key for production environment
    - `PRODUCTION_JWT_SECRET` - JWT secret for production environment
    - `PRODUCTION_DATABASE_URL` - Database connection URL
 
-The CI/CD workflow automatically creates Terraform variable files (terraform.auto.tfvars) with these secrets for secure testing and deployment.
+The CI/CD workflow automatically creates Terraform variable files
+(terraform.auto.tfvars) with these secrets for secure testing and deployment.
 
 ## Devcontainer development
 

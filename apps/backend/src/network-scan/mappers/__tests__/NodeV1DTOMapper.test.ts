@@ -61,6 +61,7 @@ describe('NodeV1DTOMapper', () => {
 			historyArchiveHasError: true,
 			historyArchiveCacheMaxAge: null,
 			historyArchiveUnreachable: false,
+			historyArchiveAccessRestricted: true,
 			historyUrl: 'myUrl',
 			activeInScp: true,
 			connectivityError: true,
@@ -128,6 +129,7 @@ describe('NodeV1DTOMapper', () => {
 		nodeMeasurement.isValidating = true;
 		nodeMeasurement.isActiveInScp = true;
 		nodeMeasurement.historyArchiveHasError = true;
+		nodeMeasurement.historyArchiveAccessRestricted = true;
 		nodeMeasurement.isOverLoaded = true;
 		nodeMeasurement.isFullValidator = true;
 		nodeMeasurement.historyArchiveHasError = true;
