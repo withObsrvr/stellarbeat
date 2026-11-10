@@ -33,6 +33,11 @@ export default class NodeMeasurement implements Measurement {
 	@Column('bool', { default: false })
 	historyArchiveUnreachable = false;
 
+	//the archive explicitly denied this scanner's request (HTTP 401/403). This
+	//does not establish that the archive is unavailable to the public.
+	@Column('bool', { default: false })
+	historyArchiveAccessRestricted = false;
+
 	//max-age advertised for .well-known/stellar-history.json, null when the
 	//archive sends no cache directive. Above the checkpoint interval the
 	//freshness result may have come from a stale cached copy.

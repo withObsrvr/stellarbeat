@@ -83,6 +83,58 @@ export class NodeScan {
 		return invalidPeerNodes;
 	}
 
+	/**
+	 * Merge authenticated endpoint probes without replacing measurements made
+	 * by the SCP-aware crawl. A probe proves identity, address and liveness; it
+	 * does not prove that a node is or is not validating.
+	 */
+	public processEndpointProbes(
+		peerNodes: PeerNode[],
+		archivedNodes: Node[] = []
+	): InvalidPeerNode[] {
+		const invalidPeerNodes: InvalidPeerNode[] = [];
+
+		peerNodes.forEach((peerNode) => {
+			const existing = this.getNodeByPublicKeyString(peerNode.publicKey);
+			if (existing) {
+				PeerNodeToNodeMapper.updateNodeIdentityFromPeerNode(
+					existing,
+					peerNode,
+					this.time
+				);
+				const measurement = existing.latestMeasurement();
+				if (measurement?.time.getTime() === this.time.getTime()) {
+					measurement.isActive = true;
+					measurement.connectivityError = false;
+				}
+				return;
+			}
+
+			const archived = archivedNodes.find(
+				(node) => node.publicKey.value === peerNode.publicKey
+			);
+			if (archived) {
+				archived.unArchive(this.time);
+				PeerNodeToNodeMapper.updateNodeFromPeerNode(
+					archived,
+					peerNode,
+					this.time
+				);
+				this.nodes.push(archived);
+				return;
+			}
+
+			const created = PeerNodeToNodeMapper.createNodeFromPeerNode(
+				peerNode,
+				this.time
+			);
+			if (created.isErr()) invalidPeerNodes.push(created.error);
+			else this.nodes.push(created.value);
+		});
+
+		return invalidPeerNodes;
+	}
+
 	getPublicKeys(): string[] {
 		return this.nodes.map((node) => node.publicKey.value);
 	}
@@ -134,10 +186,22 @@ export class NodeScan {
 			.map((node) => node.homeDomain as string);
 	}
 
+	/**
+	 * Only archives of nodes for which this scan has current liveness evidence.
+	 *
+	 * A node that has not been seen for months still carries its historyUrl, and
+	 * polling it produced a reachability error every scan - SatoshiPay's archives
+	 * resolved to ENOTFOUND for three months after the operator left. There is
+	 * nothing to report about the archive of a node that is gone: an error there
+	 * says the operator left, not that their history is stale or broken.
+	 */
 	getHistoryArchiveUrls(): Map<string, string> {
 		return new Map(
 			this.nodes
-				.filter((node) => node.details?.historyUrl)
+				.filter(
+					(node) =>
+						node.details?.historyUrl && (node.isActive() || node.isValidating())
+				)
 				.map((node) => [
 					node.publicKey.value,
 					node.details?.historyUrl as string
@@ -150,8 +214,10 @@ export class NodeScan {
 			const publicKey = node.publicKey.value;
 			const isUpToDate = statuses.upToDate.has(publicKey);
 			const isUnreachable = statuses.unreachable.has(publicKey);
+			const isAccessRestricted = statuses.accessRestricted.has(publicKey);
 			const isStale = statuses.stale.has(publicKey);
-			if (!isUpToDate && !isUnreachable && !isStale) return;
+			if (!isUpToDate && !isUnreachable && !isAccessRestricted && !isStale)
+				return;
 
 			const measurement = node.latestMeasurement();
 			if (!measurement) throw new Error('Measurement not found');
@@ -159,6 +225,7 @@ export class NodeScan {
 			//an archive we failed to read is recorded separately, so that a
 			//connectivity problem is not reported as a stale archive
 			measurement.historyArchiveUnreachable = isUnreachable;
+			measurement.historyArchiveAccessRestricted = isAccessRestricted;
 			//a cache TTL longer than the checkpoint interval means the answer above
 			//may have come from a stale copy, so record it alongside the result
 			measurement.historyArchiveCacheMaxAge =

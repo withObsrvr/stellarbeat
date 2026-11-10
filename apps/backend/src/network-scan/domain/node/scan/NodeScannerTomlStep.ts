@@ -54,12 +54,6 @@ export class NodeScannerTomlStep {
 			this.nodeRepository && newPublicKeys.length > 0
 				? await this.nodeRepository.findByPublicKey(newPublicKeys)
 				: [];
-		nodeScan.processCrawl(
-			peerNodes,
-			archivedNodes,
-			nodeScan.processedLedgers,
-			nodeScan.latestLedger,
-			nodeScan.latestLedgerCloseTime
-		);
+		nodeScan.processEndpointProbes(peerNodes, archivedNodes);
 	}
 }

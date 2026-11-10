@@ -35,7 +35,8 @@ export class CrawlerService {
 		nodes: Node[],
 		bootstrapNodeAddresses: NodeAddress[],
 		latestLedger: bigint | null,
-		latestLedgerCloseTime: Date | null
+		latestLedgerCloseTime: Date | null,
+		suppressedNodeAddresses: Set<string> = new Set()
 	): Promise<Result<CrawlResult, Error>> {
 		const nodeAddresses = NodeAddressDTOComposer.compose(
 			nodes,
@@ -52,7 +53,8 @@ export class CrawlerService {
 			nodes,
 			nodeAddresses,
 			latestLedger,
-			latestLedgerCloseTime
+			latestLedgerCloseTime,
+			suppressedNodeAddresses
 		);
 		if (crawlResultOrError.isErr()) return err(crawlResultOrError.error);
 
@@ -74,7 +76,8 @@ export class CrawlerService {
 		nodes: Node[],
 		nodeAddresses: [string, number][],
 		latestLedger: bigint | null,
-		latestLedgerCloseTime: Date | null
+		latestLedgerCloseTime: Date | null,
+		suppressedNodeAddresses: Set<string>
 	): Promise<Result<CrawlResultDTO, Error>> {
 		try {
 			const topTierNodesQuorumSet =
@@ -94,7 +97,8 @@ export class CrawlerService {
 					value: '',
 					localCloseTime: new Date()
 				},
-				CrawlerDTOMapper.createQuorumSetDTOMap(nodes)
+				CrawlerDTOMapper.createQuorumSetDTOMap(nodes),
+				suppressedNodeAddresses
 			);
 			return ok(await this.crawler.startCrawl(crawl));
 		} catch (e) {

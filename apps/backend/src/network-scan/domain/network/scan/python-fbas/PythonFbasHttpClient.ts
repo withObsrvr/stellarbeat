@@ -91,9 +91,7 @@ export class PythonFbasHttpClient implements IPythonFbasHttpClient {
 			if (error instanceof Error) {
 				if (error.name === 'AbortError') {
 					return err(
-						new Error(
-							`Health check timeout after ${this.config.timeout}ms`
-						)
+						new Error(`Health check timeout after ${this.config.timeout}ms`)
 					);
 				}
 				return err(error);
@@ -130,8 +128,7 @@ export class PythonFbasHttpClient implements IPythonFbasHttpClient {
 					await this.delay(Math.pow(2, attempt) * 1000);
 				}
 			} catch (error) {
-				lastError =
-					error instanceof Error ? error : new Error(String(error));
+				lastError = error instanceof Error ? error : new Error(String(error));
 			}
 		}
 
@@ -184,7 +181,11 @@ export class PythonFbasHttpClient implements IPythonFbasHttpClient {
 						new Error(`Request timeout after ${this.config.timeout}ms`)
 					);
 				}
-				return err(error);
+				//undici reports every connection-level failure as the opaque
+				//"fetch failed"; the reason it actually failed - ECONNREFUSED,
+				//ECONNRESET, ENOTFOUND - is only on the cause. Dropping it leaves
+				//nothing in the logs to act on.
+				return err(describeFetchError(error, endpoint));
 			}
 			return err(new Error(String(error)));
 		}
@@ -222,7 +223,9 @@ export class PythonFbasHttpClient implements IPythonFbasHttpClient {
  * Factory for creating configured client
  */
 export class PythonFbasHttpClientFactory {
-	static create(overrides?: Partial<PythonFbasHttpClientConfig>): PythonFbasHttpClient {
+	static create(
+		overrides?: Partial<PythonFbasHttpClientConfig>
+	): PythonFbasHttpClient {
 		const config: PythonFbasHttpClientConfig = {
 			baseUrl:
 				overrides?.baseUrl ||
@@ -234,4 +237,20 @@ export class PythonFbasHttpClientFactory {
 
 		return new PythonFbasHttpClient(config);
 	}
+}
+
+/**
+ * Flatten a fetch error and its cause chain into one actionable message.
+ */
+function describeFetchError(error: Error, endpoint: string): Error {
+	const parts = [`${error.message} (${endpoint})`];
+	let cause: unknown = (error as Error & { cause?: unknown }).cause;
+
+	while (cause instanceof Error) {
+		const code = (cause as Error & { code?: string }).code;
+		parts.push(code ? `${code}: ${cause.message}` : cause.message);
+		cause = (cause as Error & { cause?: unknown }).cause;
+	}
+
+	return parts.length > 1 ? new Error(parts.join(' <- ')) : error;
 }

@@ -209,7 +209,8 @@ export class Crawler {
 	private canNodeBeCrawled(peerKey: string): boolean {
 		return (
 			!this.crawl.crawledNodeAddresses.has(peerKey) &&
-			!this.crawl.observation.topTierAddressesSet.has(peerKey)
+			!this.crawl.observation.topTierAddressesSet.has(peerKey) &&
+			!this.crawl.suppressedNodeAddresses.has(peerKey)
 		);
 	}
 

@@ -51,12 +51,20 @@ describe('CrawlQueue', () => {
 
 	it('should return the active workers', async () => {
 		const crawlQueue = new AsyncCrawlQueue(10);
-		crawlQueue.initialize(async () => {});
-
-		crawlQueue.push({} as any, () => {
-			setTimeout(() => {
-				expect(crawlQueue.activeTasks().length).toEqual(1);
-			}, 1000);
+		let finishTask: (() => void) | undefined;
+		let taskStarted: (() => void) | undefined;
+		const started = new Promise<void>((resolve) => (taskStarted = resolve));
+		crawlQueue.initialize((_task, done) => {
+			finishTask = () => done();
+			taskStarted?.();
 		});
+		const drained = new Promise<void>((resolve) => crawlQueue.onDrain(resolve));
+
+		crawlQueue.push({} as any, () => {});
+		await started;
+		expect(crawlQueue.activeTasks().length).toEqual(1);
+		finishTask?.();
+		await drained;
+		expect(crawlQueue.activeTasks()).toEqual([]);
 	});
 });

@@ -49,6 +49,8 @@ export interface NodeV1 {
 	organizationId: string | null;
 	historyArchiveHasError: boolean;
 	historyArchiveCacheMaxAge?: number | null;
+	historyArchiveUnreachable?: boolean;
+	historyArchiveAccessRestricted?: boolean;
 	isValidator: boolean;
 	connectivityError: boolean;
 	stellarCoreVersionBehind: boolean;
@@ -161,6 +163,17 @@ export const NodeV1Schema: JSONSchemaType<NodeV1> = {
 			nullable: true,
 			description:
 				'max-age in seconds advertised for .well-known/stellar-history.json'
+		},
+		historyArchiveUnreachable: {
+			type: 'boolean',
+			nullable: true,
+			description:
+				'the archive could not be read at all, as distinct from being behind'
+		},
+		historyArchiveAccessRestricted: {
+			type: 'boolean',
+			nullable: true,
+			description: 'the archive denied the scanner request with HTTP 401 or 403'
 		},
 		connectivityError: {
 			type: 'boolean'

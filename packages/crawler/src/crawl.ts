@@ -24,6 +24,7 @@ export class Crawl {
 
 	constructor(
 		public nodesToCrawl: NodeAddress[],
-		public observation: Observation
+		public observation: Observation,
+		public suppressedNodeAddresses: Set<PeerKey> = new Set()
 	) {}
 }

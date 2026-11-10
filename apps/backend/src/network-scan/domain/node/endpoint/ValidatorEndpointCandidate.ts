@@ -7,6 +7,7 @@ import {
 	PrimaryGeneratedColumn,
 	UpdateDateColumn
 } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import EndpointProbeObservation from './EndpointProbeObservation';
 
 export type EndpointCandidateSource =
@@ -120,6 +121,10 @@ export default class ValidatorEndpointCandidate {
 		time = new Date()
 	): ValidatorEndpointCandidate {
 		const candidate = new ValidatorEndpointCandidate();
+		// Assign the UUID in the domain rather than relying on a database reload.
+		// Bulk persistence deliberately uses reload:false; observations created in
+		// the same batch still need a stable foreign key for newly discovered peers.
+		candidate.id = uuidv4();
 		candidate.networkId = props.networkId;
 		candidate.expectedPublicKey = props.expectedPublicKey ?? null;
 		candidate.hostname = props.hostname?.toLowerCase() ?? null;

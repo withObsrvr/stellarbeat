@@ -24,6 +24,7 @@ class InMemoryEndpointCandidateRepository
 {
 	candidates: ValidatorEndpointCandidate[] = [];
 	observations: EndpointProbeObservation[] = [];
+	writeCalls = 0;
 	private nextId = 1;
 
 	async findById(id: string): Promise<ValidatorEndpointCandidate | null> {
@@ -59,8 +60,8 @@ class InMemoryEndpointCandidateRepository
 	async saveCandidate(
 		candidate: ValidatorEndpointCandidate
 	): Promise<ValidatorEndpointCandidate> {
-		if (!candidate.id) {
-			candidate.id = `candidate-${this.nextId++}`;
+		if (!this.candidates.some((stored) => stored.id === candidate.id)) {
+			candidate.id ||= `candidate-${this.nextId++}`;
 			this.candidates.push(candidate);
 		}
 		return candidate;
@@ -72,6 +73,22 @@ class InMemoryEndpointCandidateRepository
 		observation.id = `observation-${this.observations.length + 1}`;
 		this.observations.push(observation);
 		return observation;
+	}
+
+	async saveCandidates(
+		candidates: ValidatorEndpointCandidate[]
+	): Promise<ValidatorEndpointCandidate[]> {
+		this.writeCalls++;
+		for (const candidate of candidates) await this.saveCandidate(candidate);
+		return candidates;
+	}
+
+	async saveObservations(
+		observations: EndpointProbeObservation[]
+	): Promise<void> {
+		this.writeCalls++;
+		for (const observation of observations)
+			await this.saveObservation(observation);
 	}
 }
 
@@ -145,6 +162,30 @@ describe('EndpointCandidateManager', () => {
 		).toBe('unverified');
 	});
 
+	it('refreshes a declaration and its DNS child only once per hostname', async () => {
+		const declaration = await manager.upsert({
+			networkId: 'test',
+			expectedPublicKey: MARKETNODE_KEYS[0],
+			hostname: 'validator.stellar.marketnode.com',
+			port: 11625,
+			source: 'toml_declaration'
+		});
+		resolver.resolve.mockResolvedValue([{ ip: '20.187.166.130', ttl: 1 }]);
+		const [child] = await manager.resolveCandidate(declaration);
+		const expired = new Date(Date.now() - 2_000);
+		declaration.lastResolvedAt = expired;
+		child.lastResolvedAt = expired;
+		resolver.resolve.mockClear();
+		resolver.resolve.mockResolvedValue([{ ip: '20.198.213.76', ttl: 60 }]);
+
+		await manager.prepareScanCandidates([]);
+
+		expect(resolver.resolve).toHaveBeenCalledTimes(1);
+		expect(resolver.resolve).toHaveBeenCalledWith(
+			'validator.stellar.marketnode.com'
+		);
+	});
+
 	it('discovers all Marketnode validators from TOML declarations', async () => {
 		const declarations = new Set(
 			MARKETNODE_KEYS.map(
@@ -200,6 +241,35 @@ describe('EndpointCandidateManager', () => {
 		expect(repository.observations[0].outcome).toBe('unexpected_public_key');
 	});
 
+	it('temporarily suppresses only recently failed gossip-only addresses', async () => {
+		const now = new Date('2026-10-04T21:10:00Z');
+		const failed = await manager.upsert({
+			networkId: 'test',
+			ip: '203.0.113.10',
+			port: 11625,
+			source: 'peer_gossip'
+		});
+		failed.failed(new Date(now.getTime() - 60_000));
+
+		const trusted = await manager.upsert({
+			networkId: 'test',
+			expectedPublicKey: MARKETNODE_KEYS[0],
+			ip: '203.0.113.11',
+			port: 11625,
+			source: 'peer_gossip'
+		});
+		trusted.failed(new Date(now.getTime() - 60_000));
+		await manager.upsert({
+			networkId: 'test',
+			ip: '203.0.113.11',
+			port: 11625,
+			source: 'configured_seed'
+		});
+
+		const suppressed = await manager.getRecentlyFailedGossipAddresses(now);
+		expect(suppressed).toEqual(new Set(['203.0.113.10:11625']));
+	});
+
 	it('stores a Creit-style TLS response as an overlay hello failure', async () => {
 		const candidate = await manager.upsert({
 			networkId: 'test',
@@ -247,6 +317,36 @@ describe('EndpointCandidateManager', () => {
 			'1.1.1.1'
 		]);
 		expect(addresses.map((address) => address.ip)).not.toContain('8.8.8.8');
+	});
+
+	it('writes a whole crawl in a fixed number of round trips', async () => {
+		const attempts = Array.from({ length: 400 }, (_, index) =>
+			failedAttempt(`203.0.113.${index % 256}`)
+		);
+
+		await manager.recordConnectionAttempts(attempts);
+
+		//Two candidate writes (discovered, then touched) and one observation
+		//write, regardless of how many attempts the crawl reported. Per-attempt
+		//persistence is what made a scan take twenty minutes.
+		expect(repository.writeCalls).toBe(3);
+		expect(repository.observations.length).toBe(attempts.length);
+		expect(
+			repository.observations.every((observation) => observation.candidateId)
+		).toBe(true);
+	});
+
+	it('keeps the batch when one gossiped address is unusable', async () => {
+		await manager.recordConnectionAttempts([
+			failedAttempt('203.0.113.7'),
+			failedAttempt('not-an-ip'),
+			authenticatedAttempt('203.0.113.8', MARKETNODE_KEYS[0])
+		]);
+
+		expect(
+			(await manager.list()).map((candidate) => candidate.ip).sort()
+		).toEqual(['203.0.113.7', '203.0.113.8']);
+		expect(repository.observations).toHaveLength(2);
 	});
 
 	it('parses TOML hosts with or without an explicit scheme', () => {

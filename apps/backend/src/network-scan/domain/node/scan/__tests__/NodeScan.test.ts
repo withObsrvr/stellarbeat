@@ -128,6 +128,30 @@ describe('NodeScan', () => {
 		expect(missingNode.latestMeasurement()?.time).toEqual(scanTime);
 	});
 
+	it('preserves SCP evidence when an endpoint probe confirms an existing node', () => {
+		const scanTime = new Date('2020-01-03T00:00:00.000Z');
+		const nodeScan = new NodeScan(scanTime, [activeNode]);
+		const crawledPeer = new PeerNode(activeNode.publicKey.value);
+		crawledPeer.ip = 'crawl-address';
+		crawledPeer.port = 11625;
+		crawledPeer.successfullyConnected = true;
+		crawledPeer.isValidating = true;
+		crawledPeer.participatingInSCP = true;
+		nodeScan.processCrawl([crawledPeer]);
+		const crawlMeasurement = activeNode.latestMeasurement();
+
+		const probePeer = new PeerNode(activeNode.publicKey.value);
+		probePeer.ip = 'toml-address';
+		probePeer.port = 11625;
+		probePeer.successfullyConnected = true;
+		nodeScan.processEndpointProbes([probePeer]);
+
+		expect(activeNode.latestMeasurement()).toBe(crawlMeasurement);
+		expect(activeNode.latestMeasurement()?.isValidating).toBe(true);
+		expect(activeNode.latestMeasurement()?.isActiveInScp).toBe(true);
+		expect(activeNode.ip).toBe('toml-address');
+	});
+
 	test('getPublicKeys', () => {
 		const scanTime = new Date('2020-01-03T00:00:00.000Z');
 		const nodeScan = new NodeScan(scanTime, [activeNode, missingNode]);
@@ -180,6 +204,32 @@ describe('NodeScan', () => {
 
 	test('getHistoryArchiveUrls', () => {
 		const scanTime = new Date('2020-01-03T00:00:00.000Z');
+		const details = NodeDetails.create({
+			historyUrl: 'history url',
+			host: 'host',
+			alias: 'alias',
+			name: 'name'
+		});
+		activeNode.updateDetails(details, scanTime);
+		activeNode.addMeasurement(activeMeasurement(activeNode, scanTime));
+
+		//An archive URL left behind by a node that stopped validating months ago
+		//still resolves to a dead hostname every scan, and the failure then reads
+		//as an archive defect rather than a departed operator.
+		missingNode.updateDetails(details, scanTime);
+		missingNode.addMeasurement(inactiveMeasurement(missingNode, scanTime));
+
+		const nodeScan = new NodeScan(scanTime, [activeNode, missingNode]);
+		const historyArchiveUrls = nodeScan.getHistoryArchiveUrls();
+		expect(historyArchiveUrls.size).toEqual(1);
+		expect(historyArchiveUrls.get(activeNode.publicKey.value)).toEqual(
+			'history url'
+		);
+		expect(historyArchiveUrls.has(missingNode.publicKey.value)).toBe(false);
+	});
+
+	test('checks an archive when validation is observed through relayed SCP evidence', () => {
+		const scanTime = new Date('2020-01-03T00:00:00.000Z');
 		activeNode.updateDetails(
 			NodeDetails.create({
 				historyUrl: 'history url',
@@ -189,11 +239,15 @@ describe('NodeScan', () => {
 			}),
 			scanTime
 		);
+		const measurement = new NodeMeasurement(scanTime, activeNode);
+		measurement.isActive = false;
+		measurement.isValidating = true;
+		activeNode.addMeasurement(measurement);
 
-		const nodeScan = new NodeScan(scanTime, [activeNode, missingNode]);
-		const historyArchiveUrls = nodeScan.getHistoryArchiveUrls();
-		expect(historyArchiveUrls.size).toEqual(1);
-		expect(historyArchiveUrls.get(activeNode.publicKey.value)).toEqual(
+		const historyArchiveUrls = new NodeScan(scanTime, [
+			activeNode
+		]).getHistoryArchiveUrls();
+		expect(historyArchiveUrls.get(activeNode.publicKey.value)).toBe(
 			'history url'
 		);
 	});
@@ -215,6 +269,7 @@ describe('NodeScan', () => {
 		nodeScan.updateHistoryArchiveUpToDateStatus({
 			upToDate: new Set([activeNode.publicKey.value]),
 			stale: new Set<string>(),
+			accessRestricted: new Set<string>(),
 			unreachable: new Set<string>(),
 			cacheMaxAgeSeconds: new Map<string, number>()
 		});
@@ -241,6 +296,7 @@ describe('NodeScan', () => {
 		nodeScan.updateHistoryArchiveUpToDateStatus({
 			upToDate: new Set<string>(),
 			stale: new Set<string>(),
+			accessRestricted: new Set<string>(),
 			unreachable: new Set([activeNode.publicKey.value]),
 			cacheMaxAgeSeconds: new Map<string, number>()
 		});
@@ -248,6 +304,36 @@ describe('NodeScan', () => {
 		expect(activeNode.latestMeasurement()?.historyArchiveUnreachable).toEqual(
 			true
 		);
+	});
+
+	test('updateHistoryArchiveUpToDateStatus records access restriction separately', () => {
+		const scanTime = new Date('2020-01-03T00:00:00.000Z');
+		activeNode.updateDetails(
+			NodeDetails.create({
+				historyUrl: 'history url',
+				host: 'host',
+				alias: 'alias',
+				name: 'name'
+			}),
+			scanTime
+		);
+		activeNode.addMeasurement(new NodeMeasurement(scanTime, activeNode));
+
+		new NodeScan(scanTime, [activeNode]).updateHistoryArchiveUpToDateStatus({
+			upToDate: new Set<string>(),
+			stale: new Set<string>(),
+			accessRestricted: new Set([activeNode.publicKey.value]),
+			unreachable: new Set<string>(),
+			cacheMaxAgeSeconds: new Map<string, number>()
+		});
+
+		expect(
+			activeNode.latestMeasurement()?.historyArchiveAccessRestricted
+		).toEqual(true);
+		expect(activeNode.latestMeasurement()?.historyArchiveUnreachable).toEqual(
+			false
+		);
+		expect(activeNode.latestMeasurement()?.isFullValidator).toEqual(false);
 	});
 
 	test('updateHistoryArchiveUpToDateStatus records the advertised cache ttl for a stale archive', () => {
@@ -267,6 +353,7 @@ describe('NodeScan', () => {
 		nodeScan.updateHistoryArchiveUpToDateStatus({
 			upToDate: new Set<string>(),
 			stale: new Set([activeNode.publicKey.value]),
+			accessRestricted: new Set<string>(),
 			unreachable: new Set<string>(),
 			cacheMaxAgeSeconds: new Map([[activeNode.publicKey.value, 3600]])
 		});
@@ -517,4 +604,16 @@ describe('NodeScan.getIPsNeedingGeoData', () => {
 
 function createNode(ip: string, time: Date) {
 	return createDummyNode(ip, 11625, time);
+}
+
+function activeMeasurement(node: Node, time: Date): NodeMeasurement {
+	const measurement = new NodeMeasurement(time, node);
+	measurement.isActive = true;
+	return measurement;
+}
+
+function inactiveMeasurement(node: Node, time: Date): NodeMeasurement {
+	const measurement = new NodeMeasurement(time, node);
+	measurement.isActive = false;
+	return measurement;
 }
