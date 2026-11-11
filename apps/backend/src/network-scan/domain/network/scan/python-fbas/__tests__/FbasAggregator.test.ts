@@ -416,3 +416,151 @@ describe('FbasAggregator threshold clamping', () => {
 		});
 	});
 });
+
+/**
+ * Aggregating by organization maps each trusted validator to its organization
+ * and skips the ones that belong to none. When nothing survives that mapping,
+ * the self-reference every group receives is all that is left, and the threshold
+ * clamp makes it satisfiable -- a quorum of one, disjoint from every other
+ * quorum, which drives the whole FBAS to "no quorum intersection" and every
+ * splitting set to zero.
+ */
+describe('FbasAggregator withoutSelfTrustingGroups', () => {
+	const aggregator = new FbasAggregator();
+	const time = new Date();
+
+	function core() {
+		const coreA = createNodeWithQuorumSet(
+			{ threshold: 2, validators: [], innerQuorumSets: [] },
+			true,
+			time
+		);
+		const coreB = createNodeWithQuorumSet(
+			{ threshold: 2, validators: [], innerQuorumSets: [] },
+			true,
+			time
+		);
+		//they trust each other, so neither collapses to itself
+		const pair = [coreA.publicKey.value, coreB.publicKey.value];
+		coreA.quorumSet!.quorumSet.validators = pair;
+		coreB.quorumSet!.quorumSet.validators = pair;
+
+		return {
+			coreA,
+			coreB,
+			orgA: createOrganizationWithValidators([coreA.publicKey], 'Core A', time),
+			orgB: createOrganizationWithValidators([coreB.publicKey], 'Core B', time)
+		};
+	}
+
+	it('drops an organization whose trusted validators belong to no organization', () => {
+		const { coreA, coreB, orgA, orgB } = core();
+		//its validators do declare trust, but in keys no organization claims
+		const outlier = createNodeWithQuorumSet(
+			{
+				threshold: 2,
+				validators: ['UNAFFILIATED_X', 'UNAFFILIATED_Y'],
+				innerQuorumSets: []
+			},
+			true,
+			time
+		);
+		const orgOutlier = createOrganizationWithValidators(
+			[outlier.publicKey],
+			'Outlier',
+			time
+		);
+
+		const aggregated = aggregator.aggregateByOrganization(
+			[coreA, coreB, outlier],
+			[orgA, orgB, orgOutlier]
+		);
+		//the artifact this guards against: aggregation produced it
+		expect(aggregated.map((node) => node.name).sort()).toEqual([
+			'Core A',
+			'Core B',
+			'Outlier'
+		]);
+
+		expect(
+			aggregator
+				.withoutSelfTrustingGroups(aggregated)
+				.map((node) => node.name)
+				.sort()
+		).toEqual(['Core A', 'Core B']);
+	});
+
+	it('keeps an outlying organization that still depends on the core', () => {
+		const { coreA, coreB, orgA, orgB } = core();
+		const dependent = createNodeWithQuorumSet(
+			{ threshold: 2, validators: [], innerQuorumSets: [] },
+			true,
+			time
+		);
+		dependent.quorumSet!.quorumSet.validators = [
+			coreA.publicKey.value,
+			dependent.publicKey.value
+		];
+		const orgDependent = createOrganizationWithValidators(
+			[dependent.publicKey],
+			'Dependent',
+			time
+		);
+
+		const kept = aggregator.withoutSelfTrustingGroups(
+			aggregator.aggregateByOrganization(
+				[coreA, coreB, dependent],
+				[orgA, orgB, orgDependent]
+			)
+		);
+
+		expect(kept.map((node) => node.name).sort()).toEqual([
+			'Core A',
+			'Core B',
+			'Dependent'
+		]);
+		expect(
+			kept.find((node) => node.name === 'Dependent')!.quorumSet!.validators
+		).toContain(orgA.organizationId.value);
+	});
+
+	it('leaves no group that is a quorum of one', () => {
+		const { coreA, coreB, orgA, orgB } = core();
+		const outlier = createNodeWithQuorumSet(
+			{ threshold: 1, validators: ['UNAFFILIATED_X'], innerQuorumSets: [] },
+			true,
+			time
+		);
+		const orgOutlier = createOrganizationWithValidators(
+			[outlier.publicKey],
+			'Outlier',
+			time
+		);
+
+		aggregator
+			.withoutSelfTrustingGroups(
+				aggregator.aggregateByOrganization(
+					[coreA, coreB, outlier],
+					[orgA, orgB, orgOutlier]
+				)
+			)
+			.forEach((node) => {
+				const selfOnly =
+					node.quorumSet!.validators.length === 1 &&
+					node.quorumSet!.validators[0] === node.publicKey;
+				expect(selfOnly).toBe(false);
+			});
+	});
+
+	it('leaves an aggregation with nothing to drop untouched', () => {
+		const { coreA, coreB, orgA, orgB } = core();
+		const aggregated = aggregator.aggregateByOrganization(
+			[coreA, coreB],
+			[orgA, orgB]
+		);
+
+		expect(aggregator.withoutSelfTrustingGroups(aggregated)).toEqual(
+			aggregated
+		);
+	});
+});

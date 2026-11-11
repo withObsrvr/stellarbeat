@@ -154,7 +154,9 @@ describe('PythonFbasAdapter', () => {
 
 			expect(result.isErr()).toBe(true);
 			if (result.isErr()) {
-				expect(result.error.message).toContain('No nodes with valid quorum sets');
+				expect(result.error.message).toContain(
+					'No nodes with valid quorum sets'
+				);
 			}
 		});
 
@@ -580,7 +582,8 @@ describe('PythonFbasAdapter network-wide organization splitting set', () => {
 		//each call in order: the levels, then the network-wide recomputation
 		let call = 0;
 		mockHttpClient.analyzeSplittingSets.mockImplementation(async () => {
-			const size = splittingMinSizes[Math.min(call, splittingMinSizes.length - 1)];
+			const size =
+				splittingMinSizes[Math.min(call, splittingMinSizes.length - 1)];
 			call++;
 			return ok({ min_size: size });
 		});
@@ -647,5 +650,113 @@ describe('PythonFbasAdapter network-wide organization splitting set', () => {
 			//the narrower answer survives rather than the level being lost
 			expect(result.value.organization.blockingSetsMinSize).toBe(3);
 		}
+	});
+});
+
+/**
+ * python-fbas reports a minimal splitting-set cardinality of zero when the FBAS
+ * it was handed has no quorum intersection: two disjoint quorums already exist,
+ * so no organization has to fail for safety to break. "No splitting set found"
+ * arrives as an error instead, so zero is never the good answer being widened.
+ *
+ * Publishing it rendered on the dashboard as a safety threshold of zero
+ * organizations next to a healthy top-tier figure, which is the symptom this
+ * guards.
+ */
+describe('PythonFbasAdapter network-wide splitting set of zero', () => {
+	let mockHttpClient: jest.Mocked<IPythonFbasHttpClient>;
+	let adapter: PythonFbasAdapter;
+	const time = new Date();
+
+	//the wider recomputation is the only splitting-set call carrying three
+	//organizations, which keeps this independent of how the levels interleave
+	const WIDE_ORG_COUNT = 3;
+
+	function scenario(wideMinSize: number) {
+		mockHttpClient.analyzeTopTier.mockResolvedValue(
+			ok({ top_tier: [], top_tier_size: 0 })
+		);
+		mockHttpClient.analyzeBlockingSets.mockResolvedValue(ok({ min_size: 3 }));
+		mockHttpClient.analyzeQuorums.mockResolvedValue(
+			ok({ quorum_intersection: true })
+		);
+		mockHttpClient.analyzeSplittingSets.mockImplementation(async (request) =>
+			ok({
+				min_size: request.nodes.length === WIDE_ORG_COUNT ? wideMinSize : 5
+			})
+		);
+
+		const coreA = createNodeWithQuorumSet(
+			{ threshold: 2, validators: [], innerQuorumSets: [] },
+			true,
+			time
+		);
+		const coreB = createNodeWithQuorumSet(
+			{ threshold: 2, validators: [], innerQuorumSets: [] },
+			true,
+			time
+		);
+		const pair = [coreA.publicKey.value, coreB.publicKey.value];
+		coreA.quorumSet!.quorumSet.validators = pair;
+		coreB.quorumSet!.quorumSet.validators = pair;
+
+		//an outlying validator that depends on the core, so the wider
+		//aggregation really does carry one organization more than the narrow one
+		const outlier = createNodeWithQuorumSet(
+			{ threshold: 2, validators: [], innerQuorumSets: [] },
+			true,
+			time
+		);
+		outlier.quorumSet!.quorumSet.validators = [
+			coreA.publicKey.value,
+			outlier.publicKey.value
+		];
+
+		const organizations = [
+			createOrganizationWithValidators([coreA.publicKey], 'Core A', time),
+			createOrganizationWithValidators([coreB.publicKey], 'Core B', time),
+			createOrganizationWithValidators([outlier.publicKey], 'Outlier', time)
+		];
+
+		return {
+			narrow: [coreA, coreB],
+			wide: [coreA, coreB, outlier],
+			organizations
+		};
+	}
+
+	beforeEach(() => {
+		mockHttpClient = {
+			analyzeTopTier: jest.fn(),
+			analyzeBlockingSets: jest.fn(),
+			analyzeSplittingSets: jest.fn(),
+			analyzeQuorums: jest.fn(),
+			healthCheck: jest.fn()
+		};
+		adapter = new PythonFbasAdapter(
+			mockHttpClient,
+			new FbasAggregator(),
+			new FbasFilteredAnalyzer()
+		);
+	});
+
+	it('keeps the restricted answer rather than publishing zero', async () => {
+		const { narrow, wide, organizations } = scenario(0);
+
+		const result = await adapter.analyze(narrow, organizations, wide);
+
+		expect(result.isOk()).toBe(true);
+		if (result.isOk())
+			expect(result.value.organization.splittingSetsMinSize).toBe(5);
+	});
+
+	it('still widens the figure when the wider answer is a real size', async () => {
+		const { narrow, wide, organizations } = scenario(2);
+
+		const result = await adapter.analyze(narrow, organizations, wide);
+
+		expect(result.isOk()).toBe(true);
+		if (result.isOk())
+			expect(result.value.organization.splittingSetsMinSize).toBe(2);
 	});
 });
