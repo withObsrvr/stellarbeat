@@ -34,6 +34,20 @@ scan results.
 Scanning history archives can be data/network intensive. Be sure to check your
 hosting provider data ingress costs before continuing.
 
+## Container image publishing
+
+The production image is published by the `publish-history-scanner-image` job
+in `.github/workflows/ci-cd.yml` after the main-branch test job succeeds. The
+workflow builds the same `apps/history-scanner/Dockerfile` used by the current
+DigitalOcean deployment and publishes an immutable source-commit tag. It also
+records the registry digest as a deployment artifact.
+
+Configure the repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`
+for the publishing job. Nomad deployments must use the recorded digest or the
+full commit tag; they must not use `latest`.
+
+The local Makefile follows the same rule and no longer publishes `latest`.
+
 ## Table of Contents
 
 1. [Overview](#overview)
