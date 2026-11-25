@@ -201,6 +201,46 @@ export class FbasAggregator {
 	}
 
 	/**
+	 * Drop groups that aggregation left trusting nothing but themselves.
+	 *
+	 * Such a group is a quorum of one: disjoint from every other quorum, so the
+	 * FBAS containing it has no quorum intersection and python-fbas answers
+	 * every splitting set with zero, however the real validators are wired.
+	 *
+	 * It is an artifact rather than a trust declaration. The group's validators
+	 * do trust other validators, but those validators belong to no group in this
+	 * set, so the mapping skipped them and the threshold clamp collapsed what
+	 * was left to the self-reference. Asserting an independence the operators
+	 * never declared is worse than leaving the group out.
+	 *
+	 * Callers aggregating a set wide enough to reach beyond the transitive
+	 * network quorum set want this; the narrow top-tier aggregation has no such
+	 * groups, and dropping them there would silently change a figure that is
+	 * answering its question correctly.
+	 */
+	withoutSelfTrustingGroups(nodes: AggregatedNode[]): AggregatedNode[] {
+		return nodes.filter(
+			(node) =>
+				node.quorumSet === null ||
+				!this.trustsOnlyItself(node.quorumSet, node.publicKey)
+		);
+	}
+
+	/**
+	 * True when aggregation left a group trusting nothing but itself.
+	 *
+	 * Every aggregated group gets a self-reference, so a single validator that
+	 * is also the group's own id means nothing else survived the mapping.
+	 */
+	private trustsOnlyItself(quorumSet: QuorumSet, groupId: string): boolean {
+		return (
+			quorumSet.innerQuorumSets.length === 0 &&
+			quorumSet.validators.length === 1 &&
+			quorumSet.validators[0] === groupId
+		);
+	}
+
+	/**
 	 * Merges multiple quorum sets for organization aggregation
 	 *
 	 * Uses validator-to-organization map to properly resolve all trust relationships
@@ -249,7 +289,8 @@ export class FbasAggregator {
 
 		// Calculate threshold: average of individual validator thresholds
 		// This better preserves the original trust requirements
-		const avgThreshold = quorumSets.reduce((sum, qs) => sum + qs.threshold, 0) / quorumSets.length;
+		const avgThreshold =
+			quorumSets.reduce((sum, qs) => sum + qs.threshold, 0) / quorumSets.length;
 
 		// Clamp to the number of entities that actually survived aggregation.
 		// Aggregation collapses many validators into few groups, so an averaged
@@ -320,7 +361,8 @@ export class FbasAggregator {
 
 		// Calculate threshold: average of individual validator thresholds
 		// This better preserves the original trust requirements
-		const avgThreshold = quorumSets.reduce((sum, qs) => sum + qs.threshold, 0) / quorumSets.length;
+		const avgThreshold =
+			quorumSets.reduce((sum, qs) => sum + qs.threshold, 0) / quorumSets.length;
 
 		// Clamp to the number of entities that actually survived aggregation.
 		// Aggregation collapses many validators into few groups, so an averaged
@@ -360,7 +402,11 @@ export class FbasAggregator {
 
 		// Recursively process inner quorum sets
 		qs.innerQuorumSets.forEach((innerQs: QuorumSet) => {
-			this.extractValidatorsFromQuorumSet(innerQs, validatorToGroup, allTrustedValidators);
+			this.extractValidatorsFromQuorumSet(
+				innerQs,
+				validatorToGroup,
+				allTrustedValidators
+			);
 		});
 	}
 
@@ -448,10 +494,7 @@ export class FbasAggregator {
 				}
 			}
 
-			if (
-				!node._originalValidators ||
-				node._originalValidators.length === 0
-			) {
+			if (!node._originalValidators || node._originalValidators.length === 0) {
 				errors.push(
 					`Node ${node.publicKey} missing original validator tracking`
 				);
@@ -479,8 +522,7 @@ export class FbasAggregator {
 		averageGroupSize: number;
 	} {
 		const reduction =
-			((originalNodes.length - aggregatedNodes.length) /
-				originalNodes.length) *
+			((originalNodes.length - aggregatedNodes.length) / originalNodes.length) *
 			100;
 		const avgGroupSize = originalNodes.length / aggregatedNodes.length;
 

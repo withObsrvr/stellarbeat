@@ -94,6 +94,12 @@ variable "history_scanner_worker_count" {
   default     = 1
 }
 
+variable "history_scanner_use_stellar_archivist" {
+  description = "Verify archives with the stellar-archivist subprocess instead of the legacy TypeScript streaming scanner. The history scanner image always builds the binary; this decides whether it is used."
+  type        = bool
+  default     = true
+}
+
 variable "users_instance_count" {
   description = "Number of users service instances"
   type        = number

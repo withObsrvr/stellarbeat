@@ -160,9 +160,8 @@ export class PythonFbasAdapter {
 			const ispAnalysis = ispResult.value;
 
 			// Check quorum intersection at node level
-			const quorumIntersectionResult = await this.checkQuorumIntersection(
-				validNodes
-			);
+			const quorumIntersectionResult =
+				await this.checkQuorumIntersection(validNodes);
 			if (quorumIntersectionResult.isErr())
 				return err(quorumIntersectionResult.error);
 
@@ -216,13 +215,17 @@ export class PythonFbasAdapter {
 		);
 
 		// Run analyses in parallel
-		const [topTierResult, blockingAllResult, blockingFilteredResult, splittingResult] =
-			await Promise.all([
-				this.httpClient.analyzeTopTier(allNodesRequest),
-				this.httpClient.analyzeBlockingSets(allNodesRequest),
-				this.httpClient.analyzeBlockingSets(validatingNodesRequest),
-				this.httpClient.analyzeSplittingSets(allNodesRequest)
-			]);
+		const [
+			topTierResult,
+			blockingAllResult,
+			blockingFilteredResult,
+			splittingResult
+		] = await Promise.all([
+			this.httpClient.analyzeTopTier(allNodesRequest),
+			this.httpClient.analyzeBlockingSets(allNodesRequest),
+			this.httpClient.analyzeBlockingSets(validatingNodesRequest),
+			this.httpClient.analyzeSplittingSets(allNodesRequest)
+		]);
 
 		// Check for errors
 		if (topTierResult.isErr()) return err(topTierResult.error);
@@ -330,14 +333,15 @@ export class PythonFbasAdapter {
 		);
 
 		// Log ALL organizations in detail
-		const detailedOrgs = aggregatedNodes.map(n => ({
+		const detailedOrgs = aggregatedNodes.map((n) => ({
 			publicKey: n.publicKey,
 			name: n.name,
 			validatorCount: n._originalValidators.length,
 			threshold: n.quorumSet?.threshold || 0,
 			validators: n.quorumSet?.validators || [],
 			validatorCount_in_qs: (n.quorumSet?.validators || []).length,
-			hasInvalidThreshold: (n.quorumSet?.threshold || 0) > (n.quorumSet?.validators || []).length
+			hasInvalidThreshold:
+				(n.quorumSet?.threshold || 0) > (n.quorumSet?.validators || []).length
 		}));
 
 		console.log('[PythonFbas] Organization aggregation summary:', {
@@ -350,8 +354,7 @@ export class PythonFbasAdapter {
 		});
 
 		// Validate aggregation
-		const validation =
-			this.aggregator.validateAggregatedNodes(aggregatedNodes);
+		const validation = this.aggregator.validateAggregatedNodes(aggregatedNodes);
 		if (!validation.valid) {
 			return err(
 				new Error(
@@ -410,7 +413,9 @@ export class PythonFbasAdapter {
 			...result.value,
 			//keep the restricted answer only when the wider one is unavailable
 			splittingSetsMinSize:
-				networkWide !== undefined ? networkWide : result.value.splittingSetsMinSize
+				networkWide !== undefined
+					? networkWide
+					: result.value.splittingSetsMinSize
 		});
 	}
 
@@ -427,10 +432,32 @@ export class PythonFbasAdapter {
 	): Promise<number | undefined> {
 		if (!networkWideNodes || networkWideNodes.length === 0) return undefined;
 
-		const aggregated = this.aggregator.aggregateByOrganization(
+		const everyOrganization = this.aggregator.aggregateByOrganization(
 			networkWideNodes,
 			organizations
 		);
+
+		//Widening the set reaches organizations whose validators trust keys that
+		//belong to no organization here. Aggregation cannot represent that trust,
+		//and what it leaves behind -- an organization trusting only itself -- is
+		//a quorum of one that makes the whole FBAS report no quorum intersection.
+		const aggregated =
+			this.aggregator.withoutSelfTrustingGroups(everyOrganization);
+		const dropped = everyOrganization.length - aggregated.length;
+		if (dropped > 0)
+			console.log(
+				'[PythonFbas] Excluded organizations left trusting only themselves ' +
+					'from the network-wide splitting set:',
+				{
+					dropped,
+					remaining: aggregated.length,
+					names: everyOrganization
+						.filter((organization) => !aggregated.includes(organization))
+						.map((organization) => organization.name ?? organization.publicKey)
+				}
+			);
+
+		if (aggregated.length === 0) return undefined;
 
 		const validation = this.aggregator.validateAggregatedNodes(aggregated);
 		if (!validation.valid) {
@@ -459,6 +486,29 @@ export class PythonFbasAdapter {
 			minSize: result.value.min_size
 		});
 
+		//Zero is not a safety threshold, it is python-fbas reporting that the
+		//FBAS it was handed has no quorum intersection: two disjoint quorums
+		//already exist, so no organization has to fail for safety to break.
+		//
+		//That is a statement about the aggregation rather than about the
+		//network. One organization whose aggregated quorum set can be satisfied
+		//by itself is a quorum of one, disjoint from every other quorum, and it
+		//drives this figure to zero however the real validators are wired. The
+		//aggregation drops such organizations now, but any other degenerate
+		//shape would do the same, and publishing the result would render on the
+		//dashboard as a safety threshold of zero organizations next to a
+		//perfectly healthy top-tier figure.
+		//
+		//"No splitting set found" already arrives as an error rather than a
+		//zero, so there is no real answer of zero to lose here.
+		if (result.value.min_size === 0) {
+			console.error(
+				'[PythonFbas] Network-wide organization FBAS has no quorum ' +
+					'intersection; keeping the top-tier splitting set'
+			);
+			return undefined;
+		}
+
 		return result.value.min_size;
 	}
 
@@ -472,8 +522,7 @@ export class PythonFbasAdapter {
 		const aggregatedNodes = this.aggregator.aggregateByCountry(nodes);
 
 		// Validate aggregation
-		const validation =
-			this.aggregator.validateAggregatedNodes(aggregatedNodes);
+		const validation = this.aggregator.validateAggregatedNodes(aggregatedNodes);
 		if (!validation.valid) {
 			return err(
 				new Error(
@@ -513,8 +562,7 @@ export class PythonFbasAdapter {
 		const aggregatedNodes = this.aggregator.aggregateByISP(nodes);
 
 		// Validate aggregation
-		const validation =
-			this.aggregator.validateAggregatedNodes(aggregatedNodes);
+		const validation = this.aggregator.validateAggregatedNodes(aggregatedNodes);
 		if (!validation.valid) {
 			return err(
 				new Error(
@@ -552,13 +600,17 @@ export class PythonFbasAdapter {
 		validatingNodesRequest: PythonFbasAnalysisRequest
 	): Promise<Result<AnalysisMergedResult, Error>> {
 		// Run analyses in parallel
-		const [topTierResult, blockingAllResult, blockingFilteredResult, splittingResult] =
-			await Promise.all([
-				this.httpClient.analyzeTopTier(allNodesRequest),
-				this.httpClient.analyzeBlockingSets(allNodesRequest),
-				this.httpClient.analyzeBlockingSets(validatingNodesRequest),
-				this.httpClient.analyzeSplittingSets(allNodesRequest)
-			]);
+		const [
+			topTierResult,
+			blockingAllResult,
+			blockingFilteredResult,
+			splittingResult
+		] = await Promise.all([
+			this.httpClient.analyzeTopTier(allNodesRequest),
+			this.httpClient.analyzeBlockingSets(allNodesRequest),
+			this.httpClient.analyzeBlockingSets(validatingNodesRequest),
+			this.httpClient.analyzeSplittingSets(allNodesRequest)
+		]);
 
 		// Check for errors
 		if (topTierResult.isErr()) return err(topTierResult.error);
@@ -754,13 +806,12 @@ export class PythonFbasAdapter {
 
 		// Keep original threshold, but cap it at total available votes
 		// (can't require more validators than exist)
-		const adjustedThreshold = Math.min(quorumSet.threshold, Math.max(1, totalAvailable));
-
-		return new QuorumSet(
-			adjustedThreshold,
-			filteredValidators,
-			cleanedInnerQs
+		const adjustedThreshold = Math.min(
+			quorumSet.threshold,
+			Math.max(1, totalAvailable)
 		);
+
+		return new QuorumSet(adjustedThreshold, filteredValidators, cleanedInnerQs);
 	}
 
 	/**
@@ -774,7 +825,7 @@ export class PythonFbasAdapter {
 			geoData: node.geoData
 				? {
 						countryName: node.geoData.countryName ?? null
-				  }
+					}
 				: null,
 			isp: node.isp ?? null
 		};

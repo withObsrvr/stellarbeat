@@ -912,6 +912,17 @@ resource "digitalocean_app" "radar" {
           value = lookup(var.history_scanner_env, "COORDINATOR_API_PASSWORD", "")
           type  = "SECRET"
         }
+
+        # Selects the stellar-archivist subprocess over the legacy TypeScript
+        # streaming scanner. The Dockerfile above builds and installs the binary
+        # and sets STELLAR_ARCHIVIST_PATH, but the code defaults this flag to
+        # false, so without it the image carries a binary it never invokes and
+        # the worker silently falls back to the TypeScript scanner.
+        env {
+          key   = "USE_STELLAR_ARCHIVIST"
+          value = tostring(var.history_scanner_use_stellar_archivist)
+          type  = "GENERAL"
+        }
       }
     }
 

@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -82,6 +83,110 @@ jobs:
         run: pnpm lint
       - name: Check TypeScript
         run: pnpm typecheck
+
+  publish-history-scanner-image:
+    name: Publish immutable Radar history-scanner image
+    needs: [test]
+    # Image publication is deliberately separate from Nomad deployment. It
+    # runs for successful main pushes or an explicitly requested manual run.
+    if: >
+      needs.test.result == 'success' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect scanner changes
+        id: changes
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "scanner_changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          changed_files=$(git diff --name-only "$BEFORE_SHA" "$COMMIT_SHA")
+          if grep -Eq '^(apps/history-scanner/|packages/|pnpm-lock.yaml$|pnpm-workspace.yaml$|package.json$|tsconfig.base.json$)' <<<"$changed_files"; then
+            echo "scanner_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "scanner_changed=false" >> "$GITHUB_OUTPUT"
+            echo 'No scanner or shared-package changes detected; image publication skipped.'
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.changes.outputs.scanner_changed == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: steps.changes.outputs.scanner_changed == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Generate immutable image metadata
+        if: steps.changes.outputs.scanner_changed == 'true'
+        id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: withobsrvr/radar-history-scanner
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      - name: Build and publish history-scanner image
+        if: steps.changes.outputs.scanner_changed == 'true'
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/history-scanner/Dockerfile
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: type=gha,scope=radar-history-scanner
+          cache-to: type=gha,mode=max,scope=radar-history-scanner
+
+      - name: Write image deployment record
+        if: steps.changes.outputs.scanner_changed == 'true'
+        env:
+          IMAGE: withobsrvr/radar-history-scanner
+          IMAGE_TAG: sha-${{ github.sha }}
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p image-metadata
+          cat > image-metadata/radar-history-scanner.json <<EOF
+          {
+            "image": "${IMAGE}",
+            "tag": "${IMAGE_TAG}",
+            "reference": "${IMAGE}@${IMAGE_DIGEST}",
+            "digest": "${IMAGE_DIGEST}",
+            "sourceCommit": "${SOURCE_SHA}"
+          }
+          EOF
+          cat image-metadata/radar-history-scanner.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload image deployment record
+        if: steps.changes.outputs.scanner_changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-history-scanner-image-${{ github.sha }}
+          path: image-metadata/radar-history-scanner.json
+          retention-days: 30
 
   terraform-lint:
     name: 'Terraform Lint and Format'
@@ -261,7 +366,8 @@ jobs:
     # Skip the terraform-lint dependency for push events to main
     if: >
       always() &&  
-      needs.test.result == 'success'
+      needs.test.result == 'success' &&
+      github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment: obsrvr-radar-production
     permissions:
@@ -486,6 +592,7 @@ jobs:
     needs: [plan-production]
     if: >
       github.ref == 'refs/heads/main' &&
+      github.event_name != 'workflow_dispatch' &&
       needs.plan-production.result == 'success'
     runs-on: ubuntu-latest
     environment:
@@ -500,7 +607,9 @@ jobs:
 
   deploy-production:
     needs: [approve-production-deployment]
-    if: github.ref == 'refs/heads/main'
+    if: >
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment: obsrvr-radar-production
     env:
